@@ -3,6 +3,7 @@ import Head from "next/head";
 import { Toaster } from "@/components/ui/sonner";
 import { GlobalStateProvider } from "@/lib/providers/GlobalStatesProvider";
 import { inter } from "./fonts";
+import BottomNav from "@/components/BottomNav";
 
 export const metadata = {
   title: "QuranNet",
@@ -26,8 +27,9 @@ export default function RootLayout({
         <Head>
           <meta name="viewport" content="width=device-width, initial-scale=1" />
         </Head>
-        <body className={`${inter.className}  bg-zinc-900 scroll-smooth`}>
+        <body className={`${inter.className} bg-zinc-900 scroll-smooth md:pb-0 pb-16`}>
           {children}
+          <BottomNav />
           <Toaster />
         </body>
       </html>

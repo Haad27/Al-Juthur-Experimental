@@ -8,8 +8,7 @@ import Link from "next/link";
 // Components ⭐
 import LogoIcon from "@/components/svg/icons/LogoIcon";
 import { useRouter } from "next/navigation";
-// ShadCN ⭐
-import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 // Icons / Lucide React ⭐
 import MenuIcon from "@/components/svg/icons/MenuIcon";
@@ -90,7 +89,7 @@ const SurahsList = () => {
           <div className="bg-white p-1.5 rounded-md">
             <LogoIcon className="hidden lg:block text-black" />
           </div>
-          <p className="font-bold text-2xl">QuranNet</p>
+          <p className="font-bold text-2xl">Deeper Dive</p>
 
           <div className="sm:hidden ml-auto">
             <MenuIcon
@@ -153,59 +152,41 @@ const SurahsList = () => {
               className="animate-spin fill-white text-white absolute left-10 top-10 opacity-10 blur-2xl z-0"
               size={126}
             />
-            <div className="space-y-6">
+            <div className="space-y-6 relative z-20">
               <h1 className="md:text-6xl text-4xl font-semibold text-white group">
-                Recite the{" "}
+                Dive{" "}
                 <span className="text-blue-500 group-hover:brightness-125 transition-all duration-300">
-                  <Link href="#start_reading">Quran</Link>
+                  <Link href="#start_reading">Deeper</Link>
                 </span>{" "}
-                in <br /> an orderly and clear <br /> manner
-                <span className="text-sm text-zinc-400"> - [7:4]</span>
+                into <br /> the profound <br /> meanings
+                <span className="text-sm text-zinc-400 block mt-2"> - [38:29]</span>
               </h1>
 
               <p className="max-w-md md:text-lg text-base font-medium text-zinc-400">
-                Read, recite, and get it right. With real-time correction and
-                engaging UI, mastering Pronunciation of the Quran has never been
-                this simple or rewarding — for all ages.
+                Explore authentic Tafsir, uncover profound classical Lexicons, and reflect on the divine words. Understand the Quran with comprehensive tools designed for deep study.
               </p>
 
               <div className="flex gap-4">
-                <Button className="bg-blue-500 text-white">
-                  Start Reading
+                <Button className="bg-blue-500 text-white hover:bg-blue-600 transition">
+                  Start Exploring
                 </Button>
               </div>
             </div>
 
-            {/* 📖 Right: Quran image with sparkles */}
+            {/* 📖 Right: Quran image with original float-mystic animation */}
             <div className="flex flex-col items-center justify-center relative">
               <Image
-                src="/assets/images/quran-book-isolated.png"
+                src="/assets/images/allah-quran.png"
                 alt="Floating Quran"
                 className="w-72 sm:w-96 md:w-[412px] lg:w-[512px] xl:w-[612px] animate-float-mystic pointer-events-none select-none drop-shadow-[0_0_15px_rgba(59,130,246,0.1)]"
                 height={624}
                 width={624}
               />
-
-              {/* Sparkles layered using flex, no absolute */}
             </div>
           </div>
 
           <div className="space-y-12">
-            <div className="relative space-y-6">
-              <Circle
-                className="fill-white text-blue-500 absolute right-10 top-0 animate-spin opacity-10 blur-2xl z-0 "
-                size={120}
-              />
-              <h1 className="md:text-4xl text-3xl font-semibold text-white">
-                Powering <span className="text-blue-500">success</span> with our
-                Quran Network
-              </h1>
-              <p className="max-w-md md:text-lg text-base font-medium text-zinc-400">
-                Read and Learn with purpose. Our intelligent correction and
-                interactive reading make and Quran memorization simple,
-                engaging, and accessible for every learner.
-              </p>
-            </div>
+
             <div className="space-y-6">
               <h1 className="md:text-4xl text-3xl font-semibold text-white">
                 Continue Reading
@@ -241,96 +222,7 @@ const SurahsList = () => {
               )}
             </div>
 
-            {
-              <div className="space-y-6">
-                <h1 className="md:text-4xl text-3xl font-semibold text-white">
-                  Your Reflections
-                </h1>
 
-                <div className="w-full pb-2">
-                  <div
-                    className="flex gap-6 min-w-full overflow-x-auto scroll-smooth px-1"
-                    style={{
-                      scrollbarWidth: "thin",
-                      scrollbarColor: "#3b82f6 #18181b",
-                    }}
-                  >
-                    {savedAyahs?.length ? (
-                      savedAyahs.map((a: Ayah, index) => (
-                        <div
-                          key={index}
-                          className="min-w-[320px] max-w-sm flex-shrink-0"
-                        >
-                          <div
-                            className="bg-gradient-to-br from-blue-500 via-blue-600 to-blue-500 border border-blue-500/20 backdrop-blur-lg rounded-2xl p-5 shadow-lg hover:shadow-xl hover:scale-[1.01] transition-all duration-300 ease-in-out gap-2 flex flex-col cursor-pointer"
-                            onClick={() =>
-                              router.push(
-                                `/surah/${a.surahNumber}?ayah=${a.numberInSurah}`
-                              )
-                            }
-                          >
-                            <div className="flex items-center gap-2">
-                              <span className="bg-zinc-900/80 text-white px-2 py-0.5 rounded text-xs">
-                                Surah {a.surahNumber}
-                              </span>
-                              <span className="bg-blue-900/80 text-white px-2 py-0.5 rounded text-xs">
-                                Ayah {a.numberInSurah}
-                              </span>
-                            </div>
-
-                            <p
-                              className={`${amiri.className} text-white leading-relaxed text-lg line-clamp-3 mt-4`}
-                            >
-                              {a.text}
-                            </p>
-                            <p className="text-white mt-1 line-clamp-2 italic">
-                              {a.translation}
-                            </p>
-
-                            <div className="flex justify-between mt-2">
-                              {/* ❌ Delete Icon */}
-                              <XIcon
-                                className="text-blue-900 size-6 cursor-pointer"
-                                onClick={(e) => {
-                                  e.stopPropagation(); // prevent card click
-                                  handleRemoveSavedAyah(a);
-                                }}
-                              />
-
-                              {/* 📦 Archive Icon */}
-                              <ArchiveIcon
-                                className="text-blue-900 size-6 cursor-pointer"
-                                onClick={(e) => {
-                                  e.stopPropagation(); // prevent card click
-                                  toast.info(
-                                    "Sorry, that functionality isn't implemented yet."
-                                  );
-                                }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-zinc-400 text-center py-8 w-full">
-                        No saved ayahs yet.
-                      </div>
-                    )}
-                  </div>
-                  <style jsx>{`
-                    .flex::-webkit-scrollbar {
-                      height: 8px;
-                      background: #1e293b;
-                      border-radius: 8px;
-                    }
-                    .flex::-webkit-scrollbar-thumb {
-                      background: #3b82f6;
-                      border-radius: 8px;
-                    }
-                  `}</style>
-                </div>
-              </div>
-            }
           </div>
         </div>
 
@@ -387,10 +279,97 @@ const SurahsList = () => {
           </div>
         </div>
 
+        <div className="space-y-6">
+          <h1 className="md:text-4xl text-3xl font-semibold text-white">
+            Your Reflections
+          </h1>
+
+          <div className="w-full pb-2">
+            <div
+              className="flex gap-6 min-w-full overflow-x-auto scroll-smooth px-1"
+              style={{
+                scrollbarWidth: "thin",
+                scrollbarColor: "#3b82f6 #18181b",
+              }}
+            >
+              {savedAyahs?.length ? (
+                savedAyahs.map((a: Ayah, index) => (
+                  <div
+                    key={index}
+                    className="min-w-[320px] max-w-sm flex-shrink-0"
+                  >
+                    <div
+                      className="bg-gradient-to-br from-blue-500 via-blue-600 to-blue-500 border border-blue-500/20 backdrop-blur-lg rounded-2xl p-5 shadow-lg hover:shadow-xl hover:scale-[1.01] transition-all duration-300 ease-in-out gap-2 flex flex-col cursor-pointer"
+                      onClick={() =>
+                        router.push(
+                          `/surah/${a.surahNumber}?ayah=${a.numberInSurah}`
+                        )
+                      }
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="bg-zinc-900/80 text-white px-2 py-0.5 rounded text-xs">
+                          Surah {a.surahNumber}
+                        </span>
+                        <span className="bg-blue-900/80 text-white px-2 py-0.5 rounded text-xs">
+                          Ayah {a.numberInSurah}
+                        </span>
+                      </div>
+
+                      <p
+                        className={`${amiri.className} text-white leading-relaxed text-lg line-clamp-3 mt-4`}
+                      >
+                        {a.text}
+                      </p>
+                      <p className="text-white mt-1 line-clamp-2 italic">
+                        {a.translation}
+                      </p>
+
+                      <div className="flex justify-between mt-2">
+                        {/* ❌ Delete Icon */}
+                        <XIcon
+                          className="text-blue-900 size-6 cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation(); // prevent card click
+                            handleRemoveSavedAyah(a);
+                          }}
+                        />
+
+                        {/* 📦 Archive Icon */}
+                        <ArchiveIcon
+                          className="text-blue-900 size-6 cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation(); // prevent card click
+                            toast.info(
+                              "Sorry, that functionality isn't implemented yet."
+                            );
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-zinc-400 text-center py-8 w-full">
+                  No saved ayahs yet.
+                </div>
+              )}
+            </div>
+            <style jsx>{`
+              .flex::-webkit-scrollbar {
+                height: 8px;
+                background: #1e293b;
+                border-radius: 8px;
+              }
+              .flex::-webkit-scrollbar-thumb {
+                background: #3b82f6;
+                border-radius: 8px;
+              }
+            `}</style>
+          </div>
+        </div>
+
         <footer className="w-full min-h-32 flex flex-col items-center text-white border-t border-[#262629ff]">
           <div className="relative w-full">
-            {/* Gradient Mask */}
-
             <div className="relative z-10 flex flex-col md:flex-row md:justify-center py-12 w-full gap-4">
               {/* Column 1 */}
               <div className="w-full md:w-1/2 lg:w-1/4 flex flex-col gap-5 ">
@@ -399,30 +378,43 @@ const SurahsList = () => {
                     <LogoIcon className=" text-black" />
                   </div>
                   <div className="flex flex-col">
-                    <p className="font-bold text-white">QuranNet</p>
+                    <p className="font-bold text-white">Deeper Dive</p>
                     <p className="text-[12px] text-zinc-400">
-                      Read, and Study The Quran
+                      Study & Reflect
                     </p>
                   </div>
                 </div>
                 <p className="text-sm text-white">
-                  QuranNet is providing free, easy, and ad-free access to the
-                  Holy Quran — beautifully designed, always available, and built
-                  with love for every heart.
+                  Deeper Dive in Quran. An open-source, multi-lingual platform for deep Quranic study, featuring comprehensive Tafsirs and extensive classical lexicons.
                 </p>
               </div>
 
               {/* Column 2 */}
               <div className="w-full md:w-1/2 lg:w-1/4 flex flex-col gap-2 ">
-                <p className="font-semibold text-blue-500">Quick Navigation</p>
+                <p className="font-semibold text-blue-500">Core Features</p>
                 <div className="underline space-y-1 text-white">
                   <p>
                     <Link
                       href="/surah/1"
-                      target="_blank"
                       className="hover:text-gray-300 transition"
                     >
                       Start reading
+                    </Link>
+                  </p>
+                  <p>
+                    <Link
+                      href="/tafsir"
+                      className="hover:text-gray-300 transition"
+                    >
+                      123+ Tafsir Collection
+                    </Link>
+                  </p>
+                  <p>
+                    <Link
+                      href="/lexicons"
+                      className="hover:text-gray-300 transition"
+                    >
+                      Classical Lexicons
                     </Link>
                   </p>
                 </div>
@@ -430,24 +422,24 @@ const SurahsList = () => {
 
               {/* Column 3 */}
               <div className="w-full md:w-1/2 lg:w-1/4 flex flex-col gap-2 ">
-                <p className="font-semibold text-blue-500">Quick Links</p>
+                <p className="font-semibold text-blue-500">Data Sources</p>
                 <div className="underline space-y-1 text-white">
                   <p>
                     <Link
-                      href="https://github.com/s1ddiq/Qurannet"
+                      href="https://qul.tarteel.ai/"
                       target="_blank"
                       className="hover:text-gray-300 transition"
                     >
-                      QuranNet GitHub
+                      QUL API Project
                     </Link>
                   </p>
                   <p>
                     <Link
-                      href="/surah/1"
+                      href="https://github.com/spa5k/tafsir_api"
                       target="_blank"
                       className="hover:text-gray-300 transition"
                     >
-                      Start reading
+                      GitHub Tafsir API
                     </Link>
                   </p>
                 </div>
@@ -455,38 +447,27 @@ const SurahsList = () => {
 
               {/* Column 4 */}
               <div className="w-full md:w-1/2 lg:w-1/4 flex flex-col gap-2 ">
-                <p className="font-semibold text-blue-500">What's New?</p>
-                <div className="underline text-white">
+                <p className="font-semibold text-blue-500">Legal</p>
+                <div className="underline space-y-1 text-white">
                   <Link
-                    href="https://github.com/s1ddiq/QuranNet/releases/tag/v1.0.0"
-                    target="_blank"
+                    href="#"
                     className="hover:text-gray-300 transition block"
                   >
-                    v1.0.0
+                    Privacy Policy
                   </Link>
 
                   <Link
-                    href="https://github.com/s1ddiq/QuranNet/releases/tag/v1.1.0"
-                    target="_blank"
+                    href="#"
                     className="hover:text-gray-300 transition block"
                   >
-                    v1.1.0
+                    Terms of Service
                   </Link>
 
                   <Link
-                    href="https://github.com/s1ddiq/QuranNet/releases/tag/v1.2.0"
-                    target="_blank"
+                    href="#"
                     className="hover:text-gray-300 transition block"
                   >
-                    v1.2.0
-                  </Link>
-
-                  <Link
-                    href="https://github.com/s1ddiq/QuranNet/releases/tag/v1.3.0"
-                    target="_blank"
-                    className="hover:text-gray-300 transition block"
-                  >
-                    v1.2.0 - Latest Release
+                    Contact Us
                   </Link>
                 </div>
               </div>

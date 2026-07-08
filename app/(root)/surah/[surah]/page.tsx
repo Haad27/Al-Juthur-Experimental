@@ -23,6 +23,7 @@ import { cn, convertNumberToArabicNumeral } from "@/lib/utils"; // ⭐
 // ICONS START ⭐
 import BismillahIcon from "@/components/svg/icons/BismillahIcon";
 import {
+  ArrowLeft,
   Check,
   ChevronUp,
   Copy,
@@ -234,7 +235,13 @@ const Surah = () => {
     );
 
   return (
-    <section className="w-full flex items-center flex-col dark:bg-zinc-900 bg-[var(--sephia-primary)] flex-1 dark:text-white text-black">
+    <section className="w-full flex items-center flex-col dark:bg-zinc-900 bg-[var(--sephia-primary)] flex-1 dark:text-white text-black relative">
+      <div className="w-full md:hidden flex p-4 sticky top-0 z-50 bg-zinc-900/80 backdrop-blur-md border-b border-white/10">
+        <button onClick={() => router.push("/")} className="flex items-center gap-2 text-white hover:opacity-80 transition-opacity">
+          <ArrowLeft className="w-5 h-5" />
+          <span className="font-medium text-sm">Back</span>
+        </button>
+      </div>
       <div
         className={cn(
           "hidden md:flex items-center justify-between w-full md:min-h-14 px-6 sticky top-0 backdrop-blur-md dark:bg-zinc-900/70 border-b bg-[var(--sephia-200)] border-white/10 transition-all duration-300 z-50 shadow-sm",

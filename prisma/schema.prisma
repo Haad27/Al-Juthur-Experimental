@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ----------------------------------------------------
+// TAFSIR DATA MODELS
+// ----------------------------------------------------
+
+model Language {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique // e.g. 'en', 'ar', 'ur'
+  name      String   // e.g. 'English', 'Arabic', 'Urdu'
+  
+  authors   Author[]
+}
+
+model Author {
+  id         Int        @id @default(autoincrement())
+  name       String     // e.g. 'Ibn Kathir'
+  languageId Int
+  language   Language   @relation(fields: [languageId], references: [id])
+  
+  tafsirs    TafsirEntry[]
+}
+
+model Surah {
+  id          Int      @id // 1 to 114
+  name        String   // Arabic name
+  englishName String   // Transliterated name
+  
+  ayahs       Ayah[]
+  tafsirs     TafsirEntry[]
+}
+
+model Ayah {
+  id            Int      @id @default(autoincrement())
+  surahId       Int
+  surah         Surah    @relation(fields: [surahId], references: [id])
+  numberInSurah Int      // e.g. 1 to 286 (for Al-Baqarah)
+  text          String   // Arabic text
+  
+  tafsirs       TafsirEntry[]
+  lexiconWords  LexiconWord[]
+  
+  @@unique([surahId, numberInSurah])
+}
+
+model TafsirEntry {
+  id       Int    @id @default(autoincrement())
+  authorId Int
+  author   Author @relation(fields: [authorId], references: [id])
+  surahId  Int
+  surah    Surah  @relation(fields: [surahId], references: [id])
+  ayahId   Int
+  ayah     Ayah   @relation(fields: [ayahId], references: [id])
+  
+  text     String // The actual tafsir text content
+  
+  @@index([authorId, surahId, ayahId])
+}
+
+// ----------------------------------------------------
+// LEXICON & MORPHOLOGY DATA MODELS
+// ----------------------------------------------------
+
+model LexiconWord {
+  id          Int     @id @default(autoincrement())
+  ayahId      Int
+  ayah        Ayah    @relation(fields: [ayahId], references: [id])
+  wordNumber  Int     // Position of word in ayah
+  wordArabic  String  // e.g. 'الْحَمْدُ'
+  rootWord    String? // e.g. 'ح م د'
+  lemma       String?
+  
+  lexiconEntries LexiconEntry[]
+}
+
+model LexiconBook {
+  id      Int    @id @default(autoincrement())
+  name    String // e.g. 'Lane Lexicon'
+  author  String
+  
+  entries LexiconEntry[]
+}
+
+model LexiconEntry {
+  id            Int         @id @default(autoincrement())
+  lexiconWordId Int
+  lexiconWord   LexiconWord @relation(fields: [lexiconWordId], references: [id])
+  lexiconBookId Int
+  lexiconBook   LexiconBook @relation(fields: [lexiconBookId], references: [id])
+  
+  text          String      // The lexicon definition
+}
