@@ -47,7 +47,7 @@ async function migrate() {
       
       const columns = Object.keys(rows[0]);
       const placeholders = columns.map(() => '?').join(', ');
-      const sql = `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${placeholders})`;
+      const sql = `INSERT OR IGNORE INTO ${tableName} (${columns.join(', ')}) VALUES (${placeholders})`;
 
       console.log(`Migrating ${rows.length} rows to Turso for ${tableName}...`);
       
