@@ -100,21 +100,24 @@ const SurahsList = () => {
         </div>
 
         <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 gap-6 text-zinc-400 lg:text-base text-sm">
-          <span className="cursor-pointer hover:text-gray-300 transition text-white ">
+          <Link href="/" className="cursor-pointer hover:text-gray-300 transition text-white ">
             Home
-          </span>
-          <span
+          </Link>
+          <Link
+            href="/surah/1"
             className="cursor-pointer hover:text-gray-300 transition"
-            onClick={() => router.push("/surah/1")}
           >
             Read Quran
-          </span>
-          <span className="cursor-pointer hover:text-gray-300 transition">
+          </Link>
+          <Link href="/tafsir" className="cursor-pointer hover:text-gray-300 transition">
             Tafsir
-          </span>
+          </Link>
           <span className="cursor-pointer hover:text-gray-300 transition">
             Lexicon
           </span>
+          <Link href="#" className="cursor-pointer hover:text-gray-300 transition text-zinc-400">
+            AI
+          </Link>
         </nav>
       </div>
 
@@ -167,9 +170,11 @@ const SurahsList = () => {
               </p>
 
               <div className="flex gap-4">
-                <Button className="bg-blue-500 text-white hover:bg-blue-600 transition">
-                  Start Exploring
-                </Button>
+                <Link href="/tafsir">
+                  <Button className="bg-blue-500 text-white hover:bg-blue-600 transition cursor-pointer">
+                    Start Exploring
+                  </Button>
+                </Link>
               </div>
             </div>
 

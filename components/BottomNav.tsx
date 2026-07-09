@@ -21,7 +21,7 @@ const BottomNav = () => {
     },
     {
       label: "Tafsir",
-      href: "#",
+      href: "/tafsir",
       icon: <ScrollText className="w-6 h-6" />,
     },
     {
@@ -33,19 +33,28 @@ const BottomNav = () => {
 
   return (
     <nav className="fixed bottom-0 w-full z-50 md:hidden bg-zinc-900 border-t border-[#262629ff] pb-safe">
-      <div className="flex justify-around items-center h-16">
+      <div className="flex justify-around items-center h-16 px-2">
         {navItems.map((item) => {
-          const isActive = pathname === item.href || (pathname?.startsWith("/surah/") && item.label === "Surah");
+          const isActive = pathname === item.href || 
+            (pathname?.startsWith("/surah/") && item.label === "Surah") ||
+            (pathname?.startsWith("/tafsir") && item.label === "Tafsir");
+
           return (
             <Link
               key={item.label}
               href={item.href}
-              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${
-                isActive ? "text-blue-500" : "text-zinc-500 hover:text-zinc-300"
+              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-200 ${
+                isActive 
+                  ? "text-blue-500" 
+                  : "text-zinc-500 hover:text-zinc-300"
               }`}
             >
-              {item.icon}
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <div className="relative flex items-center justify-center">
+                {item.icon}
+              </div>
+              <span className={`text-[10px] ${isActive ? "font-bold" : "font-medium"}`}>
+                {item.label}
+              </span>
             </Link>
           );
         })}
