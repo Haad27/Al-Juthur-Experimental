@@ -396,10 +396,10 @@ export default function TafsirPage() {
           {/* Logo and App Name */}
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2">
-              <div className="bg-white p-1.5 rounded-md">
+              <div className="bg-white p-1.5 rounded-md hidden md:block">
                 <LogoIcon className="text-black size-5" />
               </div>
-              <p className="font-bold text-lg md:text-xl text-white hidden md:block">Deeper Dive</p>
+              <p className="font-bold text-lg md:text-xl text-white hidden md:block">Al-Juthur</p>
             </Link>
           </div>
 
@@ -414,9 +414,9 @@ export default function TafsirPage() {
             <Link href="/tafsir" className="cursor-pointer text-white font-medium">
               Tafsir
             </Link>
-            <span className="cursor-pointer hover:text-gray-300 transition">
+            <Link href="/lexicon" className="cursor-pointer hover:text-gray-300 transition">
               Lexicon
-            </span>
+            </Link>
             <Link href="#" className="cursor-pointer hover:text-gray-300 transition">
               AI
             </Link>

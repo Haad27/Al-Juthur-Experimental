@@ -69,19 +69,19 @@ const Sidebar = () => {
         {/* Tab Switcher */}
         {!isCollapsed && (
           <div className="relative mt-4 mx-4">
-            {/* Sliding pill */}
-            <div
-              className="absolute -top-[4px] fatranslate-y-[6px] left-0 h-12 dark:bg-blue-500 bg-[var(--sephia-400)] rounded-full transition-all duration-300 px-2"
-              style={{ width: pillW, left: pillLeft }}
-            />
             <div className="relative flex dark:border dark:bg-zinc-800 bg-[var(--sephia-300)] border-[#262629ff] p-1 rounded-full">
+              {/* Sliding pill */}
+              <div
+                className="absolute top-1 bottom-1 dark:bg-emerald-500 bg-[var(--sephia-400)] rounded-full transition-all duration-300"
+                style={{ width: `calc(${pillW} - 8px)`, left: `calc(${pillLeft} + 4px)` }}
+              />
               {tabs.map((tab) => (
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
                   className={cn(
-                    "flex-1 text-center text-sm font-medium py-2 transition-colors dark:text-white text-black",
-                    activeTab === tab.key && "hover:text-gray-400"
+                    "relative z-10 flex-1 text-center text-sm font-medium py-1.5 transition-colors",
+                    activeTab === tab.key ? "text-white" : "dark:text-gray-400 text-gray-600 hover:text-white"
                   )}
                 >
                   {tab.label}
@@ -154,7 +154,7 @@ const Sidebar = () => {
           <div className="px-5 py-4">
             <Link
               href="/support"
-              className="block w-full text-center bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-xl transition"
+              className="block w-full text-center bg-emerald-500 hover:bg-emerald-600 text-white py-2 rounded-xl transition"
             >
               Support Us ♥
             </Link>

@@ -13,6 +13,7 @@ import { toast } from "sonner";
 
 // COMPONENTS START ⭐
 import NavigatorButton from "@/components/NavigatorButton";
+import { InteractiveAyahWords } from "@/components/quran/InteractiveAyahWords";
 
 // COMPONENTS END
 
@@ -47,6 +48,7 @@ const Surah = () => {
   // USESTATES START
   const [surah, setSurah] = useState<Surah | any>(null);
   const [ayahs, setAyahs] = useState<Ayah[]>([]);
+  const [surahWordsMap, setSurahWordsMap] = useState<Record<number, any[]>>({});
   const [juz, setJuz] = useState<{ arabic: any; english: any } | null>(null);
   const [loading, setLoading] = useState(true);
   // USESTATES END
@@ -86,6 +88,17 @@ const Surah = () => {
       try {
         const surahResponse = await fetchSurahById(surahNumber); // Surah Data
         const translationResponse = await fetchSurahTranslation(surahNumber); // Surah Translation Data
+
+        // Fetch exact word morphology from our local database
+        try {
+          const wordsRes = await fetch(`/api/lexicon/surah-words?surah=${surahNumber}`);
+          if (wordsRes.ok) {
+            const map = await wordsRes.json();
+            setSurahWordsMap(map);
+          }
+        } catch (e) {
+          console.error("Error fetching surah words map:", e);
+        }
 
         setSurah(surahResponse.data);
 
@@ -203,7 +216,7 @@ const Surah = () => {
           <p className="text-3xl">🧾</p>
 
           <div>
-            <p className="font-semibold text-blue-500">Already saved</p>
+            <p className="font-semibold text-emerald-500">Already saved</p>
             <p className="text-sm text-black">
               This ayah is already in your saved list.
             </p>
@@ -221,7 +234,7 @@ const Surah = () => {
       <div className="flex items-center gap-3">
         <Check size={36} />
         <div>
-          <p className="font-semibold text-blue-500">Saved Ayah</p>
+          <p className="font-semibold text-emerald-500">Saved Ayah</p>
         </div>
       </div>
     );
@@ -287,7 +300,7 @@ const Surah = () => {
               {juzParam ? (
                 <p className="text-zinc-700 dark:text-gray-200">
                   <span className="font-medium">Juz Number:</span>&nbsp;
-                  <span className="text-blue-500">{juzParam}</span>
+                  <span className="text-emerald-500">{juzParam}</span>
                 </p>
               ) : (
                 <div className="space-y-2 text-zinc-800 dark:text-gray-200 py-2">
@@ -385,7 +398,12 @@ const Surah = () => {
                   <span className="inline-flex items-center justify-center size-6 rounded-full text-xl mr-4">
                     ({convertNumberToArabicNumeral(ayah.numberInSurah)})
                   </span>
-                  {ayah.text}
+                  <InteractiveAyahWords
+                    surahNumber={surahNumber}
+                    ayahNumber={ayah.numberInSurah}
+                    ayahText={ayah.text}
+                    ayahWords={surahWordsMap[ayah.numberInSurah]}
+                  />
                 </p>
 
                 <div>

@@ -54,7 +54,7 @@ const GettingStartedPopup = ({ onStart }: { onStart: () => void }) => {
       </h1>
 
       {current === "1" ? (
-        <ul className="space-y-2 bg-blue-500 bg-opacity-20 border-l-2 border-blue-400 p-2 rounded-md text-yellow-100 text-sm leading-relaxed shadow-md">
+        <ul className="space-y-2 bg-emerald-500 bg-opacity-20 border-l-2 border-emerald-400 p-2 rounded-md text-yellow-100 text-sm leading-relaxed shadow-md">
           {steps.map((text, i) => (
             <li
               key={i}
@@ -69,7 +69,7 @@ const GettingStartedPopup = ({ onStart }: { onStart: () => void }) => {
         </ul>
       ) : (
         <>
-          <div className="bg-blue-500 bg-opacity-20 border-l-2 border-blue-400 p-4 rounded-md text-yellow-100 text-sm leading-relaxed shadow-md">
+          <div className="bg-emerald-500 bg-opacity-20 border-l-2 border-emerald-400 p-4 rounded-md text-yellow-100 text-sm leading-relaxed shadow-md">
             <strong className="block mb-2 font-semibold text-orange-50">
               <TriangleAlert className="inline-block mr-2" size={20} /> Beta
               Feature
@@ -94,7 +94,7 @@ const GettingStartedPopup = ({ onStart }: { onStart: () => void }) => {
           if (current === "2") onStart();
           else setCurrent("2");
         }}
-        className="group flex items-center justify-center gap-2 w-full bg-blue-500 py-4 text-white font-medium rounded-lg shadow hover:bg-blue-600 border-blue-400"
+        className="group flex items-center justify-center gap-2 w-full bg-emerald-500 py-4 text-white font-medium rounded-lg shadow hover:bg-emerald-600 border-emerald-400"
       >
         {current !== "2" ? "Next" : "Continue"} {current}/2{" "}
         <ArrowRight

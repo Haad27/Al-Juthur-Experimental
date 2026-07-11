@@ -26,7 +26,7 @@ const BottomNav = () => {
     },
     {
       label: "Lexicon",
-      href: "#",
+      href: "/lexicon",
       icon: <Library className="w-6 h-6" />,
     },
   ];
@@ -37,7 +37,8 @@ const BottomNav = () => {
         {navItems.map((item) => {
           const isActive = pathname === item.href || 
             (pathname?.startsWith("/surah/") && item.label === "Surah") ||
-            (pathname?.startsWith("/tafsir") && item.label === "Tafsir");
+            (pathname?.startsWith("/tafsir") && item.label === "Tafsir") ||
+            (pathname?.startsWith("/lexicon") && item.label === "Lexicon");
 
           return (
             <Link
@@ -45,7 +46,7 @@ const BottomNav = () => {
               href={item.href}
               className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-200 ${
                 isActive 
-                  ? "text-blue-500" 
+                  ? "text-emerald-500" 
                   : "text-zinc-500 hover:text-zinc-300"
               }`}
             >

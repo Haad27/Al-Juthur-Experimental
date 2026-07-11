@@ -6,7 +6,7 @@ import { inter } from "./fonts";
 import BottomNav from "@/components/BottomNav";
 
 export const metadata = {
-  title: "QuranNet",
+  title: "Al-Juthur",
   description: "Read and listen to quran for free - forever.",
   icons: {
     icon: "/assets/favicon.ico",
@@ -14,7 +14,7 @@ export const metadata = {
     apple: "/assets/favicon/apple-touch-icon.png",
   },
 };
-/* This file is used to define the web app manifest for the QuranNet PWA.  */
+/* This file is used to define the web app manifest for the Al-Juthur PWA.  */
 /* It includes metadata such as the app name, description, start URL, display mode, background color, theme color, and icons. */
 export default function RootLayout({
   children,
@@ -23,11 +23,11 @@ export default function RootLayout({
 }>) {
   return (
     <GlobalStateProvider>
-      <html lang="en" className="dark">
+      <html lang="en" className="dark" suppressHydrationWarning>
         <Head>
           <meta name="viewport" content="width=device-width, initial-scale=1" />
         </Head>
-        <body className={`${inter.className} bg-zinc-900 scroll-smooth md:pb-0 pb-16`}>
+        <body className={`${inter.className} bg-zinc-900 scroll-smooth md:pb-0 pb-16`} suppressHydrationWarning>
           {children}
           <BottomNav />
           <Toaster />

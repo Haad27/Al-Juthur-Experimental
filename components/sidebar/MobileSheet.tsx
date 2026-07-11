@@ -70,24 +70,30 @@ const MobileSheet = ({
           <p className="text-gray-400 text-xl">Menu</p>
         </div> */}
         <div className="relative mt-4 mx-1">
-          {/* Sliding pill */}
-          <div
-            className="absolute -top-[4px] left-0 h-9 dark:bg-blue-500 bg-[var(--sephia-400)] rounded-full transition-all duration-300"
-            style={{
-              width: "50%",
-              left: activeTab === "search" ? "0%" : "50%", // adjust width based on activeTab, pretty weird looking and will refactor
-            }}
-          />
-          <div className="relative flex dark:bg-zinc-800 bg-[var(--sephia-300)] dark:border-[#262629ff] border-0 p-1 rounded-full dark:text-white text-black">
+          <div className="relative flex dark:bg-zinc-800 bg-[var(--sephia-300)] dark:border-[#262629ff] border-0 p-1 rounded-full">
+            {/* Sliding pill */}
+            <div
+              className="absolute top-1 bottom-1 dark:bg-emerald-500 bg-[var(--sephia-400)] rounded-full transition-all duration-300"
+              style={{
+                width: "calc(50% - 4px)",
+                left: activeTab === "search" ? "4px" : "calc(50% + 0px)",
+              }}
+            />
             <button
               onClick={() => setActiveTab("search")}
-              className="flex-1 text-center text-sm font-medium py-2 z-10 transition-colors focus:outline-none focus-ring-0"
+              className={cn(
+                "relative z-10 flex-1 text-center text-sm font-medium py-1.5 transition-colors focus:outline-none",
+                activeTab === "search" ? "text-white" : "dark:text-gray-400 text-gray-600 hover:text-white"
+              )}
             >
               Search
             </button>
             <button
               onClick={() => setActiveTab("settings")}
-              className="flex-1 text-center text-sm font-medium py-2 z-10 transition-colors"
+              className={cn(
+                "relative z-10 flex-1 text-center text-sm font-medium py-1.5 transition-colors focus:outline-none",
+                activeTab === "settings" ? "text-white" : "dark:text-gray-400 text-gray-600 hover:text-white"
+              )}
             >
               Settings
             </button>

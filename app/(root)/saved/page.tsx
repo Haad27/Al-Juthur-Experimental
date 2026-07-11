@@ -140,7 +140,7 @@ const Saved = () => {
             <p className="text-xl mb-4">No saved ayahs yet.</p>
             <Link
               href="/surah/1"
-              className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-sm font-medium"
+              className="inline-block bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-sm font-medium"
             >
               Start Reading
             </Link>
@@ -149,7 +149,7 @@ const Saved = () => {
 
         <button
           onClick={() => router.back()}
-          className="px-8 sm:w-auto w-11/12 py-2 mt-4 bg-blue-500 hover:bg-zinc-700 text-white rounded-xl text-sm font-medium transition fixed left-1/2 -translate-x-1/2 bottom-4"
+          className="px-8 sm:w-auto w-11/12 py-2 mt-4 bg-emerald-500 hover:bg-zinc-700 text-white rounded-xl text-sm font-medium transition fixed left-1/2 -translate-x-1/2 bottom-4"
         >
           Go back
         </button>

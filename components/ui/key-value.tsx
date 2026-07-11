@@ -6,6 +6,6 @@ type KeyValueProps = {
 export const KeyValue = ({ label, value }: KeyValueProps) => (
   <div className="flex-between">
     <span className="font-medium">{label}:</span>&nbsp;
-    <span className="text-blue-500">{value}</span>
+    <span className="text-emerald-500">{value}</span>
   </div>
 );

@@ -17,7 +17,7 @@ export default function Loading() {
         </div>
         
         <div className="flex flex-col items-center gap-2">
-          <h2 className="text-xl font-bold tracking-tight">Deeper Dive</h2>
+          <h2 className="text-xl font-bold tracking-tight">Al-Juthur</h2>
           <div className="flex items-center gap-2 text-zinc-400">
             <Loader2 className="size-4 animate-spin text-emerald-500" />
             <span className="text-sm font-medium">Loading...</span>

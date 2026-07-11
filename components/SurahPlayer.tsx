@@ -251,12 +251,12 @@ export default function SurahPlayer({
             <button className="p-1 cursor-pointer">
               {recording ? (
                 <Mic
-                  className="size-5 animate-pulse text-blue-400"
+                  className="size-5 animate-pulse text-emerald-400"
                   onClick={requestMic}
                 />
               ) : (
                 <MicOff
-                  className="size-5 text-blue-500"
+                  className="size-5 text-emerald-500"
                   onClick={() => {
                     if (localStorage.getItem("hasSeenReciteGuide") === "true") {
                       unlockAudio();
@@ -270,7 +270,7 @@ export default function SurahPlayer({
                 />
               )}
             </button>
-            {/* <span className="absolute -top-4 scale-75 rounded bg-blue-500 px-2 text-xs text-white pointer-events-none">
+            {/* <span className="absolute -top-4 scale-75 rounded bg-emerald-500 px-2 text-xs text-white pointer-events-none">
               Beta feature
             </span> */}
           </div>

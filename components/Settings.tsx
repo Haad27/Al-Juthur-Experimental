@@ -27,7 +27,7 @@ const Settings = () => {
         control={
           <>
             <div className="flex justify-between">
-              <p className="text-lg font-semibold dark:text-blue-500 text-black">
+              <p className="text-lg font-semibold dark:text-emerald-500 text-black">
                 {fontSize.toString() === "0" ? "Base" : `${fontSize}x`}
               </p>
             </div>
