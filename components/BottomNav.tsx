@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BookOpen, ScrollText, Library } from "lucide-react";
+import { Home, BookOpen, ScrollText, Library, Languages } from "lucide-react";
 
 const BottomNav = () => {
   const pathname = usePathname();
@@ -29,6 +29,11 @@ const BottomNav = () => {
       href: "/lexicon",
       icon: <Library className="w-6 h-6" />,
     },
+    {
+      label: "AI",
+      href: "/ai",
+      icon: <Languages className="w-6 h-6" />,
+    },
   ];
 
   return (
@@ -38,7 +43,8 @@ const BottomNav = () => {
           const isActive = pathname === item.href || 
             (pathname?.startsWith("/surah/") && item.label === "Surah") ||
             (pathname?.startsWith("/tafsir") && item.label === "Tafsir") ||
-            (pathname?.startsWith("/lexicon") && item.label === "Lexicon");
+            (pathname?.startsWith("/lexicon") && item.label === "Lexicon") ||
+            (pathname?.startsWith("/ai") && item.label === "AI");
 
           return (
             <Link

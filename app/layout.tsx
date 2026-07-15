@@ -9,8 +9,8 @@ export const metadata = {
   title: "Al-Juthur",
   description: "Read and listen to quran for free - forever.",
   icons: {
-    icon: "/assets/favicon.ico",
-    shortcut: "/assets/favicon.ico",
+    icon: "/assets/favicon/apple-touch-icon.png",
+    shortcut: "/assets/favicon/apple-touch-icon.png",
     apple: "/assets/favicon/apple-touch-icon.png",
   },
 };

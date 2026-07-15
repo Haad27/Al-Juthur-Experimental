@@ -1,0 +1,165 @@
+import Database from 'better-sqlite3';
+import path from 'path';
+import fs from 'fs';
+
+export interface RagParentDocument {
+  id: string;
+  workType: 'tafsir' | 'lexicon';
+  authorId: number;
+  authorName: string;
+  workTitle: string;
+  language: 'en' | 'ar' | 'ur' | string;
+  surahId: number | null;
+  ayahId: number | null;
+  rootWord: string | null;
+  content: string;
+}
+
+export interface RagChildChunk {
+  id: string;
+  parentId: string;
+  chunkIndex: number;
+  content: string;
+  surahId: number | null;
+  ayahId: number | null;
+  authorId: number;
+  workType: 'tafsir' | 'lexicon';
+  language: string;
+  rootWord: string | null;
+  embedding?: number[];
+}
+
+const globalForRag = globalThis as unknown as {
+  ragDb: Database.Database | undefined;
+};
+
+export function getRagDb(): Database.Database {
+  if (!globalForRag.ragDb) {
+    const dbDir = path.join(process.cwd(), 'database', 'rag');
+    if (!fs.existsSync(dbDir)) {
+      fs.mkdirSync(dbDir, { recursive: true });
+    }
+    const dbPath = path.join(dbDir, 'ai_scholar_rag.sqlite');
+    const db = new Database(dbPath);
+
+    // Optimize SQLite settings
+    db.pragma('journal_mode = WAL');
+    db.pragma('synchronous = NORMAL');
+
+    // Create schema
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS rag_parent_documents (
+        id TEXT PRIMARY KEY,
+        workType TEXT NOT NULL,
+        authorId INTEGER NOT NULL,
+        authorName TEXT NOT NULL,
+        workTitle TEXT NOT NULL,
+        language TEXT NOT NULL,
+        surahId INTEGER,
+        ayahId INTEGER,
+        rootWord TEXT,
+        content TEXT NOT NULL
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_parent_surah_ayah ON rag_parent_documents(surahId, ayahId);
+      CREATE INDEX IF NOT EXISTS idx_parent_author ON rag_parent_documents(authorId);
+      CREATE INDEX IF NOT EXISTS idx_parent_root ON rag_parent_documents(rootWord);
+
+      CREATE TABLE IF NOT EXISTS rag_child_chunks (
+        id TEXT PRIMARY KEY,
+        parentId TEXT NOT NULL,
+        chunkIndex INTEGER NOT NULL,
+        content TEXT NOT NULL,
+        surahId INTEGER,
+        ayahId INTEGER,
+        authorId INTEGER NOT NULL,
+        workType TEXT NOT NULL,
+        language TEXT NOT NULL,
+        rootWord TEXT,
+        embedding TEXT,
+        FOREIGN KEY(parentId) REFERENCES rag_parent_documents(id) ON DELETE CASCADE
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_child_parent ON rag_child_chunks(parentId);
+      CREATE INDEX IF NOT EXISTS idx_child_surah_ayah ON rag_child_chunks(surahId, ayahId);
+      CREATE INDEX IF NOT EXISTS idx_child_author ON rag_child_chunks(authorId);
+
+      CREATE VIRTUAL TABLE IF NOT EXISTS rag_fts USING fts5(
+        id UNINDEXED,
+        content,
+        authorName,
+        rootWord,
+        tokenize='unicode61 remove_diacritics 2'
+      );
+    `);
+
+    globalForRag.ragDb = db;
+  }
+  return globalForRag.ragDb;
+}
+
+export function insertParentDocument(doc: RagParentDocument) {
+  const db = getRagDb();
+  const stmt = db.prepare(`
+    INSERT OR REPLACE INTO rag_parent_documents
+    (id, workType, authorId, authorName, workTitle, language, surahId, ayahId, rootWord, content)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  stmt.run(
+    doc.id,
+    doc.workType,
+    doc.authorId,
+    doc.authorName,
+    doc.workTitle,
+    doc.language,
+    doc.surahId,
+    doc.ayahId,
+    doc.rootWord,
+    doc.content
+  );
+}
+
+export function insertChildChunk(chunk: RagChildChunk) {
+  const db = getRagDb();
+  const embeddingJson = chunk.embedding ? JSON.stringify(chunk.embedding) : null;
+
+  const stmt = db.prepare(`
+    INSERT OR REPLACE INTO rag_child_chunks
+    (id, parentId, chunkIndex, content, surahId, ayahId, authorId, workType, language, rootWord, embedding)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  stmt.run(
+    chunk.id,
+    chunk.parentId,
+    chunk.chunkIndex,
+    chunk.content,
+    chunk.surahId,
+    chunk.ayahId,
+    chunk.authorId,
+    chunk.workType,
+    chunk.language,
+    chunk.rootWord,
+    embeddingJson
+  );
+
+  // Insert into FTS5 index
+  const ftsStmt = db.prepare(`
+    INSERT OR REPLACE INTO rag_fts (id, content, authorName, rootWord)
+    VALUES (?, ?, ?, ?)
+  `);
+  ftsStmt.run(
+    chunk.id,
+    chunk.content,
+    chunk.workType === 'tafsir' ? `Author ${chunk.authorId}` : 'Lexicon',
+    chunk.rootWord || ''
+  );
+}
+
+export function clearRagIndex() {
+  const db = getRagDb();
+  db.exec(`
+    DELETE FROM rag_fts;
+    DELETE FROM rag_child_chunks;
+    DELETE FROM rag_parent_documents;
+  `);
+}

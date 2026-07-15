@@ -2,11 +2,14 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight } from "lucide-react";
+import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, Copy, Languages } from "lucide-react";
 import LogoIcon from "@/components/svg/icons/LogoIcon";
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
 import TafsirTextRenderer from "@/components/tafsir/TafsirTextRenderer";
 import { amiriquran, inter } from "@/app/fonts";
+
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface Author {
   id: number;
@@ -39,6 +42,7 @@ interface TafsirEntry {
 }
 
 export default function TafsirPage() {
+  const router = useRouter();
   const [languages, setLanguages] = useState<Language[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -314,7 +318,7 @@ export default function TafsirPage() {
                       className="border border-zinc-800/80 bg-zinc-900/30 rounded-xl p-5 md:p-7 backdrop-blur-md transition-all hover:border-zinc-700/80 space-y-6 scroll-mt-24"
                     >
                       {/* Top Ayah Header */}
-                      <div className="flex items-center justify-between border-b border-zinc-800/60 pb-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-800/60 pb-4 gap-4">
                         <div className="flex items-center gap-3">
                           <span className="size-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-xs font-bold text-emerald-400">
                             {activeSurah}:{ayahNumber}
@@ -322,6 +326,35 @@ export default function TafsirPage() {
                           <span className="text-sm font-semibold text-zinc-300">
                             Ayah {ayahNumber}
                           </span>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 self-end sm:self-auto">
+                          <button
+                            onClick={() => {
+                              const cleanText = entry.text.replace(/<[^>]*>?/gm, '');
+                              navigator.clipboard.writeText(cleanText);
+                              toast("Copied Tafsir explanation to clipboard!", { className: "bg-zinc-800 text-white border-zinc-700" });
+                            }}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 transition text-xs font-medium text-zinc-300"
+                            title="Copy Tafsir"
+                          >
+                            <Copy className="size-3.5" />
+                            <span>Copy</span>
+                          </button>
+                          
+                          <button
+                            onClick={() => {
+                              const cleanText = entry.text.replace(/<[^>]*>?/gm, '');
+                              sessionStorage.setItem("ai_translator_input", cleanText);
+                              router.push("/ai");
+                            }}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition text-xs font-medium text-emerald-400"
+                            title="Translate to English"
+                          >
+                            <Languages className="size-3.5" />
+                            <span className="hidden sm:inline">Translate to English</span>
+                            <span className="sm:hidden">Translate</span>
+                          </button>
                         </div>
                       </div>
 
@@ -396,9 +429,7 @@ export default function TafsirPage() {
           {/* Logo and App Name */}
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2">
-              <div className="bg-white p-1.5 rounded-md hidden md:block">
-                <LogoIcon className="text-black size-5" />
-              </div>
+              <LogoIcon className="text-white size-6 hidden md:block" />
               <p className="font-bold text-lg md:text-xl text-white hidden md:block">Al-Juthur</p>
             </Link>
           </div>
@@ -417,7 +448,7 @@ export default function TafsirPage() {
             <Link href="/lexicon" className="cursor-pointer hover:text-gray-300 transition">
               Lexicon
             </Link>
-            <Link href="#" className="cursor-pointer hover:text-gray-300 transition">
+            <Link href="/ai" className="cursor-pointer hover:text-gray-300 transition">
               AI
             </Link>
           </nav>

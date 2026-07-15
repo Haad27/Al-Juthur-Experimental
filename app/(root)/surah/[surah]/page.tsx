@@ -32,6 +32,7 @@ import {
   Pause,
   Play,
   Save,
+  ScrollText,
   SplineIcon,
 } from "lucide-react";
 // ICONS END ⭐
@@ -371,6 +372,13 @@ const Surah = () => {
                     <Play className="text-zinc-400" size={18} />
                   )}
                 </div>
+                <Link
+                  href={`/tafsir?surah=${params.surah}&ayah=${ayah.numberInSurah}`}
+                  className="p-2 rounded-full hover:bg-zinc-800 transition-colors cursor-pointer inline-flex items-center justify-center"
+                  title="Read Tafsir"
+                >
+                  <ScrollText className="text-emerald-500 hover:text-emerald-400" size={18} />
+                </Link>
               </div>
 
               <div

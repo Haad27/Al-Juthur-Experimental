@@ -17,7 +17,7 @@ export const fetchAllSurahs = async () => {
 
 export const fetchSurahById = async (id: number) => {
   try {
-    const response = await fetch(`https://api.alquran.cloud/v1/surah/${id}`);
+    const response = await fetch(`https://api.alquran.cloud/v1/surah/${id}/quran-uthmani`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }

@@ -85,10 +85,8 @@ const SurahsList = () => {
       />
       <div className="sticky top-0 h-20 w-full lg:hidden flex"></div>
       <div className="sticky top-0 z-50 h-20 w-full backdrop-blur-md bg-transparent hidden lg:flex items-center justify-between xl:px-32 lg:px-16 px-4">
-        <div className="flex items-end gap-2 text-white">
-          <div className="bg-white p-1.5 rounded-md">
-            <LogoIcon className="hidden lg:block text-black" />
-          </div>
+        <div className="flex items-center gap-3 text-white">
+          <LogoIcon className="hidden lg:block w-8 h-8 rounded-[20%]" />
           <p className="font-bold text-2xl">Al-Juthur</p>
 
           <div className="sm:hidden ml-auto">
@@ -115,7 +113,7 @@ const SurahsList = () => {
           <Link href="/lexicon" className="cursor-pointer hover:text-gray-300 transition">
             Lexicon
           </Link>
-          <Link href="#" className="cursor-pointer hover:text-gray-300 transition text-zinc-400">
+          <Link href="/ai" className="cursor-pointer hover:text-gray-300 transition text-zinc-400">
             AI
           </Link>
         </nav>
@@ -406,9 +404,7 @@ const SurahsList = () => {
               {/* Column 1 */}
               <div className="w-full md:w-1/2 lg:w-1/4 flex flex-col gap-5 ">
                 <div className="flex gap-3 items-center">
-                  <div className="bg-white p-1.5 rounded-md">
-                    <LogoIcon className=" text-black" />
-                  </div>
+                  <LogoIcon className="w-8 h-8 rounded-[20%]" />
                   <div className="flex flex-col">
                     <p className="font-bold text-white">Al-Juthur</p>
                     <p className="text-[12px] text-zinc-400">

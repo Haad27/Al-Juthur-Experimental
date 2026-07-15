@@ -1,15 +1,14 @@
+import Image from 'next/image';
+
 const LogoIcon = ({ onClick, className, style, ...props }: any) => (
-  <div 
-    onClick={onClick} 
-    className={`bg-current ${className?.includes('size-') || className?.includes('w-') ? '' : 'size-6'} ${className || ''}`} 
-    style={{ 
-      maskImage: 'url("/assets/favicon/quran (2).png")', 
-      WebkitMaskImage: 'url("/assets/favicon/quran (2).png")', 
-      maskSize: 'contain', 
-      maskRepeat: 'no-repeat', 
-      maskPosition: 'center',
-      ...style 
-    }} 
+  <Image
+    src="/assets/favicon/apple-touch-icon.png"
+    alt="Quran Logo"
+    width={24}
+    height={24}
+    onClick={onClick}
+    className={`${className?.includes('size-') || className?.includes('w-') ? '' : 'w-6 h-6'} ${className || ''}`}
+    style={{ objectFit: 'contain', ...style }}
     {...props}
   />
 );

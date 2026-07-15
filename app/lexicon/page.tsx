@@ -18,7 +18,11 @@ import {
   ChevronRight,
   Globe,
   Loader2,
+  Copy,
+  Languages,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 interface DictionaryInfo {
   id: number;
@@ -75,6 +79,7 @@ const POPULAR_ROOTS = [
 ];
 
 function LexiconPageContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const initialRoot = searchParams.get('root') || 'رحم';
 
@@ -152,9 +157,7 @@ function LexiconPageContent() {
         <div className="max-w-[1700px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2">
-              <div className="bg-white p-1.5 rounded-md hidden md:block">
-                <LogoIcon className="text-black size-5" />
-              </div>
+              <LogoIcon className="w-8 h-8 rounded-[20%] hidden md:block" />
               <span className="font-bold text-xl tracking-tight text-white hidden md:block">Al-Juthur</span>
             </Link>
           </div>
@@ -173,7 +176,7 @@ function LexiconPageContent() {
             <Link href="/lexicon" className="cursor-pointer text-white font-medium">
               Lexicon
             </Link>
-            <Link href="#" className="cursor-pointer hover:text-slate-200 transition">
+            <Link href="/ai" className="cursor-pointer hover:text-slate-200 transition">
               AI
             </Link>
           </nav>
@@ -427,7 +430,7 @@ function LexiconPageContent() {
                       className="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-xl"
                     >
                       {/* Card Header */}
-                      <div className="px-6 py-4 bg-slate-800/40 border-b border-slate-800 flex items-center justify-between">
+                      <div className="px-6 py-4 bg-slate-800/40 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-sm">
                             {entry.dictId}
@@ -442,6 +445,36 @@ function LexiconPageContent() {
                               )}
                             </h3>
                           </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 self-end sm:self-auto">
+                          <button
+                            onClick={() => {
+                              const rawText = entry.definitions.join("\n");
+                              const cleanText = rawText.replace(/<[^>]*>?/gm, '');
+                              navigator.clipboard.writeText(cleanText);
+                              toast("Copied lexicon entry to clipboard!", { className: "bg-slate-800 text-white border-slate-700" });
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-850 hover:bg-slate-750 border border-slate-700/60 transition text-xs font-medium text-slate-300"
+                            title="Copy Entry"
+                          >
+                            <Copy className="w-3.5 h-3.5" />
+                            <span>Copy</span>
+                          </button>
+                          
+                          <button
+                            onClick={() => {
+                              const rawText = entry.definitions.join("\n");
+                              const cleanText = rawText.replace(/<[^>]*>?/gm, '');
+                              sessionStorage.setItem("ai_translator_input", cleanText);
+                              router.push("/ai");
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition text-xs font-medium text-emerald-400"
+                            title="Translate Entry"
+                          >
+                            <Languages className="w-3.5 h-3.5" />
+                            <span>Translate</span>
+                          </button>
                         </div>
                       </div>
 
