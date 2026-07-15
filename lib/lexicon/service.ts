@@ -171,13 +171,11 @@ export function getSurahWords(surah: number) {
   if (!globalForDb.surahWordsCache) {
     globalForDb.surahWordsCache = {};
   }
-  
   if (globalForDb.surahWordsCache[surah]) {
     return globalForDb.surahWordsCache[surah];
   }
-
   try {
-    const db = getWordRootDb(); // Use the initialized Database instance
+    const db = getMcpDb();
     const rows = db.prepare(`
       SELECT 
         r.ayahNo,
@@ -194,14 +192,17 @@ export function getSurahWords(surah: number) {
       ORDER BY r.ayahNo ASC, r.wordNo ASC
     `).all(surah) as any[];
 
-    // Fetch english morphology separately to avoid even larger JOINs
+    // Fetch English Morphology
     let engMorphMap: Record<string, string> = {};
     try {
-      const engRows = db.prepare(`SELECT ayah, word, pos_tags FROM word_morphology WHERE surah = ?`).all(surah) as any[];
+      const engDb = getEnglishMorphologyDb();
+      const engRows = engDb.prepare(`SELECT ayah, word, pos_tags FROM word_morphology WHERE surah = ?`).all(surah) as any[];
       for (const er of engRows) {
         engMorphMap[`${er.ayah}:${er.word}`] = er.pos_tags;
       }
-    } catch (e) { }
+    } catch (e) {
+      console.error('Error fetching English morphology:', e);
+    }
 
     const map: Record<number, any[]> = {};
     for (const r of rows) {
@@ -217,16 +218,21 @@ export function getSurahWords(surah: number) {
         irab: engMorph ? null : (r.irabMushakkal || null), // Omit Arabic irab if we have English
       });
     }
-    
     globalForDb.surahWordsCache[surah] = map;
     return map;
   } catch (err) {
-    console.error('Error fetching surah words from SQLite:', err);
+    console.error('Error fetching surah words from MCP:', err);
     return {};
   }
 }
 
 export function getAyahWords(surah: number, ayah: number) {
+  if (!globalForDb.surahWordsCache?.[surah]) {
+    getSurahWords(surah);
+  }
+  if (globalForDb.surahWordsCache?.[surah]?.[ayah]) {
+    return globalForDb.surahWordsCache[surah][ayah];
+  }
   try {
     const db = getMcpDb();
     const rows = db.prepare(`
@@ -275,7 +281,7 @@ export function getAyahWords(surah: number, ayah: number) {
  */
 export function getWordMorphology(surah: number, ayah: number, wordIndex: number): WordMorphology | null {
   const words = getAyahWords(surah, ayah);
-  const word = words.find(w => w.wordIndex === wordIndex);
+  const word = words.find((w: any) => w.wordIndex === wordIndex);
   
   if (word) {
     return {

@@ -2,6 +2,7 @@ import React from "react";
 import SurahReaderClient from "@/components/quran/SurahReaderClient";
 import { PrismaClient } from "@prisma/client";
 import { getSurahWords } from "@/lib/lexicon/service";
+import { SURAHS_DATA } from "@/lib/surahsData";
 import fs from "fs";
 import path from "path";
 
@@ -48,14 +49,13 @@ export default async function SurahPage({
     return <div className="p-8 text-center text-white">Invalid Surah</div>;
   }
 
-  // 1. Fetch Surah metadata directly from local DB
-  const surahMetadata = await prisma.surah.findUnique({
+  // 1. Fetch Surah metadata directly from local SURAHS_DATA memory or DB
+  const surahMetadata = SURAHS_DATA.find(s => s.number === surahNumber) || await prisma.surah.findUnique({
     where: { id: surahNumber }
   });
   
   if (surahMetadata) {
-    // Add number property to match previous API schema
-    (surahMetadata as any).number = surahMetadata.id;
+    (surahMetadata as any).number = (surahMetadata as any).number || (surahMetadata as any).id;
   }
 
   // 2. Fetch Arabic Ayahs from our massive local Prisma DB

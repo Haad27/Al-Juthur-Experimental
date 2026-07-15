@@ -177,7 +177,7 @@ function LexiconPageContent() {
               Lexicon
             </Link>
             <Link href="/ai" className="cursor-pointer hover:text-slate-200 transition">
-              AI
+              AI Translator
             </Link>
           </nav>
         </div>

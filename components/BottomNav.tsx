@@ -30,7 +30,7 @@ const BottomNav = () => {
       icon: <Library className="w-6 h-6" />,
     },
     {
-      label: "AI",
+      label: "AI Translator",
       href: "/ai",
       icon: <Languages className="w-6 h-6" />,
     },
@@ -44,7 +44,7 @@ const BottomNav = () => {
             (pathname?.startsWith("/surah/") && item.label === "Surah") ||
             (pathname?.startsWith("/tafsir") && item.label === "Tafsir") ||
             (pathname?.startsWith("/lexicon") && item.label === "Lexicon") ||
-            (pathname?.startsWith("/ai") && item.label === "AI");
+            (pathname?.startsWith("/ai") && item.label === "AI Translator");
 
           return (
             <Link

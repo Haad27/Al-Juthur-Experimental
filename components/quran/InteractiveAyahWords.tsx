@@ -37,7 +37,26 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = ({
   ayahText,
   ayahWords,
 }) => {
-  const words = ayahText.trim().split(/\s+/).map((w, i) => ({ wordIndex: i + 1, word: w }));
+  const rawTokens = ayahText.trim().split(/\s+/);
+  
+  // Build tokens array separating clickable words from non-clickable pause marks
+  let currentWordIdx = 1;
+  const tokens = rawTokens.map((w) => {
+    // Check if token is purely a pause symbol, punctuation, or Arabic numeral
+    const isPauseOrNumber = /^[\u06D6-\u06ED\u06D4\u06E9\u0660-\u0669\u06F0-\u06F9]+$/.test(w) ||
+      ['ۗ', 'ۛ', 'ۖ', 'ۚ', 'ۙ', '۩', 'ۜ', 'ۘ', '۞', '۩'].includes(w);
+
+    if (isPauseOrNumber) {
+      return { wordIndex: null, word: w, isClickable: false };
+    } else {
+      const idx = ayahWords && ayahWords[currentWordIdx - 1] 
+        ? ayahWords[currentWordIdx - 1].wordIndex 
+        : currentWordIdx;
+      currentWordIdx++;
+      return { wordIndex: idx, word: w, isClickable: true };
+    }
+  });
+
   const [loadingIndex, setLoadingIndex] = useState<number | null>(null);
   const [wordDataMap, setWordDataMap] = useState<Record<number, WordMorphologyData>>({});
 
@@ -61,9 +80,17 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = ({
 
   return (
     <span className="inline-flex flex-wrap gap-x-2.5 gap-y-2 leading-relaxed" dir="rtl">
-      {words.map((item, idx) => {
-        const wordIdx = item.wordIndex;
-        const word = item.word;
+      {tokens.map((item, idx) => {
+        const { wordIndex: wordIdx, word, isClickable } = item;
+
+        if (!isClickable || wordIdx === null) {
+          return (
+            <span key={idx} className="inline-block px-1 py-0.5 text-zinc-400 select-none">
+              {word}
+            </span>
+          );
+        }
+
         const data = wordDataMap[wordIdx];
 
         return (

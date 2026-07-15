@@ -117,7 +117,7 @@ export default function AiTranslatorPage() {
               Lexicon
             </Link>
             <Link href="/ai" className="cursor-pointer text-white font-medium">
-              Translator AI
+              AI Translator
             </Link>
           </nav>
         </div>

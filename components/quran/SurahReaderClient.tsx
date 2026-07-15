@@ -11,7 +11,6 @@ import { cn, convertNumberToArabicNumeral } from "@/lib/utils";
 import BismillahIcon from "@/components/svg/icons/BismillahIcon";
 import {
   ArrowLeft,
-  Bug,
   Check,
   ChevronUp,
   Copy,
@@ -181,61 +180,36 @@ export default function SurahReaderClient({
       </div>
 
       <div className="flex flex-col w-full min-h-screen blg:px-24 bpx-4">
-        <div className="flex items-center text-center w-full flex-col mb-4">
-          <div className="relative">
-            <BismillahIcon className="dark:text-white text-black lg:max-w-96 md:max-w-86 max-w-72  md:mt-0 mt-16" />
-
-            <button
-              onClick={() => setCollapsed((prev) => !prev)}
-              className="dark:text-white text-black rounded-full hover:opacity-80 absolute bottom-0 left-1/2 -translate-x-1/2"
-            >
-              <ChevronUp
-                className={`${
-                  collapsed ? "rotate-180" : ""
-                } size-6 cursor-pointer transition-all transition-discrete duration-300`}
-              />
-            </button>
-          </div>
-
-          <div
-            className={`mx-2 rounded-2xl ${
-              collapsed ? "" : "px-4 py-6"
-            } border border-zinc-700 shadow-xl bg-zinc-800 text-sm sm:text-base overflow-hidden transition-all delay-300 duration-300 ${
-              collapsed ? "h-0 opacity-0" : "min-h-48"
-            }`}
-          >
-            {juzParam ? (
-              <p className="text-zinc-700 dark:text-gray-200">
-                <span className="font-medium">Juz Number:</span>&nbsp;
-                <span className="text-emerald-500">{juzParam}</span>
-              </p>
-            ) : (
-              <div className="space-y-2 text-zinc-800 dark:text-gray-200 py-2">
-                <KeyValue label="Surah Number" value={surah?.number} />
-                <KeyValue
-                  label="Surah Name"
-                  value={
-                    <span className={`${amiri.className}`}>
-                      {surah?.name}
-                    </span>
-                  }
-                />
-                <KeyValue label="English Name" value={surah?.englishName} />
-                <KeyValue
-                  label="Translation"
-                  value={surah?.englishNameTranslation}
-                />
-                <KeyValue
-                  label="Number of Ayahs"
-                  value={surah?.numberOfAyahs}
-                />
-                <KeyValue
-                  label="Revelation Type"
-                  value={surah?.revelationType}
-                />
+        {/* Explore Container Hero Header */}
+        <div className="relative pt-10 pb-8 px-4 md:px-8 max-w-7xl mx-auto w-full border-b border-zinc-800/80 mb-8">
+          <div className="absolute left-10 top-10 size-96 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 relative z-10">
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
+                <span>Surah {surah?.number || surahNumber}</span>
+                <span>•</span>
+                <span>{surah?.revelationType || "Meccan"}</span>
+                <span>•</span>
+                <span>{surah?.numberOfAyahs || 0} Ayahs</span>
               </div>
-            )}
+              <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white">
+                {surah?.englishName}
+              </h1>
+              <p className="text-zinc-400 max-w-2xl text-sm md:text-base">
+                {surah?.englishNameTranslation}
+              </p>
+            </div>
+
+            <div className="text-right">
+              <p className={`${amiri.className} text-4xl md:text-6xl text-amber-100/90 font-normal leading-normal`}>
+                {surah?.name}
+              </p>
+            </div>
           </div>
+        </div>
+
+        <div className="flex items-center text-center w-full flex-col mb-8">
+          <BismillahIcon className="dark:text-white text-black lg:max-w-96 md:max-w-86 max-w-72" />
         </div>
 
         {ayahs.map((ayah) => (

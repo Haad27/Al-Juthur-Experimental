@@ -15,6 +15,8 @@ interface Author {
   id: number;
   name: string;
   languageId: number;
+  era?: string;
+  tags?: { id: number; name: string; color: string }[];
 }
 
 interface Language {
@@ -41,11 +43,31 @@ interface TafsirEntry {
   author?: Author;
 }
 
+const getTagColorClass = (color?: string) => {
+  switch (color) {
+    case "amber": return "bg-amber-500/10 text-amber-400 border-amber-500/30";
+    case "emerald": return "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+    case "blue": return "bg-blue-500/10 text-blue-400 border-blue-500/30";
+    case "purple": return "bg-purple-500/10 text-purple-400 border-purple-500/30";
+    case "cyan": return "bg-cyan-500/10 text-cyan-400 border-cyan-500/30";
+    default: return "bg-zinc-800/80 text-zinc-400 border-zinc-700/60";
+  }
+};
+
 export default function TafsirPage() {
   const router = useRouter();
   const [languages, setLanguages] = useState<Language[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("All");
+  const [selectedEra, setSelectedEra] = useState<string>("All Eras");
   const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const ERAS = useMemo(() => [
+    "All Eras",
+    "Early Classical (7th-10th CE)",
+    "Medieval (11th-14th CE)",
+    "Post-Classical (15th-18th CE)",
+    "Modern & Contemporary (19th-21st CE)"
+  ], []);
 
   // Reading Mode State
   const [activeAuthor, setActiveAuthor] = useState<Author | null>(null);
@@ -113,18 +135,22 @@ export default function TafsirPage() {
     return list;
   }, [languages]);
 
-  // Filter authors based on search query & language selection
+  // Filter authors based on search query, language, and era selection
   const filteredAuthors = useMemo(() => {
     return allAuthorsWithLang.filter(({ author, language }) => {
       const matchesLang =
         selectedLanguage === "All" ||
         language.name.toLowerCase() === selectedLanguage.toLowerCase();
+      const matchesEra =
+        selectedEra === "All Eras" ||
+        author.era === selectedEra;
       const matchesSearch =
         author.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        language.name.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesLang && matchesSearch;
+        language.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (author.tags?.some((t) => t.name.toLowerCase().includes(searchQuery.toLowerCase())));
+      return matchesLang && matchesEra && matchesSearch;
     });
-  }, [allAuthorsWithLang, selectedLanguage, searchQuery]);
+  }, [allAuthorsWithLang, selectedLanguage, selectedEra, searchQuery]);
 
   const currentSurahMeta = SURAHS_DATA.find((s) => s.number === activeSurah) || SURAHS_DATA[0];
 
@@ -449,7 +475,7 @@ export default function TafsirPage() {
               Lexicon
             </Link>
             <Link href="/ai" className="cursor-pointer hover:text-gray-300 transition">
-              AI
+              AI Translator
             </Link>
           </nav>
         </div>
@@ -487,10 +513,13 @@ export default function TafsirPage() {
         </div>
 
         {/* Language Filter Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto py-6 no-scrollbar border-b border-zinc-800/80">
+        <div className="flex items-center gap-2 overflow-x-auto pt-4 pb-3 no-scrollbar border-b border-zinc-800/60">
+          <span className="text-xs font-semibold text-zinc-400 pr-2 whitespace-nowrap flex items-center gap-1.5">
+            <Languages className="size-3.5 text-emerald-400" /> Language:
+          </span>
           <button
             onClick={() => setSelectedLanguage("All")}
-            className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
               selectedLanguage === "All"
                 ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
                 : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
@@ -502,7 +531,7 @@ export default function TafsirPage() {
             <button
               key={lang.id}
               onClick={() => setSelectedLanguage(lang.name)}
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+              className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
                 selectedLanguage === lang.name
                   ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
                   : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
@@ -512,16 +541,41 @@ export default function TafsirPage() {
             </button>
           ))}
         </div>
+
+        {/* Era Filter Tabs */}
+        <div className="flex items-center gap-2 overflow-x-auto pt-3 pb-5 no-scrollbar border-b border-zinc-800/80">
+          <span className="text-xs font-semibold text-zinc-400 pr-2 whitespace-nowrap flex items-center gap-1.5">
+            <BookOpen className="size-3.5 text-emerald-400" /> Era:
+          </span>
+          {ERAS.map((eraName) => {
+            const count = eraName === "All Eras" 
+              ? allAuthorsWithLang.length 
+              : allAuthorsWithLang.filter(a => a.author.era === eraName).length;
+            return (
+              <button
+                key={eraName}
+                onClick={() => setSelectedEra(eraName)}
+                className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                  selectedEra === eraName
+                    ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
+                    : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+                }`}
+              >
+                {eraName.replace(" & Contemporary", "")} ({count})
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Grid of Tafsir Containers (Matches Homepage Surah Cards exactly) */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
+      {/* Grid of Tafsir Containers (Matches Homepage Surah Cards exactly + Methodology Badges) */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
         {filteredAuthors.length === 0 ? (
           <div className="text-center py-20 bg-zinc-900/30 border border-zinc-800/60 rounded-xl">
-            <p className="text-zinc-400 text-sm">No Tafsir books found matching your search.</p>
+            <p className="text-zinc-400 text-sm">No Tafsir books found matching your filter selections.</p>
           </div>
         ) : (
-          <div className="w-full grid xl:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-6">
+          <div className="w-full grid xl:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
             {filteredAuthors.map(({ author, language }, index) => (
               <div
                 key={`${language.id}-${author.id}`}
@@ -530,31 +584,55 @@ export default function TafsirPage() {
                   setActiveLangName(language.name);
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
-                className="border border-input bg-input/30 group cursor-pointer rounded-md h-full backdrop-blur-md px-4 py-4 shadow-md transition-all duration-200 ease-in-out hover:scale-[1.01] hover:shadow-lg z-4"
+                className="border border-input bg-input/30 group cursor-pointer rounded-xl h-full backdrop-blur-md p-4 shadow-md transition-all duration-200 ease-in-out hover:scale-[1.01] hover:shadow-lg hover:border-emerald-500/40 flex flex-col justify-between"
               >
-                <div className="flex items-center justify-between gap-4">
-                  {/* Rotated Diamond Number Badge exactly like Homepage */}
-                  <div className="size-8 rounded-sm border border-input/30 flex justify-center items-center rotate-45 transition-all group-hover:bg-emerald-500 dark:group-hover:bg-emerald-500">
-                    <p className="-rotate-45 text-white text-sm font-bold group-hover:text-zinc-950 transition-colors">
-                      {index + 1}
-                    </p>
-                  </div>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    {/* Rotated Diamond Number Badge exactly like Homepage */}
+                    <div className="size-8 rounded-sm border border-input/30 flex justify-center items-center rotate-45 transition-all group-hover:bg-emerald-500 dark:group-hover:bg-emerald-500 shrink-0">
+                      <p className="-rotate-45 text-white text-sm font-bold group-hover:text-zinc-950 transition-colors">
+                        {index + 1}
+                      </p>
+                    </div>
 
-                  {/* Title & Subtitle */}
-                  <div className="flex flex-col flex-1 space-y-0.5 text-sm">
-                    <p className="font-semibold text-white group-hover:text-emerald-400 transition-colors">
-                      {author.name}
-                    </p>
-                    <p className="text-xs text-zinc-400">
-                      {language.name}
-                    </p>
+                    {/* Title & Subtitle */}
+                    <div className="flex flex-col space-y-1">
+                      <p className="font-semibold text-white group-hover:text-emerald-400 transition-colors leading-snug">
+                        {author.name}
+                      </p>
+                      <div className="flex items-center gap-2 text-xs text-zinc-400">
+                        <span className="text-zinc-300 font-medium">{language.name}</span>
+                        {author.era && (
+                          <>
+                            <span>•</span>
+                            <span className="text-zinc-400 text-[11px] truncate max-w-[170px]" title={author.era}>
+                              {author.era.replace(" & Contemporary", "")}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
                   </div>
 
                   {/* Quran Logo Icon on right */}
-                  <div className="text-right">
+                  <div className="text-right shrink-0">
                     <LogoIcon className="size-6 text-emerald-400 group-hover:scale-110 transition-transform" />
                   </div>
                 </div>
+
+                {/* Methodology Badges */}
+                {author.tags && author.tags.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-1.5 mt-3 pt-3 border-t border-zinc-800/60">
+                    {author.tags.map((tag) => (
+                      <span
+                        key={tag.id}
+                        className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border ${getTagColorClass(tag.color)}`}
+                      >
+                        {tag.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>

@@ -1,18 +1,11 @@
-// These functions use the Al Quran Cloud API to fetch data!
-// TODO: switch API to quran.com's api
-// TODO: add error handling and loading states
+import { SURAHS_DATA } from "@/lib/surahsData";
 
 export const fetchAllSurahs = async () => {
-  try {
-    const response = await fetch(`https://api.alquran.cloud/v1/surah`);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error fetching surahs:", error);
-  }
+  return {
+    code: 200,
+    status: "OK",
+    data: SURAHS_DATA,
+  };
 };
 
 export const fetchSurahById = async (id: number) => {

@@ -31,6 +31,8 @@ import { toast } from "sonner";
 import GettingStartedPopup from "./popups/GettingStartedPopup";
 // Utilities
 import { formatTime, normalizeArabic, unlockAudio } from "@/lib/utils";
+import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
+import { fetchAyahAudio } from "@/api/api";
 
 interface SurahPlayerProps {
   surahNumber: number;
@@ -47,6 +49,7 @@ export default function SurahPlayer({
   lastAyahNumber,
   router,
 }: SurahPlayerProps) {
+  const { mistakeDetection } = useGlobalState();
   // Audio effects
   const correct = useRef(new Audio("/assets/sounds/correct.mp3")).current;
   const wrong = useRef(new Audio("/assets/sounds/wrong.mp3")).current;
@@ -129,8 +132,20 @@ export default function SurahPlayer({
   };
 
   // Handle Incorrect Pronounciation of Verse
-  const handleIncorrect = () => {
+  const handleIncorrect = async (ayahNum?: number) => {
     wrong.play();
+    if (mistakeDetection && ayahNum) {
+      toast.info("Recitation mistake detected — replaying correct verse audio...");
+      try {
+        const response = await fetchAyahAudio(surahNumber, ayahNum);
+        if (response?.data?.audio) {
+          const ayahAudio = new Audio(response.data.audio);
+          ayahAudio.play();
+        }
+      } catch (err) {
+        console.error("Failed to play mistake correction audio:", err);
+      }
+    }
   };
 
   // ================- SPEECH RECOGNITION FUNCTION -================!
@@ -188,7 +203,7 @@ export default function SurahPlayer({
           setTimeout(() => router.push(`/surah/${surahNumber + 1}`), 1500); // if completed surah, go to next surah
         }
       } else {
-        handleIncorrect(); // calls incorrect function
+        handleIncorrect(currentAyahRef.current + 1); // calls incorrect function with current verse number
         document.getElementById(currentAyahId)?.classList.add("text-red-500"); // highlights red
       }
     };

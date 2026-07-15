@@ -25,8 +25,17 @@ model Author {
   name       String     // e.g. 'Ibn Kathir'
   languageId Int
   language   Language   @relation(fields: [languageId], references: [id])
+  era        String?    // e.g. 'Early Classical (7th-10th CE)'
+  tags       Tag[]      // Methodology tags
   
   tafsirs    TafsirEntry[]
+}
+
+model Tag {
+  id      Int      @id @default(autoincrement())
+  name    String   @unique // e.g. 'Athari / Riwayah', 'Linguistic', 'Sufi / Ishari', 'Modern'
+  color   String?  // e.g. 'emerald', 'blue', 'amber', 'purple'
+  authors Author[]
 }
 
 model Surah {
