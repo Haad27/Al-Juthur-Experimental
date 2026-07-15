@@ -288,17 +288,41 @@ export default function SurahReaderClient({
       </div>
       <div
         className={cn(
-          "hidden md:flex items-center justify-between w-full md:min-h-14 px-6 sticky top-0 backdrop-blur-md dark:bg-zinc-900/70 border-b bg-[var(--sephia-200)] border-white/10 transition-all duration-300 z-50 shadow-sm",
+          "hidden md:flex items-center justify-between w-full md:min-h-14 px-6 py-3 sticky top-0 backdrop-blur-lg dark:bg-zinc-950/90 border-b bg-[var(--sephia-200)] dark:border-zinc-800/80 border-white/10 transition-all duration-300 z-50 shadow-sm",
           !show && "-translate-y-24 opacity-0"
         )}
       >
-        <div className="flex gap-3 items-center">
+        {/* Logo and Surah Name */}
+        <div className="flex items-center gap-4">
+          <Link href="/" className="flex items-center gap-2">
+            <span className="font-bold text-lg md:text-xl dark:text-white text-black">Al-Juthur</span>
+          </Link>
+          <div className="h-4 w-px bg-zinc-700/50 hidden md:block"></div>
           <p
             className={`${amiri.className} dark:text-white text-black font-bold text-lg leading-tight`}
           >
             {surah?.name}
           </p>
         </div>
+
+        {/* Desktop Full Navigation */}
+        <nav className="hidden lg:flex items-center gap-6 text-zinc-400 text-sm">
+          <Link href="/" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">
+            Home
+          </Link>
+          <Link href="/surah/1" className="cursor-pointer dark:text-white text-black font-medium transition">
+            Read Quran
+          </Link>
+          <Link href="/tafsir" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">
+            Tafsir
+          </Link>
+          <Link href="/lexicon" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">
+            Lexicon
+          </Link>
+          <Link href="/ai" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">
+            AI Translator
+          </Link>
+        </nav>
       </div>
 
       <div className="flex flex-col w-full min-h-screen blg:px-24 bpx-4">

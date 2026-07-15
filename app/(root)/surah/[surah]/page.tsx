@@ -73,11 +73,16 @@ export default async function SurahPage({
   // 4. Fetch morphological mapping from our Lexicon service
   const surahWordsMap = getSurahWords(surahNumber);
 
+  // Pre-compute O(1) lookup map for translations to eliminate O(N^2) lag on large Surahs
+  const translationMap = new Map<number, string>();
+  if (surahTranslation?.ayahs) {
+    for (const t of surahTranslation.ayahs) {
+      translationMap.set(t.numberInSurah, t.text);
+    }
+  }
+
   // 5. Merge the local Arabic with the pure English translation
   const combinedAyahs = localAyahs.map((localAyah) => {
-    const translated = surahTranslation?.ayahs?.find(
-      (t: any) => t.numberInSurah === localAyah.numberInSurah
-    );
     let rawText = localAyah.text;
     if (localAyah.numberInSurah === 1 && surahNumber !== 1 && surahNumber !== 9) {
       rawText = rawText
@@ -92,7 +97,7 @@ export default async function SurahPage({
       numberInSurah: localAyah.numberInSurah,
       text: rawText,
       cleanText: removeDiacritics(rawText),
-      translation: translated?.text || "Translation missing.",
+      translation: translationMap.get(localAyah.numberInSurah) || "Translation missing.",
     };
   });
 

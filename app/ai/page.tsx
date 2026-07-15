@@ -6,58 +6,34 @@ import { Languages, Loader2, ArrowRightLeft, ShieldAlert, Copy, Check, LayoutGri
 import Link from 'next/link';
 import LogoIcon from '@/components/svg/icons/LogoIcon';
 import { toast } from 'sonner';
+import { useGlobalState } from '@/lib/providers/GlobalStatesProvider';
 
 export default function AiTranslatorPage() {
   const searchParams = useSearchParams();
   const initialText = searchParams.get('text') || '';
   
-  const [inputText, setInputText] = useState(initialText);
-  const [loading, setLoading] = useState(false);
-  const [translationData, setTranslationData] = useState<any[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    aiInputText,
+    setAiInputText,
+    aiTranslationData,
+    aiIsTranslating,
+    aiError,
+    triggerAiTranslation,
+    clearAiTranslation,
+  } = useGlobalState();
+
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const sessionText = sessionStorage.getItem('ai_translator_input');
     if (sessionText) {
-      setInputText(sessionText);
-      handleTranslate(sessionText);
+      triggerAiTranslation(sessionText);
       sessionStorage.removeItem('ai_translator_input');
-    } else if (initialText) {
-      handleTranslate(initialText);
+    } else if (initialText && initialText !== aiInputText) {
+      triggerAiTranslation(initialText);
     }
   }, [initialText]);
-
-  const handleTranslate = async (textToTranslate = inputText) => {
-    if (!textToTranslate.trim()) return;
-    
-    setLoading(true);
-    setError(null);
-    setTranslationData(null);
-
-    try {
-      const response = await fetch('/api/ai/translate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text: textToTranslate }),
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Translation failed');
-      }
-
-      setTranslationData(data.data);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const copySegment = (text: string, index: number) => {
     // Fallback for mobile and http contexts
@@ -152,28 +128,37 @@ export default function AiTranslatorPage() {
             className="w-full h-40 bg-slate-900/80 border border-slate-700/80 rounded-2xl p-6 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-xl transition-all resize-none font-serif text-lg leading-loose"
             dir="auto"
             placeholder="Paste classical Arabic Tafsir, Lexicon text, or Hadith here..."
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
+            value={aiInputText}
+            onChange={(e) => setAiInputText(e.target.value)}
           />
-          <button
-            onClick={() => handleTranslate()}
-            disabled={loading || !inputText.trim()}
-            className="self-end flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-neutral-800 disabled:text-neutral-500 text-white font-bold rounded-xl transition shadow-lg shadow-emerald-950/20 cursor-pointer"
-          >
-            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowRightLeft className="w-5 h-5" />}
-            {loading ? 'Translating securely...' : 'Translate to English'}
-          </button>
+          <div className="flex justify-end items-center gap-3 w-full">
+            <button
+              onClick={() => clearAiTranslation()}
+              disabled={aiIsTranslating || (!aiInputText.trim() && !aiTranslationData)}
+              className="flex items-center gap-2 px-6 py-3 bg-neutral-800 hover:bg-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:border-neutral-800 text-neutral-300 font-bold rounded-xl transition cursor-pointer border border-neutral-700"
+            >
+              Clear
+            </button>
+            <button
+              onClick={() => triggerAiTranslation(aiInputText)}
+              disabled={aiIsTranslating || !aiInputText.trim()}
+              className="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-neutral-800 disabled:text-neutral-500 text-white font-bold rounded-xl transition shadow-lg shadow-emerald-950/20 cursor-pointer"
+            >
+              {aiIsTranslating ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowRightLeft className="w-5 h-5" />}
+              {aiIsTranslating ? 'Translating securely...' : 'Translate to English'}
+            </button>
+          </div>
         </div>
 
         {/* Error State */}
-        {error && (
+        {aiError && (
           <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
-            {error}
+            {aiError}
           </div>
         )}
 
         {/* Loading Animation */}
-        {loading && (
+        {aiIsTranslating && (
           <div className="flex flex-col items-center justify-center py-16 gap-6 animate-pulse">
             <div className="relative w-20 h-20 flex items-center justify-center">
               <div className="absolute inset-0 border-4 border-emerald-500/20 rounded-full animate-ping"></div>
@@ -188,7 +173,7 @@ export default function AiTranslatorPage() {
         )}
 
         {/* Empty State CTA */}
-        {!translationData && !loading && !error && (
+        {!aiTranslationData && !aiIsTranslating && !aiError && (
           <div className="flex flex-col items-center justify-center py-16 px-4 text-center mt-4 bg-neutral-900/50 rounded-2xl border border-neutral-800/60">
             <BookOpen className="w-12 h-12 text-emerald-500/50 mb-4" />
             <h3 className="text-xl font-bold text-white mb-2">Need Arabic text to translate?</h3>
@@ -209,7 +194,7 @@ export default function AiTranslatorPage() {
         )}
 
         {/* Output Section */}
-        {translationData && translationData.length > 0 && (
+        {aiTranslationData && aiTranslationData.length > 0 && (
           <div className="mt-4 flex flex-col gap-4 animate-fadeIn">
             <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
               <h2 className="text-lg font-bold text-white">Translation Result</h2>
@@ -242,7 +227,7 @@ export default function AiTranslatorPage() {
             {/* Rendering: Reader Mode (Cards) */}
             {viewMode === 'cards' ? (
               <div className="flex flex-col gap-6">
-                {translationData.map((row, idx) => (
+                {aiTranslationData.map((row, idx) => (
                   <div key={idx} className="bg-neutral-900/40 border border-neutral-800 rounded-2xl p-5 md:p-6 hover:border-neutral-700/80 transition space-y-4 shadow-xl animate-fadeIn">
                     {/* Arabic Box */}
                     <div className="border-r-4 border-emerald-500/40 pr-4 text-right" dir="rtl">
@@ -279,7 +264,7 @@ export default function AiTranslatorPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {translationData.map((row, idx) => (
+                    {aiTranslationData.map((row, idx) => (
                       <tr key={idx} className="border-b border-neutral-800 last:border-0 hover:bg-neutral-800/20 transition">
                         <td className="p-5 align-top text-sm leading-relaxed text-neutral-300 border-r border-neutral-800">
                           {row.transcreatedText}
