@@ -15,6 +15,10 @@ const Settings = () => {
   const {
     fontSize,
     setFontSize,
+    mistakeDetection,
+    setMistakeDetection,
+    showTranslation,
+    setShowTranslation,
   } = useGlobalState();
   const handleFontSizeChange = (value: number[]) => {
     setFontSize(value[0]);
@@ -45,8 +49,24 @@ const Settings = () => {
       />
 
       <SettingSection
+        title="Mistake Detection"
+        control={
+          <Switch
+            checked={mistakeDetection}
+            onCheckedChange={setMistakeDetection}
+          />
+        }
+        description="Automatically replay the verse when a recitation mistake is detected."
+      />
+
+      <SettingSection
         title="Show Translation"
-        control={<Switch />}
+        control={
+          <Switch
+            checked={showTranslation}
+            onCheckedChange={setShowTranslation}
+          />
+        }
         description="Toggle whether translations are shown beneath the Arabic text."
       />
 

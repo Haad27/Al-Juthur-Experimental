@@ -90,7 +90,7 @@ export default function AiTranslatorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100 flex flex-col pb-10">
       {/* Top Navigation Bar */}
       <div className="sticky top-0 z-40 bg-zinc-950/90 backdrop-blur-lg border-b border-zinc-800/80 px-4 md:px-8 py-3">
         <div className="max-w-[1700px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -123,22 +123,23 @@ export default function AiTranslatorPage() {
         </div>
       </div>
 
-      <main className="flex-1 flex flex-col p-6 max-w-7xl mx-auto w-full gap-6">
+      <main className="flex-1 flex flex-col p-6 max-w-5xl mx-auto w-full gap-6">
         
-        {/* Header Title inside Page */}
-        <div className="flex flex-col gap-1 border-b border-neutral-800 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
-              <Languages className="w-6 h-6 text-emerald-400" />
+        {/* Header section */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+          <div className="text-center space-y-4 mb-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold tracking-wide uppercase">
+              <Sparkles className="w-3.5 h-3.5" />
+              Smart Translation Engine
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-white">Smart Translation Assistant</h1>
-              <p className="text-sm text-neutral-400">Translate classical Arabic Tafsir and text into clean English</p>
-            </div>
+            <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-white">
+              Classical Arabic <span className="text-emerald-400">AI Translator</span>
+            </h1>
+            <p className="max-w-2xl mx-auto text-slate-400 text-base sm:text-lg">
+              Paste classical Arabic Tafsir, Lexicon passages, or ancient Islamic texts to translate them instantly into clear, highly accurate English.
+            </p>
           </div>
         </div>
-
-        {/* Input Section */}
         <div className="w-full flex flex-col gap-4">
           <div className="flex justify-between items-end">
              <label className="text-sm font-semibold text-neutral-300">Input Source Text (Arabic)</label>
@@ -148,7 +149,7 @@ export default function AiTranslatorPage() {
              </div>
           </div>
           <textarea
-            className="w-full h-40 bg-neutral-900 border border-neutral-800 rounded-xl p-4 text-white focus:outline-none focus:border-emerald-500 resize-none font-serif text-lg leading-loose"
+            className="w-full h-40 bg-slate-900/80 border border-slate-700/80 rounded-2xl p-6 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-xl transition-all resize-none font-serif text-lg leading-loose"
             dir="auto"
             placeholder="Paste classical Arabic Tafsir, Lexicon text, or Hadith here..."
             value={inputText}

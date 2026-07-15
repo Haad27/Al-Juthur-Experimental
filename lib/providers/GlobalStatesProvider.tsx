@@ -6,6 +6,10 @@ import React, { createContext, useState, useContext } from "react";
 interface GlobalState {
   fontSize: number;
   setFontSize: React.Dispatch<React.SetStateAction<number>>;
+  mistakeDetection: boolean;
+  setMistakeDetection: React.Dispatch<React.SetStateAction<boolean>>;
+  showTranslation: boolean;
+  setShowTranslation: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 // Create the context with a default value
@@ -23,12 +27,18 @@ export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
   children,
 }) => {
   const [fontSize, setFontSize] = useState(3);
+  const [mistakeDetection, setMistakeDetection] = useState(false);
+  const [showTranslation, setShowTranslation] = useState(true);
 
   return (
     <GlobalStateContext.Provider
       value={{
         fontSize,
         setFontSize,
+        mistakeDetection,
+        setMistakeDetection,
+        showTranslation,
+        setShowTranslation,
       }}
     >
       {children}

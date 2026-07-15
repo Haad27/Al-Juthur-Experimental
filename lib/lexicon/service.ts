@@ -61,6 +61,7 @@ const globalForDb = globalThis as unknown as {
   lexiconsDb: Database.Database | undefined;
   wordRootDb: Database.Database | undefined;
   structuredLaneCache: StructuredLaneEntry[] | undefined;
+  surahWordsCache: Record<number, any> | undefined;
 };
 
 function getLexiconsDb(): Database.Database {
@@ -167,8 +168,16 @@ function getEnglishMorphologyDb() {
 }
 
 export function getSurahWords(surah: number) {
+  if (!globalForDb.surahWordsCache) {
+    globalForDb.surahWordsCache = {};
+  }
+  
+  if (globalForDb.surahWordsCache[surah]) {
+    return globalForDb.surahWordsCache[surah];
+  }
+
   try {
-    const db = getMcpDb();
+    const db = getWordRootDb(); // Use the initialized Database instance
     const rows = db.prepare(`
       SELECT 
         r.ayahNo,
@@ -185,17 +194,14 @@ export function getSurahWords(surah: number) {
       ORDER BY r.ayahNo ASC, r.wordNo ASC
     `).all(surah) as any[];
 
-    // Fetch English Morphology
+    // Fetch english morphology separately to avoid even larger JOINs
     let engMorphMap: Record<string, string> = {};
     try {
-      const engDb = getEnglishMorphologyDb();
-      const engRows = engDb.prepare(`SELECT ayah, word, pos_tags FROM word_morphology WHERE surah = ?`).all(surah) as any[];
+      const engRows = db.prepare(`SELECT ayah, word, pos_tags FROM word_morphology WHERE surah = ?`).all(surah) as any[];
       for (const er of engRows) {
         engMorphMap[`${er.ayah}:${er.word}`] = er.pos_tags;
       }
-    } catch (e) {
-      console.error('Error fetching English morphology:', e);
-    }
+    } catch (e) { }
 
     const map: Record<number, any[]> = {};
     for (const r of rows) {
@@ -211,9 +217,11 @@ export function getSurahWords(surah: number) {
         irab: engMorph ? null : (r.irabMushakkal || null), // Omit Arabic irab if we have English
       });
     }
+    
+    globalForDb.surahWordsCache[surah] = map;
     return map;
   } catch (err) {
-    console.error('Error fetching surah words from MCP:', err);
+    console.error('Error fetching surah words from SQLite:', err);
     return {};
   }
 }
