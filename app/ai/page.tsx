@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Languages, Loader2, ArrowRightLeft, ShieldAlert, Copy, Check, LayoutGrid, Columns } from 'lucide-react';
+import { Languages, Loader2, ArrowRightLeft, ShieldAlert, Copy, Check, LayoutGrid, Columns, BookOpen, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import LogoIcon from '@/components/svg/icons/LogoIcon';
 import { toast } from 'sonner';
@@ -60,10 +60,33 @@ export default function AiTranslatorPage() {
   };
 
   const copySegment = (text: string, index: number) => {
-    navigator.clipboard.writeText(text);
+    // Fallback for mobile and http contexts
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+    } else {
+      fallbackCopy(text);
+    }
     setCopiedIndex(index);
     toast("Copied translation segment!");
     setTimeout(() => setCopiedIndex(null), 2000);
+  };
+
+  const fallbackCopy = (text: string) => {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    // Avoid scrolling to bottom
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.position = "fixed";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand('copy');
+    } catch (err) {
+      console.error('Fallback: Oops, unable to copy', err);
+    }
+    document.body.removeChild(textArea);
   };
 
   return (
@@ -94,7 +117,7 @@ export default function AiTranslatorPage() {
               Lexicon
             </Link>
             <Link href="/ai" className="cursor-pointer text-white font-medium">
-              AI
+              Translator AI
             </Link>
           </nav>
         </div>
@@ -109,7 +132,7 @@ export default function AiTranslatorPage() {
               <Languages className="w-6 h-6 text-emerald-400" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">AI Translator</h1>
+              <h1 className="text-2xl font-bold text-white">Smart Translation Assistant</h1>
               <p className="text-sm text-neutral-400">Translate classical Arabic Tafsir and text into clean English</p>
             </div>
           </div>
@@ -145,6 +168,42 @@ export default function AiTranslatorPage() {
         {error && (
           <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
             {error}
+          </div>
+        )}
+
+        {/* Loading Animation */}
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-16 gap-6 animate-pulse">
+            <div className="relative w-20 h-20 flex items-center justify-center">
+              <div className="absolute inset-0 border-4 border-emerald-500/20 rounded-full animate-ping"></div>
+              <div className="absolute inset-2 border-4 border-emerald-400/40 rounded-full animate-spin"></div>
+              <Sparkles className="w-8 h-8 text-emerald-400" />
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-lg font-medium text-emerald-400">Analyzing Classical Text...</p>
+              <p className="text-sm text-neutral-500">Connecting to translation engine, please wait a moment</p>
+            </div>
+          </div>
+        )}
+
+        {/* Empty State CTA */}
+        {!translationData && !loading && !error && (
+          <div className="flex flex-col items-center justify-center py-16 px-4 text-center mt-4 bg-neutral-900/50 rounded-2xl border border-neutral-800/60">
+            <BookOpen className="w-12 h-12 text-emerald-500/50 mb-4" />
+            <h3 className="text-xl font-bold text-white mb-2">Need Arabic text to translate?</h3>
+            <p className="text-neutral-400 mb-8 max-w-md">
+              You can easily copy classical texts directly from our Lexicon or Tafsir sections to translate them instantly.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
+              <Link href="/tafsir" className="flex items-center justify-center gap-2 px-6 py-3 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl transition border border-neutral-700">
+                <BookOpen className="w-4 h-4 text-emerald-400" />
+                Go to Classic Arabic Tafsir
+              </Link>
+              <Link href="/lexicon" className="flex items-center justify-center gap-2 px-6 py-3 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl transition border border-neutral-700">
+                <Languages className="w-4 h-4 text-emerald-400" />
+                Go to Classic Lexicon
+              </Link>
+            </div>
           </div>
         )}
 

@@ -37,7 +37,7 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = ({
   ayahText,
   ayahWords,
 }) => {
-  const words = ayahWords || ayahText.trim().split(/\s+/).map((w, i) => ({ wordIndex: i + 1, word: w }));
+  const words = ayahText.trim().split(/\s+/).map((w, i) => ({ wordIndex: i + 1, word: w }));
   const [loadingIndex, setLoadingIndex] = useState<number | null>(null);
   const [wordDataMap, setWordDataMap] = useState<Record<number, WordMorphologyData>>({});
 

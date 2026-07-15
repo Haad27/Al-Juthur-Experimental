@@ -10,9 +10,9 @@ export default function Loading() {
       
       <div className="relative flex flex-col items-center gap-6">
         <div className="relative flex items-center justify-center">
-          <div className="absolute inset-0 bg-white/5 rounded-2xl animate-pulse" />
-          <div className="bg-white p-4 rounded-2xl shadow-xl shadow-emerald-500/10 ring-1 ring-white/10 relative z-10">
-            <LogoIcon className="text-black size-12" />
+          <div className="absolute inset-0 bg-emerald-500/20 rounded-[20%] animate-pulse blur-xl" />
+          <div className="relative z-10 shadow-2xl shadow-emerald-900/50 rounded-[20%] overflow-hidden ring-1 ring-emerald-500/20">
+            <LogoIcon className="size-16" />
           </div>
         </div>
         
