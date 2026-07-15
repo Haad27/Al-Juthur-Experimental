@@ -78,11 +78,20 @@ export default async function SurahPage({
     const translated = surahTranslation?.ayahs?.find(
       (t: any) => t.numberInSurah === localAyah.numberInSurah
     );
+    let rawText = localAyah.text;
+    if (localAyah.numberInSurah === 1 && surahNumber !== 1 && surahNumber !== 9) {
+      rawText = rawText
+        .replace(/^[\uFEFF]?بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ\s*/, "")
+        .replace(/^[\uFEFF]?بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ\s*/, "")
+        .replace(/^[\uFEFF]?بِسْمِ اللهِ الرَّحْمَـٰنِ الرَّحِيمِ\s*/, "")
+        .replace(/^[\uFEFF]?بِسْمِ اللهِ الرَّحْمَنِ الرَّحِيمِ\s*/, "")
+        .trim();
+    }
     return {
       number: localAyah.id,
       numberInSurah: localAyah.numberInSurah,
-      text: localAyah.text,
-      cleanText: removeDiacritics(localAyah.text),
+      text: rawText,
+      cleanText: removeDiacritics(rawText),
       translation: translated?.text || "Translation missing.",
     };
   });

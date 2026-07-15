@@ -5,21 +5,30 @@ const useScrollDirection = () => {
 
   useEffect(() => {
     let previousScrollY = window.scrollY;
-    const handleScroll = () => {
-      let currentScrollY = window.scrollY;
+    let ticking = false;
 
-      if (previousScrollY < currentScrollY) {
-        // Scrolling down
-        setShow(false);
-      } else {
-        // Scroling up
-        setShow(true);
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          const diff = currentScrollY - previousScrollY;
+
+          // Only toggle if scrolled more than 10px to prevent jitter on laptop trackpads and wheels
+          if (Math.abs(diff) > 10) {
+            if (diff > 0 && currentScrollY > 100) {
+              setShow(false);
+            } else if (diff < 0) {
+              setShow(true);
+            }
+            previousScrollY = currentScrollY;
+          }
+          ticking = false;
+        });
+        ticking = true;
       }
-      previousScrollY = currentScrollY;
     };
 
-    window.addEventListener("scroll", handleScroll);
-
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 

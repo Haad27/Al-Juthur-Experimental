@@ -207,10 +207,11 @@ export function getSurahWords(surah: number) {
     const map: Record<number, any[]> = {};
     for (const r of rows) {
       if (!map[r.ayahNo]) map[r.ayahNo] = [];
-      const engMorph = engMorphMap[`${r.ayahNo}:${r.wordNo}`];
+      const normalizedWordIdx = (surah === 2 && r.ayahNo === 1 && r.wordNo === 5) ? 1 : r.wordNo;
+      const engMorph = engMorphMap[`${r.ayahNo}:${normalizedWordIdx}`] || engMorphMap[`${r.ayahNo}:${r.wordNo}`];
       
       map[r.ayahNo].push({
-        wordIndex: r.wordNo,
+        wordIndex: normalizedWordIdx,
         word: r.rasmWord,
         root: r.root || null,
         lemma: null,
@@ -260,9 +261,10 @@ export function getAyahWords(surah: number, ayah: number) {
     } catch (e) { }
 
     return rows.map((r) => {
-      const engMorph = engMorphMap[r.wordNo];
+      const normalizedWordIdx = (surah === 2 && ayah === 1 && r.wordNo === 5) ? 1 : r.wordNo;
+      const engMorph = engMorphMap[normalizedWordIdx] || engMorphMap[r.wordNo];
       return {
-        wordIndex: r.wordNo,
+        wordIndex: normalizedWordIdx,
         word: r.rasmWord,
         root: r.root || null,
         lemma: null,
@@ -281,7 +283,7 @@ export function getAyahWords(surah: number, ayah: number) {
  */
 export function getWordMorphology(surah: number, ayah: number, wordIndex: number): WordMorphology | null {
   const words = getAyahWords(surah, ayah);
-  const word = words.find((w: any) => w.wordIndex === wordIndex);
+  const word = words.find((w: any) => w.wordIndex === wordIndex || (surah === 2 && ayah === 1 && (wordIndex === 5 || wordIndex === 1)));
   
   if (word) {
     return {

@@ -31,7 +31,7 @@ interface WordMorphologyData {
   rootQuery: string | null;
 }
 
-export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = ({
+export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.memo(({
   surahNumber,
   ayahNumber,
   ayahText,
@@ -186,4 +186,4 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = ({
       })}
     </span>
   );
-};
+});

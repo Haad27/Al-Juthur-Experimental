@@ -41,6 +41,128 @@ interface SurahReaderClientProps {
   ayahParam: string | null;
 }
 
+interface AyahRowProps {
+  ayah: AyahProps;
+  surahNumber: number;
+  surahWordsMap: Record<number, any[]>;
+  fontSize: number;
+  showTranslation: boolean;
+  currentlyPlayingAyah: number | null;
+  handleCopyAyah: (ayah: AyahProps) => void;
+  handleSaveAyah: (ayah: AyahProps) => void;
+  handleFetchAudio: (ayah: AyahProps) => void;
+}
+
+const AyahRow = React.memo(({
+  ayah,
+  surahNumber,
+  surahWordsMap,
+  fontSize,
+  showTranslation,
+  currentlyPlayingAyah,
+  handleCopyAyah,
+  handleSaveAyah,
+  handleFetchAudio,
+}: AyahRowProps) => {
+  return (
+    <div
+      className="border-b-[0.1px] border-b-[var(--sephia-500)] dark:border-b-[#262629ff] sm:px-8 px-4 sm:py-12 py-4 flex flex-col items-end justify-end sm:flex-row sm:gap-12 gap-4 transition-all duration-300"
+      id={`ayah-${ayah.numberInSurah}`}
+    >
+      <div className="h-full flex flex-row sm:order-1 order-2 sm:flex-col gap-3 sm:justify-center items-center transition-all duration-300">
+        <p className="text-lg font-light text-zinc-400 ">
+          {surahNumber}:{ayah.numberInSurah}
+        </p>
+        <div className="p-2 rounded-full hover:bg-zinc-800 transition-colors cursor-pointer inline-flex items-center justify-center">
+          <Copy
+            className="text-zinc-400"
+            size={18}
+            onClick={() => handleCopyAyah(ayah)}
+          />
+        </div>
+        <div
+          onClick={() => handleSaveAyah(ayah)}
+          className="p-2 rounded-full dark:hover:bg-zinc-800 hover:bg-[var(--sephia-500)]/45 transition-colors cursor-pointer inline-flex items-center justify-center"
+        >
+          <Save className="text-zinc-400" size={18} />
+        </div>
+        <div
+          onClick={() => handleFetchAudio(ayah)}
+          className="p-2 rounded-full hover:bg-zinc-800 transition-colors cursor-pointer inline-flex items-center justify-center"
+        >
+          {currentlyPlayingAyah === ayah.numberInSurah ? (
+            <Pause className="text-zinc-400" size={18} />
+          ) : (
+            <Play className="text-zinc-400" size={18} />
+          )}
+        </div>
+        <Link
+          href={`/tafsir?surah=${surahNumber}&ayah=${ayah.numberInSurah}`}
+          className="p-2 rounded-full hover:bg-zinc-800 transition-colors cursor-pointer inline-flex items-center justify-center"
+          title="Read Tafsir"
+        >
+          <ScrollText className="text-emerald-500 hover:text-emerald-400" size={18} />
+        </Link>
+      </div>
+
+      <div className="text-right sm:order-2 order-1 flex flex-col w-full">
+        <p
+          lang="ar"
+          id={`atext-${ayah.numberInSurah}`}
+          className={`${amiri.className} tracking-wide leading-loose font-light sm:pr-8 md:pr-16 lg:pr-26 md:pb-8 ${
+            fontSize === 0
+              ? "text-lg"
+              : fontSize === 1
+              ? "text-2xl"
+              : fontSize === 2
+              ? "text-3xl"
+              : fontSize === 3
+              ? "sm:text-3xl text-xl"
+              : fontSize === 4
+              ? "sm:text-5xl text-4xl"
+              : fontSize === 5
+              ? "text-6xl"
+              : "text-7xl"
+          }`}
+        >
+          <span className="inline-flex items-center justify-center size-6 rounded-full text-xl mr-4">
+            ({convertNumberToArabicNumeral(ayah.numberInSurah)})
+          </span>
+          <InteractiveAyahWords
+            surahNumber={surahNumber}
+            ayahNumber={ayah.numberInSurah}
+            ayahText={ayah.text}
+            ayahWords={surahWordsMap[ayah.numberInSurah] || []}
+          />
+        </p>
+
+        {showTranslation && (
+          <div>
+            <p
+              className={cn(
+                "text-white md:leading-[1.2] leading-[1.8] md:ml-8 text-left pt-6 lg:w-2/3 md:w-4/6",
+                {
+                  "text-sm": fontSize === 0,
+                  "text-[12px]": fontSize === 1,
+                  "text-lg": fontSize === 2,
+                  "text-base": fontSize === 3,
+                  "sm:text-2xl text-xl": fontSize === 4,
+                  "text-3xl": fontSize === 5,
+                  "text-4xl": fontSize === 6,
+                  "text-5xl": fontSize === 7,
+                  "text-6xl": fontSize >= 8,
+                }
+              )}
+            >
+              {ayah.translation}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+});
+
 export default function SurahReaderClient({
   surah,
   ayahs,
@@ -213,103 +335,18 @@ export default function SurahReaderClient({
         </div>
 
         {ayahs.map((ayah) => (
-          <div
+          <AyahRow
             key={ayah.numberInSurah}
-            className="border-b-[0.1px] border-b-[var(--sephia-500)] dark:border-b-[#262629ff]
-            sm:px-8 px-4 sm:py-12 py-4 flex flex-col items-end justify-end sm:flex-row  sm:gap-12 gap-4 transition-all duration-300"
-            id={`ayah-${ayah.numberInSurah}`}
-          >
-            <div className="h-full flex flex-row sm:order-1 order-2 sm:flex-col gap-3 sm:justify-center items-center transition-all duration-300">
-              <p className="text-lg font-light text-zinc-400 ">
-                {surahNumber}:{ayah.numberInSurah}
-              </p>
-              <div className="p-2 rounded-full hover:bg-zinc-800 transition-colors cursor-pointer inline-flex items-center justify-center">
-                <Copy
-                  className="text-zinc-400"
-                  size={18}
-                  onClick={() => handleCopyAyah(ayah)}
-                />
-              </div>
-              <div
-                onClick={() => handleSaveAyah(ayah)}
-                className="p-2 rounded-full dark:hover:bg-zinc-800 hover:bg-[var(--sephia-500)]/45 transition-colors cursor-pointer inline-flex items-center justify-center"
-              >
-                <Save className="text-zinc-400" size={18} />
-              </div>
-              <div
-                onClick={() => handleFetchAudio(ayah)}
-                className="p-2 rounded-full hover:bg-zinc-800  transition-colors cursor-pointer inline-flex items-center justify-center"
-              >
-                {currentlyPlayingAyah === ayah.numberInSurah ? (
-                  <Pause className="text-zinc-400" size={18} />
-                ) : (
-                  <Play className="text-zinc-400" size={18} />
-                )}
-              </div>
-              <Link
-                href={`/tafsir?surah=${surahNumber}&ayah=${ayah.numberInSurah}`}
-                className="p-2 rounded-full hover:bg-zinc-800 transition-colors cursor-pointer inline-flex items-center justify-center"
-                title="Read Tafsir"
-              >
-                <ScrollText className="text-emerald-500 hover:text-emerald-400" size={18} />
-              </Link>
-            </div>
-
-            <div className="text-right sm:order-2 order-1 flex flex-col w-full">
-              <p
-                lang="ar"
-                id={`atext-${ayah.numberInSurah}`}
-                className={`${amiri.className} tracking-wide leading-loose font-light sm:pr-8 md:pr-16 lg:pr-26 md:pb-8 ${
-                  fontSize === 0
-                    ? "text-lg"
-                    : fontSize === 1
-                    ? "text-2xl"
-                    : fontSize === 2
-                    ? "text-3xl"
-                    : fontSize === 3
-                    ? "sm:text-3xl text-xl"
-                    : fontSize === 4
-                    ? "sm:text-5xl text-4xl"
-                    : fontSize === 5
-                    ? "text-6xl"
-                    : "text-7xl"
-                }`}
-              >
-                <span className="inline-flex items-center justify-center size-6 rounded-full text-xl mr-4">
-                  ({convertNumberToArabicNumeral(ayah.numberInSurah)})
-                </span>
-                <InteractiveAyahWords
-                  surahNumber={surahNumber}
-                  ayahNumber={ayah.numberInSurah}
-                  ayahText={ayah.text}
-                  ayahWords={surahWordsMap[ayah.numberInSurah] || []}
-                />
-              </p>
-
-              {showTranslation && (
-                <div>
-                  <p
-                    className={cn(
-                      "text-white md:leading-[1.2] leading-[1.8] md:ml-8 text-left pt-6 lg:w-2/3 md:w-4/6",
-                      {
-                        "text-sm": fontSize === 0,
-                        "text-[12px]": fontSize === 1,
-                        "text-lg": fontSize === 2,
-                        "text-base": fontSize === 3,
-                        "sm:text-2xl text-xl": fontSize === 4,
-                        "text-3xl": fontSize === 5,
-                        "text-4xl": fontSize === 6,
-                        "text-5xl": fontSize === 7,
-                        "text-6xl": fontSize >= 8,
-                      }
-                    )}
-                  >
-                    {ayah.translation}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
+            ayah={ayah}
+            surahNumber={surahNumber}
+            surahWordsMap={surahWordsMap}
+            fontSize={fontSize}
+            showTranslation={showTranslation}
+            currentlyPlayingAyah={currentlyPlayingAyah}
+            handleCopyAyah={handleCopyAyah}
+            handleSaveAyah={handleSaveAyah}
+            handleFetchAudio={handleFetchAudio}
+          />
         ))}
       </div>
 
