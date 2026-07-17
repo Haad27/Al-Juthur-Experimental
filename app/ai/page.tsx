@@ -22,7 +22,7 @@ export default function AiTranslatorPage() {
     clearAiTranslation,
   } = useGlobalState();
 
-  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('table');
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   useEffect(() => {

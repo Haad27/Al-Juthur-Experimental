@@ -38,6 +38,7 @@ async function getEmbedding(text: string): Promise<number[]> {
     extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {
       quantized: false,
     });
+    console.log("Offline embedding model loaded successfully!");
   }
 
   // Generate embeddings
@@ -86,23 +87,30 @@ async function seedTafsir() {
 
     let processedCount = 0;
     for (const entry of entries) {
-      // 1. Clean HTML tags from the Tafsir text
+      // Clean HTML tags from the Tafsir text
+      if (!entry.text) {
+        // console.log(`Skipping empty text for ${entry.surah}:${entry.ayah}`);
+        continue;
+      }
       const cleanText = entry.text.replace(/<[^>]*>?/gm, '');
       if (!cleanText || cleanText.length < 10) continue;
 
-      // 2. Chunk text
+      // Chunk text
       const chunks = chunkText(cleanText, 1000);
+      console.log(`Processing Surah ${entry.surah} Ayah ${entry.ayah} (${chunks.length} chunks)...`);
 
-      // 3. Process each chunk
+      // Process each chunk
       for (let i = 0; i < chunks.length; i++) {
         const chunk = chunks[i];
         
         try {
-          // Add metadata to the text so the embedding captures context implicitly
           const embedText = `Tafsir ${author.name} for Surah ${entry.surah} Ayah ${entry.ayah}:\n${chunk}`;
+          console.log(`Getting embedding for chunk ${i}...`);
           const embedding = await getEmbedding(embedText);
+          console.log(`Embedding retrieved successfully (${embedding.length} values)`);
 
-          // 4. Insert into Supabase
+          // Insert into Supabase
+          console.log(`Inserting chunk into Supabase...`);
           const { error } = await supabase.from('rag_documents').insert({
             content: chunk,
             embedding: embedding,
@@ -116,10 +124,11 @@ async function seedTafsir() {
 
           if (error) {
             console.error(`Supabase Insert Error (Surah ${entry.surah}:${entry.ayah}):`, error);
+          } else {
+            console.log(`Inserted chunk ${i} successfully.`);
           }
         } catch (err: any) {
           console.error(`Embedding failed for ${entry.surah}:${entry.ayah}:`, err.message);
-          // Wait to respect Gemini limits if rate limited
           if (err.message.includes('429')) {
             console.log("Rate limited. Waiting 60 seconds...");
             await new Promise(r => setTimeout(r, 60000));
@@ -128,12 +137,12 @@ async function seedTafsir() {
       }
 
       processedCount++;
-      if (processedCount % 50 === 0) {
+      if (processedCount % 10 === 0) {
         console.log(`...Processed ${processedCount}/${entries.length} entries for ${author.name}`);
       }
       
-      // Delay to respect Gemini free tier limits (1500 RPM)
-      await new Promise(r => setTimeout(r, 200)); 
+      // Delay to respect local CPU limits
+      await new Promise(r => setTimeout(r, 100)); 
     }
   }
 
