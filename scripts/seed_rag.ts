@@ -85,8 +85,31 @@ async function seedTafsir() {
 
     console.log(`Found ${entries.length} entries for ${author.name}.`);
 
+    // Fetch already seeded entries to allow resumption without duplicates
+    console.log(`Checking existing database records for ${author.name}...`);
+    const { data: existingDocs, error: fetchErr } = await supabase
+      .from('rag_documents')
+      .select('metadata');
+
+    const seededKeys = new Set<string>();
+    if (existingDocs) {
+      for (const doc of existingDocs) {
+        const meta = doc.metadata as any;
+        if (meta && meta.book === author.name) {
+          seededKeys.add(`${meta.surah}:${meta.ayah}`);
+        }
+      }
+    }
+    console.log(`Already seeded ${seededKeys.size} unique ayah entries for ${author.name}.`);
+
     let processedCount = 0;
     for (const entry of entries) {
+      const key = `${entry.surah}:${entry.ayah}`;
+      if (seededKeys.has(key)) {
+        processedCount++;
+        continue;
+      }
+
       // Clean HTML tags from the Tafsir text
       if (!entry.text) {
         // console.log(`Skipping empty text for ${entry.surah}:${entry.ayah}`);

@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, BookOpen, ScrollText, Library, Languages } from "lucide-react";
+import { motion } from "framer-motion";
 
 const BottomNav = () => {
   const pathname = usePathname();
@@ -12,61 +13,84 @@ const BottomNav = () => {
     {
       label: "Home",
       href: "/",
-      icon: <Home className="w-6 h-6" />,
+      icon: <Home className="w-5 h-5" />,
     },
     {
       label: "Surah",
-      href: "/surahs",
-      icon: <BookOpen className="w-6 h-6" />,
+      href: "/",
+      icon: <BookOpen className="w-5 h-5" />,
     },
     {
       label: "Tafsir",
       href: "/tafsir",
-      icon: <ScrollText className="w-6 h-6" />,
+      icon: <ScrollText className="w-5 h-5" />,
     },
     {
       label: "Lexicon",
       href: "/lexicon",
-      icon: <Library className="w-6 h-6" />,
+      icon: <Library className="w-5 h-5" />,
     },
     {
       label: "AI Translator",
       href: "/ai",
-      icon: <Languages className="w-6 h-6" />,
+      icon: <Languages className="w-5 h-5" />,
     },
   ];
 
   return (
-    <nav className="fixed bottom-0 w-full z-50 md:hidden bg-zinc-900 border-t border-[#262629ff] pb-safe">
-      <div className="flex justify-around items-center h-16 px-2">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href || 
-            (pathname?.startsWith("/surah") && item.label === "Surah") ||
-            (pathname?.startsWith("/tafsir") && item.label === "Tafsir") ||
-            (pathname?.startsWith("/lexicon") && item.label === "Lexicon") ||
-            (pathname?.startsWith("/ai") && item.label === "AI Translator");
+    <div className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-md z-50 md:hidden">
+      <nav className="rounded-full border border-white/[0.08] border-t-white/[0.15] bg-white/[0.07] backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] px-2 py-1.5">
+        <div className="flex justify-around items-center h-14 relative">
+          {navItems.map((item) => {
+            const isActive = 
+              (item.label === "Home" && pathname === "/") ||
+              (item.label === "Surah" && pathname?.startsWith("/surah")) ||
+              (item.label === "Tafsir" && pathname?.startsWith("/tafsir")) ||
+              (item.label === "Lexicon" && pathname?.startsWith("/lexicon")) ||
+              (item.label === "AI Translator" && pathname?.startsWith("/ai"));
 
-          return (
-            <Link
-              key={item.label}
-              href={item.href}
-              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-200 ${
-                isActive 
-                  ? "text-emerald-500" 
-                  : "text-zinc-500 hover:text-zinc-300"
-              }`}
-            >
-              <div className="relative flex items-center justify-center">
-                {item.icon}
-              </div>
-              <span className={`text-[10px] ${isActive ? "font-bold" : "font-medium"}`}>
-                {item.label}
-              </span>
-            </Link>
-          );
-        })}
-      </div>
-    </nav>
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="relative flex flex-col items-center justify-center w-full h-full rounded-full transition-colors duration-300"
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="active-pill"
+                    className="absolute inset-0 bg-emerald-500/10 dark:bg-emerald-500/15 rounded-full z-0"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
+                
+                <motion.div
+                  animate={{
+                    y: isActive ? -2 : 0,
+                    scale: isActive ? 1.05 : 1,
+                  }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                  className={`relative z-10 flex items-center justify-center transition-colors duration-300 ${
+                    isActive ? "text-emerald-400" : "text-zinc-400 hover:text-zinc-200"
+                  }`}
+                >
+                  {item.icon}
+                </motion.div>
+                
+                <span 
+                  className={`relative z-10 text-[9px] tracking-wide mt-1 transition-all duration-300 ${
+                    isActive 
+                      ? "text-emerald-400 font-bold" 
+                      : "text-zinc-500 font-medium hover:text-zinc-300"
+                  }`}
+                >
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+    </div>
   );
 };
 

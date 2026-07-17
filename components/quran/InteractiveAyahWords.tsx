@@ -12,6 +12,7 @@ import { Sparkles, ArrowRight, BookOpen, Loader2 } from 'lucide-react';
 interface InteractiveAyahWordsProps {
   surahNumber: number;
   ayahNumber: number;
+  ayahText: string;
   ayahWords?: { wordIndex: number; word: string }[];
   wbwTranslation?: Record<string, string>;
   showWbw?: boolean;
