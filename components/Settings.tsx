@@ -19,6 +19,8 @@ const Settings = () => {
     setMistakeDetection,
     showTranslation,
     setShowTranslation,
+    showWbw,
+    setShowWbw,
   } = useGlobalState();
   const handleFontSizeChange = (value: number[]) => {
     setFontSize(value[0]);
@@ -68,6 +70,17 @@ const Settings = () => {
           />
         }
         description="Toggle whether translations are shown beneath the Arabic text."
+      />
+
+      <SettingSection
+        title="Show Word-by-Word Translation"
+        control={
+          <Switch
+            checked={showWbw}
+            onCheckedChange={setShowWbw}
+          />
+        }
+        description="Toggle whether the English meaning is shown beneath every Arabic word."
       />
 
       <SettingSection

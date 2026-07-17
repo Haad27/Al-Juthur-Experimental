@@ -1,0 +1,14 @@
+{
+  "editor.unicodeHighlight.allowedCharacters": {
+    "ā": true,
+    "ī": true,
+    "ū": true,
+    "ṣ": true,
+    "ḍ": true,
+    "ṭ": true,
+    "ẓ": true,
+    "ḥ": true,
+    "ʿ": true,
+    "ʾ": true
+  }
+}

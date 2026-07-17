@@ -12,8 +12,9 @@ import { Sparkles, ArrowRight, BookOpen, Loader2 } from 'lucide-react';
 interface InteractiveAyahWordsProps {
   surahNumber: number;
   ayahNumber: number;
-  ayahText: string;
   ayahWords?: { wordIndex: number; word: string }[];
+  wbwTranslation?: Record<string, string>;
+  showWbw?: boolean;
 }
 
 interface WordMorphologyData {
@@ -36,6 +37,8 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
   ayahNumber,
   ayahText,
   ayahWords,
+  wbwTranslation,
+  showWbw = true,
 }) => {
   const rawTokens = ayahText.trim().split(/\s+/);
   
@@ -85,21 +88,32 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
 
         if (!isClickable || wordIdx === null) {
           return (
-            <span key={idx} className="inline-block px-1 py-0.5 text-zinc-400 select-none">
-              {word}
+            <span key={idx} className="inline-flex flex-col items-center justify-end px-1 py-0.5 text-zinc-400 select-none min-w-[2rem]">
+              <span>{word}</span>
+              {showWbw && (
+                <span className="text-[10px] sm:text-[11px] mt-0.5 block opacity-0 pointer-events-none select-none">
+                  -
+                </span>
+              )}
             </span>
           );
         }
 
         const data = wordDataMap[wordIdx];
+        const meaning = wbwTranslation?.[`${ayahNumber}:${wordIdx}`];
 
         return (
           <Popover key={idx} onOpenChange={(open) => { if (open) handleWordClick(wordIdx); }}>
             <PopoverTrigger asChild>
               <span
-                className="inline-block cursor-pointer px-1 py-0.5 rounded-lg hover:bg-emerald-500/15 hover:text-emerald-300 transition-colors duration-150 select-none"
+                className="inline-flex flex-col items-center justify-end cursor-pointer px-1 py-0.5 rounded-lg hover:bg-emerald-500/15 hover:text-emerald-300 transition-colors duration-150 select-none min-w-[2.5rem]"
               >
-                {word}
+                <span className="text-white font-arabic">{word}</span>
+                {showWbw && meaning && (
+                  <span className="text-[10px] sm:text-[11px] text-zinc-500 dark:text-zinc-400 font-sans tracking-tight mt-0.5 block max-w-[90px] truncate text-center select-none" dir="ltr">
+                    {meaning}
+                  </span>
+                )}
               </span>
             </PopoverTrigger>
             <PopoverContent

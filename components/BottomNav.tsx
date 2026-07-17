@@ -16,7 +16,7 @@ const BottomNav = () => {
     },
     {
       label: "Surah",
-      href: "/surah/1",
+      href: "/surahs",
       icon: <BookOpen className="w-6 h-6" />,
     },
     {
@@ -41,7 +41,7 @@ const BottomNav = () => {
       <div className="flex justify-around items-center h-16 px-2">
         {navItems.map((item) => {
           const isActive = pathname === item.href || 
-            (pathname?.startsWith("/surah/") && item.label === "Surah") ||
+            (pathname?.startsWith("/surah") && item.label === "Surah") ||
             (pathname?.startsWith("/tafsir") && item.label === "Tafsir") ||
             (pathname?.startsWith("/lexicon") && item.label === "Lexicon") ||
             (pathname?.startsWith("/ai") && item.label === "AI Translator");

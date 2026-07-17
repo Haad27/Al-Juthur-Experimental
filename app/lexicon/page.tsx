@@ -167,7 +167,7 @@ function LexiconPageContent() {
             <Link href="/" className="cursor-pointer hover:text-slate-200 transition">
               Home
             </Link>
-            <Link href="/surah/1" className="cursor-pointer hover:text-slate-200 transition">
+            <Link href="/surahs" className="cursor-pointer hover:text-slate-200 transition">
               Read Quran
             </Link>
             <Link href="/tafsir" className="cursor-pointer hover:text-slate-200 transition">

@@ -83,7 +83,7 @@ export default function AiTranslatorPage() {
             <Link href="/" className="cursor-pointer hover:text-gray-300 transition text-zinc-400">
               Home
             </Link>
-            <Link href="/surah/1" className="cursor-pointer hover:text-gray-300 transition">
+            <Link href="/surahs" className="cursor-pointer hover:text-gray-300 transition">
               Read Quran
             </Link>
             <Link href="/tafsir" className="cursor-pointer hover:text-gray-300 transition">
@@ -166,8 +166,9 @@ export default function AiTranslatorPage() {
               <Sparkles className="w-8 h-8 text-emerald-400" />
             </div>
             <div className="flex flex-col items-center gap-2">
-              <p className="text-lg font-medium text-emerald-400">Analyzing Classical Text...</p>
-              <p className="text-sm text-neutral-500">Connecting to translation engine, please wait a moment</p>
+              <p className="text-sm text-neutral-500 max-w-md text-center">
+                It may take a few seconds to achieve an accurate, word-for-word scholarly translation. Feel free to explore other features in the app in the meantime—we will notify you the moment it is done!
+              </p>
             </div>
           </div>
         )}

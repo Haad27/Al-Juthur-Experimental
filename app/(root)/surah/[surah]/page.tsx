@@ -15,6 +15,7 @@ const removeDiacritics = (text: string) => {
 // Singleton cache for the large JSON to avoid re-reading from disk constantly in Dev Mode
 const globalForTranslation = globalThis as unknown as {
   sahihTranslationCache: any | undefined;
+  wbwTranslationCache: Record<string, string> | undefined;
 };
 
 function getSahihTranslation() {
@@ -29,6 +30,20 @@ function getSahihTranslation() {
     }
   }
   return globalForTranslation.sahihTranslationCache;
+}
+
+function getWbwTranslation() {
+  if (!globalForTranslation.wbwTranslationCache) {
+    try {
+      const filePath = path.join(process.cwd(), 'database', 'word-by-word-translation', 'english-wbw-translation.json');
+      const fileData = fs.readFileSync(filePath, 'utf8');
+      globalForTranslation.wbwTranslationCache = JSON.parse(fileData);
+    } catch (e) {
+      console.error("Could not load local WBW translation:", e);
+      globalForTranslation.wbwTranslationCache = {};
+    }
+  }
+  return globalForTranslation.wbwTranslationCache;
 }
 
 export default async function SurahPage({
@@ -101,6 +116,22 @@ export default async function SurahPage({
     };
   });
 
+  // 6. Generate word-by-word translation map for this Surah
+  const wbwTranslationData = getWbwTranslation();
+  const surahWbwTranslation: Record<string, string> = {}; // key: "ayahNumber:wordIndex" -> translation
+  
+  for (const ayah of localAyahs) {
+    const ayahNo = ayah.numberInSurah;
+    const wordCount = ayah.text.split(/\s+/).length;
+    // Map up to wordCount + 5 to be absolutely safe for any index
+    for (let wIdx = 1; wIdx <= wordCount + 5; wIdx++) {
+      const key = `${surahNumber}:${ayahNo}:${wIdx}`;
+      if (wbwTranslationData && wbwTranslationData[key]) {
+        surahWbwTranslation[`${ayahNo}:${wIdx}`] = wbwTranslationData[key];
+      }
+    }
+  }
+
   return (
     <SurahReaderClient
       surah={surahMetadata}
@@ -108,6 +139,7 @@ export default async function SurahPage({
       surahWordsMap={surahWordsMap}
       ayahParam={ayahParam}
       juzParam={juzParam}
+      surahWbwTranslation={surahWbwTranslation}
     />
   );
 }

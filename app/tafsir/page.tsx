@@ -465,7 +465,7 @@ export default function TafsirPage() {
             <Link href="/" className="cursor-pointer hover:text-gray-300 transition text-zinc-400">
               Home
             </Link>
-            <Link href="/surah/1" className="cursor-pointer hover:text-gray-300 transition">
+            <Link href="/surahs" className="cursor-pointer hover:text-gray-300 transition">
               Read Quran
             </Link>
             <Link href="/tafsir" className="cursor-pointer text-white font-medium">
@@ -584,33 +584,28 @@ export default function TafsirPage() {
                   setActiveLangName(language.name);
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
-                className="border border-input bg-input/30 group cursor-pointer rounded-xl h-full backdrop-blur-md p-4 shadow-md transition-all duration-200 ease-in-out hover:scale-[1.01] hover:shadow-lg hover:border-emerald-500/40 flex flex-col justify-between"
+                className="relative overflow-hidden border border-emerald-500/50 hover:border-emerald-500 bg-zinc-900/40 group cursor-pointer rounded-xl h-full backdrop-blur-md px-5 py-4 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10 flex flex-col justify-between"
               >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    {/* Rotated Diamond Number Badge exactly like Homepage */}
-                    <div className="size-8 rounded-sm border border-input/30 flex justify-center items-center rotate-45 transition-all group-hover:bg-emerald-500 dark:group-hover:bg-emerald-500 shrink-0">
-                      <p className="-rotate-45 text-white text-sm font-bold group-hover:text-zinc-950 transition-colors">
-                        {index + 1}
-                      </p>
-                    </div>
+                {/* Giant Faded Watermark Number */}
+                <div className="absolute -right-2 -bottom-4 text-[80px] font-black text-emerald-500/30 group-hover:text-emerald-500 transition-colors duration-500 pointer-events-none select-none leading-none">
+                  {index + 1}
+                </div>
 
-                    {/* Title & Subtitle */}
-                    <div className="flex flex-col space-y-1">
-                      <p className="font-semibold text-white group-hover:text-emerald-400 transition-colors leading-snug">
-                        {author.name}
-                      </p>
-                      <div className="flex items-center gap-2 text-xs text-zinc-400">
-                        <span className="text-zinc-300 font-medium">{language.name}</span>
-                        {author.era && (
-                          <>
-                            <span>•</span>
-                            <span className="text-zinc-400 text-[11px] truncate max-w-[170px]" title={author.era}>
-                              {author.era.replace(" & Contemporary", "")}
-                            </span>
-                          </>
-                        )}
-                      </div>
+                <div className="relative z-10 flex items-start justify-between gap-4">
+                  <div className="flex flex-col space-y-1">
+                    <p className="font-semibold text-white group-hover:text-emerald-400 transition-colors leading-snug">
+                      {author.name}
+                    </p>
+                    <div className="flex items-center gap-2 text-xs text-zinc-400">
+                      <span className="text-zinc-300 font-medium">{language.name}</span>
+                      {author.era && (
+                        <>
+                          <span>•</span>
+                          <span className="text-zinc-400 text-[11px] truncate max-w-[170px]" title={author.era}>
+                            {author.era.replace(" & Contemporary", "")}
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
 

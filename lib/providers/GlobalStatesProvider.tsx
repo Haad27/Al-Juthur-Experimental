@@ -11,6 +11,8 @@ interface GlobalState {
   setMistakeDetection: React.Dispatch<React.SetStateAction<boolean>>;
   showTranslation: boolean;
   setShowTranslation: React.Dispatch<React.SetStateAction<boolean>>;
+  showWbw: boolean;
+  setShowWbw: React.Dispatch<React.SetStateAction<boolean>>;
   
   // AI Translation Global State
   aiInputText: string;
@@ -39,6 +41,7 @@ export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
   const [fontSize, setFontSize] = useState(3);
   const [mistakeDetection, setMistakeDetection] = useState(false);
   const [showTranslation, setShowTranslation] = useState(true);
+  const [showWbw, setShowWbw] = useState(true);
 
   // AI Translation State
   const [aiInputText, setAiInputText] = useState("");
@@ -95,6 +98,8 @@ export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
         setMistakeDetection,
         showTranslation,
         setShowTranslation,
+        showWbw,
+        setShowWbw,
         
         aiInputText,
         setAiInputText,

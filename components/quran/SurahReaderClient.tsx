@@ -39,6 +39,7 @@ interface SurahReaderClientProps {
   surahWordsMap: Record<number, any[]>;
   juzParam: string | null;
   ayahParam: string | null;
+  surahWbwTranslation?: Record<string, string>;
 }
 
 interface AyahRowProps {
@@ -47,6 +48,8 @@ interface AyahRowProps {
   surahWordsMap: Record<number, any[]>;
   fontSize: number;
   showTranslation: boolean;
+  showWbw: boolean;
+  surahWbwTranslation?: Record<string, string>;
   currentlyPlayingAyah: number | null;
   handleCopyAyah: (ayah: AyahProps) => void;
   handleSaveAyah: (ayah: AyahProps) => void;
@@ -59,6 +62,8 @@ const AyahRow = React.memo(({
   surahWordsMap,
   fontSize,
   showTranslation,
+  showWbw,
+  surahWbwTranslation,
   currentlyPlayingAyah,
   handleCopyAyah,
   handleSaveAyah,
@@ -133,6 +138,8 @@ const AyahRow = React.memo(({
             ayahNumber={ayah.numberInSurah}
             ayahText={ayah.text}
             ayahWords={surahWordsMap[ayah.numberInSurah] || []}
+            wbwTranslation={surahWbwTranslation}
+            showWbw={showWbw}
           />
         </p>
 
@@ -169,8 +176,9 @@ export default function SurahReaderClient({
   surahWordsMap,
   juzParam,
   ayahParam,
+  surahWbwTranslation,
 }: SurahReaderClientProps) {
-  const { fontSize, showTranslation } = useGlobalState();
+  const { fontSize, showTranslation, showWbw } = useGlobalState();
   const show = useScrollDirection();
   const router = useRouter();
 
@@ -288,16 +296,12 @@ export default function SurahReaderClient({
       </div>
       <div
         className={cn(
-          "hidden md:flex items-center justify-between w-full md:min-h-14 px-6 py-3 sticky top-0 backdrop-blur-lg dark:bg-zinc-950/90 border-b bg-[var(--sephia-200)] dark:border-zinc-800/80 border-white/10 transition-all duration-300 z-50 shadow-sm",
+          "hidden md:flex items-center justify-between w-full md:min-h-14 px-6 py-3 sticky top-0 backdrop-blur-lg dark:bg-zinc-900/90 border-b bg-[var(--sephia-200)] dark:border-zinc-800/80 border-white/10 transition-all duration-300 z-50 shadow-sm",
           !show && "-translate-y-24 opacity-0"
         )}
       >
-        {/* Logo and Surah Name */}
+        {/* Surah Name */}
         <div className="flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="font-bold text-lg md:text-xl dark:text-white text-black">Al-Juthur</span>
-          </Link>
-          <div className="h-4 w-px bg-zinc-700/50 hidden md:block"></div>
           <p
             className={`${amiri.className} dark:text-white text-black font-bold text-lg leading-tight`}
           >
@@ -310,7 +314,7 @@ export default function SurahReaderClient({
           <Link href="/" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">
             Home
           </Link>
-          <Link href="/surah/1" className="cursor-pointer dark:text-white text-black font-medium transition">
+          <Link href="/surahs" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">
             Read Quran
           </Link>
           <Link href="/tafsir" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">
@@ -366,6 +370,8 @@ export default function SurahReaderClient({
             surahWordsMap={surahWordsMap}
             fontSize={fontSize}
             showTranslation={showTranslation}
+            showWbw={showWbw}
+            surahWbwTranslation={surahWbwTranslation}
             currentlyPlayingAyah={currentlyPlayingAyah}
             handleCopyAyah={handleCopyAyah}
             handleSaveAyah={handleSaveAyah}
