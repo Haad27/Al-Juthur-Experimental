@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
 
     // 3. Call OpenRouter Llama/Qwen with the Context
     const payload = {
-      model: 'meta-llama/llama-3-8b-instruct', // Free/Cheap model on OpenRouter
+      model: 'meta-llama/llama-3.1-8b-instruct', // Ultra-cheap, highly reliable model on OpenRouter ($0.0000009 per call)
       messages: [
         { role: 'system', content: `${SYSTEM_PROMPT}${contextText}` },
         { role: 'user', content: message }
