@@ -58,7 +58,7 @@ const BottomNav = () => {
                 {isActive && (
                   <motion.div
                     layoutId="active-pill"
-                    className="absolute inset-0 bg-emerald-500/10 dark:bg-emerald-500/15 rounded-full z-0"
+                    className="absolute inset-x-1 inset-y-1 bg-white/[0.08] border border-white/[0.04] rounded-2xl z-0"
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}

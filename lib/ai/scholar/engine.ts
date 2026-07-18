@@ -62,7 +62,7 @@ async function generateWithLLM(prompt: string, userQuery: string, sources: Score
       'gemini-3.1-pro-preview',
       'gemini-2.5-pro',
       'gemini-2.5-flash',
-      'gemini-2.0-flash'
+      'gemini-3.1-flash-lite'
     ];
 
     for (const modelName of geminiModels) {

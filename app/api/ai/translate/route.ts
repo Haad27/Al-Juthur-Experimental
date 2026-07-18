@@ -179,6 +179,30 @@ function parseMarkdownTable(text: string): Array<{ transcreatedText: string, sou
   return rows;
 }
 
+function splitTextIntoChunks(text: string, maxChars: number = 8000): string[] {
+  if (text.length <= maxChars) return [text];
+  
+  const chunks: string[] = [];
+  let currentChunk = '';
+  
+  // Splitting by double newlines (paragraphs) to maintain context
+  const paragraphs = text.split('\n\n');
+  
+  for (const p of paragraphs) {
+    if ((currentChunk.length + p.length + 2) > maxChars && currentChunk.length > 0) {
+      chunks.push(currentChunk.trim());
+      currentChunk = '';
+    }
+    currentChunk += (currentChunk ? '\n\n' : '') + p;
+  }
+  
+  if (currentChunk.trim().length > 0) {
+    chunks.push(currentChunk.trim());
+  }
+  
+  return chunks;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { text } = await req.json();
@@ -195,14 +219,6 @@ export async function POST(req: NextRequest) {
 
     if (!text || text.trim().length === 0) {
       return NextResponse.json({ success: false, error: 'Text is required.' }, { status: 400 });
-    }
-
-    // Input size limit to prevent users from dumping 100 pages of text and draining the API
-    if (text.length > 5000) {
-      return NextResponse.json(
-        { success: false, error: 'Input text is too long. Please limit to 5000 characters per request.' },
-        { status: 400 }
-      );
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
@@ -232,64 +248,86 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const payload = {
-      contents: [
-        {
-          role: 'user',
-          parts: [{ text: `${TRANSLATION_PROMPT}\n\nTranslate the following text strictly according to the rules:\n\n${text}` }]
+    // Process the text in chunks to bypass API token/context limits
+    const chunks = splitTextIntoChunks(text, 8000);
+    let allTranslatedData: Array<{ transcreatedText: string, sourceText: string }> = [];
+
+    for (const chunk of chunks) {
+      const payload = {
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: `${TRANSLATION_PROMPT}\n\nTranslate the following text strictly according to the rules:\n\n${chunk}` }]
+          }
+        ],
+        generationConfig: {
+          temperature: 0.1
         }
-      ],
-      generationConfig: {
-        temperature: 0.1
+      };
+
+      // Length-Aware Routing
+      let geminiModels: string[] = [];
+      if (chunk.length <= 2000) {
+        // Short texts: prioritize massive-capacity Gemma models first
+        geminiModels = [
+          'gemma-4-31b-it',
+          'gemma-4-26b-a4b-it',
+          'gemini-3.1-flash-lite',
+          'gemini-3.5-flash',
+          'gemini-2.5-flash'
+        ];
+      } else {
+        // Long texts: bypass Gemma to avoid TPM ceilings
+        geminiModels = [
+          'gemini-3.1-flash-lite',
+          'gemini-3.5-flash',
+          'gemini-2.5-flash'
+        ];
       }
-    };
 
-    // Prioritize gemini-3.5-flash and use other tiers as fallbacks
-    const geminiModels = [
-      'gemini-3.5-flash',
-      'gemini-2.5-flash',
-      'gemini-2.0-flash'
-    ];
+      let responseText = '';
+      let lastError = '';
 
-    let responseText = '';
-    let lastError = '';
+      for (const modelName of geminiModels) {
+        try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
 
-    for (const modelName of geminiModels) {
-      try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-          if (responseText) break;
-        } else {
-          const errorText = await res.text();
-          console.warn(`Gemini API Error with ${modelName}:`, errorText);
-          lastError = errorText;
+          if (res.ok) {
+            const data = await res.json();
+            responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            if (responseText) break;
+          } else {
+            const errorText = await res.text();
+            console.warn(`Gemini API Error with ${modelName}:`, errorText);
+            lastError = errorText;
+          }
+        } catch (err: any) {
+          console.warn(`Gemini API Network Error with ${modelName}:`, err.message);
+          lastError = err.message;
         }
-      } catch (err: any) {
-        console.warn(`Gemini API Network Error with ${modelName}:`, err.message);
-        lastError = err.message;
       }
+
+      if (!responseText) {
+        throw new Error(`Failed to generate translation from Gemini. Last error: ${lastError}`);
+      }
+
+      // Parse the markdown table response into the expected JSON format
+      let chunkTranslatedData = parseMarkdownTable(responseText);
+      
+      // Fallback if parsing returned empty array
+      if (chunkTranslatedData.length === 0) {
+        chunkTranslatedData = [{ sourceText: chunk, transcreatedText: responseText }];
+      }
+
+      // Aggregate chunk results
+      allTranslatedData = allTranslatedData.concat(chunkTranslatedData);
     }
 
-    if (!responseText) {
-      throw new Error(`Failed to generate translation from Gemini. Last error: ${lastError}`);
-    }
-
-    // Parse the markdown table response into the expected JSON format
-    let translatedData = parseMarkdownTable(responseText);
-    
-    // Fallback if parsing returned empty array
-    if (translatedData.length === 0) {
-      translatedData = [{ sourceText: text, transcreatedText: responseText }];
-    }
-
-    return NextResponse.json({ success: true, data: translatedData });
+    return NextResponse.json({ success: true, data: allTranslatedData });
   } catch (error: any) {
     console.error('Translation Error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

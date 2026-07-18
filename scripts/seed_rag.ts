@@ -75,66 +75,62 @@ async function seedTafsir() {
   for (const author of authors) {
     console.log(`\nProcessing ${author.name}...`);
     
-    // Fetch entries for this author
+    // Fetch entries for this author ordered sequentially
     const entries = db.prepare(`
       SELECT t.id, t.text, a.numberInSurah as ayah, a.surahId as surah
       FROM TafsirEntry t
       JOIN Ayah a ON t.ayahId = a.id
       WHERE t.authorId = ?
+      ORDER BY a.surahId, a.numberInSurah
     `).all(author.id) as any[];
 
     console.log(`Found ${entries.length} entries for ${author.name}.`);
 
-    // Fetch already seeded entries to allow resumption without duplicates
-    console.log(`Checking existing database records for ${author.name}...`);
-    const { data: existingDocs, error: fetchErr } = await supabase
+    // Fetch the latest seeded entry to allow resumption
+    console.log(`Checking latest database record for ${author.name}...`);
+    const { data: lastDocs } = await supabase
       .from('rag_documents')
-      .select('metadata');
+      .select('metadata')
+      .eq('metadata->>book', author.name)
+      .order('id', { ascending: false })
+      .limit(1);
 
-    const seededKeys = new Set<string>();
-    if (existingDocs) {
-      for (const doc of existingDocs) {
-        const meta = doc.metadata as any;
-        if (meta && meta.book === author.name) {
-          seededKeys.add(`${meta.surah}:${meta.ayah}`);
-        }
+    let lastSurah = 0;
+    let lastAyah = 0;
+    if (lastDocs && lastDocs.length > 0) {
+      const meta = lastDocs[0].metadata as any;
+      if (meta) {
+        lastSurah = meta.surah;
+        lastAyah = meta.ayah;
       }
     }
-    console.log(`Already seeded ${seededKeys.size} unique ayah entries for ${author.name}.`);
+    console.log(`Resuming seeding for ${author.name} from Surah ${lastSurah} Ayah ${lastAyah}...`);
 
     let processedCount = 0;
+    const batchRows: any[] = [];
+    const BATCH_SIZE = 100;
+
     for (const entry of entries) {
-      const key = `${entry.surah}:${entry.ayah}`;
-      if (seededKeys.has(key)) {
+      // Skip already processed sequential entries
+      if (entry.surah < lastSurah || (entry.surah === lastSurah && entry.ayah <= lastAyah)) {
         processedCount++;
         continue;
       }
 
-      // Clean HTML tags from the Tafsir text
-      if (!entry.text) {
-        // console.log(`Skipping empty text for ${entry.surah}:${entry.ayah}`);
-        continue;
-      }
+      if (!entry.text) continue;
       const cleanText = entry.text.replace(/<[^>]*>?/gm, '');
       if (!cleanText || cleanText.length < 10) continue;
 
-      // Chunk text
       const chunks = chunkText(cleanText, 1000);
-      console.log(`Processing Surah ${entry.surah} Ayah ${entry.ayah} (${chunks.length} chunks)...`);
 
-      // Process each chunk
+      // Process each chunk and add to batch
       for (let i = 0; i < chunks.length; i++) {
         const chunk = chunks[i];
-        
         try {
           const embedText = `Tafsir ${author.name} for Surah ${entry.surah} Ayah ${entry.ayah}:\n${chunk}`;
-          console.log(`Getting embedding for chunk ${i}...`);
           const embedding = await getEmbedding(embedText);
-          console.log(`Embedding retrieved successfully (${embedding.length} values)`);
 
-          // Insert into Supabase
-          console.log(`Inserting chunk into Supabase...`);
-          const { error } = await supabase.from('rag_documents').insert({
+          batchRows.push({
             content: chunk,
             embedding: embedding,
             metadata: {
@@ -145,31 +141,37 @@ async function seedTafsir() {
             }
           });
 
-          if (error) {
-            console.error(`Supabase Insert Error (Surah ${entry.surah}:${entry.ayah}):`, error);
-          } else {
-            console.log(`Inserted chunk ${i} successfully.`);
+          // Insert batch if size met
+          if (batchRows.length >= BATCH_SIZE) {
+            console.log(`Inserting batch of ${batchRows.length} chunks into Supabase...`);
+            const { error } = await supabase.from('rag_documents').insert(batchRows);
+            if (error) {
+              console.error(`Supabase Batch Insert Error:`, error);
+            }
+            batchRows.length = 0; // Clear the batch
           }
         } catch (err: any) {
           console.error(`Embedding failed for ${entry.surah}:${entry.ayah}:`, err.message);
-          if (err.message.includes('429')) {
-            console.log("Rate limited. Waiting 60 seconds...");
-            await new Promise(r => setTimeout(r, 60000));
-          }
         }
       }
 
       processedCount++;
-      if (processedCount % 10 === 0) {
+      if (processedCount % 50 === 0) {
         console.log(`...Processed ${processedCount}/${entries.length} entries for ${author.name}`);
       }
-      
-      // Delay to respect local CPU limits
-      await new Promise(r => setTimeout(r, 100)); 
+    }
+
+    // Insert any remaining items
+    if (batchRows.length > 0) {
+      console.log(`Inserting final batch of ${batchRows.length} chunks into Supabase...`);
+      const { error } = await supabase.from('rag_documents').insert(batchRows);
+      if (error) {
+        console.error(`Supabase Final Batch Insert Error:`, error);
+      }
     }
   }
 
   console.log("\nVector Seeding Complete!");
 }
 
-seedTafsir().catch(console.error);
+seedTafsir();
