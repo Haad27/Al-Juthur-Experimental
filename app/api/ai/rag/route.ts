@@ -57,6 +57,7 @@ export async function POST(req: NextRequest) {
 
     // 2. Query Supabase Vector DB for Context
     let contextText = "";
+    let retrievedSources: any[] = [];
     if (queryEmbedding && queryEmbedding.length > 0) {
       const { data: documents, error } = await supabase.rpc('match_documents', {
         query_embedding: queryEmbedding,
@@ -69,6 +70,12 @@ export async function POST(req: NextRequest) {
       } else if (documents && documents.length > 0) {
         contextText = "\n\n### Authentic Context Retrieved from Tafsirs & Lexicons:\n" + 
           documents.map((doc: any) => `[Source: ${doc.metadata?.book || 'Classical Text'} | Surah ${doc.metadata?.surah} Ayah ${doc.metadata?.ayah}]\n${doc.content}`).join("\n\n");
+          
+        retrievedSources = documents.map((doc: any) => ({
+          book: doc.metadata?.book,
+          surah: doc.metadata?.surah,
+          ayah: doc.metadata?.ayah
+        }));
       }
     }
 
@@ -103,7 +110,17 @@ export async function POST(req: NextRequest) {
     const data = await res.json();
     const responseText = data.choices?.[0]?.message?.content || '';
 
-    return NextResponse.json({ success: true, text: responseText, remaining: limit.remaining });
+    // Deduplicate sources
+    const uniqueSources = Array.from(
+      new Set(retrievedSources.map(s => JSON.stringify(s)))
+    ).map(s => JSON.parse(s));
+
+    return NextResponse.json({ 
+      success: true, 
+      text: responseText, 
+      remaining: limit.remaining,
+      sources: uniqueSources
+    });
   } catch (error: any) {
     console.error('RAG Error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

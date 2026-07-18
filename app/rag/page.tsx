@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, Send, Sparkles, AlertCircle, Loader2, Bot, User } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, AlertCircle, Loader2, Bot, User, BookOpen } from "lucide-react";
 import { amiri, inter } from "@/app/fonts";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
@@ -10,11 +10,12 @@ import ReactMarkdown from "react-markdown";
 interface Message {
   role: "user" | "assistant";
   content: string;
+  sources?: { book: string, surah: number, ayah: number }[];
 }
 
 export default function RagPage() {
   const [messages, setMessages] = useState<Message[]>([
-    { role: "assistant", content: "As-salamu alaykum! I am the Al-Juthur Theological AI. Ask me any question regarding the Quran, Tafsir, or classical Arabic linguistics." }
+    { role: "assistant", content: "As-salamu alaykum! I am the Tafsir RAG Engine. Ask me any question regarding the Quran, Tafsir, or classical Arabic linguistics." }
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -52,7 +53,11 @@ export default function RagPage() {
       }
 
       setRemainingReqs(data.remaining);
-      setMessages(prev => [...prev, { role: "assistant", content: data.text }]);
+      setMessages(prev => [...prev, { 
+        role: "assistant", 
+        content: data.text,
+        sources: data.sources || []
+      }]);
     } catch (err: any) {
       toast.error(err.message);
       setMessages(prev => [...prev, { role: "assistant", content: "Sorry, I encountered an error. Please try again later." }]);
@@ -84,7 +89,7 @@ export default function RagPage() {
             <div className="h-4 w-px bg-zinc-800 hidden md:block mx-2" />
             <h1 className="text-base md:text-lg font-bold text-white flex items-center gap-2">
               <Sparkles className="size-5 text-emerald-500" />
-              <span>Theological RAG Engine</span>
+              <span>Tafsir RAG Engine</span>
             </h1>
           </div>
           
@@ -115,6 +120,27 @@ export default function RagPage() {
                 <div className="prose prose-invert prose-emerald max-w-none text-sm md:text-base leading-relaxed">
                   <ReactMarkdown>{msg.content}</ReactMarkdown>
                 </div>
+                
+                {/* Sources Section */}
+                {msg.sources && msg.sources.length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-zinc-800/80">
+                    <p className="text-xs text-zinc-500 mb-2 font-medium">Sources used from Classical Texts:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {msg.sources.map((src, i) => (
+                        <Link 
+                          key={i}
+                          href={`/tafsir?surah=${src.surah}&ayah=${src.ayah}`}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-800/50 border border-zinc-700/50 hover:bg-emerald-500/10 hover:border-emerald-500/30 hover:text-emerald-400 transition-colors text-xs text-zinc-400"
+                          title="Click to view this Ayah in Tafsir"
+                        >
+                          <BookOpen className="size-3" />
+                          <span>{src.book}</span>
+                          <span className="opacity-60">({src.surah}:{src.ayah})</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ))}
