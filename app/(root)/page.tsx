@@ -101,12 +101,6 @@ const SurahsList = () => {
           <Link href="/" className="cursor-pointer hover:text-gray-300 transition text-white ">
             Home
           </Link>
-          <Link
-            href="/surah/1"
-            className="cursor-pointer hover:text-gray-300 transition"
-          >
-            Read Quran
-          </Link>
           <Link href="/tafsir" className="cursor-pointer hover:text-gray-300 transition">
             Tafsir
           </Link>

@@ -11,11 +11,10 @@ import { Input } from "../ui/input";
 import { useParams } from "next/navigation";
 import Settings from "../Settings";
 
-type TabKey = "surah" | "juz" | "settings";
+type TabKey = "surah" | "settings";
 const tabs: { key: TabKey; label: string }[] = [
   { key: "surah", label: "Surah" },
-  { key: "juz", label: "Juz" },
-  { key: "settings", label: "Settings" }, // maybe settings
+  { key: "settings", label: "Settings" },
 ];
 
 const Sidebar = () => {
@@ -137,15 +136,7 @@ const Sidebar = () => {
           </div>
         )}
 
-        {/* Juz Panel */}
-        {!isCollapsed && activeTab === "juz" && (
-          <div className="p-4 overflow-y-auto scrollable-container max-h-[calc(100vh-200px)]">
-            {/* Example Juz Content */}
-            {/* <h2 className="text-lg font-semibold">Juz Content</h2>
-            <p className="text-gray-400">Display Juz related content here</p> */}
-            <JuzList searchQuery={searchQuery} />
-          </div>
-        )}
+
 
         {/* Page Panel */}
         {!isCollapsed && activeTab === "settings" && <Settings />}

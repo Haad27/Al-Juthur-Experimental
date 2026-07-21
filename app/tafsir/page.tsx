@@ -465,9 +465,6 @@ export default function TafsirPage() {
             <Link href="/" className="cursor-pointer hover:text-gray-300 transition text-zinc-400">
               Home
             </Link>
-            <Link href="/surahs" className="cursor-pointer hover:text-gray-300 transition">
-              Read Quran
-            </Link>
             <Link href="/tafsir" className="cursor-pointer text-white font-medium">
               Tafsir
             </Link>

@@ -306,9 +306,6 @@ export default function SurahReaderClient({
           <Link href="/" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">
             Home
           </Link>
-          <Link href="/surahs" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">
-            Read Quran
-          </Link>
           <Link href="/tafsir" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">
             Tafsir
           </Link>

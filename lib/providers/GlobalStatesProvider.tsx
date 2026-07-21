@@ -13,6 +13,8 @@ interface GlobalState {
   setShowTranslation: React.Dispatch<React.SetStateAction<boolean>>;
   showWbw: boolean;
   setShowWbw: React.Dispatch<React.SetStateAction<boolean>>;
+  translationEdition: string;
+  setTranslationEdition: (edition: string) => void;
   
   // AI Translation Global State
   aiInputText: string;
@@ -42,6 +44,20 @@ export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
   const [mistakeDetection, setMistakeDetection] = useState(false);
   const [showTranslation, setShowTranslation] = useState(true);
   const [showWbw, setShowWbw] = useState(true);
+  const [translationEdition, setTranslationEditionState] = useState(() => {
+    if (typeof window !== "undefined") {
+      const match = document.cookie.match(/(?:^|; )trans=([^;]*)/);
+      return match ? decodeURIComponent(match[1]) : "en.sahih";
+    }
+    return "en.sahih";
+  });
+
+  const setTranslationEdition = (edition: string) => {
+    setTranslationEditionState(edition);
+    if (typeof window !== "undefined") {
+      document.cookie = `trans=${encodeURIComponent(edition)}; path=/; max-age=31536000`;
+    }
+  };
 
   // AI Translation State
   const [aiInputText, setAiInputText] = useState("");
@@ -100,6 +116,8 @@ export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
         setShowTranslation,
         showWbw,
         setShowWbw,
+        translationEdition,
+        setTranslationEdition,
         
         aiInputText,
         setAiInputText,

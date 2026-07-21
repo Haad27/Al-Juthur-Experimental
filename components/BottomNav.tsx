@@ -16,11 +16,6 @@ const BottomNav = () => {
       icon: <Home className="w-5 h-5" />,
     },
     {
-      label: "Surah",
-      href: "/",
-      icon: <BookOpen className="w-5 h-5" />,
-    },
-    {
       label: "Tafsir",
       href: "/tafsir",
       icon: <ScrollText className="w-5 h-5" />,
