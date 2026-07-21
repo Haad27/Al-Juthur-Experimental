@@ -107,11 +107,11 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
           <Popover key={idx} onOpenChange={(open) => { if (open) handleWordClick(wordIdx); }}>
             <PopoverTrigger asChild>
               <span
-                className="inline-flex flex-col items-center justify-end cursor-pointer px-1 py-0.5 rounded-lg hover:bg-emerald-500/15 hover:text-emerald-300 transition-colors duration-150 select-none min-w-[2.5rem]"
+                className="group inline-flex flex-col items-center justify-end cursor-pointer px-1 py-0.5 rounded-lg hover:bg-emerald-500/30 transition-colors duration-150 select-none min-w-[2.5rem]"
               >
-                <span className="text-white font-arabic">{word}</span>
+                <span className="text-white group-hover:text-emerald-300 font-arabic transition-colors duration-150">{word}</span>
                 {showWbw && meaning && (
-                  <span className="text-[10px] sm:text-[11px] text-zinc-500 dark:text-zinc-400 font-sans tracking-tight mt-0.5 block max-w-[90px] truncate text-center select-none" dir="ltr">
+                  <span className="text-[10px] sm:text-[11px] text-zinc-500 dark:text-zinc-400 group-hover:text-emerald-200 font-sans tracking-tight mt-0.5 block max-w-[90px] truncate text-center select-none transition-colors duration-150" dir="ltr">
                     {meaning}
                   </span>
                 )}
