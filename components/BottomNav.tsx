@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BookOpen, ScrollText, Library, Languages } from "lucide-react";
+import { Home, BookOpen, ScrollText, Library, Languages, Bot } from "lucide-react";
 import { motion } from "framer-motion";
 
 const BottomNav = () => {
@@ -35,6 +35,11 @@ const BottomNav = () => {
       href: "/ai",
       icon: <Languages className="w-5 h-5" />,
     },
+    {
+      label: "RAG Bot",
+      href: "/rag",
+      icon: <Bot className="w-5 h-5" />,
+    },
   ];
 
   return (
@@ -47,7 +52,8 @@ const BottomNav = () => {
               (item.label === "Surah" && pathname?.startsWith("/surah")) ||
               (item.label === "Tafsir" && pathname?.startsWith("/tafsir")) ||
               (item.label === "Lexicon" && pathname?.startsWith("/lexicon")) ||
-              (item.label === "AI Translator" && pathname?.startsWith("/ai"));
+              (item.label === "AI Translator" && pathname?.startsWith("/ai")) ||
+              (item.label === "RAG Bot" && pathname?.startsWith("/rag"));
 
             return (
               <Link

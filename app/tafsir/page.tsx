@@ -477,6 +477,9 @@ export default function TafsirPage() {
             <Link href="/ai" className="cursor-pointer hover:text-gray-300 transition">
               AI Translator
             </Link>
+            <Link href="/rag" className="cursor-pointer hover:text-gray-300 transition">
+              RAG Bot
+            </Link>
           </nav>
         </div>
       </div>

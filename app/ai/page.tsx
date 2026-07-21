@@ -95,6 +95,9 @@ export default function AiTranslatorPage() {
             <Link href="/ai" className="cursor-pointer text-white font-medium">
               AI Translator
             </Link>
+            <Link href="/rag" className="cursor-pointer hover:text-gray-300 transition text-zinc-400">
+              RAG Bot
+            </Link>
           </nav>
         </div>
       </div>

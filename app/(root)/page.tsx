@@ -116,6 +116,9 @@ const SurahsList = () => {
           <Link href="/ai" className="cursor-pointer hover:text-gray-300 transition text-zinc-400">
             AI Translator
           </Link>
+          <Link href="/rag" className="cursor-pointer hover:text-gray-300 transition">
+            RAG Bot
+          </Link>
         </nav>
       </div>
 
@@ -200,7 +203,7 @@ const SurahsList = () => {
                 <Link href={`/surah/${recent?.number}`}>
                   <div className="relative overflow-hidden border border-white/50 hover:border-white bg-gradient-to-r from-emerald-500 via-emerald-600 to-emerald-500 group cursor-pointer rounded-xl h-full backdrop-blur-md px-5 py-4 shadow-md transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg z-4 sm:w-64 w-full">
                     {/* Giant Faded Watermark Number */}
-                    <div className="absolute -right-1 -bottom-4 text-[80px] font-black text-white/50 group-hover:text-white transition-colors duration-500 pointer-events-none select-none leading-none">
+                    <div className="absolute -right-1 -bottom-4 text-6xl font-black text-white/50 group-hover:text-white transition-colors duration-500 pointer-events-none select-none leading-none">
                       {recent?.number}
                     </div>
 
@@ -282,24 +285,24 @@ const SurahsList = () => {
               <Link href={`/surah/${surah.number}`} key={surah.number}>
                 <div className="relative overflow-hidden border border-emerald-500/50 hover:border-emerald-500 bg-zinc-900/40 group cursor-pointer rounded-xl h-full backdrop-blur-md px-5 py-4 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10 z-4">
                   {/* Giant Faded Watermark Number */}
-                  <div className="absolute -right-1 -bottom-4 text-[80px] font-black text-emerald-500/30 group-hover:text-emerald-500 transition-colors duration-500 pointer-events-none select-none leading-none">
+                  <div className="absolute -right-1 -bottom-4 text-6xl font-black text-emerald-500/30 group-hover:text-emerald-500 transition-colors duration-500 pointer-events-none select-none leading-none">
                     {surah.number}
                   </div>
 
                   <div className="relative z-10 flex items-center justify-between gap-4">
-                    <div className="flex flex-col flex-1 space-y-0.5 text-sm">
+                    <div className="flex flex-col flex-1 space-y-0.5 text-sm min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-bold text-zinc-500 group-hover:text-emerald-400 transition-colors">{surah.number}.</span>
-                        <p className="font-semibold text-white text-base">
+                        <span className="text-[11px] font-bold text-zinc-500 group-hover:text-emerald-400 transition-colors whitespace-nowrap">{surah.number}.</span>
+                        <p className="font-semibold text-white text-base truncate">
                           {surah.englishName}
                         </p>
                       </div>
-                      <p className="text-xs text-zinc-400 pl-4">
+                      <p className="text-[11px] sm:text-xs text-zinc-400 pl-4 truncate">
                         {surah.englishNameTranslation}
                       </p>
                     </div>
 
-                    <p className={`${amiriquran.className} text-xl text-zinc-300 group-hover:text-emerald-300 transition-colors tracking-wide`}>
+                    <p className={`${amiriquran.className} text-xl text-zinc-300 group-hover:text-emerald-300 transition-colors tracking-wide whitespace-nowrap shrink-0`}>
                       {surah.name}
                     </p>
                   </div>

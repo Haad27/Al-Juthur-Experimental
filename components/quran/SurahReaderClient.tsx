@@ -7,6 +7,8 @@ import Link from "next/link";
 import { toast } from "sonner";
 import NavigatorButton from "@/components/NavigatorButton";
 import { InteractiveAyahWords } from "@/components/quran/InteractiveAyahWords";
+import { Virtuoso } from "react-virtuoso";
+import { useAudioStore } from "@/lib/stores/audioStore";
 import { cn, convertNumberToArabicNumeral } from "@/lib/utils";
 import BismillahIcon from "@/components/svg/icons/BismillahIcon";
 import {
@@ -50,10 +52,8 @@ interface AyahRowProps {
   showTranslation: boolean;
   showWbw: boolean;
   surahWbwTranslation?: Record<string, string>;
-  currentlyPlayingAyah: number | null;
   handleCopyAyah: (ayah: AyahProps) => void;
   handleSaveAyah: (ayah: AyahProps) => void;
-  handleFetchAudio: (ayah: AyahProps) => void;
 }
 
 const AyahRow = React.memo(({
@@ -64,11 +64,24 @@ const AyahRow = React.memo(({
   showTranslation,
   showWbw,
   surahWbwTranslation,
-  currentlyPlayingAyah,
   handleCopyAyah,
   handleSaveAyah,
-  handleFetchAudio,
 }: AyahRowProps) => {
+  const isCurrentlyPlaying = useAudioStore(s => s.currentAyah === ayah.numberInSurah && s.currentSurah === surahNumber);
+  const playAyah = useAudioStore(s => s.playAyah);
+  const pause = useAudioStore(s => s.pause);
+
+  const handleFetchAudio = async () => {
+    if (isCurrentlyPlaying) {
+      pause();
+      return;
+    }
+    const response = await fetchAyahAudio(surahNumber, ayah.numberInSurah);
+    if (response?.data?.audio) {
+      playAyah(surahNumber, ayah.numberInSurah, response.data.audio);
+    }
+  };
+
   return (
     <div
       className="border-b-[0.1px] border-b-[var(--sephia-500)] dark:border-b-[#262629ff] sm:px-8 px-4 sm:py-12 py-4 flex flex-col items-end justify-end sm:flex-row sm:gap-12 gap-4 transition-all duration-300"
@@ -92,10 +105,10 @@ const AyahRow = React.memo(({
           <Save className="text-zinc-400" size={18} />
         </div>
         <div
-          onClick={() => handleFetchAudio(ayah)}
+          onClick={handleFetchAudio}
           className="p-2 rounded-full hover:bg-zinc-800 transition-colors cursor-pointer inline-flex items-center justify-center"
         >
-          {currentlyPlayingAyah === ayah.numberInSurah ? (
+          {isCurrentlyPlaying ? (
             <Pause className="text-zinc-400" size={18} />
           ) : (
             <Play className="text-zinc-400" size={18} />
@@ -183,10 +196,14 @@ export default function SurahReaderClient({
   const router = useRouter();
 
   const [collapsed, setCollapsed] = useState(true);
-  const [currentlyPlayingAyah, setCurrentlyPlayingAyah] = useState<number | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const surahNumber = surah?.number || 1;
+
+  // Clear audio state on unmount or surah change
+  useEffect(() => {
+    const clearAudio = useAudioStore.getState().clearAudio;
+    return () => clearAudio();
+  }, [surahNumber]);
 
   // Scroll to the selected ayah (if provided via the "ayah" search param)
   useEffect(() => {
@@ -210,7 +227,7 @@ export default function SurahReaderClient({
     }
   }, [ayahParam, ayahs]);
 
-  const handleCopyAyah = ({ numberInSurah, text, translation }: AyahProps) => {
+  const handleCopyAyah = React.useCallback(({ numberInSurah, text, translation }: AyahProps) => {
     navigator.clipboard.writeText(
       `${text} ${translation} [${surahNumber}:${numberInSurah}]`
     );
@@ -227,34 +244,9 @@ export default function SurahReaderClient({
         duration: 3000,
       }
     );
-  };
+  }, [surahNumber]);
 
-  const handleFetchAudio = async (ayah: AyahProps) => {
-    const response = await fetchAyahAudio(surahNumber, ayah.numberInSurah);
-    if (!response?.data?.audio) return;
-
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-
-    if (currentlyPlayingAyah === ayah.numberInSurah) {
-      setCurrentlyPlayingAyah(null);
-      return;
-    }
-
-    const audio = new Audio(response.data.audio);
-    audioRef.current = audio;
-
-    audio.play();
-    setCurrentlyPlayingAyah(ayah.numberInSurah);
-
-    audio.addEventListener("ended", () => {
-      setCurrentlyPlayingAyah(null);
-    });
-  };
-
-  const handleSaveAyah = (ayah: AyahProps) => {
+  const handleSaveAyah = React.useCallback((ayah: AyahProps) => {
     const saved = JSON.parse(localStorage.getItem("saved-ayahs") || "[]");
     const alreadySaved = saved.some((item: AyahProps) => item.number === ayah.number);
 
@@ -284,7 +276,7 @@ export default function SurahReaderClient({
         </div>
       </div>
     );
-  };
+  }, [surahNumber]);
 
   return (
     <section className="w-full flex items-center flex-col dark:bg-zinc-900 bg-[var(--sephia-primary)] flex-1 dark:text-white text-black relative">
@@ -326,6 +318,9 @@ export default function SurahReaderClient({
           <Link href="/ai" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">
             AI Translator
           </Link>
+          <Link href="/rag" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">
+            RAG Bot
+          </Link>
         </nav>
       </div>
 
@@ -362,22 +357,27 @@ export default function SurahReaderClient({
           <BismillahIcon className="dark:text-white text-black lg:max-w-96 md:max-w-86 max-w-72" />
         </div>
 
-        {ayahs.map((ayah) => (
-          <AyahRow
-            key={ayah.numberInSurah}
-            ayah={ayah}
-            surahNumber={surahNumber}
-            surahWordsMap={surahWordsMap}
-            fontSize={fontSize}
-            showTranslation={showTranslation}
-            showWbw={showWbw}
-            surahWbwTranslation={surahWbwTranslation}
-            currentlyPlayingAyah={currentlyPlayingAyah}
-            handleCopyAyah={handleCopyAyah}
-            handleSaveAyah={handleSaveAyah}
-            handleFetchAudio={handleFetchAudio}
-          />
-        ))}
+        <Virtuoso
+          useWindowScroll
+          totalCount={ayahs.length}
+          itemContent={(index) => {
+            const ayah = ayahs[index];
+            return (
+              <AyahRow
+                key={ayah.numberInSurah}
+                ayah={ayah}
+                surahNumber={surahNumber}
+                surahWordsMap={surahWordsMap}
+                fontSize={fontSize}
+                showTranslation={showTranslation}
+                showWbw={showWbw}
+                surahWbwTranslation={surahWbwTranslation}
+                handleCopyAyah={handleCopyAyah}
+                handleSaveAyah={handleSaveAyah}
+              />
+            );
+          }}
+        />
       </div>
 
       <div className="mb-6 w-full flex justify-center items-center">

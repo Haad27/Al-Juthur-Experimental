@@ -179,6 +179,9 @@ function LexiconPageContent() {
             <Link href="/ai" className="cursor-pointer hover:text-slate-200 transition">
               AI Translator
             </Link>
+            <Link href="/rag" className="cursor-pointer hover:text-slate-200 transition">
+              RAG Bot
+            </Link>
           </nav>
         </div>
       </div>
