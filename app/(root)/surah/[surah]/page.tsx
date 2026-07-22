@@ -1,6 +1,6 @@
 import React from "react";
 import SurahReaderClient from "@/components/quran/SurahReaderClient";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/prisma";
 import { getSurahWords } from "@/lib/lexicon/service";
 import { SURAHS_DATA } from "@/lib/surahsData";
 import { getLocalSurahTranslation } from "@/lib/translations";
@@ -8,11 +8,29 @@ import { cookies } from "next/headers";
 import fs from "fs";
 import path from "path";
 
-const prisma = new PrismaClient();
-
 const removeDiacritics = (text: string) => {
   return text.replace(/[\u064B-\u065F\u0670]/g, ""); // removes harakat + dagger alif
 };
+
+// Singleton cache for Ayahs
+const globalForAyahs = globalThis as unknown as {
+  surahAyahsCache: Record<number, any[]> | undefined;
+};
+
+async function getAyahsForSurah(surahNumber: number) {
+  if (!globalForAyahs.surahAyahsCache) {
+    globalForAyahs.surahAyahsCache = {};
+  }
+  if (globalForAyahs.surahAyahsCache[surahNumber]) {
+    return globalForAyahs.surahAyahsCache[surahNumber];
+  }
+  const localAyahs = await prisma.ayah.findMany({
+    where: { surahId: surahNumber },
+    orderBy: { numberInSurah: "asc" }
+  });
+  globalForAyahs.surahAyahsCache[surahNumber] = localAyahs;
+  return localAyahs;
+}
 
 // Singleton cache for WBW JSON
 const globalForTranslation = globalThis as unknown as {
@@ -66,11 +84,8 @@ export default async function SurahPage({
     (surahMetadata as any).number = (surahMetadata as any).number || (surahMetadata as any).id;
   }
 
-  // 2. Fetch Arabic Ayahs from our massive local Prisma DB
-  const localAyahs = await prisma.ayah.findMany({
-    where: { surahId: surahNumber },
-    orderBy: { numberInSurah: "asc" }
-  });
+  // 2. Fetch Arabic Ayahs from our massive local Prisma DB (cached in memory after first load)
+  const localAyahs = await getAyahsForSurah(surahNumber);
 
   // 3. Fetch selected translation from local JSON files
   const translationAyahs = getLocalSurahTranslation(surahNumber, editionParam);

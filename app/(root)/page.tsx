@@ -276,7 +276,7 @@ const SurahsList = () => {
             />
 
             {surahs.map((surah: Surah) => (
-              <Link href={`/surah/${surah.number}`} key={surah.number}>
+              <Link href={`/surah/${surah.number}`} key={surah.number} prefetch={false}>
                 <div className="relative overflow-hidden border border-emerald-500/50 hover:border-emerald-500 bg-zinc-900/40 group cursor-pointer rounded-xl h-full backdrop-blur-md px-5 py-4 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10 z-4">
                   {/* Giant Faded Watermark Number */}
                   <div className="absolute -right-1 -bottom-4 text-6xl font-black text-emerald-500/30 group-hover:text-emerald-500 transition-colors duration-500 pointer-events-none select-none leading-none">
