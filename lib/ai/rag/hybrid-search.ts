@@ -41,11 +41,11 @@ export async function searchHybrid(
   const sqlConditions: string[] = ['1=1'];
   const sqlParams: any[] = [];
 
-  if (filters.surahId) {
+  if (typeof filters.surahId === 'number' && filters.surahId >= 1 && filters.surahId <= 114) {
     sqlConditions.push('surahId = ?');
     sqlParams.push(filters.surahId);
   }
-  if (filters.ayahId) {
+  if (typeof filters.ayahId === 'number' && filters.ayahId >= 1 && filters.ayahId <= 286) {
     sqlConditions.push('ayahId = ?');
     sqlParams.push(filters.ayahId);
   }
@@ -159,64 +159,83 @@ export async function searchHybrid(
   // 3. Reciprocal Rank Fusion (RRF) across Parent Documents
   const allParentIds = new Set<string>([...bm25Matches.keys(), ...vectorMatches.keys()]);
 
-  // Direct structural fallback: If local vector index didn't hit but we have exact coordinates or mode query, fetch direct from dev.db or local parents
-  if (allParentIds.size === 0 && (filters.surahId || filters.ayahId || filters.mode)) {
-    // First check local rag_parent_documents
-    const directParents = db
-      .prepare(
-        `
-        SELECT * FROM rag_parent_documents
-        WHERE ${whereClause}
-        LIMIT ?
-      `
-      )
-      .all(...sqlParams, topK) as RagParentDocument[];
-
-    if (directParents.length > 0) {
-      return directParents.map((p) => ({
-        ...p,
-        rrfScore: 1.0,
-        matchedChildSnippets: [p.content.substring(0, 300)],
-        relevanceExplanation: `Direct structural match for ${p.workTitle}`,
-      }));
-    }
-
-    // If surahId and ayahId exist, fetch directly from dev.db for the allowed mode authors so user ALWAYS gets exact passage
-    if (filters.surahId && filters.ayahId && filters.mode && filters.mode !== 'lexicon') {
+  // Direct structural fallback: If local vector/BM25 matches are empty OR if we have explicit Surah coordinate (e.g. Surah 1) to guarantee exact verse boundaries
+  if ((allParentIds.size === 0 || typeof filters.surahId === 'number') && filters.mode && filters.mode !== 'lexicon') {
+    // Check if we have exact surahId and/or ayahId
+    if (typeof filters.surahId === 'number') {
       try {
         const devDbPath = path.join(process.cwd(), 'prisma', 'dev.db');
         const devDb = new Database(devDbPath, { readonly: true });
-        const allowedAuthorIds = MODE_AUTHORS[filters.mode];
+        const allowedAuthorIds = MODE_AUTHORS[filters.mode] || MODE_AUTHORS.default;
         
-        const devRows = devDb.prepare(`
+        let querySql = `
           SELECT t.id, t.authorId, t.surahId, a.numberInSurah as ayahNo, t.text, au.name as authorName
           FROM TafsirEntry t
           JOIN Ayah a ON t.ayahId = a.id
           JOIN Author au ON t.authorId = au.id
           WHERE t.authorId IN (${allowedAuthorIds.join(',')})
-            AND t.surahId = ? AND a.numberInSurah = ?
-          LIMIT ?
-        `).all(filters.surahId, filters.ayahId, topK) as any[];
+            AND t.surahId = ?
+        `;
+        const queryParams: any[] = [filters.surahId];
+
+        if (typeof filters.ayahId === 'number') {
+          querySql += ' AND a.numberInSurah = ?';
+          queryParams.push(filters.ayahId);
+        }
+
+        querySql += ' ORDER BY a.numberInSurah ASC, t.authorId ASC LIMIT ?';
+        queryParams.push(topK * 2);
+
+        const devRows = devDb.prepare(querySql).all(...queryParams) as any[];
 
         if (devRows && devRows.length > 0) {
-          return devRows.map((row) => ({
-            id: `tafsir-${row.authorId}-${row.surahId}-${row.ayahNo}`,
-            workType: 'tafsir',
-            authorId: row.authorId,
-            authorName: row.authorName,
-            workTitle: row.authorName,
-            language: row.authorId === 61 ? 'en' : 'ar',
-            surahId: row.surahId,
-            ayahId: row.ayahNo,
-            rootWord: null,
-            content: row.text,
-            rrfScore: 1.0,
-            matchedChildSnippets: [row.text.substring(0, 300)],
-            relevanceExplanation: `Direct database passage from ${row.authorName} (${row.surahId}:${row.ayahNo})`
-          }));
+          // If we had no vector/bm25 hits OR if the hits don't cover the requested surah cleanly, return these direct passages
+          if (allParentIds.size === 0 || typeof filters.surahId === 'number') {
+            const directResults = devRows.map((row) => ({
+              id: `tafsir-${row.authorId}-${row.surahId}-${row.ayahNo}`,
+              workType: 'tafsir' as const,
+              authorId: row.authorId,
+              authorName: row.authorName,
+              workTitle: row.authorName,
+              language: row.authorId === 61 ? 'en' : 'ar',
+              surahId: row.surahId,
+              ayahId: row.ayahNo,
+              rootWord: null,
+              content: row.text,
+              rrfScore: 1.0,
+              matchedChildSnippets: [row.text.substring(0, 300)],
+              relevanceExplanation: `Exact Surah/Ayah passage from ${row.authorName} (${row.surahId}:${row.ayahNo})`
+            }));
+            
+            // If explicit surahId filter was provided (like summarizing Surah 1), return ONLY verses of that surah
+            if (typeof filters.surahId === 'number') {
+              return directResults.slice(0, topK + 4);
+            }
+          }
         }
       } catch (e) {
         console.warn('Direct dev.db structural query failed:', e);
+      }
+    }
+
+    if (allParentIds.size === 0) {
+      const directParents = db
+        .prepare(
+          `
+          SELECT * FROM rag_parent_documents
+          WHERE ${whereClause}
+          LIMIT ?
+        `
+        )
+        .all(...sqlParams, topK) as RagParentDocument[];
+
+      if (directParents.length > 0) {
+        return directParents.map((p) => ({
+          ...p,
+          rrfScore: 1.0,
+          matchedChildSnippets: [p.content.substring(0, 300)],
+          relevanceExplanation: `Direct structural match for ${p.workTitle}`,
+        }));
       }
     }
   }

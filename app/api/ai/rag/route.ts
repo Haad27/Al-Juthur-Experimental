@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 1. Run LLM 1 Query Rewriter & Scope Guardrail Check
+    // 1. Run LLM 1 Query Rewriter & Scope Guardrail Check (prioritizing Gemini)
     const preparedQuery = await prepareRagQuery(message, mode);
 
     if (!preparedQuery.isScopeValid) {
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 2. Perform Hybrid Search (BM25 + Vector + Mode filtering)
+    // 2. Perform Hybrid Search (BM25 + Vector + Mode & exact Surah filtering)
     const documents = await searchHybrid(
       message,
       {
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
         expandedQueryAr: preparedQuery.expandedQueryAr,
         rootWord: preparedQuery.rootWords?.[0]
       },
-      6
+      8
     );
 
     // 3. Format Context and Sources for Grounded Synthesis
@@ -100,79 +100,96 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const systemPrompt = `You are a scholarly RAG Synthesis Engine strictly grounded in the provided classical Quranic texts.
-Your task is to answer the user's inquiry directly using ONLY the retrieved classical passages provided in the context.
+    const systemPrompt = `You are a rigorous, scholarly Quranic RAG Synthesis Engine strictly grounded in canonical Quranic structure and the provided authentic classical texts.
+Your task is to answer the user's inquiry accurately using ONLY the retrieved classical passages provided below and exact canonical Quranic knowledge.
 
 ACTIVE RAG MODE: "${mode.toUpperCase()}"
 
-MANDATORY RULES:
-1. STRICT SCHOLARLY ATTRIBUTION: Never invent opinions or rulings from outside the provided context. Every major claim or point MUST cite the exact source name in brackets, for example: [Tafsir Ibn Kathir, Surah 2:255] or [Lisan al-Arab, Root صبر].
-2. MULTILINGUAL CLARITY: If quoting from Arabic sources, provide clear, accurate English translations alongside the terminology.
-3. CLEAR & STRUCTURED: Organize your response into neat markdown sections with bullet points or bold headers.
-4. If the retrieved context does not contain enough information to fully answer the specific question, state clearly what is available in the sources and mention that further classical commentary may be consulted.
+CRITICAL MANDATORY FACTUALITY & ANTI-HALLUCINATION RULES:
+1. ZERO FABRICATION OF QURANIC VERSES OR STRUCTURE: You MUST NEVER invent, fabricate, or hallucinate Quranic verses, Arabic texts, surah names, or ayah counts.
+2. EXACT SURAH STRUCTURE:
+   - Surah Al-Fatihah (Surah 1) has EXACTLY 7 verses (Ayahs 1:1 to 1:7). NEVER invent verses 8, 9, 10, 11, or 12 for Al-Fatihah.
+   - Every Surah in the Quran has a fixed canonical number of verses (e.g. Al-Baqarah has 286, Al-Ikhlas has 4). If summarizing any surah, ONLY state its real canonical structure and exact verses.
+3. STRICT SCHOLARLY ATTRIBUTION: Never invent opinions or rulings from outside the provided context. Every major claim or point MUST cite the exact source name in brackets, for example: [Tafsir Ibn Kathir, Surah 1:1] or [Lisan al-Arab, Root صبر].
+4. CLEAR & STRUCTURED: Organize your response into neat markdown sections with bullet points or bold headers.
+5. If the retrieved context does not contain enough information to fully answer the specific question, state clearly what is available in the sources.
 
 ${contextText}`;
 
     let responseText = '';
 
-    // Try Llama-3.1-8B-Instruct via OpenRouter first (ultra-cheap, fast, reliable, perfect for free tier)
-    if (openRouterKey) {
-      try {
-        const payload = {
-          model: 'meta-llama/llama-3.1-8b-instruct',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: message }
-          ],
-          temperature: 0.2,
-          max_tokens: 1500
-        };
+    // Prioritize Gemini models (gemini-2.5-flash / gemini-1.5-flash) via Google Gemini API first per user instruction
+    if (geminiKey) {
+      const models = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash'];
+      for (const modelName of models) {
+        try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [
+                { role: 'user', parts: [{ text: `${systemPrompt}\n\nUSER INQUIRY: ${message}` }] }
+              ],
+              generationConfig: { temperature: 0.1, maxOutputTokens: 2000 }
+            }),
+          });
 
-        const res = await fetch(OPENROUTER_URL, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${openRouterKey}`,
-            'HTTP-Referer': 'http://localhost:3000',
-            'X-Title': 'Al-Juthur RAG Synthesis',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload),
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          responseText = data.choices?.[0]?.message?.content || '';
+          if (res.ok) {
+            const data = await res.json();
+            responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            if (responseText) break;
+          }
+        } catch (e) {
+          console.warn(`Gemini API synthesis error with ${modelName}:`, e);
         }
-      } catch (e) {
-        console.warn('OpenRouter synthesis error, falling back to Gemini:', e);
       }
     }
 
-    // Fallback to Gemini 2.5 Flash if OpenRouter failed or not set
-    if (!responseText && geminiKey) {
-      try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [
-              { role: 'user', parts: [{ text: `${systemPrompt}\n\nUSER INQUIRY: ${message}` }] }
-            ],
-            generationConfig: { temperature: 0.2, maxOutputTokens: 1500 }
-          }),
-        });
+    // Try Gemini models on OpenRouter second (or fallback to other strong models) if direct Gemini key not available/failed
+    if (!responseText && openRouterKey) {
+      const openRouterModels = [
+        'google/gemini-2.5-flash',
+        'google/gemini-flash-1.5',
+        'google/gemini-pro-1.5',
+        'meta-llama/llama-3.1-8b-instruct'
+      ];
 
-        if (res.ok) {
-          const data = await res.json();
-          responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      for (const model of openRouterModels) {
+        try {
+          const payload = {
+            model,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: message }
+            ],
+            temperature: 0.1,
+            max_tokens: 2000
+          };
+
+          const res = await fetch(OPENROUTER_URL, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${openRouterKey}`,
+              'HTTP-Referer': 'http://localhost:3000',
+              'X-Title': 'Al-Juthur RAG Synthesis',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload),
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            responseText = data.choices?.[0]?.message?.content || '';
+            if (responseText) break;
+          }
+        } catch (e) {
+          console.warn(`OpenRouter synthesis error with ${model}:`, e);
         }
-      } catch (e) {
-        console.warn('Gemini synthesis error:', e);
       }
     }
 
     if (!responseText) {
-      throw new Error('Failed to generate synthesis from free-tier AI models.');
+      throw new Error('Failed to generate synthesis from AI models.');
     }
 
     // Deduplicate sources by book + surah:ayah or root

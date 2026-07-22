@@ -9,7 +9,7 @@ export interface PreparedQueryInfo {
   expandedQueryEn: string;
   keywords: string[];
   rootWords: string[];
-  targetSurahAyah?: { surah: number; ayah: number };
+  targetSurahAyah?: { surah?: number; ayah?: number };
   mode: RagMode;
 }
 
@@ -31,13 +31,49 @@ const BASE_CONCEPT_KEYWORDS: Record<string, { ar: string[]; roots: string[] }> =
   praise: { ar: ['الحمد', 'التسبيح', 'الشكر', 'التحميد'], roots: ['حمد', 'سبح', 'شكر'] }
 };
 
+const SURAH_NAME_MAP: Record<string, number> = {
+  'fatiha': 1, 'al-fatiha': 1, 'fatihah': 1, 'al-fatihah': 1, 'the opening': 1,
+  'baqarah': 2, 'al-baqarah': 2, 'the cow': 2,
+  'imran': 3, 'al-imran': 3, 'ali imran': 3,
+  'nisa': 4, 'an-nisa': 4, 'al-nisa': 4,
+  'maida': 5, 'al-maida': 5, 'al-maidah': 5,
+  'an-nam': 6, 'al-anam': 6,
+  'araf': 7, 'al-araf': 7,
+  'anfal': 8, 'al-anfal': 8,
+  'tawbah': 9, 'at-tawbah': 9,
+  'yunus': 10,
+  'hud': 11,
+  'yusuf': 12,
+  'rad': 13, 'ar-rad': 13,
+  'ibrahim': 14,
+  'hijr': 15, 'al-hijr': 15,
+  'nahl': 16, 'an-nahl': 16,
+  'isra': 17, 'al-isra': 17,
+  'kahf': 18, 'al-kahf': 18, 'the cave': 18,
+  'maryam': 19,
+  'taha': 20,
+  'anbiya': 21, 'al-anbiya': 21,
+  'hajj': 22, 'al-hajj': 22,
+  'muminun': 23, 'al-muminun': 23,
+  'nur': 24, 'an-nur': 24, 'the light': 24,
+  'furqan': 25, 'al-furqan': 25,
+  'yasin': 36, 'ya-sin': 36, 'yaseen': 36,
+  'rahman': 55, 'ar-rahman': 55,
+  'waqiah': 56, 'al-waqiah': 56,
+  'mulk': 67, 'al-mulk': 67,
+  'ikhlas': 112, 'al-ikhlas': 112,
+  'falaq': 113, 'al-falaq': 113,
+  'nas': 114, 'an-nas': 114
+};
+
 /**
- * Parses explicit Surah:Ayah coordinates (e.g. "2:255", "Surah 2 Ayah 255").
+ * Parses explicit Surah:Ayah coordinates or Surah names.
  */
-export function parseSurahAyah(text: string): { surah: number; ayah: number } | undefined {
+export function parseSurahAyah(text: string): { surah?: number; ayah?: number } | undefined {
   if (!text) return undefined;
   const clean = text.toLowerCase().trim();
 
+  // Explicit coordinate e.g. 2:255
   const colonMatch = clean.match(/\b(\d{1,3})\s*:\s*(\d{1,3})\b/);
   if (colonMatch) {
     const s = parseInt(colonMatch[1], 10);
@@ -45,6 +81,7 @@ export function parseSurahAyah(text: string): { surah: number; ayah: number } | 
     if (s >= 1 && s <= 114 && a >= 1 && a <= 286) return { surah: s, ayah: a };
   }
 
+  // Verbal match e.g. Surah 2 Ayah 255
   const verbalMatch = clean.match(/\b(?:surah|sura|ch|chapter)\s*(\d{1,3})\s*(?:ayah|ayat|verse|v)?\s*(\d{1,3})\b/);
   if (verbalMatch) {
     const s = parseInt(verbalMatch[1], 10);
@@ -52,12 +89,27 @@ export function parseSurahAyah(text: string): { surah: number; ayah: number } | 
     if (s >= 1 && s <= 114 && a >= 1 && a <= 286) return { surah: s, ayah: a };
   }
 
+  // Check if query mentions Surah by number only (e.g. "Surah 1" or "Surah 112")
+  const surahOnlyMatch = clean.match(/\b(?:surah|sura|chapter)\s*(\d{1,3})\b/);
+  if (surahOnlyMatch) {
+    const s = parseInt(surahOnlyMatch[1], 10);
+    if (s >= 1 && s <= 114) return { surah: s };
+  }
+
+  // Check Surah name map
+  for (const [name, surahNo] of Object.entries(SURAH_NAME_MAP)) {
+    const regex = new RegExp(`\\b${name}\\b`, 'i');
+    if (regex.test(clean)) {
+      return { surah: surahNo };
+    }
+  }
+
   return undefined;
 }
 
 /**
  * LLM 1: Query Rewriter, Scope Guardrail Check, and Arabic Vocabulary Expansion.
- * Uses lightweight/free-tier models (`meta-llama/llama-3.1-8b-instruct` / `gemini-2.5-flash`).
+ * Prioritizes Gemini Flash / Flash-Lite models per user instruction.
  */
 export async function prepareRagQuery(userMessage: string, mode: RagMode = 'default'): Promise<PreparedQueryInfo> {
   const cleanMessage = (userMessage || '').trim();
@@ -86,7 +138,7 @@ export async function prepareRagQuery(userMessage: string, mode: RagMode = 'defa
     }
   }
 
-  // 2. Perform fast deterministic check for out-of-scope intent in specialized modes before LLM call
+  // 2. Fast deterministic guardrail checks
   if (mode === 'grammar') {
     const isAqidahOrFiqh = /\b(aqidah|creed|halal|haram|fatwa|ruling|divorce|marriage|inherit|punishment|predestination|qadar)\b/i.test(cleanMessage);
     if (isAqidahOrFiqh && !/\b(grammar|i'rab|irab|balagha|syntax|particle|rhetoric|linguistic|word|root)\b/i.test(cleanMessage)) {
@@ -119,7 +171,7 @@ export async function prepareRagQuery(userMessage: string, mode: RagMode = 'defa
     }
   }
 
-  // 3. Call Light LLM (OpenRouter Llama / Gemini Flash) to rewrite query for maximum BM25 & Vector recall
+  // 3. Call Gemini (or OpenRouter Gemini) to structure and rewrite the query
   const openRouterKey = process.env.OPENROUTER_API_KEY;
   const geminiKey = process.env.GEMINI_API_KEY;
 
@@ -127,18 +179,12 @@ export async function prepareRagQuery(userMessage: string, mode: RagMode = 'defa
 Your task is to analyze the user's prompt in the context of the selected mode and return a strict JSON object.
 
 ACTIVE MODE: "${mode}"
-MODE DESCRIPTION:
-- default: Balanced & comprehensive commentary (Ibn Kathir, Tabari, Baghawi, Qurtubi, Ibn Ashur). Valid for any general Quranic query.
-- classical: Early Ma'thur & Athar narrations from Sahabah and Salaf (Ibn Kathir, Tabari, Suyuti).
-- grammar: Linguistic syntax, i'rab, rhetorical structure, and particle usage (Zamakhshari, Abu Hayyan, Darwish). NOTE: If user asks aqidah (creed) or general legal verdicts (fiqh) without linguistic context, set isScopeValid=false.
-- modern: Macro-themes, maqasid, and contemporary application (Ibn Ashur, Shanqiti, Tantawi).
-- philosophical: Kalam, theological proofs, and systematic logic (Al-Razi, Al-Alusi, Baydawi). NOTE: If user asks basic fiqh rulings, set isScopeValid=false.
-- lexicon: Word roots, semantic definitions, and dictionary usage (Mufradat, Lisan al-Arab, Maqayis, Lane's).
-
 OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
 {
   "isScopeValid": true or false,
   "warningMessage": "Only if isScopeValid is false, state why clearly and suggest switching to Default Mode.",
+  "targetSurah": null or exact Surah number (1 to 114) if the query mentions a specific Surah (e.g. Al-Fatihah is 1, Al-Baqarah is 2, Al-Ikhlas is 112),
+  "targetAyah": null or exact Ayah number if mentioned,
   "expandedQueryAr": "Exact classical Arabic keywords, vocabulary, and synonyms corresponding to the query for BM25 matching against classical texts.",
   "expandedQueryEn": "Expanded English terminology and synonyms.",
   "keywords": ["keyword1", "keyword2", "keyword3"],
@@ -148,9 +194,9 @@ OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
   try {
     let rawJsonText = '';
 
-    // Try Gemini Flash / Flash-Lite first if available
+    // Prioritize direct Gemini API
     if (geminiKey) {
-      const models = ['gemini-2.5-flash', 'gemini-3.1-flash-lite', 'gemini-3.5-flash'];
+      const models = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash-lite'];
       for (const modelName of models) {
         try {
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiKey}`, {
@@ -176,36 +222,41 @@ OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
       }
     }
 
-    // Try OpenRouter Llama-3.1-8B-Instruct if Gemini didn't return or not set
+    // Fallback to OpenRouter (preferring Gemini models via OpenRouter or reliable fallback)
     if (!rawJsonText && openRouterKey) {
-      const res = await fetch(OPENROUTER_URL, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openRouterKey}`,
-          'HTTP-Referer': 'http://localhost:3000',
-          'X-Title': 'Al-Juthur RAG Router',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: 'meta-llama/llama-3.1-8b-instruct',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: cleanMessage }
-          ],
-          temperature: 0.1,
-          max_tokens: 500,
-          response_format: { type: 'json_object' }
-        })
-      });
+      const models = ['google/gemini-2.5-flash', 'google/gemini-flash-1.5', 'meta-llama/llama-3.1-8b-instruct'];
+      for (const model of models) {
+        try {
+          const res = await fetch(OPENROUTER_URL, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${openRouterKey}`,
+              'HTTP-Referer': 'http://localhost:3000',
+              'X-Title': 'Al-Juthur RAG Router',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              model,
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: cleanMessage }
+              ],
+              temperature: 0.1,
+              max_tokens: 500,
+              response_format: { type: 'json_object' }
+            })
+          });
 
-      if (res.ok) {
-        const data = await res.json();
-        rawJsonText = data.choices?.[0]?.message?.content || '';
+          if (res.ok) {
+            const data = await res.json();
+            rawJsonText = data.choices?.[0]?.message?.content || '';
+            if (rawJsonText) break;
+          }
+        } catch (e) {}
       }
     }
 
     if (rawJsonText) {
-      // Parse JSON response
       const cleanJsonStr = rawJsonText.replace(/```json|```/g, '').trim();
       const parsed = JSON.parse(cleanJsonStr);
 
@@ -221,6 +272,13 @@ OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
           mode
         };
       }
+
+      const surahNum = typeof parsed.targetSurah === 'number' && parsed.targetSurah >= 1 && parsed.targetSurah <= 114
+        ? parsed.targetSurah
+        : parsedRef?.surah;
+      const ayahNum = typeof parsed.targetAyah === 'number' && parsed.targetAyah >= 1 && parsed.targetAyah <= 286
+        ? parsed.targetAyah
+        : parsedRef?.ayah;
 
       const combinedAr = Array.from(new Set([
         ...baseArWords,
@@ -243,7 +301,7 @@ OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
         expandedQueryEn: parsed.expandedQueryEn || cleanMessage,
         keywords: combinedKeywords,
         rootWords: combinedRoots,
-        targetSurahAyah: parsedRef,
+        targetSurahAyah: surahNum ? { surah: surahNum, ayah: ayahNum } : parsedRef,
         mode
       };
     }
@@ -251,7 +309,6 @@ OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
     console.warn('LLM 1 query routing error, using deterministic fallback:', err);
   }
 
-  // Fallback return if LLM unavailable
   return {
     isScopeValid: true,
     expandedQueryAr: baseArWords.join(' '),
