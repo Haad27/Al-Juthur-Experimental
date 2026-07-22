@@ -11,7 +11,110 @@ import {
   Languages,
   BookOpenCheck,
   Zap,
+  BookMarked,
+  Check,
 } from "lucide-react";
+
+// 9 Authentic Mushaf Layouts from the Quranic Universal Library (QUL) database
+const MUSHAF_LAYOUTS = [
+  {
+    id: "v2",
+    name: "Madani Mushaf V2",
+    subtitle: "KFQPC Uthmanic Hafs",
+    fontClass: "font-mushaf-v2",
+    scriptFamily: "Uthmanic",
+    scriptColor: "emerald",
+    region: "Madinah",
+    sample: "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",
+  },
+  {
+    id: "v1",
+    name: "Madani Mushaf V1",
+    subtitle: "Old KFQPC Glyph Font",
+    fontClass: "font-mushaf-v1",
+    scriptFamily: "Uthmanic",
+    scriptColor: "emerald",
+    region: "Madinah",
+    sample: "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",
+  },
+  {
+    id: "uthmani-simple",
+    name: "Uthmani Simple",
+    subtitle: "UthmanicHafs V18 Text",
+    fontClass: "font-mushaf-uthmani-simple",
+    scriptFamily: "Uthmanic",
+    scriptColor: "emerald",
+    region: "Madinah",
+    sample: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+  },
+  {
+    id: "kfqpc",
+    name: "KFQPC Premium",
+    subtitle: "UthmanicHafs V18 HD",
+    fontClass: "font-mushaf-kfqpc",
+    scriptFamily: "Uthmanic",
+    scriptColor: "emerald",
+    region: "Saudi Arabia",
+    sample: "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",
+  },
+  {
+    id: "indopak",
+    name: "Indo-Pak Nastaleeq",
+    subtitle: "Authentic Nastaleeq Script",
+    fontClass: "font-mushaf-indopak",
+    scriptFamily: "Nastaliq",
+    scriptColor: "amber",
+    region: "South Asia",
+    sample: "بِسۡمِ اللّٰہِ الرَّحۡمٰنِ الرَّحِیۡمِ",
+  },
+  {
+    id: "indopak-15",
+    name: "Indo-Pak 15 Lines",
+    subtitle: "Scheherazade · 15 Lines/Page",
+    fontClass: "font-mushaf-indopak-15",
+    scriptFamily: "Nastaliq",
+    scriptColor: "amber",
+    region: "South Asia",
+    sample: "بِسۡمِ اللّٰہِ الرَّحۡمٰنِ الرَّحِیۡمِ",
+  },
+  {
+    id: "indopak-16",
+    name: "Indo-Pak 16 Lines",
+    subtitle: "Lateef · 16 Lines/Page",
+    fontClass: "font-mushaf-indopak-16",
+    scriptFamily: "Nastaliq",
+    scriptColor: "amber",
+    region: "Pakistan",
+    sample: "بِسۡمِ اللّٰہِ الرَّحۡمٰنِ الرَّحِیۡمِ",
+  },
+  {
+    id: "naskh",
+    name: "Digital Naskh",
+    subtitle: "Noto Naskh Arabic · Clean",
+    fontClass: "font-mushaf-naskh",
+    scriptFamily: "Naskh",
+    scriptColor: "blue",
+    region: "Digital",
+    sample: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+  },
+  {
+    id: "warsh",
+    name: "Warsh Script",
+    subtitle: "Amiri · Warsh ʿan Nāfiʿ",
+    fontClass: "font-mushaf-warsh",
+    scriptFamily: "Warsh",
+    scriptColor: "purple",
+    region: "North Africa",
+    sample: "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ",
+  },
+];
+
+const scriptColorMap: Record<string, string> = {
+  emerald: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  amber:   "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  blue:    "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  purple:  "bg-purple-500/10 text-purple-400 border-purple-500/20",
+};
 
 const Settings = () => {
   const {
@@ -23,6 +126,8 @@ const Settings = () => {
     setShowTranslation,
     showWbw,
     setShowWbw,
+    mushafStyle,
+    setMushafStyle,
   } = useGlobalState();
 
   const handleFontSizeChange = (value: number[]) => {
@@ -36,6 +141,8 @@ const Settings = () => {
     { label: "Extra", val: 7 },
   ];
 
+  const activeLayout = MUSHAF_LAYOUTS.find((l) => l.id === (mushafStyle || "v2")) || MUSHAF_LAYOUTS[0];
+
   return (
     <div className="p-4 space-y-4 max-w-md overflow-y-auto scrollable-container max-h-[calc(100vh-190px)]">
       <SettingSection
@@ -43,6 +150,77 @@ const Settings = () => {
         title="Translation Language"
         control={<TranslationSelector />}
         description="Search & select from 124 local offline translations grouped by language."
+      />
+
+      <SettingSection
+        icon={<BookMarked className="w-4 h-4 text-emerald-400" />}
+        title="Mushaf Script Style"
+        control={
+          <div className="space-y-3 pt-1">
+            {/* Active layout preview */}
+            <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-zinc-800/40 border border-zinc-700/40">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-semibold text-zinc-200 truncate">{activeLayout.name}</span>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full border font-medium ${scriptColorMap[activeLayout.scriptColor]}`}>
+                    {activeLayout.scriptFamily}
+                  </span>
+                </div>
+                <span className="text-[11px] text-zinc-500">{activeLayout.subtitle}</span>
+              </div>
+              <span className={`${activeLayout.fontClass} text-emerald-300 text-lg leading-normal`} dir="rtl" lang="ar">
+                ﷽
+              </span>
+            </div>
+
+            {/* 3-column grid of layout options */}
+            <div className="grid grid-cols-3 gap-1.5">
+              {MUSHAF_LAYOUTS.map((layout) => {
+                const isSelected = (mushafStyle || "v2") === layout.id;
+                return (
+                  <button
+                    key={layout.id}
+                    type="button"
+                    onClick={() => setMushafStyle(layout.id)}
+                    title={`${layout.name} — ${layout.subtitle}`}
+                    className={`relative p-2 rounded-xl border text-left flex flex-col gap-1.5 transition-all duration-200 cursor-pointer group ${
+                      isSelected
+                        ? "bg-emerald-500/12 border-emerald-500/50 shadow-lg shadow-emerald-500/10"
+                        : "bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800 hover:border-zinc-600"
+                    }`}
+                  >
+                    {/* Script family badge */}
+                    <div className="flex items-center justify-between w-full">
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full border font-semibold leading-none ${scriptColorMap[layout.scriptColor]}`}>
+                        {layout.scriptFamily}
+                      </span>
+                      {isSelected && (
+                        <Check className="w-3 h-3 text-emerald-400 shrink-0" />
+                      )}
+                    </div>
+
+                    {/* Arabic sample in the layout's font */}
+                    <span
+                      className={`${layout.fontClass} text-right block w-full leading-relaxed truncate`}
+                      style={{ fontSize: "0.85rem", color: isSelected ? "#6ee7b7" : "#a1a1aa" }}
+                      dir="rtl"
+                      lang="ar"
+                    >
+                      {layout.sample}
+                    </span>
+
+                    {/* Layout name */}
+                    <span className={`text-[10px] font-semibold leading-tight truncate ${isSelected ? "text-emerald-300" : "text-zinc-400"}`}>
+                      {layout.name}
+                    </span>
+                    <span className="text-[9px] text-zinc-600 truncate leading-none">{layout.region}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        }
+        description="Choose from 9 authentic Mushaf editions: Uthmanic Hafs (Madani), Indo-Pak Nastaleeq, Digital Naskh, and Warsh script."
       />
 
       <SettingSection

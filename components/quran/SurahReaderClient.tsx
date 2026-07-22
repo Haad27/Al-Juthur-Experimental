@@ -71,6 +71,27 @@ const AyahRow = React.memo(({
   const playAyah = useAudioStore(s => s.playAyah);
   const pause = useAudioStore(s => s.pause);
 
+  const { mushafStyle } = useGlobalState();
+
+  const mushafFontClass = React.useMemo(() => {
+    switch (mushafStyle) {
+      case "v1":              return "font-mushaf-v1";
+      case "v2":              return "font-mushaf-v2";
+      case "uthmani-simple":  return "font-mushaf-uthmani-simple";
+      case "kfqpc":           return "font-mushaf-kfqpc";
+      case "indopak":         return "font-mushaf-indopak";
+      case "indopak-15":      return "font-mushaf-indopak-15";
+      case "indopak-16":      return "font-mushaf-indopak-16";
+      case "naskh":           return "font-mushaf-naskh";
+      case "warsh":           return "font-mushaf-warsh";
+      // Legacy compat
+      case "uthmani":         return "font-mushaf-v2";
+      case "amiri":           return "font-mushaf-warsh";
+      default:                return "font-mushaf-v2";
+    }
+  }, [mushafStyle]);
+
+
   const handleFetchAudio = async () => {
     if (isCurrentlyPlaying) {
       pause();
@@ -127,7 +148,7 @@ const AyahRow = React.memo(({
         <p
           lang="ar"
           id={`atext-${ayah.numberInSurah}`}
-          className={`${amiri.className} tracking-wide leading-loose font-light sm:pr-8 md:pr-16 lg:pr-26 md:pb-8 ${
+          className={`${mushafFontClass} tracking-wide leading-loose font-light sm:pr-8 md:pr-16 lg:pr-26 md:pb-8 ${
             fontSize === 0
               ? "text-lg"
               : fontSize === 1

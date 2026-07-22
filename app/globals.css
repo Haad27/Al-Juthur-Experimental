@@ -2,6 +2,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Google Fonts — for Scheherazade New, Lateef (Nastaliq), Lora (Tafsir serif) */
+@import url('https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;500;600;700&family=Lateef:wght@400;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
+
 /* Custom dark mode variant */
 @custom-variant dark (&:is(.dark *));
 
@@ -126,25 +129,150 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-/* Font Face for UthmanicHafs */
+/* Font Face for UthmanicHafs (KFQPC Glyph Font V2 — Madani Mushaf) */
 @font-face {
   font-family: 'UthmanicHafs';
   src: url('/KFGQPC-KufiExtV14.ttf');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
+}
+
+/* UthmanicHafs V18 — quran.com premium quality */
+@font-face {
+  font-family: 'UthmanicHafs18';
+  src: url('/assets/fonts/UthmanicHafs1Ver18.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Amiri — local (lexicon database) */
+@font-face {
+  font-family: 'Amiri';
+  src: url('/assets/fonts/Amiri-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Amiri';
+  src: url('/assets/fonts/Amiri-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Amiri';
+  src: url('/assets/fonts/Amiri-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Indo-Pak Nastaleeq — local (quran.com database) */
+@font-face {
+  font-family: 'IndoPakNastaleeq';
+  src: url('/assets/fonts/indopak-nastaleeq.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Noto Naskh Arabic — local (quran.com database) */
+@font-face {
+  font-family: 'NotoNaskhArabic';
+  src: url('/assets/fonts/NotoNaskhArabic-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 /* Quran text styling */
 .quran-text {
   font-family: 'UthmanicHafs', serif;
-  direction: rtl
+  direction: rtl;
 }
+
+/* ============================================================ */
+/* MUSHAF SCRIPT STYLES — 9 Authentic QUL Layouts               */
+/* ============================================================ */
+
+/* 1. Madani Mushaf V2 — KFQPC Uthmanic Hafs Glyph Font (default) */
+.font-mushaf-v2 {
+  font-family: 'UthmanicHafs', 'Amiri', serif;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+
+/* 2. Madani Mushaf V1 — Old KFQPC glyph font (same base, lighter weight) */
+.font-mushaf-v1 {
+  font-family: 'UthmanicHafs', 'Amiri', serif;
+  font-weight: 400;
+  letter-spacing: 0.025em;
+}
+
+/* 3. Indo-Pak Nastaliq — authentic Nastaleeq woff2 */
+.font-mushaf-indopak {
+  font-family: 'IndoPakNastaleeq', 'Scheherazade New', 'Lateef', serif;
+  font-size: 1.15em;
+  line-height: 2.4 !important;
+}
+
+/* 4. Uthmani Simple — Amiri Quran Unicode text */
+.font-mushaf-uthmani-simple {
+  font-family: 'UthmanicHafs18', 'Amiri', serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+/* 5. KFQPC Premium — UthmanicHafs V18 (higher quality) */
+.font-mushaf-kfqpc {
+  font-family: 'UthmanicHafs18', 'UthmanicHafs', serif;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* 6. Indo-Pak 15 Lines — Scheherazade New (airier, 15-line spacing) */
+.font-mushaf-indopak-15 {
+  font-family: 'Scheherazade New', 'IndoPakNastaleeq', 'Lateef', serif;
+  font-size: 1.1em;
+  line-height: 2.6 !important;
+}
+
+/* 7. Indo-Pak 16 Lines — Lateef (tighter 16-line layout) */
+.font-mushaf-indopak-16 {
+  font-family: 'Lateef', 'Scheherazade New', serif;
+  line-height: 2.2 !important;
+  font-size: 1.05em;
+}
+
+/* 8. Naskh Digital — Noto Naskh Arabic (screen-optimized) */
+.font-mushaf-naskh {
+  font-family: 'NotoNaskhArabic', 'Amiri', serif;
+  font-weight: 400;
+  letter-spacing: 0.015em;
+}
+
+/* 9. Warsh / Amiri — Amiri italic (Warsh Qirat classical style) */
+.font-mushaf-warsh {
+  font-family: 'Amiri', serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.025em;
+}
+
+/* Legacy compat aliases */
+.font-mushaf-uthmani { font-family: 'UthmanicHafs', 'Amiri', serif; }
+.font-mushaf-amiri   { font-family: 'Amiri', serif; }
+.font-mushaf-indopak-nastaliq { font-family: 'IndoPakNastaleeq', 'Scheherazade New', serif; }
+
 
 @font-face {
   font-family: 'SurahFont';
   src: url('/sura_names.woff2');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 .surah-font {
@@ -292,4 +420,332 @@
 .no-scrollbar {
   -ms-overflow-style: none !important;
   scrollbar-width: none !important;
+}
+
+/* ============================================================ */
+/* TAFSIR IMMERSIVE READING MODE                                */
+/* ============================================================ */
+
+/* Reading Progress Bar */
+.tafsir-reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #b45309, #d97706, #f59e0b);
+  z-index: 9999;
+  transition: width 0.15s ease-out;
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+}
+
+/* Immersive mode root container */
+.tafsir-immersive {
+  background: linear-gradient(160deg, #0f0b07 0%, #1a1208 30%, #150f08 60%, #0d0a06 100%);
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Warm parchment paper texture via CSS (no images) */
+.tafsir-immersive::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(180, 120, 40, 0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 20% 50%, rgba(120, 80, 20, 0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 50%, rgba(120, 80, 20, 0.04) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Vignette edges for focus effect */
+.tafsir-immersive::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse 100% 100% at 50% 50%, transparent 50%, rgba(0,0,0,0.5) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Content above overlays */
+.tafsir-immersive > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Immersive content column \u2014 book-like centered reading area */
+.tafsir-immersive-content {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 8rem;
+}
+
+@media (min-width: 768px) {
+  .tafsir-immersive-content {
+    padding: 3rem 2.5rem 8rem;
+  }
+}
+
+/* Individual ayah immersive card \u2014 no harsh borders, flowing text */
+.tafsir-immersive-ayah {
+  padding: 2.5rem 0;
+  border-bottom: 1px solid rgba(180, 120, 40, 0.12);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.tafsir-immersive-ayah.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.tafsir-immersive-ayah:last-child {
+  border-bottom: none;
+}
+
+/* Golden highlighted ayah (the target from URL param) */
+.tafsir-immersive-ayah.highlighted {
+  background: radial-gradient(ellipse 80% 100% at 50% 0%, rgba(245, 158, 11, 0.06) 0%, transparent 80%);
+  border-radius: 8px;
+  padding: 2.5rem 1.5rem;
+  margin: 0 -1.5rem;
+  animation: goldenPulse 2s ease-out forwards;
+}
+
+@keyframes goldenPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(245,158,11,0.4); }
+  50%  { box-shadow: 0 0 0 8px rgba(245,158,11,0.1); }
+  100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+}
+
+/* Ayah number badge \u2014 ornamental drop-cap style */
+.tafsir-immersive-ayah-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(180,120,40,0.2), rgba(245,158,11,0.1));
+  border: 1px solid rgba(245,158,11,0.3);
+  color: #f59e0b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: 'Lora', Georgia, serif;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+  box-shadow: 0 0 12px rgba(245,158,11,0.15);
+}
+
+/* Arabic verse text in immersive mode */
+.tafsir-immersive-arabic {
+  font-family: 'Amiri', 'UthmanicHafs', serif;
+  font-size: 1.75rem;
+  line-height: 2.4;
+  text-align: right;
+  direction: rtl;
+  color: #fef3c7;
+  text-shadow: 0 0 30px rgba(245, 158, 11, 0.15);
+  padding: 1.25rem 0;
+  border-bottom: 1px solid rgba(180,120,40,0.1);
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .tafsir-immersive-arabic {
+    font-size: 2.1rem;
+    line-height: 2.6;
+  }
+}
+
+/* Tafsir exegesis text in immersive mode */
+.tafsir-immersive-text {
+  font-family: 'Lora', Georgia, 'Times New Roman', serif;
+  font-size: 1.0625rem;
+  line-height: 1.95;
+  color: #d4b896;
+  letter-spacing: 0.01em;
+}
+
+@media (min-width: 768px) {
+  .tafsir-immersive-text {
+    font-size: 1.125rem;
+    line-height: 2.05;
+  }
+}
+
+/* Arabic tafsir text in immersive mode */
+.tafsir-immersive-text-arabic {
+  font-family: 'Amiri', serif;
+  font-size: 1.2rem;
+  line-height: 2.4;
+  direction: rtl;
+  text-align: right;
+  color: #e8d5b0;
+}
+
+@media (min-width: 768px) {
+  .tafsir-immersive-text-arabic {
+    font-size: 1.35rem;
+    line-height: 2.6;
+  }
+}
+
+/* Ornamental divider between ayahs */
+.tafsir-immersive-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.5rem 0;
+}
+
+.tafsir-immersive-divider::before,
+.tafsir-immersive-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(180,120,40,0.3), transparent);
+}
+
+.tafsir-immersive-divider-icon {
+  color: rgba(180,120,40,0.4);
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+}
+
+/* Floating navigation side buttons */
+.tafsir-float-nav {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.tafsir-float-nav:hover,
+.tafsir-float-nav.visible {
+  opacity: 1;
+}
+
+.tafsir-float-nav-left  { left: 1rem; }
+.tafsir-float-nav-right { right: 1rem; }
+
+.tafsir-float-btn {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background: rgba(24, 16, 6, 0.8);
+  border: 1px solid rgba(180,120,40,0.3);
+  color: #d97706;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+.tafsir-float-btn:hover {
+  background: rgba(180,120,40,0.15);
+  border-color: rgba(245,158,11,0.5);
+  color: #f59e0b;
+  box-shadow: 0 4px 20px rgba(245,158,11,0.2);
+  transform: scale(1.08);
+}
+
+/* Reading position indicator */
+.tafsir-reading-indicator {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: rgba(15, 11, 7, 0.85);
+  border: 1px solid rgba(180,120,40,0.25);
+  border-radius: 2rem;
+  padding: 0.4rem 1rem;
+  font-family: 'Lora', serif;
+  font-size: 0.75rem;
+  color: #b45309;
+  backdrop-filter: blur(12px);
+  z-index: 50;
+  letter-spacing: 0.05em;
+  transition: opacity 0.3s ease;
+}
+
+/* Immersive mode toggle button \u2014 floating amber pill */
+.tafsir-immersive-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.tafsir-immersive-toggle-off {
+  background: rgba(180,120,40,0.1);
+  border: 1px solid rgba(180,120,40,0.3);
+  color: #d97706;
+}
+
+.tafsir-immersive-toggle-off:hover {
+  background: rgba(180,120,40,0.18);
+  border-color: rgba(245,158,11,0.5);
+  color: #f59e0b;
+  box-shadow: 0 0 16px rgba(245,158,11,0.15);
+}
+
+.tafsir-immersive-toggle-on {
+  background: linear-gradient(135deg, #92400e, #b45309);
+  border: 1px solid rgba(245,158,11,0.4);
+  color: #fef3c7;
+  box-shadow: 0 0 20px rgba(180,120,40,0.3);
+}
+
+.tafsir-immersive-toggle-on:hover {
+  background: linear-gradient(135deg, #78350f, #92400e);
+  box-shadow: 0 0 28px rgba(180,120,40,0.4);
+}
+
+/* Surah banner in immersive mode */
+.tafsir-immersive-surah-banner {
+  text-align: center;
+  padding: 2.5rem 1rem 2rem;
+  border-bottom: 1px solid rgba(180,120,40,0.15);
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.tafsir-immersive-surah-banner::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%; transform: translateX(-50%);
+  width: 200px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(180,120,40,0.4), transparent);
+}
+
+/* Keyboard shortcut hint */
+.tafsir-kb-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.6875rem;
+  color: rgba(180,120,40,0.5);
+  padding: 0.2rem 0.5rem;
+  border: 1px solid rgba(180,120,40,0.15);
+  border-radius: 0.25rem;
+  font-family: monospace;
+  letter-spacing: 0.05em;
 }

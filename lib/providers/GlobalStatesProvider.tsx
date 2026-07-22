@@ -15,6 +15,8 @@ interface GlobalState {
   setShowWbw: React.Dispatch<React.SetStateAction<boolean>>;
   translationEdition: string;
   setTranslationEdition: (edition: string) => void;
+  mushafStyle: string;
+  setMushafStyle: (style: string) => void;
   
   // AI Translation Global State
   aiInputText: string;
@@ -56,6 +58,22 @@ export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
     setTranslationEditionState(edition);
     if (typeof window !== "undefined") {
       document.cookie = `trans=${encodeURIComponent(edition)}; path=/; max-age=31536000`;
+    }
+  };
+
+  const [mushafStyle, setMushafStyleState] = useState(() => {
+    if (typeof window !== "undefined") {
+      const match = document.cookie.match(/(?:^|; )mushaf=([^;]*)/);
+      return match ? decodeURIComponent(match[1]) : "v2";
+    }
+    return "v2";
+  });
+
+
+  const setMushafStyle = (style: string) => {
+    setMushafStyleState(style);
+    if (typeof window !== "undefined") {
+      document.cookie = `mushaf=${encodeURIComponent(style)}; path=/; max-age=31536000`;
     }
   };
 
@@ -118,6 +136,8 @@ export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
         setShowWbw,
         translationEdition,
         setTranslationEdition,
+        mushafStyle,
+        setMushafStyle,
         
         aiInputText,
         setAiInputText,

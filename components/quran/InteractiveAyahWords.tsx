@@ -9,6 +9,8 @@ import {
 } from '@/components/ui/popover';
 import { Sparkles, ArrowRight, BookOpen, Loader2 } from 'lucide-react';
 
+import { useGlobalState } from '@/lib/providers/GlobalStatesProvider';
+
 interface InteractiveAyahWordsProps {
   surahNumber: number;
   ayahNumber: number;
@@ -41,6 +43,21 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
   wbwTranslation,
   showWbw = true,
 }) => {
+  const { mushafStyle } = useGlobalState();
+
+  const mushafFontClass = React.useMemo(() => {
+    switch (mushafStyle) {
+      case "indopak":
+      case "amiri":
+        return "font-mushaf-uthmani";
+      case "naskh":
+        return "font-mushaf-naskh";
+      case "uthmani":
+      default:
+        return "font-mushaf-uthmani";
+    }
+  }, [mushafStyle]);
+
   const tokens = React.useMemo(() => {
     const rawTokens = ayahText.trim().split(/\s+/);
     let currentWordIdx = 1;
@@ -109,7 +126,7 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
               <span
                 className="group inline-flex flex-col items-center justify-end cursor-pointer px-1 py-0.5 rounded-lg hover:bg-emerald-500/30 transition-colors duration-150 select-none min-w-[2.5rem]"
               >
-                <span className="text-white group-hover:text-emerald-300 font-arabic transition-colors duration-150">{word}</span>
+                <span className={`text-white group-hover:text-emerald-300 ${mushafFontClass} transition-colors duration-150`}>{word}</span>
                 {showWbw && meaning && (
                   <span className="text-[10px] sm:text-[11px] text-zinc-500 dark:text-zinc-400 group-hover:text-emerald-200 font-sans tracking-tight mt-0.5 block max-w-[90px] truncate text-center select-none transition-colors duration-150" dir="ltr">
                     {meaning}
