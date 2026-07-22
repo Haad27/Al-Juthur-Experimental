@@ -1,5 +1,9 @@
 import { getRagDb, RagParentDocument } from './db';
 import { generateEmbedding, cosineSimilarity } from './embeddings';
+import { RagMode } from './query-router';
+import { MODE_AUTHORS } from '../../../scripts/seed_rag_modes';
+import Database from 'better-sqlite3';
+import path from 'path';
 
 export interface HybridSearchFilters {
   surahId?: number;
@@ -8,6 +12,9 @@ export interface HybridSearchFilters {
   workType?: 'tafsir' | 'lexicon';
   language?: string;
   rootWord?: string;
+  mode?: RagMode;
+  keywords?: string[];
+  expandedQueryAr?: string;
 }
 
 export interface ScoredParentDocument extends RagParentDocument {
@@ -17,7 +24,7 @@ export interface ScoredParentDocument extends RagParentDocument {
 }
 
 /**
- * Performs Hybrid Retrieval (BM25 Lexical + Dense Vector + Structural SQL Filter + RRF Fusion)
+ * Performs Hybrid Retrieval (BM25 Lexical + Dense Vector + Structural SQL Filter + Mode Source Bounds + RRF Fusion)
  * and returns full Parent Documents with combined scores.
  */
 export async function searchHybrid(
@@ -59,17 +66,37 @@ export async function searchHybrid(
     sqlParams.push(filters.rootWord);
   }
 
+  // Enforce strict Mode Author/Dict bounds
+  if (filters.mode && MODE_AUTHORS[filters.mode]) {
+    const allowedIds = MODE_AUTHORS[filters.mode];
+    if (filters.mode === 'lexicon') {
+      sqlConditions.push(`workType = 'lexicon' AND authorId IN (${allowedIds.join(',')})`);
+    } else {
+      sqlConditions.push(`workType = 'tafsir' AND authorId IN (${allowedIds.join(',')})`);
+    }
+  }
+
   const whereClause = sqlConditions.join(' AND ');
 
-  // 1. BM25 / FTS5 Search on child chunks
+  // 1. BM25 / FTS5 Search on child chunks (using expanded terms from LLM 1)
   const bm25Matches = new Map<string, { rank: number; snippet: string }>();
   try {
-    // Escape FTS query or prepare simple terms
-    const ftsQuery = cleanQuery
-      .replace(/[^\p{L}\p{N}\s]/gu, ' ')
-      .split(/\s+/)
-      .filter((t) => t.length > 2)
-      .join(' OR ');
+    const searchTokens = new Set<string>();
+    cleanQuery.replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).forEach((t) => { if (t.length > 2) searchTokens.add(t); });
+
+    if (filters.expandedQueryAr) {
+      filters.expandedQueryAr.replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).forEach((t) => { if (t.length > 2) searchTokens.add(t); });
+    }
+    if (filters.keywords) {
+      filters.keywords.forEach((k) => {
+        k.replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).forEach((t) => { if (t.length > 2) searchTokens.add(t); });
+      });
+    }
+    if (filters.rootWord && filters.rootWord.length >= 3) {
+      searchTokens.add(filters.rootWord);
+    }
+
+    const ftsQuery = Array.from(searchTokens).slice(0, 15).join(' OR ');
 
     if (ftsQuery.length > 0) {
       const ftsRows = db
@@ -94,8 +121,9 @@ export async function searchHybrid(
     // FTS query fallback if syntax error
   }
 
-  // 2. Vector Semantic Search on child chunks
-  const queryVec = await generateEmbedding(cleanQuery);
+  // 2. Vector Semantic Search on child chunks (using combined semantic text)
+  const vectorSearchInput = [cleanQuery, filters.expandedQueryAr, ...(filters.keywords || [])].filter(Boolean).join(' ');
+  const queryVec = await generateEmbedding(vectorSearchInput);
   const candidateRows = db
     .prepare(
       `
@@ -131,8 +159,9 @@ export async function searchHybrid(
   // 3. Reciprocal Rank Fusion (RRF) across Parent Documents
   const allParentIds = new Set<string>([...bm25Matches.keys(), ...vectorMatches.keys()]);
 
-  // If no search matches found but we have explicit filters (e.g. Surah 2 Ayah 255), return those parent documents directly
-  if (allParentIds.size === 0 && (filters.surahId || filters.authorId || filters.rootWord)) {
+  // Direct structural fallback: If local vector index didn't hit but we have exact coordinates or mode query, fetch direct from dev.db or local parents
+  if (allParentIds.size === 0 && (filters.surahId || filters.ayahId || filters.mode)) {
+    // First check local rag_parent_documents
     const directParents = db
       .prepare(
         `
@@ -143,12 +172,53 @@ export async function searchHybrid(
       )
       .all(...sqlParams, topK) as RagParentDocument[];
 
-    return directParents.map((p) => ({
-      ...p,
-      rrfScore: 1.0,
-      matchedChildSnippets: [p.content.substring(0, 300)],
-      relevanceExplanation: `Direct structural match for ${p.workTitle}`,
-    }));
+    if (directParents.length > 0) {
+      return directParents.map((p) => ({
+        ...p,
+        rrfScore: 1.0,
+        matchedChildSnippets: [p.content.substring(0, 300)],
+        relevanceExplanation: `Direct structural match for ${p.workTitle}`,
+      }));
+    }
+
+    // If surahId and ayahId exist, fetch directly from dev.db for the allowed mode authors so user ALWAYS gets exact passage
+    if (filters.surahId && filters.ayahId && filters.mode && filters.mode !== 'lexicon') {
+      try {
+        const devDbPath = path.join(process.cwd(), 'prisma', 'dev.db');
+        const devDb = new Database(devDbPath, { readonly: true });
+        const allowedAuthorIds = MODE_AUTHORS[filters.mode];
+        
+        const devRows = devDb.prepare(`
+          SELECT t.id, t.authorId, t.surahId, a.numberInSurah as ayahNo, t.text, au.name as authorName
+          FROM TafsirEntry t
+          JOIN Ayah a ON t.ayahId = a.id
+          JOIN Author au ON t.authorId = au.id
+          WHERE t.authorId IN (${allowedAuthorIds.join(',')})
+            AND t.surahId = ? AND a.numberInSurah = ?
+          LIMIT ?
+        `).all(filters.surahId, filters.ayahId, topK) as any[];
+
+        if (devRows && devRows.length > 0) {
+          return devRows.map((row) => ({
+            id: `tafsir-${row.authorId}-${row.surahId}-${row.ayahNo}`,
+            workType: 'tafsir',
+            authorId: row.authorId,
+            authorName: row.authorName,
+            workTitle: row.authorName,
+            language: row.authorId === 61 ? 'en' : 'ar',
+            surahId: row.surahId,
+            ayahId: row.ayahNo,
+            rootWord: null,
+            content: row.text,
+            rrfScore: 1.0,
+            matchedChildSnippets: [row.text.substring(0, 300)],
+            relevanceExplanation: `Direct database passage from ${row.authorName} (${row.surahId}:${row.ayahNo})`
+          }));
+        }
+      } catch (e) {
+        console.warn('Direct dev.db structural query failed:', e);
+      }
+    }
   }
 
   const k = 60; // RRF smoothing constant

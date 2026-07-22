@@ -1,52 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit } from '@/lib/rateLimit';
-import { supabase } from '@/lib/supabase';
-import { pipeline } from '@xenova/transformers';
-
-let globalExtractor: any = null;
+import { prepareRagQuery, RagMode } from '@/lib/ai/rag/query-router';
+import { searchHybrid, ScoredParentDocument } from '@/lib/ai/rag/hybrid-search';
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
-const SYSTEM_PROMPT = `
-You are a highly knowledgeable Islamic scholar assistant strictly adhering to orthodox Sunni theology.
-Your role is to answer questions related to the Quran, Tafsir, and Islamic linguistics based on the provided authentic context or your internal knowledge base if no context is provided.
-Always maintain a respectful, scholarly tone. Do not invent rulings or give personal fatwas. If you do not know the answer, state that clearly.
-`;
-
-function parseSurahAyah(text: string): { surah: number, ayah: number } | null {
-  const clean = text.toLowerCase().trim();
-
-  // Pattern 1: 4:50 or 4 : 50
-  const colonMatch = clean.match(/\b(\d+)\s*:\s*(\d+)\b/);
-  if (colonMatch) {
-    return { surah: parseInt(colonMatch[1]), ayah: parseInt(colonMatch[2]) };
-  }
-
-  // Pattern 2: ch 4 verse 50, surah 4 ayah 50, chapter 4 verse 50, sura 4 ayah 50
-  const verbalMatch = clean.match(/\b(?:surah|sura|ch|chapter)\s*(\d+)\s*(?:ayah|ayat|verse|v)?\s*(\d+)\b/);
-  if (verbalMatch) {
-    return { surah: parseInt(verbalMatch[1]), ayah: parseInt(verbalMatch[2]) };
-  }
-
-  // Pattern 3: verse 50 of surah 4, ayah 50 in ch 4
-  const reverseMatch = clean.match(/\b(?:ayah|ayat|verse|v)\s*(\d+)\s*(?:of|in)?\s*(?:surah|sura|ch|chapter)?\s*(\d+)\b/);
-  if (reverseMatch) {
-    return { surah: parseInt(reverseMatch[2]), ayah: parseInt(reverseMatch[1]) };
-  }
-
-  return null;
-}
-
 export async function POST(req: NextRequest) {
   try {
-    const { message } = await req.json();
+    const body = await req.json();
+    const message: string = body.message;
+    const mode: RagMode = body.mode || 'default';
 
     const ip = req.headers.get('x-forwarded-for') || '127.0.0.1';
-    const limit = checkRateLimit(`rag_${ip}`, 30, 24 * 60 * 60 * 1000); // 30 requests per 24 hours for RAG
+    const limit = checkRateLimit(`rag_${ip}`, 50, 24 * 60 * 60 * 1000); // 50 requests per 24 hours
     
     if (!limit.success) {
       return NextResponse.json(
-        { success: false, error: 'Daily free RAG chat limit reached. Please try again tomorrow.' },
+        { success: false, error: 'Daily free RAG request limit reached. Please try again tomorrow.' },
         { status: 429 }
       );
     }
@@ -58,120 +28,170 @@ export async function POST(req: NextRequest) {
     const openRouterKey = process.env.OPENROUTER_API_KEY;
     const geminiKey = process.env.GEMINI_API_KEY;
 
-    if (!openRouterKey || !geminiKey) {
+    if (!openRouterKey && !geminiKey) {
       return NextResponse.json(
         { success: false, error: 'API Keys missing from environment variables.' },
         { status: 500 }
       );
     }
 
-    // 1. Check if the user is asking for a specific Surah/Ayah coordinates
-    const parsedRef = parseSurahAyah(message);
-    let documents: any[] = [];
+    // 1. Run LLM 1 Query Rewriter & Scope Guardrail Check
+    const preparedQuery = await prepareRagQuery(message, mode);
 
-    if (parsedRef) {
-      console.log(`Direct routing to Surah ${parsedRef.surah} Ayah ${parsedRef.ayah}`);
-      const { data, error } = await supabase
-        .from('rag_documents')
-        .select('*')
-        .eq('metadata->>surah', parsedRef.surah.toString())
-        .eq('metadata->>ayah', parsedRef.ayah.toString())
-        .limit(10); // Get up to 10 chunks from all books for this verse
-
-      if (error) {
-        console.error("Supabase direct query error:", error);
-      } else if (data) {
-        documents = data;
-      }
-    } else {
-      // Generate Embedding for the User's Message using Xenova Offline
-      let queryEmbedding: number[] = [];
-      try {
-        if (!globalExtractor) {
-          globalExtractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {
-            quantized: false,
-          });
-        }
-        const output = await globalExtractor(message, { pooling: 'mean', normalize: true });
-        queryEmbedding = Array.from(output.data) as number[];
-      } catch (e) {
-        console.error("Failed to generate embedding for query", e);
-      }
-
-      if (queryEmbedding && queryEmbedding.length > 0) {
-        const { data, error } = await supabase.rpc('match_documents', {
-          query_embedding: queryEmbedding,
-          match_threshold: 0.5, // Return matches that are somewhat similar
-          match_count: 5 // Get top 5 most relevant paragraphs
-        });
-
-        if (error) {
-          console.error("Supabase vector search error:", error);
-        } else if (data) {
-          documents = data;
-        }
-      }
+    if (!preparedQuery.isScopeValid) {
+      return NextResponse.json({
+        success: true,
+        isScopeInvalid: true,
+        text: preparedQuery.warningMessage || "This inquiry is out of scope for the selected mode. Please switch to Default Mode.",
+        sources: [],
+        remaining: limit.remaining
+      });
     }
 
-    // 2. Format Context and Sources
-    let contextText = "";
-    let retrievedSources: any[] = [];
+    // 2. Perform Hybrid Search (BM25 + Vector + Mode filtering)
+    const documents = await searchHybrid(
+      message,
+      {
+        mode,
+        surahId: preparedQuery.targetSurahAyah?.surah,
+        ayahId: preparedQuery.targetSurahAyah?.ayah,
+        keywords: preparedQuery.keywords,
+        expandedQueryAr: preparedQuery.expandedQueryAr,
+        rootWord: preparedQuery.rootWords?.[0]
+      },
+      6
+    );
+
+    // 3. Format Context and Sources for Grounded Synthesis
+    let contextText = '';
+    const retrievedSources: Array<{
+      id: string;
+      book: string;
+      authorName: string;
+      surah?: number | null;
+      ayah?: number | null;
+      rootWord?: string | null;
+      snippet: string;
+      workType: 'tafsir' | 'lexicon';
+    }> = [];
 
     if (documents && documents.length > 0) {
-      contextText = "\n\n### Authentic Context Retrieved from Tafsirs & Lexicons:\n" + 
-        documents.map((doc: any) => `[Source: ${doc.metadata?.book || 'Classical Text'} | Surah ${doc.metadata?.surah} Ayah ${doc.metadata?.ayah}]\n${doc.content}`).join("\n\n");
-        
-      retrievedSources = documents.map((doc: any) => ({
-        book: doc.metadata?.book,
-        surah: doc.metadata?.surah,
-        ayah: doc.metadata?.ayah
-      }));
+      contextText = "\n\n### Retrieved Authentic Classical Passages for Mode [" + mode.toUpperCase() + "]:\n" +
+        documents.map((doc: ScoredParentDocument, idx: number) => {
+          const ref = doc.surahId && doc.ayahId
+            ? `Surah ${doc.surahId}:${doc.ayahId}`
+            : doc.rootWord
+              ? `Root [${doc.rootWord}]`
+              : 'Classical Text';
+          return `[Source ${idx + 1}: ${doc.workTitle} (${doc.authorName}) | ${ref} | Lang: ${doc.language.toUpperCase()}]\n${doc.content.substring(0, 2500)}`;
+        }).join("\n\n---\n\n");
+
+      documents.forEach((doc: ScoredParentDocument) => {
+        retrievedSources.push({
+          id: doc.id,
+          book: doc.workTitle,
+          authorName: doc.authorName,
+          surah: doc.surahId,
+          ayah: doc.ayahId,
+          rootWord: doc.rootWord,
+          snippet: doc.content.substring(0, 180),
+          workType: doc.workType
+        });
+      });
     }
 
-    // 3. Call OpenRouter Llama/Qwen with the Context
-    const payload = {
-      model: 'meta-llama/llama-3.1-8b-instruct', // Ultra-cheap, highly reliable model on OpenRouter ($0.0000009 per call)
-      messages: [
-        { role: 'system', content: `${SYSTEM_PROMPT}${contextText}` },
-        { role: 'user', content: message }
-      ],
-      temperature: 0.2,
-      max_tokens: 1000
-    };
+    const systemPrompt = `You are a scholarly RAG Synthesis Engine strictly grounded in the provided classical Quranic texts.
+Your task is to answer the user's inquiry directly using ONLY the retrieved classical passages provided in the context.
 
-    const res = await fetch(OPENROUTER_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openRouterKey}`,
-        'HTTP-Referer': 'http://localhost:3000', // Required by OpenRouter
-        'X-Title': 'Al-Juthur RAG', // Required by OpenRouter
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload),
+ACTIVE RAG MODE: "${mode.toUpperCase()}"
+
+MANDATORY RULES:
+1. STRICT SCHOLARLY ATTRIBUTION: Never invent opinions or rulings from outside the provided context. Every major claim or point MUST cite the exact source name in brackets, for example: [Tafsir Ibn Kathir, Surah 2:255] or [Lisan al-Arab, Root صبر].
+2. MULTILINGUAL CLARITY: If quoting from Arabic sources, provide clear, accurate English translations alongside the terminology.
+3. CLEAR & STRUCTURED: Organize your response into neat markdown sections with bullet points or bold headers.
+4. If the retrieved context does not contain enough information to fully answer the specific question, state clearly what is available in the sources and mention that further classical commentary may be consulted.
+
+${contextText}`;
+
+    let responseText = '';
+
+    // Try Llama-3.1-8B-Instruct via OpenRouter first (ultra-cheap, fast, reliable, perfect for free tier)
+    if (openRouterKey) {
+      try {
+        const payload = {
+          model: 'meta-llama/llama-3.1-8b-instruct',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: message }
+          ],
+          temperature: 0.2,
+          max_tokens: 1500
+        };
+
+        const res = await fetch(OPENROUTER_URL, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openRouterKey}`,
+            'HTTP-Referer': 'http://localhost:3000',
+            'X-Title': 'Al-Juthur RAG Synthesis',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          responseText = data.choices?.[0]?.message?.content || '';
+        }
+      } catch (e) {
+        console.warn('OpenRouter synthesis error, falling back to Gemini:', e);
+      }
+    }
+
+    // Fallback to Gemini 2.5 Flash if OpenRouter failed or not set
+    if (!responseText && geminiKey) {
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [
+              { role: 'user', parts: [{ text: `${systemPrompt}\n\nUSER INQUIRY: ${message}` }] }
+            ],
+            generationConfig: { temperature: 0.2, maxOutputTokens: 1500 }
+          }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        }
+      } catch (e) {
+        console.warn('Gemini synthesis error:', e);
+      }
+    }
+
+    if (!responseText) {
+      throw new Error('Failed to generate synthesis from free-tier AI models.');
+    }
+
+    // Deduplicate sources by book + surah:ayah or root
+    const uniqueSourcesMap = new Map<string, typeof retrievedSources[0]>();
+    retrievedSources.forEach((src) => {
+      const key = `${src.book}_${src.surah || ''}_${src.ayah || ''}_${src.rootWord || ''}`;
+      if (!uniqueSourcesMap.has(key)) {
+        uniqueSourcesMap.set(key, src);
+      }
     });
 
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error('OpenRouter API Error:', errorText);
-      throw new Error(`OpenRouter returned ${res.status}: ${errorText}`);
-    }
-
-    const data = await res.json();
-    const responseText = data.choices?.[0]?.message?.content || '';
-
-    // Deduplicate sources
-    const uniqueSources = Array.from(
-      new Set(retrievedSources.map(s => JSON.stringify(s)))
-    ).map(s => JSON.parse(s));
-
-    return NextResponse.json({ 
-      success: true, 
-      text: responseText, 
-      remaining: limit.remaining,
-      sources: uniqueSources
+    return NextResponse.json({
+      success: true,
+      text: responseText,
+      sources: Array.from(uniqueSourcesMap.values()),
+      remaining: limit.remaining
     });
   } catch (error: any) {
-    console.error('RAG Error:', error);
+    console.error('RAG Engine Error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
