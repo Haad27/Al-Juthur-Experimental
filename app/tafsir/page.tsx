@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, Copy, Languages } from "lucide-react";
+import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, Copy, Languages, User } from "lucide-react";
 import LogoIcon from "@/components/svg/icons/LogoIcon";
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
 import TafsirTextRenderer from "@/components/tafsir/TafsirTextRenderer";
@@ -14,6 +14,7 @@ import { toast } from "sonner";
 interface Author {
   id: number;
   name: string;
+  authorName?: string;
   languageId: number;
   era?: string;
   tags?: { id: number; name: string; color: string }[];
@@ -52,6 +53,45 @@ const getTagColorClass = (color?: string) => {
     case "cyan": return "bg-cyan-500/10 text-cyan-400 border-cyan-500/30";
     default: return "bg-zinc-800/80 text-zinc-400 border-zinc-700/60";
   }
+};
+
+const normalizeText = (text: string): string => {
+  if (!text) return "";
+  return text
+    .toLowerCase()
+    .replace(/[''`’"`\-–—:;,\.\(\)\[\]\/]/g, " ")
+    .replace(/\b(tafseer|tafsir)\b/g, "tafsir")
+    .replace(/\b(kaseer|kahtir|katheer)\b/g, "kathir")
+    .replace(/\b(saddi|saadi|sadi)\b/g, "saadi")
+    .replace(/\b(ashour|ashur)\b/g, "ashur")
+    .replace(/\b(qatab|qutb|qutub)\b/g, "qutb")
+    .replace(/\b(syed|sayyid|sayed)\b/g, "sayyid")
+    .replace(/\b(thanwi|thanvi)\b/g, "thanwi")
+    .replace(/\b(jalalayn|jalalain)\b/g, "jalalayn")
+    .replace(/\s+/g, " ")
+    .trim();
+};
+
+const matchesSmartSearch = (
+  author: Author,
+  language: Language,
+  query: string
+): boolean => {
+  if (!query.trim()) return true;
+
+  const normalizedQuery = normalizeText(query);
+  const queryTokens = normalizedQuery.split(" ").filter(Boolean);
+
+  const rawTarget = `${author.name} ${author.authorName || ""} ${language.name} ${
+    author.tags?.map((t) => t.name).join(" ") || ""
+  } ${author.era || ""}`;
+
+  const normalizedTarget = normalizeText(rawTarget);
+  const strippedTarget = normalizedTarget.replace(/\b(al|ar|an|at|az|as|ad|ash|el)\s+/g, " ");
+
+  return queryTokens.every((token) => {
+    return normalizedTarget.includes(token) || strippedTarget.includes(token);
+  });
 };
 
 export default function TafsirPage() {
@@ -144,10 +184,7 @@ export default function TafsirPage() {
       const matchesEra =
         selectedEra === "All Eras" ||
         author.era === selectedEra;
-      const matchesSearch =
-        author.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        language.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (author.tags?.some((t) => t.name.toLowerCase().includes(searchQuery.toLowerCase())));
+      const matchesSearch = matchesSmartSearch(author, language, searchQuery);
       return matchesLang && matchesEra && matchesSearch;
     });
   }, [allAuthorsWithLang, selectedLanguage, selectedEra, searchQuery]);
@@ -188,11 +225,17 @@ export default function TafsirPage() {
               
               <div>
                 <h1 className="text-base md:text-lg font-bold text-white flex items-center gap-2">
-                  <span className="truncate max-w-[150px] sm:max-w-none">{activeAuthor.name}</span>
+                  <span className="truncate max-w-[200px] sm:max-w-none">{activeAuthor.name}</span>
                   <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-normal">
                     {activeLangName}
                   </span>
                 </h1>
+                {activeAuthor.authorName && (
+                  <p className="text-xs text-zinc-400 flex items-center gap-1.5 mt-0.5">
+                    <User className="size-3 text-emerald-400" />
+                    <span>{activeAuthor.authorName}</span>
+                  </p>
+                )}
               </div>
             </div>
 
@@ -504,7 +547,7 @@ export default function TafsirPage() {
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-zinc-500" />
             <input
               type="text"
-              placeholder="Search author or language..."
+              placeholder="Search by author, tafsir name, language..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-zinc-900/80 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-emerald-500/60 transition-all shadow-sm"
@@ -596,7 +639,14 @@ export default function TafsirPage() {
                     <p className="font-semibold text-white group-hover:text-emerald-400 transition-colors leading-snug">
                       {author.name}
                     </p>
-                    <div className="flex items-center gap-2 text-xs text-zinc-400">
+                    {author.authorName && (
+                      <p className="text-[11px] text-emerald-400/90 font-medium flex items-center gap-1">
+                        <User className="size-3 text-emerald-400/70 shrink-0" />
+                        <span className="text-zinc-400">Author:</span>
+                        <span className="truncate max-w-[200px]" title={author.authorName}>{author.authorName}</span>
+                      </p>
+                    )}
+                    <div className="flex items-center gap-2 text-xs text-zinc-400 pt-0.5">
                       <span className="text-zinc-300 font-medium">{language.name}</span>
                       {author.era && (
                         <>

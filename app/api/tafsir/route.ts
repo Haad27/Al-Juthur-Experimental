@@ -18,7 +18,7 @@ export async function GET(request: Request) {
         const db = new Database(dbPath, { readonly: true });
         
         const langs = db.prepare(`SELECT * FROM Language ORDER BY name ASC`).all() as any[];
-        const authors = db.prepare(`SELECT id, name, languageId, era FROM Author`).all() as any[];
+        const authors = db.prepare(`SELECT id, name, authorName, languageId, era FROM Author`).all() as any[];
         const authorTags = db.prepare(`
           SELECT at.A as authorId, t.id, t.name, t.color
           FROM _AuthorToTag at

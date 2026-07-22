@@ -22,7 +22,8 @@ model Language {
 
 model Author {
   id         Int        @id @default(autoincrement())
-  name       String     // e.g. 'Ibn Kathir'
+  name       String     // e.g. 'Tafsir Ibn Kathir'
+  authorName String?    // e.g. 'Hafiz Ibn Kathir'
   languageId Int
   language   Language   @relation(fields: [languageId], references: [id])
   era        String?    // e.g. 'Early Classical (7th-10th CE)'
