@@ -43,9 +43,27 @@ export default function TranslationSelector() {
 
     // Filter by quick language pill if selected
     if (activeLangPill !== "All") {
-      list = list.filter(
-        (opt) => opt.languageLabel.toLowerCase() === activeLangPill.toLowerCase()
-      );
+      const target = activeLangPill.toLowerCase();
+      list = list.filter((opt) => {
+        const langLabel = opt.languageLabel.toLowerCase();
+        const langCode = opt.languageCode.toLowerCase();
+        const id = opt.identifier.toLowerCase();
+        
+        if (langLabel === target || langCode === target) return true;
+        if (target === "english" && (langCode === "en" || id.startsWith("en."))) return true;
+        if (target === "urdu" && (langCode === "ur" || id.startsWith("ur."))) return true;
+        if (target === "arabic" && (langCode === "ar" || id.startsWith("ar."))) return true;
+        if (target === "spanish" && (langCode === "es" || id.startsWith("es."))) return true;
+        if (target === "french" && (langCode === "fr" || id.startsWith("fr."))) return true;
+        if (target === "german" && (langCode === "de" || id.startsWith("de."))) return true;
+        if (target === "turkish" && (langCode === "tr" || id.startsWith("tr."))) return true;
+        if (target === "persian" && (langCode === "fa" || id.startsWith("fa."))) return true;
+        if (target === "hindi" && (langCode === "hi" || id.startsWith("hi."))) return true;
+        if (target === "bengali" && (langCode === "bn" || id.startsWith("bn."))) return true;
+        if (target === "indonesian" && (langCode === "id" || id.startsWith("id."))) return true;
+        
+        return false;
+      });
     }
 
     // Filter by search text query
@@ -108,13 +126,13 @@ export default function TranslationSelector() {
       <PopoverContent
         align="start"
         side="top"
-        sideOffset={8}
-        collisionPadding={12}
-        className="w-[var(--radix-popover-trigger-width)] min-w-[280px] max-w-[340px] p-3 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border border-zinc-200 dark:border-zinc-800 shadow-2xl rounded-2xl z-50 text-zinc-900 dark:text-zinc-100"
+        sideOffset={6}
+        collisionPadding={16}
+        className="w-[var(--radix-popover-trigger-width)] min-w-[280px] max-w-[340px] max-h-[min(360px,var(--radix-popover-content-available-height))] p-3 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl rounded-2xl z-50 text-zinc-900 dark:text-zinc-100 flex flex-col overflow-hidden"
       >
-        <div className="space-y-2.5">
+        <div className="flex flex-col space-y-2.5 min-h-0 flex-1 overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between px-0.5">
+          <div className="flex items-center justify-between px-0.5 shrink-0">
             <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-500">
               <Sparkles className="w-3.5 h-3.5" />
               <span>Translation (124 Local)</span>
@@ -125,7 +143,7 @@ export default function TranslationSelector() {
           </div>
 
           {/* Quick Language Filter Pills */}
-          <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none text-[11px]">
+          <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none text-[11px] shrink-0">
             {POPULAR_LANGUAGES.map((lang) => {
               const isActive = activeLangPill === lang;
               return (
@@ -147,7 +165,7 @@ export default function TranslationSelector() {
           </div>
 
           {/* Search Bar */}
-          <div className="relative">
+          <div className="relative shrink-0">
             <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input
               type="text"
@@ -159,7 +177,7 @@ export default function TranslationSelector() {
           </div>
 
           {/* List of translations grouped by language */}
-          <div className="max-h-48 overflow-y-auto scrollable-container space-y-2 pr-0.5">
+          <div className="flex-1 min-h-0 overflow-y-auto scrollable-container space-y-2 pr-0.5">
             {Object.keys(groupedOptions).length === 0 ? (
               <div className="text-center py-4 text-xs text-zinc-400">
                 No translation found for &quot;{search || activeLangPill}&quot;
