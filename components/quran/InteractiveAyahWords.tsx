@@ -47,16 +47,21 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
 
   const mushafFontClass = React.useMemo(() => {
     switch (mushafStyle) {
-      case "indopak":
-      case "amiri":
-        return "font-mushaf-uthmani";
-      case "naskh":
-        return "font-mushaf-naskh";
-      case "uthmani":
-      default:
-        return "font-mushaf-uthmani";
+      case "v1":              return "font-mushaf-v1";
+      case "v2":              return "font-mushaf-v2";
+      case "uthmani-simple":  return "font-mushaf-uthmani-simple";
+      case "kfqpc":           return "font-mushaf-kfqpc";
+      case "indopak":         return "font-mushaf-indopak";
+      case "indopak-15":      return "font-mushaf-indopak-15";
+      case "indopak-16":      return "font-mushaf-indopak-16";
+      case "naskh":           return "font-mushaf-naskh";
+      case "warsh":           return "font-mushaf-warsh";
+      case "uthmani":         return "font-mushaf-v2";
+      case "amiri":           return "font-mushaf-warsh";
+      default:                return "font-mushaf-v2";
     }
   }, [mushafStyle]);
+
 
   const tokens = React.useMemo(() => {
     const rawTokens = ayahText.trim().split(/\s+/);

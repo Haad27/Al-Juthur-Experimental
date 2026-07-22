@@ -101,7 +101,7 @@ export default function TafsirTextRenderer({ text, isArabic, immersive }: Tafsir
     // ── IMMERSIVE MODE RENDERING ──────────────────────────────────────────────
     return (
       <div
-        className={isArabic ? "tafsir-immersive-text-arabic" : "tafsir-immersive-text"}
+        className={isArabic ? "tafsir-immersive-text-arabic text-center" : "tafsir-immersive-text text-center"}
         dir={isArabic ? "rtl" : "ltr"}
       >
         {blocks.map((block, idx) => {
@@ -111,6 +111,7 @@ export default function TafsirTextRenderer({ text, isArabic, immersive }: Tafsir
             return (
               <h3
                 key={idx}
+                className="tafsir-immersive-block"
                 style={{
                   fontFamily: isArabic ? "Amiri, serif" : "'Lora', Georgia, serif",
                   fontSize: isArabic ? "1.3rem" : "1.15rem",
@@ -121,6 +122,7 @@ export default function TafsirTextRenderer({ text, isArabic, immersive }: Tafsir
                   marginTop: "2rem",
                   marginBottom: "1rem",
                   letterSpacing: "0.01em",
+                  textAlign: "center",
                 }}
                 dangerouslySetInnerHTML={{ __html: transformedHtml }}
               />
@@ -138,6 +140,7 @@ export default function TafsirTextRenderer({ text, isArabic, immersive }: Tafsir
             return (
               <p
                 key={idx}
+                className="tafsir-immersive-block"
                 style={{
                   fontFamily: "Amiri, serif",
                   fontWeight: 700,
@@ -146,6 +149,7 @@ export default function TafsirTextRenderer({ text, isArabic, immersive }: Tafsir
                   marginTop: "1.5rem",
                   paddingBottom: "0.4rem",
                   borderBottom: "1px solid rgba(180,120,40,0.15)",
+                  textAlign: "center",
                 }}
                 dangerouslySetInnerHTML={{ __html: transformedHtml }}
               />
@@ -155,7 +159,8 @@ export default function TafsirTextRenderer({ text, isArabic, immersive }: Tafsir
           return (
             <p
               key={idx}
-              style={{ marginBottom: "1.25em", textIndent: idx === 0 ? 0 : undefined }}
+              className="tafsir-immersive-block"
+              style={{ marginBottom: "1.25em", textAlign: "center" }}
               dangerouslySetInnerHTML={{ __html: transformedHtml }}
             />
           );
@@ -177,7 +182,7 @@ export default function TafsirTextRenderer({ text, isArabic, immersive }: Tafsir
           return (
             <h3
               key={idx}
-              className="text-lg md:text-xl font-bold text-amber-300 border-b border-amber-500/20 pb-2 mt-6 mb-3"
+              className="text-lg md:text-xl font-bold text-emerald-400 border-b border-emerald-500/20 pb-2 mt-6 mb-3"
               dangerouslySetInnerHTML={{ __html: transformedHtml }}
             />
           );
@@ -203,7 +208,7 @@ export default function TafsirTextRenderer({ text, isArabic, immersive }: Tafsir
         return (
           <p
             key={idx}
-            className="text-zinc-200 text-base md:text-lg leading-relaxed whitespace-pre-wrap"
+            className="text-zinc-300 text-base md:text-lg leading-relaxed whitespace-pre-wrap"
             dangerouslySetInnerHTML={{ __html: transformedHtml }}
           />
         );

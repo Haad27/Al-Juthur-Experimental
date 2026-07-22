@@ -103,6 +103,45 @@ const AyahRow = React.memo(({
     }
   };
 
+  const getArabicFontSize = (size: number): string => {
+    if (size <= 0.5) return "1.1rem";
+    if (size <= 1)   return "1.4rem";
+    if (size <= 1.5) return "1.6rem";
+    if (size <= 2)   return "1.8rem";
+    if (size <= 2.5) return "2.0rem";
+    if (size <= 3)   return "2.2rem";
+    if (size <= 3.5) return "2.4rem";
+    if (size <= 4)   return "2.6rem";
+    if (size <= 4.5) return "2.85rem";
+    if (size <= 5)   return "3.1rem";
+    if (size <= 5.5) return "3.35rem";
+    if (size <= 6)   return "3.6rem";
+    if (size <= 6.5) return "3.9rem";
+    if (size <= 7)   return "4.2rem";
+    if (size <= 7.5) return "4.5rem";
+    return "4.8rem";
+  };
+
+  const getTranslationFontSize = (size: number): string => {
+    if (size <= 0.5) return "0.75rem";
+    if (size <= 1)   return "0.85rem";
+    if (size <= 1.5) return "0.9rem";
+    if (size <= 2)   return "0.95rem";
+    if (size <= 2.5) return "1.0rem";
+    if (size <= 3)   return "1.05rem";
+    if (size <= 3.5) return "1.12rem";
+    if (size <= 4)   return "1.2rem";
+    if (size <= 4.5) return "1.27rem";
+    if (size <= 5)   return "1.35rem";
+    if (size <= 5.5) return "1.45rem";
+    if (size <= 6)   return "1.55rem";
+    if (size <= 6.5) return "1.67rem";
+    if (size <= 7)   return "1.8rem";
+    if (size <= 7.5) return "1.95rem";
+    return "2.1rem";
+  };
+
+
   return (
     <div
       className="border-b-[0.1px] border-b-[var(--sephia-500)] dark:border-b-[#262629ff] sm:px-8 px-4 sm:py-12 py-4 flex flex-col items-end justify-end sm:flex-row sm:gap-12 gap-4 transition-all duration-300"
@@ -148,21 +187,8 @@ const AyahRow = React.memo(({
         <p
           lang="ar"
           id={`atext-${ayah.numberInSurah}`}
-          className={`${mushafFontClass} tracking-wide leading-loose font-light sm:pr-8 md:pr-16 lg:pr-26 md:pb-8 ${
-            fontSize === 0
-              ? "text-lg"
-              : fontSize === 1
-              ? "text-2xl"
-              : fontSize === 2
-              ? "text-3xl"
-              : fontSize === 3
-              ? "sm:text-3xl text-xl"
-              : fontSize === 4
-              ? "sm:text-5xl text-4xl"
-              : fontSize === 5
-              ? "text-6xl"
-              : "text-7xl"
-          }`}
+          className={`${mushafFontClass} tracking-wide leading-loose font-light sm:pr-8 md:pr-16 lg:pr-26 md:pb-8`}
+          style={{ fontSize: getArabicFontSize(fontSize) }}
         >
           <span className="inline-flex items-center justify-center size-6 rounded-full text-xl mr-4">
             ({convertNumberToArabicNumeral(ayah.numberInSurah)})
@@ -180,20 +206,8 @@ const AyahRow = React.memo(({
         {showTranslation && (
           <div>
             <p
-              className={cn(
-                "text-white md:leading-[1.2] leading-[1.8] md:ml-8 text-left pt-6 lg:w-2/3 md:w-4/6",
-                {
-                  "text-sm": fontSize === 0,
-                  "text-[12px]": fontSize === 1,
-                  "text-lg": fontSize === 2,
-                  "text-base": fontSize === 3,
-                  "sm:text-2xl text-xl": fontSize === 4,
-                  "text-3xl": fontSize === 5,
-                  "text-4xl": fontSize === 6,
-                  "text-5xl": fontSize === 7,
-                  "text-6xl": fontSize >= 8,
-                }
-              )}
+              className="text-white md:leading-[1.4] leading-[1.8] md:ml-8 text-left pt-6 lg:w-2/3 md:w-4/6"
+              style={{ fontSize: getTranslationFontSize(fontSize) }}
             >
               {ayah.translation}
             </p>
@@ -202,6 +216,7 @@ const AyahRow = React.memo(({
       </div>
     </div>
   );
+
 });
 
 export default function SurahReaderClient({

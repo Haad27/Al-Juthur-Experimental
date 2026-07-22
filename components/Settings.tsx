@@ -19,14 +19,15 @@ import {
 const MUSHAF_LAYOUTS = [
   {
     id: "v2",
-    name: "Madani Mushaf V2",
-    subtitle: "KFQPC Uthmanic Hafs",
+    name: "Classic Uthmani (Default)",
+    subtitle: "Madani Mushaf · KFQPC Hafs",
     fontClass: "font-mushaf-v2",
     scriptFamily: "Uthmanic",
     scriptColor: "emerald",
     region: "Madinah",
     sample: "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",
   },
+
   {
     id: "v1",
     name: "Madani Mushaf V1",
@@ -135,13 +136,18 @@ const Settings = () => {
   };
 
   const fontPresets = [
+    { label: "0.5x", val: 0.5 },
     { label: "Small", val: 1 },
     { label: "Standard", val: 3 },
     { label: "Large", val: 5 },
     { label: "Extra", val: 7 },
   ];
 
-  const activeLayout = MUSHAF_LAYOUTS.find((l) => l.id === (mushafStyle || "v2")) || MUSHAF_LAYOUTS[0];
+
+  const currentStyle = mushafStyle || "v2";
+  const activeLayout = MUSHAF_LAYOUTS.find(
+    (l) => l.id === currentStyle || (currentStyle === "uthmani" && l.id === "v2")
+  ) || MUSHAF_LAYOUTS[0];
 
   return (
     <div className="p-4 space-y-4 max-w-md overflow-y-auto scrollable-container max-h-[calc(100vh-190px)]">
@@ -176,7 +182,9 @@ const Settings = () => {
             {/* 3-column grid of layout options */}
             <div className="grid grid-cols-3 gap-1.5">
               {MUSHAF_LAYOUTS.map((layout) => {
-                const isSelected = (mushafStyle || "v2") === layout.id;
+                const isSelected =
+                  currentStyle === layout.id ||
+                  (currentStyle === "uthmani" && layout.id === "v2");
                 return (
                   <button
                     key={layout.id}
@@ -189,6 +197,7 @@ const Settings = () => {
                         : "bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800 hover:border-zinc-600"
                     }`}
                   >
+
                     {/* Script family badge */}
                     <div className="flex items-center justify-between w-full">
                       <span className={`text-[9px] px-1.5 py-0.5 rounded-full border font-semibold leading-none ${scriptColorMap[layout.scriptColor]}`}>
@@ -239,14 +248,15 @@ const Settings = () => {
               value={[fontSize]}
               defaultValue={[3]}
               max={8}
-              min={1}
-              step={1}
+              min={0.5}
+              step={0.5}
               onValueChange={handleFontSizeChange}
               className="w-full py-1"
             />
 
             {/* Quick Presets */}
-            <div className="grid grid-cols-4 gap-1.5 pt-1">
+            <div className="grid grid-cols-5 gap-1 pt-1">
+
               {fontPresets.map((preset) => {
                 const isActive = fontSize === preset.val;
                 return (

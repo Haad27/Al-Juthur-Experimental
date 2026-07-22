@@ -1,12 +1,13 @@
+/* Google Fonts — for Scheherazade New, Lateef (Nastaliq), Lora (Tafsir serif) */
+@import url('https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;500;600;700&family=Lateef:wght@400;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
+
 /* Import Tailwind CSS and animations */
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Google Fonts — for Scheherazade New, Lateef (Nastaliq), Lora (Tafsir serif) */
-@import url('https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;500;600;700&family=Lateef:wght@400;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
-
 /* Custom dark mode variant */
 @custom-variant dark (&:is(.dark *));
+
 
 /* Theme settings */
 @theme inline {
@@ -214,7 +215,6 @@
 /* 3. Indo-Pak Nastaliq — authentic Nastaleeq woff2 */
 .font-mushaf-indopak {
   font-family: 'IndoPakNastaleeq', 'Scheherazade New', 'Lateef', serif;
-  font-size: 1.15em;
   line-height: 2.4 !important;
 }
 
@@ -235,7 +235,6 @@
 /* 6. Indo-Pak 15 Lines — Scheherazade New (airier, 15-line spacing) */
 .font-mushaf-indopak-15 {
   font-family: 'Scheherazade New', 'IndoPakNastaleeq', 'Lateef', serif;
-  font-size: 1.1em;
   line-height: 2.6 !important;
 }
 
@@ -243,7 +242,6 @@
 .font-mushaf-indopak-16 {
   font-family: 'Lateef', 'Scheherazade New', serif;
   line-height: 2.2 !important;
-  font-size: 1.05em;
 }
 
 /* 8. Naskh Digital — Noto Naskh Arabic (screen-optimized) */
@@ -492,18 +490,25 @@
 .tafsir-immersive-ayah {
   padding: 2.5rem 0;
   border-bottom: 1px solid rgba(180, 120, 40, 0.12);
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-.tafsir-immersive-ayah.visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
 }
 
 .tafsir-immersive-ayah:last-child {
   border-bottom: none;
+}
+
+/* Paragraph and text block level fade-in / fade-out */
+.tafsir-immersive-block {
+  opacity: 0.15;
+  transform: translateY(4px);
+  transition: opacity 0.12s ease-out, transform 0.12s ease-out;
+  will-change: opacity, transform;
+}
+
+.tafsir-immersive-block.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Golden highlighted ayah (the target from URL param) */
@@ -568,6 +573,7 @@
   line-height: 1.95;
   color: #d4b896;
   letter-spacing: 0.01em;
+  text-align: center !important;
 }
 
 @media (min-width: 768px) {
@@ -583,7 +589,7 @@
   font-size: 1.2rem;
   line-height: 2.4;
   direction: rtl;
-  text-align: right;
+  text-align: center !important;
   color: #e8d5b0;
 }
 
