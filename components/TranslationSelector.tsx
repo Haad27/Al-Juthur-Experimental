@@ -135,7 +135,7 @@ export default function TranslationSelector() {
           <div className="flex items-center justify-between px-0.5 shrink-0">
             <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-500">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Translation (124 Local)</span>
+              <span>Translation ({ALL_TRANSLATION_OPTIONS.length} Editions)</span>
             </div>
             <span className="text-[10px] text-zinc-400 font-mono">
               {filteredOptions.length}

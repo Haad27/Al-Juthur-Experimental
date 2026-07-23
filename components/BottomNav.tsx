@@ -9,7 +9,13 @@ import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 
 const BottomNav = () => {
   const pathname = usePathname();
-  const { immersiveMode } = useGlobalState();
+  const { immersiveMode, setImmersiveMode } = useGlobalState();
+
+  React.useEffect(() => {
+    setImmersiveMode(false);
+  }, [pathname, setImmersiveMode]);
+
+  const isImmersive = immersiveMode && pathname?.startsWith("/tafsir");
 
   const navItems = [
     {
@@ -56,12 +62,17 @@ const BottomNav = () => {
               <Link
                 key={item.label}
                 href={item.href}
+                onClick={() => setImmersiveMode(false)}
                 className="relative flex flex-col items-center justify-center w-full h-full rounded-full transition-colors duration-300"
               >
                 {isActive && (
                   <motion.div
                     layoutId="active-pill"
-                    className="absolute inset-x-1 inset-y-1 bg-white/[0.08] border border-white/[0.04] rounded-2xl z-0"
+                    className={`absolute inset-x-1 inset-y-1 rounded-2xl z-0 ${
+                      isImmersive 
+                        ? "bg-amber-500/15 border border-amber-500/30" 
+                        : "bg-white/[0.08] border border-white/[0.04]"
+                    }`}
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -73,7 +84,7 @@ const BottomNav = () => {
                   }}
                   transition={{ type: "spring", stiffness: 400, damping: 25 }}
                   className={`relative z-10 flex items-center justify-center transition-colors duration-300 ${
-                    isActive ? (immersiveMode ? "text-amber-500" : "text-emerald-400") : "text-zinc-400 hover:text-zinc-200"
+                    isActive ? (isImmersive ? "text-amber-400" : "text-emerald-400") : "text-zinc-400 hover:text-zinc-200"
                   }`}
                 >
                   {item.icon}
@@ -82,7 +93,7 @@ const BottomNav = () => {
                 <span 
                   className={`relative z-10 text-[9px] tracking-wide mt-1 transition-all duration-300 ${
                     isActive 
-                      ? (immersiveMode ? "text-amber-500 font-bold" : "text-emerald-400 font-bold")
+                      ? (isImmersive ? "text-amber-400 font-bold" : "text-emerald-400 font-bold")
                       : "text-zinc-500 font-medium hover:text-zinc-300"
                   }`}
                 >

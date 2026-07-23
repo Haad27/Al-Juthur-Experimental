@@ -10,6 +10,7 @@ import { amiriquran, inter } from "@/app/fonts";
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 
 interface Author {
   id: number;
@@ -97,6 +98,7 @@ const matchesSmartSearch = (
 export default function TafsirPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { immersiveMode, setImmersiveMode } = useGlobalState();
   const [languages, setLanguages] = useState<Language[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("All");
   const [selectedEra, setSelectedEra] = useState<string>("All Eras");
@@ -118,7 +120,6 @@ export default function TafsirPage() {
   const [loadingEntries, setLoadingEntries] = useState<boolean>(false);
 
   // Immersive Mode State
-  const [immersiveMode, setImmersiveMode] = useState<boolean>(false);
   const [readingProgress, setReadingProgress] = useState<number>(0);
   const [currentAyahIndex, setCurrentAyahIndex] = useState<number>(0);
   const [floatNavVisible, setFloatNavVisible] = useState<boolean>(false);
@@ -214,6 +215,16 @@ export default function TafsirPage() {
       if (!isNaN(n) && n >= 1 && n <= 114) setActiveSurah(n);
     }
   }, [urlSurah]);
+
+  // Reset immersive mode when leaving author view or unmounting page
+  useEffect(() => {
+    if (!activeAuthor) {
+      setImmersiveMode(false);
+    }
+    return () => {
+      setImmersiveMode(false);
+    };
+  }, [activeAuthor, setImmersiveMode]);
 
   // Immersive mode: reset scroll to absolute top on enter, reading progress bar & fixed top nav
   useEffect(() => {
@@ -587,78 +598,82 @@ export default function TafsirPage() {
     return (
       <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white ${inter.className}`}>
         {/* Top Navigation Bar */}
-        <div className="sticky top-0 z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-4 md:px-8 py-4">
-          <div className="max-w-[1700px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setActiveAuthor(null)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-900/80 border border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-800/80 text-sm font-medium transition-all text-zinc-300 hover:text-white"
-              >
-                <ArrowLeft className="size-4" />
-                <span>All Tafsirs</span>
-              </button>
-              
-              <div className="h-4 w-px bg-zinc-800 hidden md:block mx-2" />
-              
-              <div>
-                <h1 className="text-base md:text-lg font-bold text-white flex items-center gap-2">
-                  <span className="truncate max-w-[200px] sm:max-w-none">{activeAuthor.name}</span>
-                  <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-normal">
-                    {activeLangName}
-                  </span>
-                </h1>
-                {activeAuthor.authorName && (
-                  <p className="text-xs text-zinc-400 flex items-center gap-1.5 mt-0.5">
-                    <User className="size-3 text-emerald-400" />
-                    <span>{activeAuthor.authorName}</span>
-                  </p>
-                )}
+        <div className="sticky top-0 z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-3 md:px-8 py-3 md:py-4">
+          <div className="max-w-[1700px] mx-auto">
+            {/* Top Row: Back, Title, Immersive Toggle */}
+            <div className="flex items-center justify-between gap-2 md:gap-4 w-full">
+              {/* Left Side: Back + Title */}
+              <div className="flex items-center gap-2 md:gap-4 min-w-0">
+                <button
+                  onClick={() => setActiveAuthor(null)}
+                  className="flex items-center justify-center p-2 md:px-3 md:py-1.5 rounded-lg bg-zinc-900/80 border border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-800/80 text-sm font-medium transition-all text-zinc-300 hover:text-white shrink-0"
+                >
+                  <ArrowLeft className="size-4" />
+                  <span className="hidden md:inline ml-2">All Tafsirs</span>
+                </button>
+                
+                <div className="h-4 w-px bg-zinc-800 hidden md:block mx-1 shrink-0" />
+                
+                <div className="min-w-0">
+                  <h1 className="text-sm md:text-lg font-bold text-white flex items-center gap-2 truncate">
+                    <span className="truncate">{activeAuthor.name}</span>
+                    <span className="hidden sm:inline-flex text-[10px] md:text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-normal shrink-0 items-center justify-center">
+                      {activeLangName}
+                    </span>
+                  </h1>
+                  {activeAuthor.authorName && (
+                    <p className="hidden md:flex text-xs text-zinc-400 items-center gap-1.5 mt-0.5 truncate">
+                      <User className="size-3 text-emerald-400 shrink-0" />
+                      <span className="truncate">{activeAuthor.authorName}</span>
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* Immersive Mode Toggle Button */}
-            <div className="flex items-center gap-3">
+              {/* Right Side: Immersive Mode Toggle */}
               <button
                 onClick={() => setImmersiveMode(true)}
-                className="tafsir-immersive-toggle tafsir-immersive-toggle-off"
+                className="tafsir-immersive-toggle tafsir-immersive-toggle-off shrink-0 !p-2 md:!px-3 md:!py-1.5"
                 title="Enter Immersive Reading Mode (R)"
               >
-                <BookOpenText className="size-3.5" />
-                <span>Immersive Mode</span>
-                <span className="tafsir-kb-hint hidden md:inline">R</span>
+                <BookOpenText className="size-4" />
+                <span className="hidden md:inline ml-2 text-sm font-medium">Immersive Mode</span>
+                <span className="tafsir-kb-hint hidden md:inline ml-2">R</span>
               </button>
             </div>
 
-            {/* Mobile Navigation (Surah Dropdown & Ayah Scroller) */}
-            <div className="md:hidden flex flex-col gap-3 w-full">
+            {/* Bottom Row (Mobile Only): Surah & Ayah Dropdowns */}
+            <div className="md:hidden flex gap-2 w-full mt-3">
               {/* Surah Dropdown */}
-              <div className="relative w-full">
+              <div className="relative flex-1 min-w-0">
                 <select
                   value={activeSurah}
                   onChange={(e) => setActiveSurah(Number(e.target.value))}
-                  className="w-full appearance-none bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5 text-sm text-zinc-300 font-medium focus:outline-none focus:border-zinc-500 pr-10 shadow-sm"
+                  className="w-full appearance-none bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-300 font-medium focus:outline-none focus:border-emerald-500/50 pr-8 shadow-sm truncate"
                 >
                   {SURAHS_DATA.map((s) => (
                     <option key={s.number} value={s.number} className="bg-zinc-900 text-zinc-200">
-                      {s.number}. {s.englishName} ({s.name})
+                      {s.number}. {s.englishName}
                     </option>
                   ))}
                 </select>
-                <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-zinc-500 pointer-events-none rotate-90" />
+                <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 size-3.5 text-zinc-500 pointer-events-none rotate-90" />
               </div>
 
-              {/* Horizontal Ayah Pills Scroller */}
-              <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-1.5 -mx-4 px-4 sm:mx-0 sm:px-0">
-                {Array.from({ length: currentSurahMeta.numberOfAyahs }, (_, i) => i + 1).map((num) => (
-                  <button
-                    key={num}
-                    onClick={() => scrollToAyah(num)}
-                    className="flex-shrink-0 size-9 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-bold text-xs transition-all shadow-sm hover:bg-emerald-500 hover:text-zinc-950 active:scale-95"
-                    title={`Jump to Ayah ${num}`}
-                  >
-                    {num}
-                  </button>
-                ))}
+              {/* Ayah Dropdown */}
+              <div className="relative w-28 shrink-0">
+                <select
+                  value={currentAyahIndex + 1}
+                  onChange={(e) => scrollToAyah(Number(e.target.value))}
+                  className="w-full appearance-none bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-300 font-medium focus:outline-none focus:border-emerald-500/50 pr-8 shadow-sm"
+                >
+                  {Array.from({ length: currentSurahMeta.numberOfAyahs }, (_, i) => i + 1).map((num) => (
+                    <option key={num} value={num} className="bg-zinc-900 text-zinc-200">
+                      Ayah {num}
+                    </option>
+                  ))}
+                </select>
+                <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 size-3.5 text-zinc-500 pointer-events-none rotate-90" />
               </div>
             </div>
           </div>
