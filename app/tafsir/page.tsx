@@ -215,22 +215,22 @@ export default function TafsirPage() {
     }
   }, [urlSurah]);
 
-  // Immersive mode: reading progress bar & scroll-based top nav hiding
+  // Immersive mode: reset scroll to absolute top on enter, reading progress bar & fixed top nav
   useEffect(() => {
     if (!immersiveMode) return;
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    setTopNavVisible(true);
+
     const onScroll = () => {
       const scrollTop = window.scrollY;
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
       const pct = docHeight > 0 ? Math.min(100, (scrollTop / docHeight) * 100) : 0;
       setReadingProgress(pct);
 
-      // Hide navbar when scrolling down, reveal reliably on any scroll up or top of page
-      const prev = lastScrollYRef.current;
-      if (scrollTop < 60) {
-        setTopNavVisible(true);
-      } else if (scrollTop > prev + 5) {
+      // Hide top nav when scrolling down, show when scrolling up
+      if (scrollTop > lastScrollYRef.current && scrollTop > 100) {
         setTopNavVisible(false);
-      } else if (scrollTop < prev - 3) {
+      } else {
         setTopNavVisible(true);
       }
       lastScrollYRef.current = scrollTop;
@@ -240,6 +240,7 @@ export default function TafsirPage() {
       if (floatNavTimerRef.current) clearTimeout(floatNavTimerRef.current);
       floatNavTimerRef.current = setTimeout(() => setFloatNavVisible(false), 2000);
     };
+    
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       window.removeEventListener("scroll", onScroll);
@@ -265,29 +266,8 @@ export default function TafsirPage() {
     );
     ayahRefs.current.forEach((el) => { if (el) indexObserver.observe(el); });
 
-    // 2. Block observer (fades individual paragraph text blocks in/out as you scroll through them)
-    const blockObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("visible");
-          } else {
-            entry.target.classList.remove("visible");
-          }
-        });
-      },
-      { threshold: 0, rootMargin: "150px 0px 50px 0px" }
-    );
-
-    const timer = setTimeout(() => {
-      const blocks = document.querySelectorAll(".tafsir-immersive-block");
-      blocks.forEach((b) => blockObserver.observe(b));
-    }, 100);
-
     return () => {
-      clearTimeout(timer);
       indexObserver.disconnect();
-      blockObserver.disconnect();
     };
   }, [immersiveMode, tafsirEntries, loadingEntries]);
 
@@ -360,14 +340,14 @@ export default function TafsirPage() {
     // ── IMMERSIVE MODE ─────────────────────────────────────────
     if (immersiveMode) {
       return (
-        <div className="tafsir-immersive text-white pt-16">
+        <div className="tafsir-immersive text-white">
           {/* Reading Progress Bar (Fixed) */}
           <div className="fixed top-0 left-0 right-0 z-50 tafsir-reading-progress" style={{ width: `${readingProgress}%` }} />
 
-          {/* Immersive Top Bar (Fixed Glossy Glassmorphism) */}
-          <div className={`fixed top-0 left-0 right-0 z-40 backdrop-blur-2xl border-b px-4 md:px-8 py-3.5 transition-all duration-300 ${topNavVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}
+          {/* Immersive Top Bar (Sticky Glossy Glassmorphism) */}
+          <div className={`sticky top-0 z-40 backdrop-blur-2xl border-b px-4 md:px-8 py-3.5 transition-all duration-300 ${topNavVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}
             style={{ 
-              background: "linear-gradient(180deg, rgba(28, 18, 9, 0.95) 0%, rgba(18, 12, 6, 0.85) 100%)", 
+              background: "linear-gradient(180deg, rgba(28, 18, 9, 0.6) 0%, rgba(18, 12, 6, 0.4) 100%)", 
               borderColor: "rgba(217, 119, 6, 0.25)",
               boxShadow: "0 10px 30px -10px rgba(0, 0, 0, 0.8), 0 0 15px rgba(217, 119, 6, 0.1)"
             }}>
@@ -406,7 +386,7 @@ export default function TafsirPage() {
                       </option>
                     ))}
                   </select>
-                  <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 size-3 pointer-events-none" style={{ color: "#d97706" }} />
+                  <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 size-3 pointer-events-none rotate-90" style={{ color: "#d97706" }} />
                 </div>
 
                 {/* Ayah selector in immersive mode */}
@@ -423,35 +403,54 @@ export default function TafsirPage() {
                       </option>
                     ))}
                   </select>
-                  <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 size-3 pointer-events-none" style={{ color: "#d97706" }} />
+                  <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 size-3 pointer-events-none rotate-90" style={{ color: "#d97706" }} />
                 </div>
 
                 {/* Exit immersive toggle */}
                 <button
                   onClick={() => setImmersiveMode(false)}
-                  className="tafsir-immersive-toggle tafsir-immersive-toggle-on"
+                  className="tafsir-immersive-toggle tafsir-immersive-toggle-on group"
+                  title="Exit Immersive Mode"
                 >
-                  <X className="size-3.5" />
-                  <span className="hidden xs:inline">Exit</span>
-                  <span className="tafsir-kb-hint hidden md:inline">R</span>
+                  <X className="size-4 text-amber-200 group-hover:text-white transition stroke-[2.5]" />
+                  <span className="font-semibold tracking-wide text-amber-100 group-hover:text-white">Exit</span>
                 </button>
               </div>
             </div>
 
-            {/* Mobile surah selector */}
-            <div className="sm:hidden mt-2">
-              <select
-                value={activeSurah}
-                onChange={(e) => { setActiveSurah(Number(e.target.value)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                className="w-full appearance-none text-xs rounded-lg px-3 py-2 focus:outline-none"
-                style={{ background: "rgba(180,120,40,0.08)", border: "1px solid rgba(180,120,40,0.2)", color: "#d97706" }}
-              >
-                {SURAHS_DATA.map((s) => (
-                  <option key={s.number} value={s.number} style={{ background: "#1a1208" }}>
-                    {s.number}. {s.englishName} — {s.name}
-                  </option>
-                ))}
-              </select>
+            {/* Mobile surah & ayah selector */}
+            <div className="sm:hidden mt-2 flex items-center gap-2">
+              <div className="relative flex-1">
+                <select
+                  value={activeSurah}
+                  onChange={(e) => { setActiveSurah(Number(e.target.value)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                  className="w-full appearance-none text-xs rounded-lg px-3 py-2 pr-7 focus:outline-none"
+                  style={{ background: "rgba(180,120,40,0.08)", border: "1px solid rgba(180,120,40,0.2)", color: "#d97706" }}
+                >
+                  {SURAHS_DATA.map((s) => (
+                    <option key={s.number} value={s.number} style={{ background: "#1a1208" }}>
+                      {s.number}. {s.englishName}
+                    </option>
+                  ))}
+                </select>
+                <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 size-3 pointer-events-none rotate-90" style={{ color: "#d97706" }} />
+              </div>
+              
+              <div className="relative w-28 shrink-0">
+                <select
+                  value={currentAyahIndex + 1}
+                  onChange={(e) => scrollToAyah(Number(e.target.value))}
+                  className="w-full appearance-none text-xs rounded-lg px-3 py-2 pr-7 focus:outline-none"
+                  style={{ background: "rgba(180,120,40,0.08)", border: "1px solid rgba(180,120,40,0.2)", color: "#d97706" }}
+                >
+                  {Array.from({ length: currentSurahMeta.numberOfAyahs }, (_, i) => i + 1).map((num) => (
+                    <option key={num} value={num} style={{ background: "#1a1208" }}>
+                      Ayah {num}
+                    </option>
+                  ))}
+                </select>
+                <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 size-3 pointer-events-none rotate-90" style={{ color: "#d97706" }} />
+              </div>
             </div>
           </div>
 
@@ -556,8 +555,8 @@ export default function TafsirPage() {
           </div>
 
           {/* Mobile bottom ayah scroller */}
-          <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden"
-            style={{ background: "rgba(15,11,7,0.95)", borderTop: "1px solid rgba(180,120,40,0.15)", backdropFilter: "blur(12px)", padding: "0.5rem 1rem" }}>
+          <div className={`fixed bottom-0 left-0 right-0 z-50 md:hidden transition-all duration-300 ${topNavVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"}`}
+            style={{ background: "rgba(15, 11, 7, 0.4)", borderTop: "1px solid rgba(180,120,40,0.25)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", padding: "0.5rem 1rem" }}>
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
               {Array.from({ length: currentSurahMeta.numberOfAyahs }, (_, i) => i + 1).map((num) => (
                 <button
@@ -588,7 +587,7 @@ export default function TafsirPage() {
     return (
       <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white ${inter.className}`}>
         {/* Top Navigation Bar */}
-        <div className="sticky top-0 z-40 bg-zinc-950/90 backdrop-blur-lg border-b border-zinc-800/80 px-4 md:px-8 py-4">
+        <div className="sticky top-0 z-40 bg-zinc-950/20 backdrop-blur-3xl border-b border-zinc-800/80 px-4 md:px-8 py-4">
           <div className="max-w-[1700px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <button
@@ -853,7 +852,7 @@ export default function TafsirPage() {
     <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white pb-24 ${inter.className}`}>
       
       {/* Top Navigation Bar (Library View) */}
-      <div className="sticky top-0 z-40 bg-zinc-950/90 backdrop-blur-lg border-b border-zinc-800/80 px-4 md:px-8 py-3">
+      <div className="sticky top-0 z-40 bg-zinc-950/20 backdrop-blur-3xl border-b border-zinc-800/80 px-4 md:px-8 py-3">
         <div className="max-w-[1700px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Logo and App Name */}
           <div className="flex items-center gap-4">

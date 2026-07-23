@@ -138,6 +138,60 @@ export function normalizeRootVariants(root: string): { compact: string; spaced: 
   };
 }
 
+export interface PdfDictionaryInfo {
+  id: string;
+  name: string;
+  author: string;
+  language: 'English' | 'Urdu';
+  filePath: string;
+  sizeMb: string;
+  description: string;
+}
+
+/**
+ * Returns list of PDF reference lexicons available in database/pdf/lexicon
+ */
+export function getPdfDictionaries(): PdfDictionaryInfo[] {
+  return [
+    {
+      id: 'pdf-abdel-haleem',
+      name: "Arabic-English Dictionary of Qur'anic Usage",
+      author: 'Elsaid M. Badawi & Muhammad Abdel Haleem (with Nouman Ali Khan notes)',
+      language: 'English',
+      filePath: 'english/(Nouman ali khan) - Muhammad Abdel Haleem Arabic-English-Dictionary-Quranic.pdf',
+      sizeMb: '8.7 MB',
+      description: 'Comprehensive modern Arabic-English dictionary of Quranic vocabulary and contextual nuances.'
+    },
+    {
+      id: 'pdf-abdul-mannan',
+      name: 'Dictionary of the Holy Quran',
+      author: 'Abdul Mannan Omar',
+      language: 'English',
+      filePath: 'english/Dictionary of Quran by Abdul Manan omar .pdf',
+      sizeMb: '4.9 MB',
+      description: 'Classic English reference work mapping Quranic root words to classical Arabic lexicon meanings.'
+    },
+    {
+      id: 'pdf-lughatul-quran-en',
+      name: 'Lughat-ul-Quran Dictionary',
+      author: 'Scholarly Collective',
+      language: 'English',
+      filePath: 'english/lughatul quran dictionary.pdf',
+      sizeMb: '18.3 MB',
+      description: 'Detailed English vocabulary reference and root guide for study of classical Quranic Arabic.'
+    },
+    {
+      id: 'pdf-lutf-ur-rahman-ur',
+      name: 'Quranic Dictionary (لغات القرآن)',
+      author: 'Maulana Lutf-ur-Rahman (مولانا لطف الرحمن)',
+      language: 'Urdu',
+      filePath: 'urdu/Quranic Dictionary By Lutf ur Rahman.pdf',
+      sizeMb: '71.2 MB',
+      description: 'Extensive Urdu reference dictionary for Quranic root words, grammar, and classical meanings.'
+    }
+  ];
+}
+
 /**
  * Returns list of all available dictionaries
  */

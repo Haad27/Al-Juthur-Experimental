@@ -468,7 +468,7 @@
 }
 
 /* Content above overlays */
-.tafsir-immersive > * {
+.tafsir-immersive-content {
   position: relative;
   z-index: 1;
 }
@@ -498,17 +498,15 @@
   border-bottom: none;
 }
 
-/* Paragraph and text block level fade-in / fade-out */
+/* Paragraph and text blocks - fully visible immediately without fade */
 .tafsir-immersive-block {
-  opacity: 0.15;
-  transform: translateY(4px);
-  transition: opacity 0.12s ease-out, transform 0.12s ease-out;
-  will-change: opacity, transform;
+  opacity: 1;
+  transform: none;
 }
 
 .tafsir-immersive-block.visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
 }
 
 /* Golden highlighted ayah (the target from URL param) */
@@ -714,15 +712,22 @@
 }
 
 .tafsir-immersive-toggle-on {
-  background: linear-gradient(135deg, #92400e, #b45309);
-  border: 1px solid rgba(245,158,11,0.4);
-  color: #fef3c7;
-  box-shadow: 0 0 20px rgba(180,120,40,0.3);
+  background: linear-gradient(135deg, rgba(217, 119, 6, 0.3), rgba(180, 83, 9, 0.55));
+  border: 1.5px solid rgba(245, 158, 11, 0.6);
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.3);
 }
 
 .tafsir-immersive-toggle-on:hover {
-  background: linear-gradient(135deg, #78350f, #92400e);
-  box-shadow: 0 0 28px rgba(180,120,40,0.4);
+  background: linear-gradient(135deg, rgba(217, 119, 6, 0.45), rgba(180, 83, 9, 0.75));
+  border-color: #fbbf24;
+  box-shadow: 0 0 24px rgba(245, 158, 11, 0.45);
+}
+
+.tafsir-immersive-toggle-on .tafsir-kb-hint {
+  color: #fef3c7;
+  border-color: rgba(254, 243, 199, 0.35);
+  background: rgba(0, 0, 0, 0.35);
 }
 
 /* Surah banner in immersive mode */

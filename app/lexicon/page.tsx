@@ -34,6 +34,16 @@ interface DictionaryInfo {
   link: string;
 }
 
+interface PdfDictionaryInfo {
+  id: string;
+  name: string;
+  author: string;
+  language: 'English' | 'Urdu';
+  filePath: string;
+  sizeMb: string;
+  description: string;
+}
+
 interface StructuredLaneEntry {
   id: number;
   root: string;
@@ -88,6 +98,7 @@ function LexiconPageContent() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<RootLexiconResult | null>(null);
   const [dictionaries, setDictionaries] = useState<DictionaryInfo[]>([]);
+  const [pdfDictionaries, setPdfDictionaries] = useState<PdfDictionaryInfo[]>([]);
   const [selectedDictId, setSelectedDictId] = useState<number | 'all'>(1); // Default to Lane's
   const [langFilter, setLangFilter] = useState<'all' | 'en' | 'ar'>('all');
   const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
@@ -101,12 +112,15 @@ function LexiconPageContent() {
   }, [searchParams]);
 
   useEffect(() => {
-    // Fetch available dictionaries
+    // Fetch available dictionaries & PDF lexicons
     fetch('/api/lexicon/dictionaries')
       .then((r) => r.json())
       .then((data) => {
         if (data.dictionaries) {
           setDictionaries(data.dictionaries);
+        }
+        if (data.pdfDictionaries) {
+          setPdfDictionaries(data.pdfDictionaries);
         }
       })
       .catch((e) => console.error('Failed to load dictionaries', e));
@@ -371,6 +385,55 @@ function LexiconPageContent() {
                   ))}
                 </div>
               </div>
+
+              {/* PDF Reference Lexicons (English & Urdu) */}
+              {pdfDictionaries.length > 0 && (
+                <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-emerald-400" />
+                      PDF Reference Lexicons ({pdfDictionaries.length})
+                    </h3>
+                    <span className="text-[10px] uppercase bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded-full">
+                      Full Books
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 mb-4">
+                    Full digital PDF editions of English & Urdu Quranic reference dictionaries:
+                  </p>
+                  <div className="space-y-3">
+                    {pdfDictionaries.map((pdf) => (
+                      <div
+                        key={pdf.id}
+                        className="p-3.5 rounded-xl bg-slate-800/40 border border-slate-800 hover:border-emerald-500/40 transition-all flex flex-col gap-2"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <h4 className="text-xs font-bold text-white leading-snug">{pdf.name}</h4>
+                            <p className="text-[11px] text-slate-400 mt-0.5">{pdf.author}</p>
+                          </div>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded shrink-0 ${pdf.language === 'English' ? 'bg-blue-500/20 text-blue-300' : 'bg-emerald-500/20 text-emerald-300'}`}>
+                            {pdf.language}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-300 leading-normal">{pdf.description}</p>
+                        <div className="flex items-center justify-between pt-2 border-t border-slate-800 mt-1">
+                          <span className="text-[10px] text-slate-400 font-mono">{pdf.sizeMb}</span>
+                          <a
+                            href={`/api/lexicon/pdf?file=${encodeURIComponent(pdf.filePath)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition text-xs font-medium"
+                          >
+                            <span>Open PDF</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Main Definition Display Panel */}
