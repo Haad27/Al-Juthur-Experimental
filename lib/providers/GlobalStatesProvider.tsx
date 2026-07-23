@@ -18,6 +18,9 @@ interface GlobalState {
   mushafStyle: string;
   setMushafStyle: (style: string) => void;
   
+  immersiveMode: boolean;
+  setImmersiveMode: React.Dispatch<React.SetStateAction<boolean>>;
+  
   // AI Translation Global State
   aiInputText: string;
   setAiInputText: React.Dispatch<React.SetStateAction<string>>;
@@ -44,6 +47,7 @@ export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
 }) => {
   const [fontSize, setFontSize] = useState(3);
   const [mistakeDetection, setMistakeDetection] = useState(false);
+  const [immersiveMode, setImmersiveMode] = useState(false);
   const [showTranslation, setShowTranslation] = useState(true);
   const [showWbw, setShowWbw] = useState(true);
   const [translationEdition, setTranslationEditionState] = useState(() => {
@@ -130,6 +134,8 @@ export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
         setFontSize,
         mistakeDetection,
         setMistakeDetection,
+        immersiveMode,
+        setImmersiveMode,
         showTranslation,
         setShowTranslation,
         showWbw,

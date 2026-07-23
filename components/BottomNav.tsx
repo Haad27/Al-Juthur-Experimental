@@ -5,9 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, BookOpen, ScrollText, Library, Languages, Bot } from "lucide-react";
 import { motion } from "framer-motion";
+import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 
 const BottomNav = () => {
   const pathname = usePathname();
+  const { immersiveMode } = useGlobalState();
 
   const navItems = [
     {
@@ -39,7 +41,7 @@ const BottomNav = () => {
 
   return (
     <div className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-md z-50 md:hidden">
-      <nav className="rounded-full border border-white/[0.08] border-t-white/[0.15] bg-white/[0.07] backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] px-2 py-1.5">
+      <nav className="rounded-full border border-zinc-700/50 border-t-zinc-600/50 bg-zinc-950/60 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] px-2 py-1.5">
         <div className="flex justify-around items-center h-14 relative">
           {navItems.map((item) => {
             const isActive = 
@@ -71,7 +73,7 @@ const BottomNav = () => {
                   }}
                   transition={{ type: "spring", stiffness: 400, damping: 25 }}
                   className={`relative z-10 flex items-center justify-center transition-colors duration-300 ${
-                    isActive ? "text-emerald-400" : "text-zinc-400 hover:text-zinc-200"
+                    isActive ? (immersiveMode ? "text-amber-500" : "text-emerald-400") : "text-zinc-400 hover:text-zinc-200"
                   }`}
                 >
                   {item.icon}
@@ -80,7 +82,7 @@ const BottomNav = () => {
                 <span 
                   className={`relative z-10 text-[9px] tracking-wide mt-1 transition-all duration-300 ${
                     isActive 
-                      ? "text-emerald-400 font-bold" 
+                      ? (immersiveMode ? "text-amber-500 font-bold" : "text-emerald-400 font-bold")
                       : "text-zinc-500 font-medium hover:text-zinc-300"
                   }`}
                 >

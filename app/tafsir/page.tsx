@@ -344,10 +344,10 @@ export default function TafsirPage() {
           {/* Reading Progress Bar (Fixed) */}
           <div className="fixed top-0 left-0 right-0 z-50 tafsir-reading-progress" style={{ width: `${readingProgress}%` }} />
 
-          {/* Immersive Top Bar (Sticky Glossy Glassmorphism) */}
-          <div className={`sticky top-0 z-40 backdrop-blur-2xl border-b px-4 md:px-8 py-3.5 transition-all duration-300 ${topNavVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}
+          {/* Immersive Top Bar (Sticky Glassmorphism) */}
+          <div className={`sticky top-0 z-40 border-b px-4 md:px-8 py-3.5 transition-all duration-300 ${topNavVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}
             style={{ 
-              background: "linear-gradient(180deg, rgba(28, 18, 9, 0.6) 0%, rgba(18, 12, 6, 0.4) 100%)", 
+              background: "rgba(15, 11, 7, 0.4)", 
               borderColor: "rgba(217, 119, 6, 0.25)",
               boxShadow: "0 10px 30px -10px rgba(0, 0, 0, 0.8), 0 0 15px rgba(217, 119, 6, 0.1)"
             }}>
@@ -556,7 +556,7 @@ export default function TafsirPage() {
 
           {/* Mobile bottom ayah scroller */}
           <div className={`fixed bottom-0 left-0 right-0 z-50 md:hidden transition-all duration-300 ${topNavVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"}`}
-            style={{ background: "rgba(15, 11, 7, 0.4)", borderTop: "1px solid rgba(180,120,40,0.25)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", padding: "0.5rem 1rem" }}>
+            style={{ background: "rgba(15, 11, 7, 0.4)", borderTop: "1px solid rgba(180,120,40,0.25)", padding: "0.5rem 1rem" }}>
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
               {Array.from({ length: currentSurahMeta.numberOfAyahs }, (_, i) => i + 1).map((num) => (
                 <button
@@ -587,7 +587,7 @@ export default function TafsirPage() {
     return (
       <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white ${inter.className}`}>
         {/* Top Navigation Bar */}
-        <div className="sticky top-0 z-40 bg-zinc-950/20 backdrop-blur-3xl border-b border-zinc-800/80 px-4 md:px-8 py-4">
+        <div className="sticky top-0 z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-4 md:px-8 py-4">
           <div className="max-w-[1700px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <button
@@ -668,7 +668,7 @@ export default function TafsirPage() {
         <div className="max-w-[1700px] mx-auto flex min-h-[calc(100vh-73px)]">
           {/* Left Sidebar: 114 Surahs */}
           <aside className="hidden md:flex flex-col w-72 border-r border-zinc-800/60 bg-zinc-950/50 sticky top-[73px] h-[calc(100vh-73px)] overflow-y-auto custom-scrollbar">
-            <div className="p-4 border-b border-zinc-800/60 sticky top-0 bg-zinc-950/90 backdrop-blur-md z-10">
+            <div className="p-4 border-b border-zinc-800/60 sticky top-0 bg-zinc-950/90 z-10">
               <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
                 Surahs (1 - 114)
               </h2>
@@ -708,7 +708,7 @@ export default function TafsirPage() {
           {/* Main Content Area */}
           <main className="flex-1 p-4 md:p-8 space-y-8 min-w-0">
             {/* Surah Banner Header */}
-            <div className="relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-gradient-to-r from-emerald-950/40 via-zinc-900/60 to-zinc-900/40 p-6 md:p-8 backdrop-blur-md">
+            <div className="relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-gradient-to-r from-emerald-950/40 via-zinc-900/60 to-zinc-900/40 p-6 md:p-8">
               <div className="absolute -right-10 -bottom-10 size-48 rounded-full bg-emerald-500/10 blur-3xl" />
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
                 <div>
@@ -758,7 +758,7 @@ export default function TafsirPage() {
                     <div
                       key={entry.id || idx}
                       id={`ayah-${ayahNumber}`}
-                      className="border border-emerald-500/20 bg-zinc-900/40 rounded-xl p-5 md:p-7 backdrop-blur-md transition-all hover:border-emerald-500/50 space-y-6 scroll-mt-24"
+                      className="border border-emerald-500/20 bg-zinc-900/40 rounded-xl p-5 md:p-7 transition-all hover:border-emerald-500/50 space-y-6 scroll-mt-24"
                     >
                       {/* Top Ayah Header */}
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-800/60 pb-4 gap-4">
@@ -852,7 +852,7 @@ export default function TafsirPage() {
     <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white pb-24 ${inter.className}`}>
       
       {/* Top Navigation Bar (Library View) */}
-      <div className="sticky top-0 z-40 bg-zinc-950/20 backdrop-blur-3xl border-b border-zinc-800/80 px-4 md:px-8 py-3">
+      <div className="sticky top-0 z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-4 md:px-8 py-3">
         <div className="max-w-[1700px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Logo and App Name */}
           <div className="flex items-center gap-4">
