@@ -226,10 +226,12 @@ export default function TafsirPage() {
     };
   }, [activeAuthor, setImmersiveMode]);
 
-  // Immersive mode: reset scroll to absolute top on enter, reading progress bar & fixed top nav
+  // Scroll behavior: reading progress bar & headroom hide-on-scroll top nav across modes
   useEffect(() => {
-    if (!immersiveMode) return;
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    if (!activeAuthor) return;
+    if (immersiveMode) {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
     setTopNavVisible(true);
 
     const onScroll = () => {
@@ -257,13 +259,13 @@ export default function TafsirPage() {
       window.removeEventListener("scroll", onScroll);
       if (floatNavTimerRef.current) clearTimeout(floatNavTimerRef.current);
     };
-  }, [immersiveMode]);
+  }, [activeAuthor, immersiveMode]);
 
-  // Immersive mode: IntersectionObservers for Ayah index tracking and line-by-line paragraph fade
+  // IntersectionObserver for Ayah index tracking across both Standard and Immersive modes
   useEffect(() => {
-    if (!immersiveMode || tafsirEntries.length === 0) return;
+    if (!activeAuthor || tafsirEntries.length === 0) return;
 
-    // 1. Index observer (tracks which Ayah is currently active on screen)
+    // Index observer (tracks which Ayah is currently active on screen)
     const indexObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -273,14 +275,14 @@ export default function TafsirPage() {
           }
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0.2, rootMargin: "-10% 0px -40% 0px" }
     );
     ayahRefs.current.forEach((el) => { if (el) indexObserver.observe(el); });
 
     return () => {
       indexObserver.disconnect();
     };
-  }, [immersiveMode, tafsirEntries, loadingEntries]);
+  }, [activeAuthor, tafsirEntries, loadingEntries]);
 
   // Keyboard shortcuts in immersive mode
   useEffect(() => {
@@ -323,6 +325,7 @@ export default function TafsirPage() {
   }, [urlAyah, tafsirEntries, activeAuthor]);
 
   const scrollToAyah = (num: number) => {
+    setCurrentAyahIndex(num - 1);
     const el = document.getElementById(`ayah-${num}`);
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -598,7 +601,7 @@ export default function TafsirPage() {
     return (
       <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white ${inter.className}`}>
         {/* Top Navigation Bar */}
-        <div className="sticky top-0 z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-3 md:px-8 py-3 md:py-4">
+        <div className={`sticky top-0 z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-3 md:px-8 py-3 md:py-4 transition-all duration-300 ${topNavVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}>
           <div className="max-w-[1700px] mx-auto">
             {/* Top Row: Back, Title, Immersive Toggle */}
             <div className="flex items-center justify-between gap-2 md:gap-4 w-full">
@@ -773,6 +776,8 @@ export default function TafsirPage() {
                     <div
                       key={entry.id || idx}
                       id={`ayah-${ayahNumber}`}
+                      data-ayah-idx={idx}
+                      ref={(el) => { ayahRefs.current[idx] = el; }}
                       className="border border-emerald-500/20 bg-zinc-900/40 rounded-xl p-5 md:p-7 transition-all hover:border-emerald-500/50 space-y-6 scroll-mt-24"
                     >
                       {/* Top Ayah Header */}

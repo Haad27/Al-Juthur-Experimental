@@ -315,7 +315,7 @@ export default function SurahReaderClient({
   }, [surahNumber]);
 
   return (
-    <section className="w-full flex items-center flex-col dark:bg-zinc-900 bg-[var(--sephia-primary)] flex-1 dark:text-white text-black relative">
+    <section className="w-full flex items-center flex-col dark:bg-zinc-900 bg-[var(--sephia-primary)] flex-1 dark:text-white text-black relative pb-28 md:pb-12">
       <div className="w-full md:hidden flex p-4 sticky top-0 z-50 bg-zinc-900/80 backdrop-blur-md border-b border-white/10">
         <button onClick={() => router.push("/")} className="flex items-center gap-2 text-white hover:opacity-80 transition-opacity">
           <ArrowLeft className="w-5 h-5" />
@@ -425,13 +425,15 @@ export default function SurahReaderClient({
           />
         </div>
       </div>
-      <div className="sticky bottom-0 bg-transparent p-4 w-full flex justify-center items-center">
-        <SurahPlayer
-          surahNumber={surahNumber}
-          ayahText={ayahs.map((a) => a.cleanText)}
-          lastAyahNumber={surah?.numberOfAyahs || 0}
-          router={router}
-        />
+      <div className="fixed md:sticky bottom-[calc(5.25rem+env(safe-area-inset-bottom,0px))] md:bottom-0 bg-transparent p-2 md:p-4 w-full flex justify-center items-center z-40 pointer-events-none">
+        <div className="pointer-events-auto">
+          <SurahPlayer
+            surahNumber={surahNumber}
+            ayahText={ayahs.map((a) => a.cleanText)}
+            lastAyahNumber={surah?.numberOfAyahs || 0}
+            router={router}
+          />
+        </div>
       </div>
     </section>
   );
