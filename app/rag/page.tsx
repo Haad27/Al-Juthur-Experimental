@@ -26,16 +26,11 @@ export default function RagLandingPage() {
       {/* Global Top Navigation Bar */}
       <div className="sticky top-0 z-40 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/80 px-4 md:px-8 py-3">
         <div className="max-w-[1700px] mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-2">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link href="/" className="flex items-center gap-2 shrink-0">
               <LogoIcon className="w-8 h-8 rounded-[20%]" />
-              <span className="font-bold text-xl tracking-tight text-white">Al-Juthur</span>
+              <span className="font-bold text-lg sm:text-xl tracking-tight text-white whitespace-nowrap">Al-Juthur</span>
             </Link>
-            <div className="h-4 w-px bg-zinc-800 hidden sm:block mx-1" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1.5">
-              <Sparkles className="size-3 text-emerald-400" />
-              <span>RAG Bot</span>
-            </span>
           </div>
 
           {/* Desktop Navigation Links */}
@@ -121,12 +116,6 @@ export default function RagLandingPage() {
                 <span className="font-semibold text-emerald-400 block">Stage 3: Grounded Output</span>
                 <p className="text-zinc-400 text-[11px]">Synthesizes answers strictly from retrieved passages with citations.</p>
               </div>
-            </div>
-            <div className="pt-1 flex items-center justify-between text-xs text-zinc-400 border-t border-zinc-800/80 pt-3">
-              <span>Need to index custom classical texts or add new volume chunks?</span>
-              <code className="px-2 py-0.5 rounded bg-zinc-950 border border-zinc-800 text-emerald-400 font-mono text-[11px]">
-                npx tsx scripts/seed_rag_modes.ts
-              </code>
             </div>
           </div>
         )}

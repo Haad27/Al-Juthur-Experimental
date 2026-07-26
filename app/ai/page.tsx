@@ -79,7 +79,7 @@ export default function AiTranslatorPage() {
           </div>
 
           {/* Desktop Full Navigation */}
-          <nav className="hidden lg:flex items-center gap-6 text-zinc-400 text-sm">
+          <nav className="hidden lg:flex flex-1 items-center justify-center gap-6 text-zinc-400 text-sm font-medium">
             <Link href="/" className="cursor-pointer hover:text-gray-300 transition text-zinc-400">
               Home
             </Link>
@@ -175,18 +175,18 @@ export default function AiTranslatorPage() {
 
         {/* Empty State CTA */}
         {!aiTranslationData && !aiIsTranslating && !aiError && (
-          <div className="flex flex-col items-center justify-center py-16 px-4 text-center mt-4 bg-neutral-900/50 rounded-2xl border border-neutral-800/60">
-            <BookOpen className="w-12 h-12 text-emerald-500/50 mb-4" />
-            <h3 className="text-xl font-bold text-white mb-2">Need Arabic text to translate?</h3>
-            <p className="text-neutral-400 mb-8 max-w-md">
+          <div className="flex flex-col items-center justify-center py-16 px-4 text-center mt-4 bg-slate-900/30 rounded-2xl border border-slate-700/50 backdrop-blur-sm shadow-xl">
+            <BookOpen className="w-12 h-12 text-emerald-500/60 mb-5" />
+            <h3 className="text-2xl font-bold text-white mb-3 tracking-tight">Need Arabic text to translate?</h3>
+            <p className="text-slate-400 mb-8 max-w-md text-base">
               You can easily copy classical texts directly from our Lexicon or Tafsir sections to translate them instantly.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
-              <Link href="/tafsir" className="flex items-center justify-center gap-2 px-6 py-3 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl transition border border-neutral-700">
-                <BookOpen className="w-4 h-4 text-emerald-400" />
-                Go to Classic Arabic Tafsir
+              <Link href="/tafsir" className="flex items-center justify-center gap-2 px-6 py-3.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-semibold rounded-xl transition-all border border-emerald-500/20 hover:border-emerald-500/40">
+                <BookOpen className="w-4 h-4" />
+                Go to Classical Tafsir
               </Link>
-              <Link href="/lexicon" className="flex items-center justify-center gap-2 px-6 py-3 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl transition border border-neutral-700">
+              <Link href="/lexicon" className="flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl transition-all border border-slate-600 hover:border-slate-500">
                 <Languages className="w-4 h-4 text-emerald-400" />
                 Go to Classic Lexicon
               </Link>
