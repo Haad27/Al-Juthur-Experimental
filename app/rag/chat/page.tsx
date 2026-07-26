@@ -140,22 +140,22 @@ function RagChatContent() {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col bg-zinc-950 text-white ${inter.className}`}>
+    <div className={`h-[100dvh] flex flex-col bg-zinc-950 text-white overflow-hidden ${inter.className}`}>
       {/* Top Navigation */}
-      <nav className="sticky top-0 z-40 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800/80 px-4 md:px-8 py-3.5">
-        <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+      <nav className="shrink-0 z-40 bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800/80 px-3 sm:px-4 md:px-8 py-2.5 sm:py-3.5">
+        <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Link
               href="/rag"
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-900/80 border border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-800/80 text-sm font-medium transition-all text-zinc-300 hover:text-white"
+              className="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1.5 rounded-lg bg-zinc-900/80 border border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-800/80 text-xs sm:text-sm font-medium transition-all text-zinc-300 hover:text-white"
             >
-              <ArrowLeft className="size-4" />
-              <span>RAG Hub</span>
+              <ArrowLeft className="size-3.5 sm:size-4" />
+              <span className="whitespace-nowrap">RAG Hub</span>
             </Link>
             <div className="h-4 w-px bg-zinc-800 hidden sm:block mx-1" />
             <div className="hidden sm:flex items-center gap-2">
               <Sparkles className="size-4 text-emerald-500" />
-              <span className="font-bold text-sm md:text-base text-white">Quranic RAG Engine</span>
+              <span className="font-bold text-sm md:text-base text-white whitespace-nowrap">Quranic RAG Engine</span>
             </div>
           </div>
 
@@ -163,15 +163,15 @@ function RagChatContent() {
           <div className="relative">
             <button
               onClick={() => setIsModeSwitcherOpen(!isModeSwitcherOpen)}
-              className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-emerald-500/50 text-xs sm:text-sm font-semibold text-emerald-400 transition-all shadow-sm"
+              className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-emerald-500/50 text-xs sm:text-sm font-semibold text-emerald-400 transition-all shadow-sm"
             >
-              <span className="truncate max-w-[140px] sm:max-w-[220px]">Mode: {currentModeInfo.shortName}</span>
-              <ChevronDown className={`size-4 shrink-0 transition-transform ${isModeSwitcherOpen ? "rotate-180" : ""}`} />
+              <span className="truncate max-w-[110px] xs:max-w-[140px] sm:max-w-[220px]">Mode: {currentModeInfo.shortName}</span>
+              <ChevronDown className={`size-3.5 sm:size-4 shrink-0 transition-transform ${isModeSwitcherOpen ? "rotate-180" : ""}`} />
             </button>
 
             {/* Mode Dropdown Menu */}
             {isModeSwitcherOpen && (
-              <div className="absolute right-0 mt-2 w-[320px] sm:w-[380px] bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl p-2 z-50 space-y-1">
+              <div className="absolute right-0 mt-2 w-[280px] xs:w-[320px] sm:w-[380px] bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl p-2 z-50 space-y-1">
                 <div className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-zinc-500 border-b border-zinc-800">
                   Switch Active RAG Mode
                 </div>
@@ -179,7 +179,7 @@ function RagChatContent() {
                   <button
                     key={m.id}
                     onClick={() => handleSwitchMode(m.id)}
-                    className={`w-full text-left px-3.5 py-2.5 rounded-xl transition-all flex flex-col gap-1 ${
+                    className={`w-full text-left px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl transition-all flex flex-col gap-0.5 sm:gap-1 ${
                       m.id === activeModeId
                         ? "bg-emerald-500/20 border border-emerald-500/40 text-white"
                         : "hover:bg-zinc-800/70 text-zinc-300"
@@ -187,7 +187,7 @@ function RagChatContent() {
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold">{m.name}</span>
-                      {m.id === activeModeId && <CheckCircle2 className="size-3.5 text-emerald-400" />}
+                      {m.id === activeModeId && <CheckCircle2 className="size-3.5 text-emerald-400 shrink-0" />}
                     </div>
                     <span className="text-[11px] text-zinc-400 line-clamp-1">{m.targetIntent}</span>
                   </button>
@@ -205,25 +205,25 @@ function RagChatContent() {
 
       {/* Mode Warning Banner (if niche mode active) */}
       {currentModeInfo.warning && (
-        <div className="bg-amber-500/10 border-b border-amber-500/30 px-4 py-2.5 text-xs text-amber-200">
+        <div className="shrink-0 bg-amber-500/10 border-b border-amber-500/30 px-3 sm:px-4 py-2 text-xs text-amber-200">
           <div className="max-w-[1200px] mx-auto flex items-center gap-2 font-medium">
             <AlertTriangle className="size-4 text-amber-400 shrink-0" />
-            <span><strong>Guardrail Active:</strong> {currentModeInfo.warning}</span>
+            <span className="line-clamp-2 sm:line-clamp-none"><strong>Guardrail Active:</strong> {currentModeInfo.warning}</span>
           </div>
         </div>
       )}
 
       {/* Chat Area */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
-        <div className="max-w-[900px] mx-auto space-y-6 pb-24">
+      <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-8 custom-scrollbar">
+        <div className="max-w-[900px] mx-auto space-y-4 sm:space-y-6 pb-4">
           {messages.map((msg, idx) => (
             <div
               key={idx}
-              className={`flex gap-4 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}
+              className={`flex gap-2.5 sm:gap-4 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}
             >
               {/* Avatar */}
               <div
-                className={`shrink-0 size-10 rounded-full flex items-center justify-center shadow-md ${
+                className={`shrink-0 size-8 sm:size-10 rounded-full flex items-center justify-center shadow-md ${
                   msg.role === "user"
                     ? "bg-zinc-800 border border-zinc-700"
                     : msg.isScopeInvalid
@@ -232,17 +232,17 @@ function RagChatContent() {
                 }`}
               >
                 {msg.role === "user" ? (
-                  <User className="size-5 text-zinc-300" />
+                  <User className="size-4 sm:size-5 text-zinc-300" />
                 ) : msg.isScopeInvalid ? (
-                  <ShieldAlert className="size-5 text-amber-400" />
+                  <ShieldAlert className="size-4 sm:size-5 text-amber-400" />
                 ) : (
-                  <Bot className="size-5 text-emerald-400" />
+                  <Bot className="size-4 sm:size-5 text-emerald-400" />
                 )}
               </div>
 
               {/* Message Bubble */}
               <div
-                className={`max-w-[88%] sm:max-w-[78%] rounded-2xl px-5 py-4.5 shadow-sm ${
+                className={`max-w-[90%] sm:max-w-[78%] rounded-2xl px-4 py-3 sm:px-5 sm:py-4.5 shadow-sm ${
                   msg.role === "user"
                     ? "bg-zinc-800/90 border border-zinc-700/60 rounded-tr-sm"
                     : msg.isScopeInvalid
@@ -257,19 +257,19 @@ function RagChatContent() {
                   </div>
                 )}
 
-                <div className="prose prose-invert prose-emerald max-w-none text-sm md:text-base leading-relaxed">
+                <div className="prose prose-invert prose-emerald max-w-none text-xs sm:text-sm md:text-base leading-relaxed">
                   <ReactMarkdown>{msg.content}</ReactMarkdown>
                 </div>
 
                 {/* Sources Section */}
                 {msg.sources && msg.sources.length > 0 && (
-                  <div className="mt-5 pt-4 border-t border-zinc-800/80 space-y-3">
-                    <div className="flex items-center justify-between text-xs font-semibold text-zinc-400">
+                  <div className="mt-4 pt-3 sm:mt-5 sm:pt-4 border-t border-zinc-800/80 space-y-2.5 sm:space-y-3">
+                    <div className="flex items-center justify-between text-[11px] sm:text-xs font-semibold text-zinc-400">
                       <span className="flex items-center gap-1.5">
-                        <BookOpen className="size-3.5 text-emerald-500" />
-                        <span>Sources Used from {currentModeInfo.name.split(". ")[1] || "Classical Texts"}:</span>
+                        <BookOpen className="size-3.5 text-emerald-500 shrink-0" />
+                        <span className="truncate">Sources Used ({msg.sources.length}):</span>
                       </span>
-                      <span className="text-[11px] text-zinc-500">Click to view in Library</span>
+                      <span className="text-[10px] sm:text-[11px] text-zinc-500 shrink-0">Click to view</span>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -284,11 +284,11 @@ function RagChatContent() {
                           className="group p-2.5 rounded-xl bg-zinc-950/80 border border-zinc-800 hover:border-emerald-500/40 transition-all text-left space-y-1"
                         >
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-zinc-200 group-hover:text-emerald-400 transition-colors flex items-center gap-1">
-                              {src.workType === "lexicon" ? <Layers className="size-3 text-rose-400" /> : <BookOpen className="size-3 text-emerald-400" />}
-                              <span>{src.book}</span>
+                            <span className="text-xs font-bold text-zinc-200 group-hover:text-emerald-400 transition-colors flex items-center gap-1 truncate">
+                              {src.workType === "lexicon" ? <Layers className="size-3 text-rose-400 shrink-0" /> : <BookOpen className="size-3 text-emerald-400 shrink-0" />}
+                              <span className="truncate">{src.book}</span>
                             </span>
-                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 group-hover:border-emerald-500/30 group-hover:text-emerald-300">
+                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 group-hover:border-emerald-500/30 group-hover:text-emerald-300 shrink-0">
                               {src.workType === "lexicon" ? `Root: [${src.rootWord}]` : `${src.surah}:${src.ayah}`}
                             </span>
                           </div>
@@ -305,15 +305,15 @@ function RagChatContent() {
           ))}
 
           {isLoading && (
-            <div className="flex gap-4">
-              <div className="shrink-0 size-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
-                <Bot className="size-5 text-emerald-400" />
+            <div className="flex gap-2.5 sm:gap-4">
+              <div className="shrink-0 size-8 sm:size-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
+                <Bot className="size-4 sm:size-5 text-emerald-400" />
               </div>
-              <div className="bg-zinc-900/60 border border-zinc-800/90 rounded-2xl rounded-tl-sm px-6 py-5 flex items-center gap-3 shadow-sm">
-                <Loader2 className="size-4 animate-spin text-emerald-500" />
+              <div className="bg-zinc-900/60 border border-zinc-800/90 rounded-2xl rounded-tl-sm px-4 py-3 sm:px-6 sm:py-5 flex items-center gap-3 shadow-sm">
+                <Loader2 className="size-4 animate-spin text-emerald-500 shrink-0" />
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-sm font-medium text-zinc-300">Searching classical {currentModeInfo.name.split(". ")[1] || "texts"}...</span>
-                  <span className="text-xs text-zinc-500">Stage 1 Router & BM25 + Vector Retrieval in progress</span>
+                  <span className="text-xs sm:text-sm font-medium text-zinc-300">Searching classical texts...</span>
+                  <span className="text-[11px] text-zinc-500">Stage 1 Router & BM25 + Vector Retrieval</span>
                 </div>
               </div>
             </div>
@@ -322,34 +322,28 @@ function RagChatContent() {
         </div>
       </main>
 
-      {/* Sticky Input Area */}
-      <div className="sticky bottom-0 bg-zinc-950/95 backdrop-blur-md border-t border-zinc-800/80 p-4">
+      {/* Fixed Bottom Input Area */}
+      <div className="shrink-0 bg-zinc-950 border-t border-zinc-800/80 p-3 sm:p-4">
         <div className="max-w-[900px] mx-auto relative">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={`Ask in ${currentModeInfo.name.split(". ")[1] || "Default Mode"}... (e.g. ${
-              activeModeId === "grammar"
-                ? "Explain the i'rab of Surah Al-Fatiha verse 5"
-                : activeModeId === "lexicon"
-                ? "What is the classical root definition of 'رحم'?"
-                : "What did classical scholars comment on Surah 2 Ayah 255?"
-            })`}
-            className="w-full bg-zinc-900/90 border border-zinc-800 rounded-2xl pl-4 pr-14 py-4 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 resize-none min-h-[60px] max-h-[180px] custom-scrollbar shadow-inner"
+            placeholder={`Ask in ${currentModeInfo.shortName}...`}
+            className="w-full bg-zinc-900/90 border border-zinc-800 rounded-2xl pl-3.5 pr-12 py-3 sm:pl-4 sm:pr-14 sm:py-3.5 text-base sm:text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 resize-none min-h-[50px] sm:min-h-[56px] max-h-[140px] custom-scrollbar shadow-inner"
             rows={1}
           />
           <button
             onClick={handleSend}
             disabled={!input.trim() || isLoading}
-            className="absolute right-3 bottom-3.5 size-9 rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:bg-zinc-800 disabled:text-zinc-600 text-white flex items-center justify-center transition-all shadow-md shadow-emerald-500/20"
+            className="absolute right-2.5 bottom-2.5 sm:right-3 sm:bottom-3 size-8 sm:size-9 rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:bg-zinc-800 disabled:text-zinc-600 text-white flex items-center justify-center transition-all shadow-md shadow-emerald-500/20"
           >
             <Send className="size-4" />
           </button>
         </div>
-        <div className="text-center mt-2.5">
-          <p className="text-[11px] text-zinc-600 font-medium">
-            Active Mode: <span className="text-emerald-500/90 font-semibold">{currentModeInfo.name.split(". ")[1] || currentModeInfo.name}</span> — 2-LLM Guardrail & Citation Engine. Always verify theological rulings with certified scholars.
+        <div className="text-center mt-2">
+          <p className="text-[10px] sm:text-[11px] text-zinc-500 font-medium truncate px-2">
+            Active Mode: <span className="text-emerald-400 font-semibold">{currentModeInfo.shortName}</span> — Verified Citations Engine
           </p>
         </div>
       </div>

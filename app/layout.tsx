@@ -27,7 +27,7 @@ export default function RootLayout({
         <Head>
           <meta name="viewport" content="width=device-width, initial-scale=1" />
         </Head>
-        <body className={`${inter.className} bg-zinc-900 scroll-smooth md:pb-0 pb-28`} suppressHydrationWarning>
+        <body className={`${inter.className} bg-zinc-950 scroll-smooth md:pb-0 pb-28`} suppressHydrationWarning>
           {children}
           <BottomNav />
           <Toaster />
