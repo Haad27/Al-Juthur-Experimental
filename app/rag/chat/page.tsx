@@ -323,7 +323,7 @@ function RagChatContent() {
       </main>
 
       {/* Fixed Bottom Input Area */}
-      <div className="shrink-0 bg-zinc-950 border-t border-zinc-800/80 p-3 sm:p-4">
+      <div className="shrink-0 bg-zinc-950 border-t border-zinc-800/80 p-3 sm:p-4 pb-[env(safe-area-inset-bottom,0px)]">
         <div className="max-w-[900px] mx-auto relative">
           <textarea
             value={input}
