@@ -278,8 +278,8 @@ function RagChatContent() {
                           key={i}
                           href={
                             src.workType === "lexicon"
-                              ? `/lexicon?root=${src.rootWord || "رحم"}`
-                              : `/tafsir?surah=${src.surah || 1}&ayah=${src.ayah || 1}`
+                              ? `/lexicon?root=${src.rootWord || "رحم"}&author=${encodeURIComponent(src.authorName || src.book)}`
+                              : `/tafsir?surah=${src.surah || 1}&ayah=${src.ayah || 1}&author=${encodeURIComponent(src.authorName || src.book)}`
                           }
                           className="group p-2.5 rounded-xl bg-zinc-950/80 border border-zinc-800 hover:border-emerald-500/40 transition-all text-left space-y-1"
                         >

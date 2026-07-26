@@ -128,9 +128,10 @@ export default function TafsirPage() {
   const floatNavTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const ayahRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // URL param ayah target
+  // URL param target
   const urlAyah = searchParams?.get("ayah");
   const urlSurah = searchParams?.get("surah");
+  const urlAuthor = searchParams?.get("author");
 
   // Fetch all languages & authors on mount
 
@@ -153,10 +154,32 @@ export default function TafsirPage() {
             return a.name.localeCompare(b.name);
           });
           setLanguages(sorted);
+          
+          // Auto-select author if deep linked
+          if (urlAuthor) {
+            const authorQuery = normalizeText(urlAuthor);
+            let matchedAuthor = null;
+            let matchedLang = "";
+            for (const lang of sorted) {
+              for (const author of lang.authors) {
+                if (normalizeText(author.name).includes(authorQuery) || (author.authorName && normalizeText(author.authorName).includes(authorQuery))) {
+                  matchedAuthor = author;
+                  matchedLang = lang.name;
+                  break;
+                }
+              }
+              if (matchedAuthor) break;
+            }
+            if (matchedAuthor) {
+              setActiveAuthor(matchedAuthor);
+              setActiveLangName(matchedLang);
+              setImmersiveMode(true);
+            }
+          }
         }
       })
       .catch((err) => console.error("Failed to fetch languages:", err));
-  }, []);
+  }, [urlAuthor, setImmersiveMode]);
 
   // Fetch full Surah tafsir when author or surah changes
   useEffect(() => {

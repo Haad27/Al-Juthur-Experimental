@@ -91,6 +91,7 @@ function LexiconPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialRoot = searchParams.get('root') || 'رحم';
+  const urlAuthor = searchParams.get('author');
 
   const { immersiveMode, setImmersiveMode } = useGlobalState();
 
@@ -175,7 +176,23 @@ function LexiconPageContent() {
       const res = await fetch(`/api/lexicon/root/${encodeURIComponent(root)}`);
       const data = await res.json();
       setResult(data);
-      setSelectedDictId('all');
+      
+      // Deep link to specific dictionary
+      if (urlAuthor && data.entries) {
+        const query = urlAuthor.toLowerCase().replace(/[''`'"\-–—:;,.()\[\]\/]/g, " ").replace(/\s+/g, " ").trim();
+        const matched = data.entries.find((e: LexiconEntry) => 
+          e.dictName.toLowerCase().replace(/[''`'"\-–—:;,.()\[\]\/]/g, " ").replace(/\s+/g, " ").trim().includes(query) ||
+          e.dictIdent.toLowerCase().includes(query)
+        );
+        if (matched) {
+          setSelectedDictId(matched.dictId);
+          setImmersiveMode(true);
+        } else {
+          setSelectedDictId('all');
+        }
+      } else {
+        setSelectedDictId('all');
+      }
     } catch (err) {
       console.error('Error fetching root lexicon:', err);
     } finally {
@@ -363,28 +380,16 @@ function LexiconPageContent() {
       {/* Global Top Navigation Bar (Transparent Glassy Backdrop on Mobile & Desktop) */}
       <div className="sticky top-0 z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-4 md:px-8 py-3">
         <div className="max-w-[1700px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div className="flex items-center justify-between w-full md:w-auto">
+          <div className="flex items-center gap-3">
             {/* Left Logo & Badge */}
-            <div className="flex items-center gap-3">
-              <Link href="/" className="flex items-center gap-2">
-                <LogoIcon className="w-8 h-8 rounded-[20%]" />
-                <span className="font-bold text-xl tracking-tight text-white">Al-Juthur</span>
-              </Link>
-              <div className="h-4 w-px bg-zinc-800 hidden sm:block mx-1" />
-              <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 hidden sm:inline-block">
-                Lexicon
-              </span>
-            </div>
-
-            {/* Mobile Immersive Mode Toggle (Far-Right on Mobile Header Row) */}
-            <button
-              onClick={() => setImmersiveMode(true)}
-              className="md:hidden tafsir-immersive-toggle tafsir-immersive-toggle-off !px-3 !py-1.5 text-xs"
-              title="Enter Lexicon Immersive Mode (R)"
-            >
-              <BookOpenText className="size-4" />
-              <span>Immersive</span>
-            </button>
+            <Link href="/" className="flex items-center gap-2">
+              <LogoIcon className="w-8 h-8 rounded-[20%]" />
+              <span className="font-bold text-xl tracking-tight text-white">Al-Juthur</span>
+            </Link>
+            <div className="h-4 w-px bg-zinc-800 hidden sm:block mx-1" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 hidden sm:inline-block">
+              Lexicon
+            </span>
           </div>
 
           {/* Desktop: Centered Navigation Links */}
