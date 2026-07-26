@@ -11,7 +11,8 @@ import {
   ShieldAlert,
   Database,
   ArrowRight,
-  AlertTriangle
+  AlertTriangle,
+  Info
 } from "lucide-react";
 import { inter } from "@/app/fonts";
 import { RAG_MODES } from "@/lib/ai/rag/modes-config";
@@ -56,15 +57,15 @@ export default function RagLandingPage() {
             </Link>
           </nav>
 
-          {/* Action Button: Add/Index Data Drawer Toggle */}
+          {/* Action Button: How RAG Works Drawer Toggle */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowDataInfo(!showDataInfo)}
               className="px-3.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-400 hover:bg-emerald-500/20 transition-all flex items-center gap-1.5 font-medium shadow-sm"
+              title="How the RAG Engine Searches & Synthesizes Data"
             >
-              <Database className="size-3.5" />
-              <span className="hidden sm:inline">Add / Index Data</span>
-              <span className="sm:hidden">Data Info</span>
+              <Info className="size-3.5 text-emerald-400" />
+              <span>How RAG Works</span>
             </button>
           </div>
         </div>

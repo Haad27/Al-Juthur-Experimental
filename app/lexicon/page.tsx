@@ -282,56 +282,47 @@ function LexiconPageContent() {
         </div>
 
         {/* Immersive Main Reading Content */}
-        <div className="tafsir-immersive-content max-w-6xl mx-auto px-4 sm:px-6 md:px-10 py-10 space-y-10">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-amber-500/20 pb-6">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-medium mb-2">
-                <Sparkles className="size-3.5" />
-                <span>Classical Lexical Root Analysis</span>
-              </div>
-              <h1 className={`${amiriquran.className} text-4xl sm:text-5xl text-amber-100 tracking-wide font-normal`}>
+        <div className="tafsir-immersive-content max-w-6xl mx-auto px-4 sm:px-6 md:px-10 py-6 space-y-6">
+          {/* Micro-Compact Immersive Root Banner */}
+          <div className="flex items-center justify-between gap-4 border-b border-amber-500/20 pb-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="text-[10px] uppercase font-bold tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-full shrink-0">
+                Root
+              </span>
+              <h1 className={`${amiriquran.className} text-3xl sm:text-4xl text-amber-100 tracking-wide font-normal truncate`}>
                 {result?.normalizedRoot}
               </h1>
-              {result?.structuredLane?.summary_en && (
-                <p className="text-amber-200/80 text-sm font-serif italic mt-1">
-                  &ldquo;{result.structuredLane.summary_en}&rdquo;
-                </p>
-              )}
             </div>
 
             {result?.structuredLane && (
-              <div className="bg-amber-950/30 border border-amber-500/20 rounded-xl px-4 py-2.5 text-center shrink-0 self-start sm:self-auto">
-                <div className="text-xl font-bold text-amber-400 font-mono">
+              <div className="bg-amber-950/30 border border-amber-500/25 rounded-lg px-3 py-1 text-center shrink-0 flex items-center gap-2">
+                <span className="text-[11px] text-amber-400/80 uppercase font-bold tracking-wider">Quran Freq:</span>
+                <span className="text-sm font-bold text-amber-300 font-mono">
                   {result.structuredLane.quran_frequency}x
-                </div>
-                <div className="text-[10px] uppercase font-bold text-amber-500/70 tracking-wider">
-                  Quran Occurrences
-                </div>
+                </span>
               </div>
             )}
           </div>
 
-          {/* Morphological Derivations Row */}
+          {/* Morphological Derivations Horizontal Scroll */}
           {result?.structuredLane && result.structuredLane.morphological_forms.length > 0 && (
-            <div className="space-y-3 bg-amber-950/20 border border-amber-500/20 rounded-2xl p-4">
-              <h3 className="text-xs uppercase font-bold text-amber-400/90 tracking-widest flex items-center gap-2">
-                <Layers className="size-4 text-amber-500" />
-                Quranic Derivations ({result.structuredLane.morphological_forms.length})
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {result.structuredLane.morphological_forms.map((form, idx) => (
-                  <div
-                    key={idx}
-                    className="px-3 py-1.5 rounded-xl bg-amber-900/20 border border-amber-500/30 text-xs flex items-center gap-2"
-                  >
-                    <span className="font-bold text-amber-300 font-arabic">{form.example_word}</span>
-                    <span className="text-amber-400/60">• {form.form_name}</span>
-                    <span className="text-[10px] bg-amber-500/10 px-1.5 py-0.5 rounded text-amber-400 font-mono">
-                      {form.occurrences}x
-                    </span>
-                  </div>
-                ))}
-              </div>
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 bg-amber-950/20 border border-amber-500/20 rounded-xl px-3">
+              <span className="text-[10px] uppercase font-bold text-amber-400/80 tracking-wider shrink-0 mr-1 flex items-center gap-1">
+                <Layers className="size-3 text-amber-400" />
+                <span>Derivations ({result.structuredLane.morphological_forms.length}):</span>
+              </span>
+              {result.structuredLane.morphological_forms.map((form, idx) => (
+                <div
+                  key={idx}
+                  className="px-2.5 py-0.5 rounded-md bg-amber-900/25 border border-amber-500/30 text-xs flex items-center gap-1.5 shrink-0 whitespace-nowrap"
+                >
+                  <span className="font-bold text-amber-200 font-arabic">{form.example_word}</span>
+                  <span className="text-amber-400/70 text-[11px]">• {form.form_name}</span>
+                  <span className="text-[10px] bg-amber-500/10 px-1 py-0.2 rounded text-amber-300 font-mono">
+                    {form.occurrences}x
+                  </span>
+                </div>
+              ))}
             </div>
           )}
 
@@ -373,6 +364,7 @@ function LexiconPageContent() {
       <div className="sticky top-0 z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-4 md:px-8 py-3">
         <div className="max-w-[1700px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex items-center justify-between w-full md:w-auto">
+            {/* Left Logo & Badge */}
             <div className="flex items-center gap-3">
               <Link href="/" className="flex items-center gap-2">
                 <LogoIcon className="w-8 h-8 rounded-[20%]" />
@@ -384,7 +376,7 @@ function LexiconPageContent() {
               </span>
             </div>
 
-            {/* Immersive Mode Toggle Button (Right Side on Mobile) */}
+            {/* Mobile Immersive Mode Toggle (Far-Right on Mobile Header Row) */}
             <button
               onClick={() => setImmersiveMode(true)}
               className="md:hidden tafsir-immersive-toggle tafsir-immersive-toggle-off !px-3 !py-1.5 text-xs"
@@ -395,7 +387,7 @@ function LexiconPageContent() {
             </button>
           </div>
 
-          {/* Desktop: Centered Navigation Links + Right Immersive Button */}
+          {/* Desktop: Centered Navigation Links */}
           <nav className="hidden lg:flex flex-1 items-center justify-center gap-6 text-zinc-400 text-sm font-medium">
             <Link href="/" className="hover:text-zinc-200 transition">
               Home
@@ -414,7 +406,7 @@ function LexiconPageContent() {
             </Link>
           </nav>
 
-          {/* Desktop Immersive Mode Toggle (Right Pinned) */}
+          {/* Desktop Immersive Mode Toggle (Far-Right Pinned) */}
           <div className="hidden md:flex items-center shrink-0">
             <button
               onClick={() => setImmersiveMode(true)}
@@ -430,12 +422,12 @@ function LexiconPageContent() {
           {/* MOBILE ONLY: Pinned Dropdowns for Dictionaries & PDF Lexicons */}
           {result?.entries && result.entries.length > 0 && (
             <div className="md:hidden flex gap-2 w-full pt-1">
-              {/* Dictionary Dropdown */}
+              {/* Dictionary Dropdown (Prominent Green Border) */}
               <div className="relative flex-1 min-w-0">
                 <select
                   value={selectedDictId}
                   onChange={(e) => setSelectedDictId(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-                  className="w-full appearance-none bg-zinc-900/90 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-200 font-medium focus:outline-none focus:border-emerald-500/50 pr-7 shadow-sm truncate"
+                  className="w-full appearance-none bg-emerald-950/30 border border-emerald-500/70 rounded-lg px-3 py-1.5 text-xs text-emerald-300 font-semibold focus:outline-none focus:border-emerald-400 pr-7 shadow-sm truncate"
                 >
                   <option value="all" className="bg-zinc-900 text-white">All Dictionaries ({result.entries.length})</option>
                   {result.entries.map((entry) => (
@@ -476,6 +468,20 @@ function LexiconPageContent() {
       {/* Search Bar & Container */}
       <div className="max-w-[1700px] mx-auto px-4 md:px-8 pt-4 md:pt-6">
         <div className="max-w-3xl mx-auto mb-6">
+          {/* Subtle Compact Hero Header */}
+          <div className="text-center space-y-1.5 mb-4">
+            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-medium">
+              <Sparkles className="size-3 text-emerald-400" />
+              <span>Classical Lexical Engine</span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+              Classical Arabic Root Lexicon
+            </h1>
+            <p className="text-xs text-zinc-400 max-w-md mx-auto">
+              Explore Lane&apos;s Lexicon, Lisan al-Arab, and classical etymological dictionaries by Arabic root.
+            </p>
+          </div>
+
           <form onSubmit={handleSearchSubmit} className="relative mb-3">
             <div className="relative flex items-center">
               <Search className="absolute left-4 w-5 h-5 text-zinc-400 pointer-events-none" />
@@ -625,13 +631,16 @@ function LexiconPageContent() {
                 )}
               </div>
 
-              {/* Mobile Compact Quranic Derivations Chips */}
+              {/* Mobile Compact Quranic Derivations Chips (Single Horizontal Scroll Row) */}
               {result.structuredLane && result.structuredLane.morphological_forms.length > 0 && (
-                <div className="lg:hidden flex flex-wrap gap-1.5 mt-1">
+                <div className="lg:hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 border-t border-zinc-800/40 pt-2">
+                  <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider shrink-0 mr-0.5">
+                    Derivations:
+                  </span>
                   {result.structuredLane.morphological_forms.map((form, idx) => (
                     <span
                       key={idx}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/80 border border-zinc-800 text-[11px]"
+                      className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-zinc-900/90 border border-zinc-800 text-[11px] shrink-0 whitespace-nowrap"
                     >
                       <span className="font-arabic font-bold text-emerald-300">{form.example_word}</span>
                       <span className="text-zinc-400">{form.form_name}</span>
@@ -646,14 +655,15 @@ function LexiconPageContent() {
                 {filteredEntries.map((entry) => (
                   <div
                     key={entry.dictId}
-                    className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-4 md:p-6 shadow-lg space-y-4"
+                    className="bg-gradient-to-br from-zinc-900/90 via-zinc-900/60 to-zinc-950/80 border border-emerald-500/20 rounded-2xl p-4 md:p-6 shadow-lg space-y-4 hover:border-emerald-500/35 transition-all"
                   >
-                    <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3">
-                      <div className="flex items-center gap-2.5">
-                        <BookOpen className="size-4 md:size-5 text-emerald-400" />
-                        <h3 className="text-sm md:text-base font-bold text-white">{entry.dictName}</h3>
+                    <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm md:text-base font-bold text-emerald-300/90 border-l-2 border-emerald-500/60 pl-2.5">
+                          {entry.dictName}
+                        </h3>
                         {entry.isEnglish && (
-                          <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                          <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                             English
                           </span>
                         )}

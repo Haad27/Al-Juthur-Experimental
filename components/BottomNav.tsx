@@ -15,7 +15,7 @@ const BottomNav = () => {
     setImmersiveMode(false);
   }, [pathname, setImmersiveMode]);
 
-  const isImmersive = immersiveMode && pathname?.startsWith("/tafsir");
+  const isImmersive = immersiveMode && (pathname?.startsWith("/tafsir") || pathname?.startsWith("/lexicon"));
 
   const navItems = [
     {

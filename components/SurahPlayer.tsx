@@ -252,7 +252,7 @@ export default function SurahPlayer({
         {/* Floating Action Button */}
         <button
           onClick={() => setMobileFabOpen(!mobileFabOpen)}
-          className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom,0px))] right-4 z-50 size-12 rounded-full bg-emerald-600 border border-emerald-400/40 text-white shadow-2xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+          className="fixed bottom-[calc(6.75rem+env(safe-area-inset-bottom,0px))] right-4 z-50 size-12 rounded-full bg-emerald-600 border border-emerald-400/40 text-white shadow-2xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
           title="Audio Recitation Controls"
         >
           {playing ? (
@@ -270,7 +270,7 @@ export default function SurahPlayer({
             initial={{ opacity: 0, y: 15, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 15, scale: 0.95 }}
-            className="fixed bottom-[calc(9rem+env(safe-area-inset-bottom,0px))] right-4 z-50 w-64 bg-zinc-900/95 border border-zinc-800 rounded-2xl p-4 shadow-2xl backdrop-blur-xl space-y-4 text-white"
+            className="fixed bottom-[calc(10.25rem+env(safe-area-inset-bottom,0px))] right-4 z-50 w-64 bg-zinc-900/95 border border-zinc-800 rounded-2xl p-4 shadow-2xl backdrop-blur-xl space-y-4 text-white"
           >
             <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Recitation Player</span>
