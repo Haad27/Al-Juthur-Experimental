@@ -24,8 +24,8 @@ export default function RagLandingPage() {
   return (
     <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-slate-100 flex flex-col pb-16 ${inter.className}`}>
       {/* Global Top Navigation Bar */}
-      <div className="sticky top-0 z-40 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/80 px-4 md:px-8 py-3">
-        <div className="max-w-[1700px] mx-auto flex items-center justify-between gap-4">
+      <div className="sticky top-0 z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-4 md:px-8 py-3">
+        <div className="max-w-[1700px] mx-auto relative flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 sm:gap-3">
             <Link href="/" className="flex items-center gap-2 shrink-0">
               <LogoIcon className="w-8 h-8 rounded-[20%]" />
@@ -34,7 +34,7 @@ export default function RagLandingPage() {
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex flex-1 items-center justify-center gap-6 text-zinc-400 text-sm font-medium">
+          <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-6 text-zinc-400 text-sm font-medium">
             <Link href="/" className="hover:text-zinc-200 transition">
               Home
             </Link>

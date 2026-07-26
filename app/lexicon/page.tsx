@@ -379,21 +379,33 @@ function LexiconPageContent() {
     <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-slate-100 pb-24 ${inter.className}`}>
       {/* Global Top Navigation Bar (Transparent Glassy Backdrop on Mobile & Desktop) */}
       <div className="sticky top-0 z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-4 md:px-8 py-3">
-        <div className="max-w-[1700px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+        <div className="max-w-[1700px] mx-auto relative flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="flex items-center justify-between w-full md:w-auto">
             {/* Left Logo & Badge */}
-            <Link href="/" className="flex items-center gap-2">
-              <LogoIcon className="w-8 h-8 rounded-[20%]" />
-              <span className="font-bold text-xl tracking-tight text-white">Al-Juthur</span>
-            </Link>
-            <div className="h-4 w-px bg-zinc-800 hidden sm:block mx-1" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 hidden sm:inline-block">
-              Lexicon
-            </span>
+            <div className="flex items-center gap-3">
+              <Link href="/" className="flex items-center gap-2">
+                <LogoIcon className="w-8 h-8 rounded-[20%]" />
+                <span className="font-bold text-xl tracking-tight text-white">Al-Juthur</span>
+              </Link>
+              <div className="h-4 w-px bg-zinc-800 hidden sm:block mx-1" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 hidden sm:inline-block">
+                Lexicon
+              </span>
+            </div>
+            
+            {/* Mobile Immersive Mode Toggle */}
+            <button
+              onClick={() => setImmersiveMode(true)}
+              className="md:hidden tafsir-immersive-toggle tafsir-immersive-toggle-off !px-3 !py-1.5 text-xs shrink-0"
+              title="Enter Lexicon Immersive Mode (R)"
+            >
+              <BookOpenText className="size-4" />
+              <span>Immersive</span>
+            </button>
           </div>
 
-          {/* Desktop: Centered Navigation Links */}
-          <nav className="hidden lg:flex flex-1 items-center justify-center gap-6 text-zinc-400 text-sm font-medium">
+          {/* Desktop Navigation Links */}
+          <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-6 text-zinc-400 text-sm font-medium">
             <Link href="/" className="hover:text-zinc-200 transition">
               Home
             </Link>

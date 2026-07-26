@@ -896,7 +896,7 @@ export default function TafsirPage() {
       
       {/* Top Navigation Bar (Library View) */}
       <div className="sticky top-0 z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-4 md:px-8 py-3">
-        <div className="max-w-[1700px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="max-w-[1700px] mx-auto relative flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Logo and App Name */}
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2">
@@ -906,7 +906,7 @@ export default function TafsirPage() {
           </div>
 
           {/* Desktop Full Navigation (Same as Homepage) */}
-          <nav className="hidden lg:flex items-center gap-6 text-zinc-400 text-sm">
+          <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-6 text-zinc-400 text-sm font-medium">
             <Link href="/" className="cursor-pointer hover:text-gray-300 transition text-zinc-400">
               Home
             </Link>

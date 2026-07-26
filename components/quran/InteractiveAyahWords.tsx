@@ -7,7 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Sparkles, ArrowRight, BookOpen, Loader2 } from 'lucide-react';
+import { Sparkles, ArrowRight, BookOpen, Loader2, Bot } from 'lucide-react';
 
 import { useGlobalState } from '@/lib/providers/GlobalStatesProvider';
 
@@ -196,16 +196,27 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
                     </div>
                   )}
 
-                  {/* Deep Lexicon CTA button */}
+                  {/* Deep Lexicon CTA buttons */}
                   {data.rootQuery ? (
-                    <Link
-                      href={`/lexicon?root=${encodeURIComponent(data.rootQuery)}`}
-                      className="w-full mt-1 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/30 transition-all"
-                    >
-                      <BookOpen className="w-3.5 h-3.5" />
-                      Explore Root [{data.rootQuery}] in Lexicons
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
+                    <div className="flex flex-col gap-2 mt-2">
+                      <Link
+                        href={`/lexicon?root=${encodeURIComponent(data.rootQuery)}`}
+                        className="w-full px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/30 transition-all"
+                      >
+                        <BookOpen className="w-3.5 h-3.5" />
+                        Explore Root [{data.rootQuery}] in Lexicons
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Link>
+                      
+                      <Link
+                        href={`/rag/chat?mode=lexicon&q=${encodeURIComponent(`What does the root ${data.rootQuery} mean?`)}`}
+                        className="w-full px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-all"
+                      >
+                        <Bot className="w-3.5 h-3.5 text-emerald-400" />
+                        Ask our Lexicon RAG
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Link>
+                    </div>
                   ) : (
                     <div className="text-[11px] text-slate-500 text-center">
                       No further lexicon entries for particle/non-root word

@@ -24,8 +24,21 @@ export default function AiTranslatorPage() {
 
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('table');
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [remainingTokens, setRemainingTokens] = useState<number | null>(null);
+  const [tokenLimit, setTokenLimit] = useState<number>(250000);
 
   useEffect(() => {
+    // Fetch remaining tokens on mount
+    fetch('/api/ai/translate')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setRemainingTokens(data.remaining);
+          if (data.limit) setTokenLimit(data.limit);
+        }
+      })
+      .catch(console.error);
+
     const sessionText = sessionStorage.getItem('ai_translator_input');
     if (sessionText) {
       triggerAiTranslation(sessionText);
@@ -68,8 +81,8 @@ export default function AiTranslatorPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100 flex flex-col pb-10">
       {/* Top Navigation Bar */}
-      <div className="sticky top-0 z-40 bg-zinc-950/90 backdrop-blur-lg border-b border-zinc-800/80 px-4 md:px-8 py-3">
-        <div className="max-w-[1700px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="sticky top-0 z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-4 md:px-8 py-3">
+        <div className="max-w-[1700px] mx-auto relative flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Logo and App Name */}
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2">
@@ -79,7 +92,7 @@ export default function AiTranslatorPage() {
           </div>
 
           {/* Desktop Full Navigation */}
-          <nav className="hidden lg:flex flex-1 items-center justify-center gap-6 text-zinc-400 text-sm font-medium">
+          <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-6 text-zinc-400 text-sm font-medium">
             <Link href="/" className="cursor-pointer hover:text-gray-300 transition text-zinc-400">
               Home
             </Link>
@@ -116,6 +129,19 @@ export default function AiTranslatorPage() {
             </p>
           </div>
         </div>
+        
+        {/* Token limit */}
+        {remainingTokens !== null && (
+          <div className="max-w-2xl mx-auto w-full flex items-center justify-center -mt-2 mb-2">
+            <div className="flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20 text-emerald-400 text-xs font-semibold shadow-sm">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>
+                <strong>{remainingTokens.toLocaleString()}</strong> / {tokenLimit.toLocaleString()} Daily Tokens Remaining
+              </span>
+            </div>
+          </div>
+        )}
+
         <div className="w-full flex flex-col gap-4">
           <div className="flex justify-between items-end">
              <label className="text-sm font-semibold text-neutral-300">Input Source Text (Arabic)</label>
