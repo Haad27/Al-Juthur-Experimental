@@ -13,7 +13,7 @@ export interface PreparedQueryInfo {
   mode: RagMode;
 }
 
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'; // Deprecated - Using Gemini only
 
 /**
  * Deterministic concept-to-Arabic root dictionary for fast baseline expansion.
@@ -171,21 +171,25 @@ export async function prepareRagQuery(userMessage: string, mode: RagMode = 'defa
     }
   }
 
-  // 3. Call Gemini (or OpenRouter Gemini) to structure and rewrite the query
-  const openRouterKey = process.env.OPENROUTER_API_KEY;
   const geminiKey = process.env.GEMINI_API_KEY;
+  if (!geminiKey) throw new Error("GEMINI_API_KEY is missing for Query Router.");
 
   const systemPrompt = `You are the Light Query Preparation & Guardrail Router for a Classical Quranic RAG System.
 Your task is to analyze the user's prompt in the context of the selected mode and return a strict JSON object.
 
 ACTIVE MODE: "${mode}"
+
+CRITICAL INSTRUCTIONS:
+1. **Arabic Translation for Vector Search**: You must extract the core concepts from the user's English query and translate them into classical Arabic keywords ("expandedQueryAr"). This is critical because our databases are primarily in Arabic. The translation depth depends on the mode (e.g., Classical and Lexicon require heavy, precise Arabic root extraction).
+2. **Aqeedah & Fiqh Guardrail**: If the ACTIVE MODE is "grammar" or "lexicon", strictly refuse theological (Aqeedah), sectarian, or Fiqh questions. Set isScopeValid to false. If the mode is "default" or "philosophical", these are allowed.
+
 OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
 {
   "isScopeValid": true or false,
   "warningMessage": "Only if isScopeValid is false, state why clearly and suggest switching to Default Mode.",
-  "targetSurah": null or exact Surah number (1 to 114) if the query mentions a specific Surah (e.g. Al-Fatihah is 1, Al-Baqarah is 2, Al-Ikhlas is 112),
+  "targetSurah": null or exact Surah number (1 to 114) if the query mentions a specific Surah (e.g. Al-Fatihah is 1),
   "targetAyah": null or exact Ayah number if mentioned,
-  "expandedQueryAr": "Exact classical Arabic keywords, vocabulary, and synonyms corresponding to the query for BM25 matching against classical texts.",
+  "expandedQueryAr": "Exact classical Arabic keywords, vocabulary, and synonyms corresponding to the query for BM25 matching against classical texts. (Must be in Arabic script)",
   "expandedQueryEn": "Expanded English terminology and synonyms.",
   "keywords": ["keyword1", "keyword2", "keyword3"],
   "rootWords": ["3-letter or 4-letter Arabic root if applicable, e.g. صبر, رحم, علم"]
@@ -218,41 +222,9 @@ OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
             rawJsonText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
             if (rawJsonText) break;
           }
-        } catch (e) {}
-      }
-    }
-
-    // Fallback to OpenRouter (preferring Gemini models via OpenRouter or reliable fallback)
-    if (!rawJsonText && openRouterKey) {
-      const models = ['google/gemini-2.5-flash', 'google/gemini-flash-1.5', 'meta-llama/llama-3.1-8b-instruct'];
-      for (const model of models) {
-        try {
-          const res = await fetch(OPENROUTER_URL, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${openRouterKey}`,
-              'HTTP-Referer': 'http://localhost:3000',
-              'X-Title': 'Al-Juthur RAG Router',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              model,
-              messages: [
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: cleanMessage }
-              ],
-              temperature: 0.1,
-              max_tokens: 500,
-              response_format: { type: 'json_object' }
-            })
-          });
-
-          if (res.ok) {
-            const data = await res.json();
-            rawJsonText = data.choices?.[0]?.message?.content || '';
-            if (rawJsonText) break;
-          }
-        } catch (e) {}
+        } catch (e) {
+          console.warn(`Query Router API error with ${modelName}:`, e);
+        }
       }
     }
 

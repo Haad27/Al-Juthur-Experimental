@@ -108,3 +108,33 @@ model LexiconEntry {
   
   text          String      // The lexicon definition
 }
+
+// ----------------------------------------------------
+// AI RATE LIMITING & QUOTA TRACKING
+// ----------------------------------------------------
+
+model UserUsage {
+  id                  Int      @id @default(autoincrement())
+  identifier          String   @unique // e.g. IP Address or User ID
+  dailyTokensConsumed Int      @default(0)
+  lastResetDate       DateTime @default(now())
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model ModelUsage {
+  id                   Int      @id @default(autoincrement())
+  modelName            String   @unique // e.g. 'gemini-3.1-flash-lite'
+  
+  // Rolling RPM Bucket
+  rpmCount             Int      @default(0)
+  rpmLastReset         DateTime @default(now())
+  
+  // Weekly Budget Bucket
+  weeklyTokensConsumed Int      @default(0)
+  weeklyLastReset      DateTime @default(now())
+
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}

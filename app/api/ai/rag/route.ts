@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { checkRateLimit } from '@/lib/rateLimit';
+import { checkUserQuota } from '@/lib/ai/quota-manager';
+import { executeWithFallback } from '@/lib/ai/model-router';
+import { estimateTokens } from '@/lib/ai/token-budget';
 import { prepareRagQuery, RagMode } from '@/lib/ai/rag/query-router';
 import { searchHybrid, ScoredParentDocument } from '@/lib/ai/rag/hybrid-search';
-
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,11 +12,14 @@ export async function POST(req: NextRequest) {
     const mode: RagMode = body.mode || 'default';
 
     const ip = req.headers.get('x-forwarded-for') || '127.0.0.1';
-    const limit = checkRateLimit(`rag_${ip}`, 50, 24 * 60 * 60 * 1000); // 50 requests per 24 hours
     
-    if (!limit.success) {
+    // Quick token estimate for initial limit check
+    const estimatedInputTokens = estimateTokens(message) + 1500; // rough baseline for retrieved context + prompt
+    const quota = await checkUserQuota(ip, estimatedInputTokens);
+    
+    if (!quota.allowed) {
       return NextResponse.json(
-        { success: false, error: 'Daily free RAG request limit reached. Please try again tomorrow.' },
+        { success: false, error: 'Daily free RAG token limit reached. Please try again tomorrow.' },
         { status: 429 }
       );
     }
@@ -25,17 +28,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Message is required.' }, { status: 400 });
     }
 
-    const openRouterKey = process.env.OPENROUTER_API_KEY;
     const geminiKey = process.env.GEMINI_API_KEY;
-
-    if (!openRouterKey && !geminiKey) {
+    if (!geminiKey) {
       return NextResponse.json(
-        { success: false, error: 'API Keys missing from environment variables.' },
+        { success: false, error: 'GEMINI_API_KEY missing from environment variables.' },
         { status: 500 }
       );
     }
 
-    // 1. Run LLM 1 Query Rewriter & Scope Guardrail Check (prioritizing Gemini)
+    // 1. Run LLM 1 Query Rewriter & Scope Guardrail Check
     const preparedQuery = await prepareRagQuery(message, mode);
 
     if (!preparedQuery.isScopeValid) {
@@ -44,7 +45,7 @@ export async function POST(req: NextRequest) {
         isScopeInvalid: true,
         text: preparedQuery.warningMessage || "This inquiry is out of scope for the selected mode. Please switch to Default Mode.",
         sources: [],
-        remaining: limit.remaining
+        remaining: quota.remaining
       });
     }
 
@@ -100,97 +101,54 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const systemPrompt = `You are a rigorous, scholarly Quranic RAG Synthesis Engine strictly grounded in canonical Quranic structure and the provided authentic classical texts.
-Your task is to answer the user's inquiry accurately using ONLY the retrieved classical passages provided below and exact canonical Quranic knowledge.
+    let modeSpecificRole = '';
+    switch (mode) {
+      case 'default':
+        modeSpecificRole = 'Synthesize a comprehensive, structured answer using only the provided texts. Blend authentic narration with analytical clarity. First, extract the core meaning from the texts, then expand upon it for clarity. Adhere strictly to the universal guardrails regarding Fiqh and sectarian debates.';
+        break;
+      case 'classical':
+        modeSpecificRole = 'You are a traditional Muhaddith. Focus strictly on historical narrations, reports from the Sahabah, and isnad-grounded exegesis from the retrieved texts. Do not provide modern contextualizations. Cite exact narrators. Do not engage in any theological or jurisprudential debates beyond what is explicitly quoted in the early texts.';
+        break;
+      case 'grammar':
+        modeSpecificRole = 'You are a master of classical Arabic syntax (Nahw) and rhetoric (Balagha). Deconstruct the grammatical architecture and word morphology of the Ayah based on the provided texts. STRICT GUARDRAIL: You must absolutely refuse to answer any theological (Aqeedah), sectarian, or Fiqh question in this mode. Direct the user to Default mode instead. Only discuss linguistics.';
+        break;
+      case 'modern':
+        modeSpecificRole = 'Focus on Maqasid al-Shariah (higher objectives). Connect the retrieved Quranic principles to societal realities, legislative wisdom, and holistic thematic relationships. Maintain a high academic standard. Do not issue modern legal fatwas; only discuss legislative wisdom as framed by the retrieved scholars.';
+        break;
+      case 'philosophical':
+        modeSpecificRole = 'You are a master of scholastic theology (Ilm al-Kalam). Engage with deep rational arguments and logical proofs. Use rigorous, systematic logic to synthesize the answer based ONLY on the provided retrieved context. Maintain strict academic neutrality on sectarian differences.';
+        break;
+      case 'lexicon':
+        modeSpecificRole = 'You are an expert Arabic lexicographer. Focus strictly on root semantics, word definitions, and morphological forms using the retrieved dictionaries. STRICT GUARDRAIL: Do not provide full verse exegesis, theological commentary, or practical rulings. Restrict your answer entirely to the linguistic journey of the root word.';
+        break;
+    }
+
+    const systemPrompt = `You are a strictly academic Islamic AI researcher. You must base every claim on the provided retrieved texts. Do NOT hallucinate. 
+CRITICAL GUARDRAILS: If the user asks about sectarian differences (e.g., Sunni vs Shia), modern political issues, or deeply contentious Fiqh (jurisprudence) debates, you MUST remain strictly academic. Do not take a side, do not issue legal rulings (fatwas), and do not entertain polemical or exploitative prompts. State what the provided classical texts say objectively, and note if the topic falls outside the retrieved scope.
+
+MODE DIRECTIVE: ${modeSpecificRole}
 
 ACTIVE RAG MODE: "${mode.toUpperCase()}"
 
-CRITICAL MANDATORY FACTUALITY & ANTI-HALLUCINATION RULES:
-1. ZERO FABRICATION OF QURANIC VERSES OR STRUCTURE: You MUST NEVER invent, fabricate, or hallucinate Quranic verses, Arabic texts, surah names, or ayah counts.
-2. EXACT SURAH STRUCTURE:
-   - Surah Al-Fatihah (Surah 1) has EXACTLY 7 verses (Ayahs 1:1 to 1:7). NEVER invent verses 8, 9, 10, 11, or 12 for Al-Fatihah.
-   - Every Surah in the Quran has a fixed canonical number of verses (e.g. Al-Baqarah has 286, Al-Ikhlas has 4). If summarizing any surah, ONLY state its real canonical structure and exact verses.
-3. STRICT SCHOLARLY ATTRIBUTION: Never invent opinions or rulings from outside the provided context. Every major claim or point MUST cite the exact source name in brackets, for example: [Tafsir Ibn Kathir, Surah 1:1] or [Lisan al-Arab, Root صبر].
-4. CLEAR & STRUCTURED: Organize your response into neat markdown sections with bullet points or bold headers.
-5. If the retrieved context does not contain enough information to fully answer the specific question, state clearly what is available in the sources.
+CRITICAL MANDATORY FACTUALITY RULES:
+1. ZERO FABRICATION OF QURANIC VERSES OR STRUCTURE.
+2. EXACT SURAH STRUCTURE (e.g., Al-Fatihah has EXACTLY 7 verses).
+3. STRICT SCHOLARLY ATTRIBUTION: Every major claim MUST cite the exact source name in brackets (e.g., [Tafsir Ibn Kathir, Surah 1:1]).
+4. CLEAR & STRUCTURED: Organize your response into neat markdown sections.
 
 ${contextText}`;
 
-    let responseText = '';
-
-    // Prioritize Gemini models (gemini-2.5-flash / gemini-1.5-flash) via Google Gemini API first per user instruction
-    if (geminiKey) {
-      const models = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash'];
-      for (const modelName of models) {
-        try {
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [
-                { role: 'user', parts: [{ text: `${systemPrompt}\n\nUSER INQUIRY: ${message}` }] }
-              ],
-              generationConfig: { temperature: 0.1, maxOutputTokens: 2000 }
-            }),
-          });
-
-          if (res.ok) {
-            const data = await res.json();
-            responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-            if (responseText) break;
-          }
-        } catch (e) {
-          console.warn(`Gemini API synthesis error with ${modelName}:`, e);
-        }
-      }
+    // Calculate actual estimated tokens before running LLM 2
+    const totalEstimatedTokensForExecution = estimateTokens(systemPrompt + message) + 1000; // +1000 for expected output
+    
+    // Check if we still have quota for this exact size (in case it's huge)
+    const exactQuotaCheck = await checkUserQuota(ip, totalEstimatedTokensForExecution);
+    if (!exactQuotaCheck.allowed) {
+      return NextResponse.json({ success: false, error: 'Daily free RAG token limit reached for this query size.' }, { status: 429 });
     }
 
-    // Try Gemini models on OpenRouter second (or fallback to other strong models) if direct Gemini key not available/failed
-    if (!responseText && openRouterKey) {
-      const openRouterModels = [
-        'google/gemini-2.5-flash',
-        'google/gemini-flash-1.5',
-        'google/gemini-pro-1.5',
-        'meta-llama/llama-3.1-8b-instruct'
-      ];
-
-      for (const model of openRouterModels) {
-        try {
-          const payload = {
-            model,
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: message }
-            ],
-            temperature: 0.1,
-            max_tokens: 2000
-          };
-
-          const res = await fetch(OPENROUTER_URL, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${openRouterKey}`,
-              'HTTP-Referer': 'http://localhost:3000',
-              'X-Title': 'Al-Juthur RAG Synthesis',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload),
-          });
-
-          if (res.ok) {
-            const data = await res.json();
-            responseText = data.choices?.[0]?.message?.content || '';
-            if (responseText) break;
-          }
-        } catch (e) {
-          console.warn(`OpenRouter synthesis error with ${model}:`, e);
-        }
-      }
-    }
-
-    if (!responseText) {
-      throw new Error('Failed to generate synthesis from AI models.');
-    }
+    // 4. Execute Multi-Model Fallback Chain
+    const execution = await executeWithFallback(mode, systemPrompt, message, ip, totalEstimatedTokensForExecution);
 
     // Deduplicate sources by book + surah:ayah or root
     const uniqueSourcesMap = new Map<string, typeof retrievedSources[0]>();
@@ -203,9 +161,10 @@ ${contextText}`;
 
     return NextResponse.json({
       success: true,
-      text: responseText,
+      text: execution.text,
       sources: Array.from(uniqueSourcesMap.values()),
-      remaining: limit.remaining
+      remaining: exactQuotaCheck.remaining,
+      modelUsed: execution.modelUsed
     });
   } catch (error: any) {
     console.error('RAG Engine Error:', error);
