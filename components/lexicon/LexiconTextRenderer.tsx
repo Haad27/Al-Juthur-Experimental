@@ -35,12 +35,11 @@ export default function LexiconTextRenderer({ text, isImmersive }: LexiconTextRe
             <p
               key={idx}
               className={`${amiriquran.className} ${
-                isImmersive ? "text-2xl md:text-3xl text-amber-200/90 py-1" : "text-xl md:text-2xl text-emerald-300 py-1"
+                isImmersive ? "text-2xl md:text-3xl text-amber-200/90 py-1" : "text-xl md:text-2xl text-slate-100 py-1"
               } text-right leading-loose`}
               dir="rtl"
-            >
-              {line}
-            </p>
+              dangerouslySetInnerHTML={{ __html: line }}
+            />
           );
         }
 
@@ -50,9 +49,8 @@ export default function LexiconTextRenderer({ text, isImmersive }: LexiconTextRe
             className={`${
               isImmersive ? "text-base md:text-lg text-amber-100/80" : "text-sm md:text-base text-slate-300"
             } leading-relaxed`}
-          >
-            {line}
-          </p>
+            dangerouslySetInnerHTML={{ __html: line }}
+          />
         );
       })}
     </div>

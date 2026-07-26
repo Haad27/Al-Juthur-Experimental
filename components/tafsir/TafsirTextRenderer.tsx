@@ -43,18 +43,21 @@ export default function TafsirTextRenderer({ text, isArabic, immersive }: Tafsir
         '<span style="color:#9a7c5a;font-style:italic;">'
       );
     } else {
-      // Standard mode (original styling)
+      // Standard mode (3-Role Color System)
+      // 1. Quranic Verse Citations → Soft amber citation chip (tinted background, not harsh text)
       html = html.replace(
         /<span[^>]*class="qpc-hafs"[^>]*>/gi,
-        '<span class="font-bold text-emerald-400 font-serif text-xl leading-relaxed mx-1">'
+        '<span class="bg-amber-950/60 text-amber-200/90 border border-amber-500/30 px-2 py-0.5 rounded-md font-serif text-lg md:text-xl leading-loose inline-block mx-1 my-0.5 shadow-sm">'
       );
+      // 2. Phrase Highlights → Soft warm amber text
       html = html.replace(
         /<span[^>]*class="hlt"[^>]*>/gi,
-        '<span class="text-amber-200">'
+        '<span class="text-amber-300/90 font-semibold">'
       );
+      // 3. Footnotes / Gray Text → Muted neutral pill
       html = html.replace(
         /<span[^>]*class="gray"[^>]*>/gi,
-        '<span class="text-zinc-400 italic bg-zinc-800/40 px-1.5 py-0.5 rounded border border-zinc-700/40 inline-block my-0.5">'
+        '<span class="text-zinc-400 italic bg-zinc-800/40 px-1.5 py-0.5 rounded border border-zinc-700/40 inline-block my-0.5 text-xs md:text-sm">'
       );
     }
 
@@ -169,7 +172,7 @@ export default function TafsirTextRenderer({ text, isArabic, immersive }: Tafsir
     );
   }
 
-  // ── STANDARD MODE RENDERING (unchanged) ────────────────────────────────────
+  // ── STANDARD MODE RENDERING (3-Role Color System) ────────────────────────────
   return (
     <div
       className={`space-y-4 ${isArabic ? "font-serif text-right" : "text-left"}`}
@@ -182,7 +185,9 @@ export default function TafsirTextRenderer({ text, isArabic, immersive }: Tafsir
           return (
             <h3
               key={idx}
-              className="text-lg md:text-xl font-bold text-emerald-400 border-b border-emerald-500/20 pb-2 mt-6 mb-3"
+              className={`font-bold text-emerald-300/90 text-base md:text-lg my-4 leading-snug ${
+                isArabic ? "border-r-2 border-emerald-500/60 pr-3" : "border-l-2 border-emerald-500/60 pl-3"
+              }`}
               dangerouslySetInnerHTML={{ __html: transformedHtml }}
             />
           );
@@ -199,7 +204,7 @@ export default function TafsirTextRenderer({ text, isArabic, immersive }: Tafsir
           return (
             <p
               key={idx}
-              className="font-bold text-emerald-400 text-lg mt-4 pb-1 border-b border-emerald-500/20 inline-block"
+              className="font-bold text-emerald-300/90 text-base md:text-lg mt-4 pb-1 border-r-2 border-emerald-500/60 pr-3 inline-block"
               dangerouslySetInnerHTML={{ __html: transformedHtml }}
             />
           );
@@ -208,7 +213,7 @@ export default function TafsirTextRenderer({ text, isArabic, immersive }: Tafsir
         return (
           <p
             key={idx}
-            className="text-zinc-300 text-base md:text-lg leading-relaxed whitespace-pre-wrap"
+            className="text-stone-300 text-base md:text-lg leading-relaxed whitespace-pre-wrap"
             dangerouslySetInnerHTML={{ __html: transformedHtml }}
           />
         );

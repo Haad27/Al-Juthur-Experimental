@@ -68,6 +68,7 @@ export default function SurahPlayer({
   const currentAyahRef = useRef(currentAyah);
 
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileFabOpen, setMobileFabOpen] = useState(false);
 
   // +=============- User Experience UseEffects -=============+
   // Set user-friendly volumes
@@ -246,107 +247,193 @@ export default function SurahPlayer({
           }}
         />
       )}
-      {!collapsed ? (
-        <motion.div
-          key="controls"
-          layout
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ opacity: { duration: 0.2 } }}
-          className="flex justify-center items-center gap-3 backdrop-blur-md dark:bg-zinc-800/90 p-3 sm:w-fit w-full rounded-full shadow-lg"
+      {/* Mobile Floating Action Button (FAB) & Vertical Controls Card */}
+      <div className="md:hidden">
+        {/* Floating Action Button */}
+        <button
+          onClick={() => setMobileFabOpen(!mobileFabOpen)}
+          className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom,0px))] right-4 z-50 size-12 rounded-full bg-emerald-600 border border-emerald-400/40 text-white shadow-2xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+          title="Audio Recitation Controls"
         >
-          <button
-            onClick={() => setCollapsed(true)}
-            className="p-1 text-white hover:bg-white/10 rounded-full"
+          {playing ? (
+            <Pause className="size-5" />
+          ) : recording ? (
+            <Mic className="size-5 text-emerald-300 animate-pulse" />
+          ) : (
+            <Mic className="size-5 text-white" />
+          )}
+        </button>
+
+        {/* Mobile Vertical Floating Menu Popup */}
+        {mobileFabOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 15, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 15, scale: 0.95 }}
+            className="fixed bottom-[calc(9rem+env(safe-area-inset-bottom,0px))] right-4 z-50 w-64 bg-zinc-900/95 border border-zinc-800 rounded-2xl p-4 shadow-2xl backdrop-blur-xl space-y-4 text-white"
           >
-            <ChevronDown className="size-6 dark:text-white text-black" />
-          </button>
-          <div className="flex flex-col items-center relative">
-            <button className="p-1 cursor-pointer">
-              {recording ? (
-                <Mic
-                  className="size-5 animate-pulse text-emerald-400"
-                  onClick={requestMic}
-                />
-              ) : (
-                <MicOff
-                  className="size-5 text-emerald-500"
-                  onClick={() => {
-                    if (localStorage.getItem("hasSeenReciteGuide") === "true") {
-                      unlockAudio();
-                      requestMic();
-                      // console.log("has seen it!");
-                    } else {
-                      // console.log("has seen it2!");
-                      setShowReciteGuide(true);
-                    }
-                  }}
-                />
-              )}
-            </button>
-            {/* <span className="absolute -top-4 scale-75 rounded bg-emerald-500 px-2 text-xs text-white pointer-events-none">
-              Beta feature
-            </span> */}
-          </div>
-          <button
-            onClick={() => skip(-10)}
-            className="p-2 text-white hover:bg-white/10 rounded-full"
-          >
-            <SkipBackIcon className="size-5" />
-          </button>
-          <button
-            onClick={handlePlayPause}
-            className="p-2 text-white hover:bg-white/10 rounded-full"
-          >
-            {playing ? (
-              <Pause className="size-5" />
-            ) : (
-              <Play className="size-5" />
-            )}
-          </button>
-          <button
-            onClick={() => skip(10)}
-            className="p-2 text-white hover:bg-white/10 rounded-full"
-          >
-            <SkipForwardIcon className="size-5" />
-          </button>
-          <span className="md:block hidden font-mono text-xs text-white">
-            {formatTime(currentTime)} / {formatTime(duration)}
-          </span>
-          <Popover>
-            <PopoverTrigger className="p-2 text-white hover:bg-white/10 rounded-full">
-              {playbackRate}×
-            </PopoverTrigger>
-            <PopoverContent className="space-y-1 rounded-lg bg-zinc-800 p-2 shadow-lg">
-              {playbackRates.map((rate) => (
-                <div
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Recitation Player</span>
+              <button onClick={() => setMobileFabOpen(false)} className="p-1 hover:bg-zinc-800 rounded-lg text-zinc-400">
+                <ChevronDown className="size-4" />
+              </button>
+            </div>
+
+            {/* Playback Controls */}
+            <div className="flex items-center justify-center gap-4 py-1">
+              <button onClick={() => skip(-10)} className="p-2 bg-zinc-800/80 hover:bg-zinc-800 rounded-full text-white">
+                <SkipBackIcon className="size-4" />
+              </button>
+              <button onClick={handlePlayPause} className="p-3 bg-emerald-600 hover:bg-emerald-500 rounded-full text-white shadow-lg">
+                {playing ? <Pause className="size-5" /> : <Play className="size-5" />}
+              </button>
+              <button onClick={() => skip(10)} className="p-2 bg-zinc-800/80 hover:bg-zinc-800 rounded-full text-white">
+                <SkipForwardIcon className="size-4" />
+              </button>
+            </div>
+
+            {/* Time / Progress */}
+            <div className="text-center font-mono text-xs text-zinc-400">
+              {formatTime(currentTime)} / {formatTime(duration)}
+            </div>
+
+            {/* Speed Selector */}
+            <div className="flex items-center justify-center gap-1 bg-zinc-950/60 p-1 rounded-xl">
+              {playbackRates.slice(2, 6).map((rate) => (
+                <button
                   key={rate}
                   onClick={() => setPlaybackRate(rate)}
-                  className={`cursor-pointer rounded px-3 py-1 hover:bg-white/20 ${
-                    playbackRate === rate ? "bg-white/20" : ""
+                  className={`flex-1 py-1 rounded-lg text-xs font-semibold transition ${
+                    playbackRate === rate ? "bg-emerald-600 text-white" : "text-zinc-400 hover:text-white"
                   }`}
                 >
                   {rate}×
-                </div>
+                </button>
               ))}
-            </PopoverContent>
-          </Popover>
-        </motion.div>
-      ) : (
-        <motion.button
-          key="collapsed"
-          layout
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ opacity: { duration: 0.2 } }}
-          onClick={() => setCollapsed(false)}
-          className="rounded-full p-2 bg-zinc-800/80 text-white shadow-lg"
-        >
-          <ChevronUp className="size-6" />
-        </motion.button>
-      )}
+            </div>
+
+            {/* Recite Mic Toggle */}
+            <button
+              onClick={() => {
+                if (localStorage.getItem("hasSeenReciteGuide") === "true") {
+                  unlockAudio();
+                  requestMic();
+                } else {
+                  setShowReciteGuide(true);
+                }
+              }}
+              className={`w-full py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-2 border transition ${
+                recording
+                  ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
+                  : "bg-zinc-800/60 border-zinc-700/60 text-zinc-300 hover:bg-zinc-800"
+              }`}
+            >
+              <Mic className="size-4 text-emerald-400" />
+              <span>{recording ? "Recording Active..." : "Voice Recite Assistant"}</span>
+            </button>
+          </motion.div>
+        )}
+      </div>
+
+      {/* Desktop Horizontal Player Bar */}
+      <div className="hidden md:block">
+        {!collapsed ? (
+          <motion.div
+            key="controls"
+            layout
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ opacity: { duration: 0.2 } }}
+            className="flex justify-center items-center gap-3 backdrop-blur-md dark:bg-zinc-800/90 p-3 sm:w-fit w-full rounded-full shadow-lg"
+          >
+            <button
+              onClick={() => setCollapsed(true)}
+              className="p-1 text-white hover:bg-white/10 rounded-full"
+            >
+              <ChevronDown className="size-6 dark:text-white text-black" />
+            </button>
+            <div className="flex flex-col items-center relative">
+              <button className="p-1 cursor-pointer">
+                {recording ? (
+                  <Mic
+                    className="size-5 animate-pulse text-emerald-400"
+                    onClick={requestMic}
+                  />
+                ) : (
+                  <MicOff
+                    className="size-5 text-emerald-500"
+                    onClick={() => {
+                      if (localStorage.getItem("hasSeenReciteGuide") === "true") {
+                        unlockAudio();
+                        requestMic();
+                      } else {
+                        setShowReciteGuide(true);
+                      }
+                    }}
+                  />
+                )}
+              </button>
+            </div>
+            <button
+              onClick={() => skip(-10)}
+              className="p-2 text-white hover:bg-white/10 rounded-full"
+            >
+              <SkipBackIcon className="size-5" />
+            </button>
+            <button
+              onClick={handlePlayPause}
+              className="p-2 text-white hover:bg-white/10 rounded-full"
+            >
+              {playing ? (
+                <Pause className="size-5" />
+              ) : (
+                <Play className="size-5" />
+              )}
+            </button>
+            <button
+              onClick={() => skip(10)}
+              className="p-2 text-white hover:bg-white/10 rounded-full"
+            >
+              <SkipForwardIcon className="size-5" />
+            </button>
+            <span className="md:block hidden font-mono text-xs text-white">
+              {formatTime(currentTime)} / {formatTime(duration)}
+            </span>
+            <Popover>
+              <PopoverTrigger className="p-2 text-white hover:bg-white/10 rounded-full">
+                {playbackRate}×
+              </PopoverTrigger>
+              <PopoverContent className="space-y-1 rounded-lg bg-zinc-800 p-2 shadow-lg">
+                {playbackRates.map((rate) => (
+                  <div
+                    key={rate}
+                    onClick={() => setPlaybackRate(rate)}
+                    className={`cursor-pointer rounded px-3 py-1 hover:bg-white/20 ${
+                      playbackRate === rate ? "bg-white/20" : ""
+                    }`}
+                  >
+                    {rate}×
+                  </div>
+                ))}
+              </PopoverContent>
+            </Popover>
+          </motion.div>
+        ) : (
+          <motion.button
+            key="collapsed"
+            layout
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ opacity: { duration: 0.2 } }}
+            onClick={() => setCollapsed(false)}
+            className="rounded-full p-2 bg-zinc-800/80 text-white shadow-lg"
+          >
+            <ChevronUp className="size-6" />
+          </motion.button>
+        )}
+      </div>
     </AnimatePresence>
   );
 }

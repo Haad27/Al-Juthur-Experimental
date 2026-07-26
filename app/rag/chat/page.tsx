@@ -165,8 +165,8 @@ function RagChatContent() {
               onClick={() => setIsModeSwitcherOpen(!isModeSwitcherOpen)}
               className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-emerald-500/50 text-xs sm:text-sm font-semibold text-emerald-400 transition-all shadow-sm"
             >
-              <span>Mode: {currentModeInfo.name.split(". ")[1] || currentModeInfo.name}</span>
-              <ChevronDown className={`size-4 transition-transform ${isModeSwitcherOpen ? "rotate-180" : ""}`} />
+              <span className="truncate max-w-[140px] sm:max-w-[220px]">Mode: {currentModeInfo.shortName}</span>
+              <ChevronDown className={`size-4 shrink-0 transition-transform ${isModeSwitcherOpen ? "rotate-180" : ""}`} />
             </button>
 
             {/* Mode Dropdown Menu */}

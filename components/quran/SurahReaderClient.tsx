@@ -56,6 +56,41 @@ interface AyahRowProps {
   handleSaveAyah: (ayah: AyahProps) => void;
 }
 
+function processTranslation(rawText: string) {
+  if (!rawText) return { mainText: "", footnotes: [] as string[] };
+
+  let clean = rawText.trim();
+  const footnotes: string[] = [];
+
+  // Extract footnote patterns like: [1] ... or (1) ... or \n[1] ...
+  const fnRegex = /(?:^|\n|\s)(\[\d+\]|\(\d+\)|\d+\.)\s*([^\n\[\]]+)/g;
+  let fnMatch;
+  while ((fnMatch = fnRegex.exec(clean)) !== null) {
+    if (fnMatch[0]) {
+      footnotes.push(fnMatch[0].trim());
+    }
+  }
+
+  // Remove trailing footnotes from main text if match was found
+  if (footnotes.length > 0) {
+    const firstFnMarkerIndex = clean.search(/(?:\n|\s+)(\[\d+\]|\(\d+\)|\d+\.)\s*/);
+    if (firstFnMarkerIndex > 0) {
+      clean = clean.substring(0, firstFnMarkerIndex).trim();
+    }
+  }
+
+  // Deduplicate identical sentences (e.g. duplicate sentences appended by mistake)
+  const sentences = clean.split(/(?<=[.!?])\s+/);
+  const uniqueSentences = sentences.filter((s, idx) => {
+    const lower = s.trim().toLowerCase();
+    return lower && sentences.findIndex((other) => other.trim().toLowerCase() === lower) === idx;
+  });
+
+  clean = uniqueSentences.join(" ");
+
+  return { mainText: clean, footnotes };
+}
+
 const AyahRow = React.memo(({
   ayah,
   surahNumber,
@@ -203,16 +238,29 @@ const AyahRow = React.memo(({
           />
         </p>
 
-        {showTranslation && (
-          <div>
-            <p
-              className="text-white md:leading-[1.4] leading-[1.8] md:ml-8 text-left pt-6 lg:w-2/3 md:w-4/6"
-              style={{ fontSize: getTranslationFontSize(fontSize) }}
-            >
-              {ayah.translation}
-            </p>
-          </div>
-        )}
+        {showTranslation && (() => {
+          const { mainText, footnotes } = processTranslation(ayah.translation);
+          return (
+            <div className="pt-4 md:ml-8 lg:w-2/3 md:w-4/6 text-left">
+              <p
+                className="text-white md:leading-[1.5] leading-[1.8]"
+                style={{ fontSize: getTranslationFontSize(fontSize) }}
+              >
+                {mainText}
+              </p>
+              {footnotes.length > 0 && (
+                <div className="mt-3 p-3 rounded-xl bg-zinc-900/60 border border-zinc-800/80 text-xs text-zinc-400 italic space-y-1.5">
+                  <div className="font-semibold text-emerald-400 not-italic uppercase tracking-wider text-[10px]">
+                    Footnote / Note
+                  </div>
+                  {footnotes.map((fn, fIdx) => (
+                    <p key={fIdx} className="leading-relaxed">{fn}</p>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

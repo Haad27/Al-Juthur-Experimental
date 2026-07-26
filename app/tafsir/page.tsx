@@ -601,11 +601,11 @@ export default function TafsirPage() {
     return (
       <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white ${inter.className}`}>
         {/* Top Navigation Bar */}
-        <div className={`sticky top-0 z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-3 md:px-8 py-3 md:py-4 transition-all duration-300 ${topNavVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}>
+        <div className="sticky top-0 z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-3 md:px-8 py-3 md:py-4">
           <div className="max-w-[1700px] mx-auto">
             {/* Top Row: Back, Title, Immersive Toggle */}
             <div className="flex items-center justify-between gap-2 md:gap-4 w-full">
-              {/* Left Side: Back + Title */}
+              {/* Left Side: Back + Title (Always Pinned) */}
               <div className="flex items-center gap-2 md:gap-4 min-w-0">
                 <button
                   onClick={() => setActiveAuthor(null)}
@@ -633,7 +633,7 @@ export default function TafsirPage() {
                 </div>
               </div>
 
-              {/* Right Side: Immersive Mode Toggle */}
+              {/* Right Side: Immersive Mode Toggle (Always Pinned) */}
               <button
                 onClick={() => setImmersiveMode(true)}
                 className="tafsir-immersive-toggle tafsir-immersive-toggle-off shrink-0 !p-2 md:!px-3 md:!py-1.5"
