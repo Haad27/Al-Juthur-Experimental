@@ -24,7 +24,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import useScrollDirection from "@/hooks/useScrollDirection";
 import { motion } from "framer-motion";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, ChevronRight } from "lucide-react";
+import { SURAHS_DATA } from "@/lib/surahsData";
 
 const MobileSheet = ({
   isOpen,
@@ -43,22 +44,89 @@ const MobileSheet = ({
   );
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger
-        className={cn(
-          "fixed w-full lg:hidden flex justify-between items-center transition-all duration-300 p-2 px-4 backdrop-blur-md border-b dark:border-[#262629ff] border-black min-h-16 z-99999",
-          show ? "top-0" : "-top-16"
-        )}
-        id="mobile-menu-trigger"
-      >
-        <LogoIcon
-          onClick={() => router.push("/")}
-          className="dark:text-white text-black"
-        />
-        <MenuIcon
-          onClick={() => setIsOpen(true)}
-          className="dark:text-white text-black"
-        />
-      </SheetTrigger>
+      {surahNumber ? (
+        <div
+          className={cn(
+            "fixed w-full lg:hidden flex flex-col gap-2 transition-all duration-300 p-2 pl-4 pr-2 bg-zinc-950/80 backdrop-blur-md border-b dark:border-[#262629ff] border-black min-h-16 z-99999",
+            show ? "top-0" : "-top-24"
+          )}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              <span className="text-emerald-400 font-bold text-sm tracking-wide">
+                {SURAHS_DATA.find((s) => s.number === surahNumber)?.englishName}
+              </span>
+            </div>
+            <button 
+              onClick={() => { setActiveTab("settings"); setIsOpen(true); }} 
+              className="p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white transition-colors"
+            >
+              <SlidersHorizontal className="size-4" />
+            </button>
+          </div>
+          <div className="flex w-full gap-2 items-center">
+            <div className="relative flex-1 min-w-0">
+              <select
+                value={surahNumber}
+                onChange={(e) => {
+                  router.push(`/surah/${e.target.value}`);
+                }}
+                className="w-full appearance-none bg-zinc-900 border border-emerald-500/50 rounded-lg px-3 py-2 text-xs text-zinc-300 font-medium focus:outline-none focus:border-emerald-400 pr-8 shadow-sm truncate"
+              >
+                {SURAHS_DATA.map((s) => (
+                  <option key={s.number} value={s.number} className="bg-zinc-900 text-zinc-200">
+                    {s.number}. {s.englishName}
+                  </option>
+                ))}
+              </select>
+              <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 size-3.5 text-zinc-500 pointer-events-none rotate-90" />
+            </div>
+
+            <div className="relative w-28 shrink-0">
+              <select
+                onChange={(e) => {
+                  const ayahNumber = e.target.value;
+                  const element = document.getElementById(`ayah-${ayahNumber}`);
+                  if (element) {
+                    element.scrollIntoView({ behavior: "auto", block: "center" });
+                    const c = ["dark:bg-[#1c1c1cff]", "bg-[var(--sephia-300)]"];
+                    element.classList.add(...c);
+                    setTimeout(() => element.classList.remove(...c), 2000);
+                  } else {
+                    router.replace(`/surah/${surahNumber}?ayah=${ayahNumber}`);
+                  }
+                }}
+                className="w-full appearance-none bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-300 font-medium focus:outline-none focus:border-emerald-500/50 pr-8 shadow-sm"
+              >
+                <option value="" disabled selected className="bg-zinc-900 text-zinc-200">Ayah...</option>
+                {Array.from({ length: SURAHS_DATA.find((s) => s.number === surahNumber)?.numberOfAyahs || 1 }, (_, i) => i + 1).map((num) => (
+                  <option key={num} value={num} className="bg-zinc-900 text-zinc-200">
+                    Ayah {num}
+                  </option>
+                ))}
+              </select>
+              <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 size-3.5 text-zinc-500 pointer-events-none rotate-90" />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <SheetTrigger
+          className={cn(
+            "fixed w-full lg:hidden flex justify-between items-center transition-all duration-300 p-2 px-4 backdrop-blur-md border-b dark:border-[#262629ff] border-black min-h-16 z-99999",
+            show ? "top-0" : "-top-16"
+          )}
+          id="mobile-menu-trigger"
+        >
+          <LogoIcon
+            onClick={() => router.push("/")}
+            className="dark:text-white text-black"
+          />
+          <MenuIcon
+            onClick={() => setIsOpen(true)}
+            className="dark:text-white text-black"
+          />
+        </SheetTrigger>
+      )}
       <SheetContent
         side="right"
         className="z-999999 dark:bg-zinc-900 bg-[var(--sephia-200)] dark:text-white text-black px-4 border-l dark:border-[#262629ff] border-black sm:min-w-[25%] min-w-[90%]" // maybe make transparent and add backdrop MAYBE REVERT BACK TO NOT  bg-transparent backdrop-blur-md

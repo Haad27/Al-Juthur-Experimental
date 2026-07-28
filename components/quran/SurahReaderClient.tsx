@@ -20,6 +20,7 @@ import {
   Play,
   Save,
   ScrollText,
+  BookOpen,
 } from "lucide-react";
 import SurahPlayer from "@/components/SurahPlayer";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
@@ -179,7 +180,7 @@ const AyahRow = React.memo(({
 
   return (
     <div
-      className="border-b-[0.1px] border-b-[var(--sephia-500)] dark:border-b-[#262629ff] sm:px-8 px-4 sm:py-12 py-4 flex flex-col items-end justify-end sm:flex-row sm:gap-12 gap-4 transition-all duration-300"
+      className="border-b-[0.1px] border-b-[var(--sephia-500)] dark:border-b-[#262629ff] sm:px-8 pl-4 pr-1 sm:py-12 py-4 flex flex-col items-end justify-end sm:flex-row sm:gap-12 gap-4 transition-all duration-300"
       id={`ayah-${ayah.numberInSurah}`}
     >
       <div className="h-full flex flex-row sm:order-1 order-2 sm:flex-col gap-3 sm:justify-center items-center transition-all duration-300">
@@ -215,6 +216,13 @@ const AyahRow = React.memo(({
           title="Read Tafsir"
         >
           <ScrollText className="text-emerald-500 hover:text-emerald-400" size={18} />
+        </Link>
+        <Link
+          href={`/lexicon?surah=${surahNumber}&ayah=${ayah.numberInSurah}`}
+          className="p-2 rounded-full hover:bg-zinc-800 transition-colors cursor-pointer inline-flex items-center justify-center"
+          title="Read Lexicon"
+        >
+          <BookOpen className="text-amber-500 hover:text-amber-400" size={18} />
         </Link>
       </div>
 
@@ -288,6 +296,12 @@ export default function SurahReaderClient({
     const clearAudio = useAudioStore.getState().clearAudio;
     return () => clearAudio();
   }, [surahNumber]);
+
+  useEffect(() => {
+    if (surah) {
+      localStorage.setItem("recent", JSON.stringify(surah));
+    }
+  }, [surah]);
 
   // Scroll to the selected ayah (if provided via the "ayah" search param)
   useEffect(() => {
@@ -364,12 +378,6 @@ export default function SurahReaderClient({
 
   return (
     <section className="w-full flex items-center flex-col dark:bg-zinc-900 bg-[var(--sephia-primary)] flex-1 dark:text-white text-black relative pb-28 md:pb-12">
-      <div className="w-full md:hidden flex p-4 sticky top-0 z-50 bg-zinc-900/80 backdrop-blur-md border-b border-white/10">
-        <button onClick={() => router.push("/")} className="flex items-center gap-2 text-white hover:opacity-80 transition-opacity">
-          <ArrowLeft className="w-5 h-5" />
-          <span className="font-medium text-sm">Back</span>
-        </button>
-      </div>
       <div
         className={cn(
           "hidden md:flex items-center justify-between w-full md:min-h-14 px-6 py-3 sticky top-0 backdrop-blur-lg dark:bg-zinc-900/90 border-b bg-[var(--sephia-200)] dark:border-zinc-800/80 border-white/10 transition-all duration-300 z-50 shadow-sm",
@@ -405,9 +413,9 @@ export default function SurahReaderClient({
         </nav>
       </div>
 
-      <div className="flex flex-col w-full min-h-screen blg:px-24 bpx-4">
+      <div className="flex flex-col w-full min-h-screen lg:px-24 px-0">
         {/* Explore Container Hero Header */}
-        <div className="relative pt-10 pb-8 px-4 md:px-8 max-w-7xl mx-auto w-full border-b border-zinc-800/80 mb-8">
+        <div className="relative pt-28 md:pt-10 pb-8 pl-4 pr-1 md:px-8 max-w-7xl mx-auto w-full border-b border-zinc-800/80 mb-8">
           <div className="absolute left-10 top-10 size-96 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 relative z-10">
             <div className="space-y-3">
