@@ -279,19 +279,28 @@ export async function POST(req: NextRequest) {
       // Parse the markdown table response into the expected JSON format
       let chunkTranslatedData = parseMarkdownTable(responseText);
       
-      // Fallback if parsing returned empty array
+      // If parsing returned empty array, or if model printed text/reasoning instead of a table
       if (chunkTranslatedData.length === 0) {
-        chunkTranslatedData = [{ sourceText: chunk, transcreatedText: responseText }];
+        // If the model responded with refusal or reasoning text, check for refusal keywords
+        return NextResponse.json({
+          success: true,
+          data: [{ sourceText: text, transcreatedText: "I am a specialized Translation AI. Please provide classical Arabic Tafsir, Lexicon, or scholarly text to translate." }]
+        });
       }
 
       // Aggregate chunk results
       allTranslatedData = allTranslatedData.concat(chunkTranslatedData);
     }
 
-    // Post-generation prompt leak & reasoning protection
+    // Post-generation leak & reasoning detection
     for (const row of allTranslatedData) {
       const lowerTrans = row.transcreatedText.toLowerCase();
-      if (
+      const isReasoning = 
+        lowerTrans.includes('role:') ||
+        lowerTrans.includes('domain scope:') ||
+        lowerTrans.includes('refusal mandate:') ||
+        lowerTrans.includes('input text:') ||
+        lowerTrans.includes('is it tafsīr?') ||
         lowerTrans.includes('academic translation ai') ||
         lowerTrans.includes('system role') ||
         lowerTrans.includes('specialist turāth') ||
@@ -301,8 +310,9 @@ export async function POST(req: NextRequest) {
         lowerTrans.includes('prime directive') ||
         lowerTrans.includes('wait, looking at the prompt') ||
         lowerTrans.includes('output only a markdown table') ||
-        lowerTrans.includes('table header:')
-      ) {
+        lowerTrans.includes('table header:');
+
+      if (isReasoning) {
         return NextResponse.json({
           success: true,
           data: [{ sourceText: text, transcreatedText: "I am a specialized Translation AI. Please provide classical Arabic Tafsir, Lexicon, or scholarly text to translate." }],
