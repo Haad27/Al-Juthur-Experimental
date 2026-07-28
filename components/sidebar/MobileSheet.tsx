@@ -47,7 +47,7 @@ const MobileSheet = ({
       {surahNumber ? (
         <div
           className={cn(
-            "fixed w-full lg:hidden flex flex-col gap-2 transition-all duration-300 p-2 pl-4 pr-2 bg-zinc-950/80 backdrop-blur-md border-b dark:border-[#262629ff] border-black min-h-16 z-99999",
+            "fixed w-full lg:hidden flex flex-col gap-2 transition-all duration-300 p-2 pl-4 pr-2 bg-zinc-950/40 backdrop-blur-md border-b border-zinc-800/80 min-h-16 z-99999",
             show ? "top-0" : "-top-24"
           )}
         >
