@@ -18,6 +18,9 @@ interface GlobalState {
   mushafStyle: string;
   setMushafStyle: (style: string) => void;
   
+  selectedReciter: number;
+  setSelectedReciter: (reciter: number) => void;
+
   immersiveMode: boolean;
   setImmersiveMode: React.Dispatch<React.SetStateAction<boolean>>;
   
@@ -78,6 +81,21 @@ export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
     setMushafStyleState(style);
     if (typeof window !== "undefined") {
       document.cookie = `mushaf=${encodeURIComponent(style)}; path=/; max-age=31536000`;
+    }
+  };
+
+  const [selectedReciter, setSelectedReciterState] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const match = document.cookie.match(/(?:^|; )reciter=([^;]*)/);
+      return match ? parseInt(decodeURIComponent(match[1])) : 7;
+    }
+    return 7; // Mishary Alafasy as default
+  });
+
+  const setSelectedReciter = (reciter: number) => {
+    setSelectedReciterState(reciter);
+    if (typeof window !== "undefined") {
+      document.cookie = `reciter=${reciter}; path=/; max-age=31536000`;
     }
   };
 
@@ -144,6 +162,8 @@ export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
         setTranslationEdition,
         mushafStyle,
         setMushafStyle,
+        selectedReciter,
+        setSelectedReciter,
         
         aiInputText,
         setAiInputText,

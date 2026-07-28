@@ -3,6 +3,7 @@ import { create } from 'zustand';
 interface AudioState {
   currentSurah: number | null;
   currentAyah: number | null;
+  currentWord: number | null;
   isPlaying: boolean;
   audioElement: HTMLAudioElement | null;
   
@@ -10,12 +11,16 @@ interface AudioState {
   playAyah: (surahNumber: number, ayahNumber: number, audioUrl: string) => void;
   pause: () => void;
   setAudioElement: (element: HTMLAudioElement | null) => void;
+  setCurrentAyah: (ayah: number | null) => void;
+  setCurrentWord: (word: number | null) => void;
+  setIsPlaying: (isPlaying: boolean) => void;
   clearAudio: () => void;
 }
 
 export const useAudioStore = create<AudioState>((set, get) => ({
   currentSurah: null,
   currentAyah: null,
+  currentWord: null,
   isPlaying: false,
   audioElement: null,
 
@@ -74,6 +79,9 @@ export const useAudioStore = create<AudioState>((set, get) => ({
   },
 
   setAudioElement: (element) => set({ audioElement: element }),
+  setCurrentAyah: (ayah) => set({ currentAyah: ayah }),
+  setCurrentWord: (word) => set({ currentWord: word }),
+  setIsPlaying: (isPlaying) => set({ isPlaying }),
 
   clearAudio: () => {
     const { audioElement } = get();
@@ -81,6 +89,6 @@ export const useAudioStore = create<AudioState>((set, get) => ({
       audioElement.pause();
       audioElement.currentTime = 0;
     }
-    set({ currentSurah: null, currentAyah: null, isPlaying: false, audioElement: null });
+    set({ currentSurah: null, currentAyah: null, currentWord: null, isPlaying: false, audioElement: null });
   }
 }));

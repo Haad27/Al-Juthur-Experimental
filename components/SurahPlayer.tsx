@@ -33,6 +33,7 @@ import GettingStartedPopup from "./popups/GettingStartedPopup";
 import { formatTime, normalizeArabic, unlockAudio } from "@/lib/utils";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 import { fetchAyahAudio } from "@/api/api";
+import { useAudioStore } from "@/lib/stores/audioStore";
 
 interface SurahPlayerProps {
   surahNumber: number;
@@ -49,12 +50,18 @@ export default function SurahPlayer({
   lastAyahNumber,
   router,
 }: SurahPlayerProps) {
-  const { mistakeDetection } = useGlobalState();
+  const { mistakeDetection, selectedReciter } = useGlobalState();
+  const audioStore = useAudioStore();
+
   // Audio effects
   const correct = useRef(new Audio("/assets/sounds/correct.mp3")).current;
   const wrong = useRef(new Audio("/assets/sounds/wrong.mp3")).current;
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const [audioQueue, setAudioQueue] = useState<any[]>([]);
+  const [currentAyahIndex, setCurrentAyahIndex] = useState(0);
+  const [startAyah, setStartAyah] = useState(1);
 
   const [playing, setPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
@@ -77,22 +84,65 @@ export default function SurahPlayer({
     wrong.volume = 0.5;
   }, [correct, wrong]);
 
-  // Keep ref in sync
+  // Keep ref in sync for SR
   useEffect(() => {
     currentAyahRef.current = currentAyah;
   }, [currentAyah]);
 
-  /** Preload and current Surah audio */
+  // Fetch the segments queue on mount or when surah/reciter changes
   useEffect(() => {
-    const audio = new Audio(
-      `https://cdn.islamic.network/quran/audio-surah/128/ar.alafasy/${surahNumber}.mp3`
-    );
+    import("@/api/api").then((module) => {
+      module.fetchChapterAudioSegments(selectedReciter || 7, surahNumber).then((res) => {
+        if (res?.audio_files) {
+          setAudioQueue(res.audio_files);
+          setCurrentAyahIndex(startAyah - 1);
+        }
+      });
+    });
+  }, [surahNumber, selectedReciter]);
+
+  // Handle QUL Audio Queue Playback
+  useEffect(() => {
+    if (audioQueue.length === 0 || currentAyahIndex >= audioQueue.length) return;
+
+    const currentItem = audioQueue[currentAyahIndex];
+    let url = currentItem.url;
+    if (!url.startsWith('http')) {
+      url = `https://audio.qurancdn.com/${url}`;
+    }
+
+    const audio = new Audio(url);
     audio.preload = "auto";
     audio.playbackRate = playbackRate;
 
-    const onTime = () => setCurrentTime(audio.currentTime);
+    const onTime = () => {
+      setCurrentTime(audio.currentTime);
+      if (currentItem.segments && currentItem.segments.length > 0) {
+        const timeMs = audio.currentTime * 1000;
+        let foundWord = null;
+        for (const segment of currentItem.segments) {
+          if (timeMs >= segment[2] && timeMs <= segment[3]) {
+             foundWord = segment[0];
+             break;
+          }
+        }
+        audioStore.setCurrentWord(foundWord);
+      } else {
+        audioStore.setCurrentWord(null);
+      }
+    };
+    
     const onLoaded = () => setDuration(audio.duration);
-    const onEnded = () => setPlaying(false);
+    const onEnded = () => {
+      if (currentAyahIndex + 1 < audioQueue.length) {
+        setCurrentAyahIndex(prev => prev + 1);
+      } else {
+        setPlaying(false);
+        audioStore.setIsPlaying(false);
+        audioStore.setCurrentAyah(null);
+        audioStore.setCurrentWord(null);
+      }
+    };
 
     audio.addEventListener("timeupdate", onTime);
     audio.addEventListener("loadedmetadata", onLoaded);
@@ -101,26 +151,53 @@ export default function SurahPlayer({
     audioRef.current?.pause();
     audioRef.current = audio;
 
+    // Update global state
+    const ayahNum = parseInt(currentItem.verse_key.split(":")[1]);
+    audioStore.setCurrentAyah(ayahNum);
+    
+    // Play automatically if playing is true (e.g. moving to next ayah)
+    if (playing) {
+      audio.play().catch(e => console.error("Playback error", e));
+      const element = document.getElementById(`ayah-${ayahNum}`);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+
     return () => {
       audio.pause();
       audio.removeEventListener("timeupdate", onTime);
       audio.removeEventListener("loadedmetadata", onLoaded);
       audio.removeEventListener("ended", onEnded);
     };
-  }, [surahNumber, playbackRate]);
+  }, [currentAyahIndex, audioQueue, playbackRate]);
+
+  // Separately handle play/pause toggle
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    
+    if (playing) {
+      audio.play().catch(e => console.error(e));
+      audioStore.setIsPlaying(true);
+      
+      if (audioQueue[currentAyahIndex]) {
+        const ayahNum = parseInt(audioQueue[currentAyahIndex].verse_key.split(":")[1]);
+        audioStore.setCurrentAyah(ayahNum);
+        const element = document.getElementById(`ayah-${ayahNum}`);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
+    } else {
+      audio.pause();
+      audioStore.setIsPlaying(false);
+    }
+  }, [playing]);
 
   // Audio Controls
   const handlePlayPause = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (playing) {
-      audio.pause();
-      setPlaying(false);
-    } else {
-      audio.play();
-      setPlaying(true);
-    }
+    setPlaying(!playing);
   };
 
   const skip = (sec: number) => {
@@ -150,7 +227,6 @@ export default function SurahPlayer({
   };
 
   // ================- SPEECH RECOGNITION FUNCTION -================!
-  // TODO: Clean up this function and organize.
   const startRecognition = () => {
     const SpeechRecognition =
       (window as any).SpeechRecognition ||
@@ -159,13 +235,11 @@ export default function SurahPlayer({
       toast.error("Speech recognition not supported.");
       return;
     }
-    // Check SR Compatibility ^^
 
     const recognition = new SpeechRecognition();
     recognition.lang = "ar-SA";
     recognition.interimResults = false;
     recognition.continuous = true;
-    // Initialize SR ^^
 
     recognition.onresult = (e: any) => {
       const transcript = e.results[e.resultIndex][0].transcript;
@@ -175,37 +249,36 @@ export default function SurahPlayer({
         1 -
         levenshtein(actual, expected) /
           Math.max(actual.length, expected.length);
-      // ^ Uses the levenshtein algorithm to check similarties between senteces!
 
-      const currentAyahId = `ayah-${currentAyahRef.current + 1}`; // uses a ref to be safe
+      const currentAyahId = `ayah-${currentAyahRef.current + 1}`; 
       const arabicTextElement = document.getElementById(
-        `atext-${currentAyahRef.current + 1}` // current arabicTextElement for highlighting
+        `atext-${currentAyahRef.current + 1}` 
       );
 
       if (similarity > 0.6) {
         correct.play();
-        arabicTextElement?.classList.add("text-green-500"); // adds if correct
-        arabicTextElement?.classList.remove("text-red-500"); // removes just in case user got it wrong before
+        arabicTextElement?.classList.add("text-green-500");
+        arabicTextElement?.classList.remove("text-red-500");
         document
           .getElementById(currentAyahId)
-          ?.classList.remove("bg-zinc-800/75"); // removes highlight
+          ?.classList.remove("bg-zinc-800/75");
 
-        setCurrentAyah((prev) => prev + 1); // next ayah
+        setCurrentAyah((prev) => prev + 1);
 
         if (currentAyahRef.current + 2 <= lastAyahNumber) {
           document
             .getElementById(`ayah-${currentAyahRef.current + 2}`)
-            ?.scrollIntoView({ behavior: "smooth", block: "center" }); // scrolls into view
+            ?.scrollIntoView({ behavior: "smooth", block: "center" });
           document
             .getElementById(`ayah-${currentAyahRef.current + 2}`)
-            ?.classList.add("bg-zinc-800/75"); // highlights it
+            ?.classList.add("bg-zinc-800/75");
         } else {
           toast.success("You completed the Surah!");
-          setTimeout(() => router.push(`/surah/${surahNumber + 1}`), 1500); // if completed surah, go to next surah
+          setTimeout(() => router.push(`/surah/${surahNumber + 1}`), 1500); 
         }
       } else {
-        handleIncorrect(currentAyahRef.current + 1); // calls incorrect function with current verse number
-        document.getElementById(currentAyahId)?.classList.add("text-red-500"); // highlights red
+        handleIncorrect(currentAyahRef.current + 1); 
+        document.getElementById(currentAyahId)?.classList.add("text-red-500");
       }
     };
 
@@ -216,20 +289,18 @@ export default function SurahPlayer({
 
   const requestMic = async () => {
     if (recording) {
-      // if the user presses while recording, set it to false
       setRecording(false);
       return;
     }
 
     try {
-      // attempt to get userMedia, once that's done setRecording to true and call speech recognition
       await navigator.mediaDevices.getUserMedia({ audio: true });
       setRecording(true);
       startRecognition();
       document
         .getElementById(`ayah-${currentAyahRef.current + 1}`)
-        ?.classList.add("bg-zinc-800/75"); // highlight it
-      toast.success("Start reciting aloud. Tap mic again to stop."); // toast user
+        ?.classList.add("bg-zinc-800/75"); 
+      toast.success("Start reciting aloud. Tap mic again to stop.");
     } catch {
       setRecording(false);
     }
@@ -249,7 +320,6 @@ export default function SurahPlayer({
       )}
       {/* Mobile Floating Action Button (FAB) & Vertical Controls Card */}
       <div className="md:hidden">
-        {/* Floating Action Button */}
         <button
           onClick={() => setMobileFabOpen(!mobileFabOpen)}
           className="fixed bottom-[calc(6.75rem+env(safe-area-inset-bottom,0px))] right-4 z-50 size-12 rounded-full bg-emerald-600 border border-emerald-400/40 text-white shadow-2xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
@@ -264,7 +334,6 @@ export default function SurahPlayer({
           )}
         </button>
 
-        {/* Mobile Vertical Floating Menu Popup */}
         {mobileFabOpen && (
           <motion.div
             initial={{ opacity: 0, y: 15, scale: 0.95 }}
@@ -277,6 +346,25 @@ export default function SurahPlayer({
               <button onClick={() => setMobileFabOpen(false)} className="p-1 hover:bg-zinc-800 rounded-lg text-zinc-400">
                 <ChevronDown className="size-4" />
               </button>
+            </div>
+
+            {/* Start Ayah Selector Mobile */}
+            <div className="flex items-center justify-between bg-zinc-950/60 rounded-xl px-3 py-2">
+               <span className="text-xs text-zinc-400">Start Ayah:</span>
+               <select 
+                 className="bg-transparent text-white text-xs outline-none cursor-pointer"
+                 value={startAyah}
+                 onChange={(e) => {
+                   const val = Number(e.target.value);
+                   setStartAyah(val);
+                   setCurrentAyahIndex(val - 1);
+                   setPlaying(false);
+                 }}
+               >
+                 {Array.from({ length: lastAyahNumber }, (_, i) => i + 1).map(num => (
+                   <option key={num} value={num} className="bg-zinc-800">{num}</option>
+                 ))}
+               </select>
             </div>
 
             {/* Playback Controls */}
@@ -375,6 +463,26 @@ export default function SurahPlayer({
                 )}
               </button>
             </div>
+
+            {/* Start Ayah Selector Desktop */}
+            <div className="flex items-center bg-zinc-700/50 rounded-full px-3 py-1 mr-1">
+               <span className="text-[10px] uppercase font-bold text-emerald-400 mr-2">Start Ayah</span>
+               <select 
+                 className="bg-transparent text-white font-mono text-sm outline-none cursor-pointer"
+                 value={startAyah}
+                 onChange={(e) => {
+                   const val = Number(e.target.value);
+                   setStartAyah(val);
+                   setCurrentAyahIndex(val - 1);
+                   setPlaying(false);
+                 }}
+               >
+                 {Array.from({ length: lastAyahNumber }, (_, i) => i + 1).map(num => (
+                   <option key={num} value={num} className="bg-zinc-800">{num}</option>
+                 ))}
+               </select>
+            </div>
+
             <button
               onClick={() => skip(-10)}
               className="p-2 text-white hover:bg-white/10 rounded-full"

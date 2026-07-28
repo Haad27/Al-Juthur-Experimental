@@ -10,6 +10,8 @@ import {
 import { Sparkles, ArrowRight, BookOpen, Loader2, Bot } from 'lucide-react';
 
 import { useGlobalState } from '@/lib/providers/GlobalStatesProvider';
+import { useAudioStore } from '@/lib/stores/audioStore';
+import { toast } from 'sonner';
 
 interface InteractiveAyahWordsProps {
   surahNumber: number;
@@ -44,6 +46,7 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
   showWbw = true,
 }) => {
   const { mushafStyle } = useGlobalState();
+  const isPlaying = useAudioStore((state) => state.isPlaying);
 
   const mushafFontClass = React.useMemo(() => {
     switch (mushafStyle) {
@@ -87,6 +90,10 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
   const [wordDataMap, setWordDataMap] = useState<Record<number, WordMorphologyData>>({});
 
   const handleWordClick = async (wordIndex: number) => {
+    if (useAudioStore.getState().isPlaying) {
+      toast.info("Please pause the recitation to interact with words.", { id: 'pause-recitation' });
+      return;
+    }
     if (wordDataMap[wordIndex]) return; // already loaded
     setLoadingIndex(wordIndex);
     try {
@@ -103,6 +110,61 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
       setLoadingIndex(null);
     }
   };
+
+  React.useEffect(() => {
+    const unsubscribe = useAudioStore.subscribe((state, prevState) => {
+       const isPlaying = state.isPlaying;
+       const currentAyah = state.currentAyah;
+       const currentWord = state.currentWord;
+
+       if (currentAyah !== ayahNumber) {
+          if (prevState.currentAyah === ayahNumber) {
+             tokens.forEach(t => {
+               if (t.wordIndex !== null) {
+                 document.getElementById(`word-${ayahNumber}-${t.wordIndex}`)?.classList.remove('!text-emerald-400', 'scale-110');
+               }
+             });
+             const ayahTextEl = document.getElementById(`atext-${ayahNumber}`);
+             ayahTextEl?.classList.remove('!text-emerald-400');
+          }
+          return;
+       }
+
+       if (isPlaying) {
+         if (currentWord !== null) {
+           // Word-by-word highlighting
+           tokens.forEach(t => {
+             const el = document.getElementById(`word-${ayahNumber}-${t.wordIndex}`);
+             if (!el) return;
+             if (t.wordIndex === currentWord) {
+               el.classList.add('!text-emerald-400', 'scale-110');
+             } else {
+               el.classList.remove('!text-emerald-400', 'scale-110');
+             }
+           });
+         } else {
+           // Ayah-by-ayah highlighting fallback (if segments not available)
+           tokens.forEach(t => {
+             if (t.wordIndex !== null) {
+               document.getElementById(`word-${ayahNumber}-${t.wordIndex}`)?.classList.add('!text-emerald-400');
+             }
+           });
+           const ayahTextEl = document.getElementById(`atext-${ayahNumber}`);
+           ayahTextEl?.classList.add('!text-emerald-400');
+         }
+       } else {
+          tokens.forEach(t => {
+             if (t.wordIndex !== null) {
+               document.getElementById(`word-${ayahNumber}-${t.wordIndex}`)?.classList.remove('!text-emerald-400', 'scale-110');
+             }
+          });
+          const ayahTextEl = document.getElementById(`atext-${ayahNumber}`);
+          ayahTextEl?.classList.remove('!text-emerald-400');
+       }
+    });
+
+    return unsubscribe;
+  }, [ayahNumber, tokens]);
 
   return (
     <span className="inline-flex flex-wrap gap-x-2.5 gap-y-2 leading-relaxed" dir="rtl">
@@ -130,8 +192,15 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
             <PopoverTrigger asChild>
               <span
                 className="group inline-flex flex-col items-center justify-end cursor-pointer px-1 py-0.5 rounded-lg hover:bg-emerald-500/30 transition-colors duration-150 select-none min-w-[2.5rem]"
+                onClick={(e) => {
+                  if (useAudioStore.getState().isPlaying) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toast.info("Please pause the recitation to interact with words.", { id: 'pause-recitation' });
+                  }
+                }}
               >
-                <span className={`text-white group-hover:text-emerald-300 ${mushafFontClass} transition-colors duration-150`}>{word}</span>
+                <span id={`word-${ayahNumber}-${wordIdx}`} className={`text-white group-hover:text-emerald-300 ${mushafFontClass} transition-all duration-150`}>{word}</span>
                 {showWbw && meaning && (
                   <span className="text-[10px] sm:text-[11px] text-zinc-500 dark:text-zinc-400 group-hover:text-emerald-200 font-sans tracking-tight mt-0.5 block max-w-[90px] truncate text-center select-none transition-colors duration-150" dir="ltr">
                     {meaning}

@@ -13,6 +13,7 @@ import {
   Zap,
   BookMarked,
   Check,
+  Headphones,
 } from "lucide-react";
 
 // 9 Authentic Mushaf Layouts from the Quranic Universal Library (QUL) database
@@ -129,7 +130,27 @@ const Settings = () => {
     setShowWbw,
     mushafStyle,
     setMushafStyle,
+    selectedReciter,
+    setSelectedReciter,
   } = useGlobalState();
+
+  const [reciters, setReciters] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    import("@/api/api").then((module) => {
+      module.fetchReciters().then((res) => {
+        if (res?.recitations) {
+          setReciters(res.recitations);
+        }
+      });
+    });
+  }, []);
+
+  // Known reciters with word-by-word segments
+  const WBW_RECITERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+  
+  const wbwRecitersList = reciters.filter(r => WBW_RECITERS.includes(r.id));
+  const ayahRecitersList = reciters.filter(r => !WBW_RECITERS.includes(r.id));
 
   const handleFontSizeChange = (value: number[]) => {
     setFontSize(value[0]);
@@ -233,6 +254,51 @@ const Settings = () => {
       />
 
       <SettingSection
+        icon={<Headphones className="w-4 h-4 text-emerald-400" />}
+        title="Audio Reciter"
+        control={
+          <div className="space-y-4 pt-2">
+            <div className="space-y-2">
+              <span className="text-xs font-semibold text-emerald-400">Word-by-Word (Recommended)</span>
+              <select
+                value={WBW_RECITERS.includes(selectedReciter) ? selectedReciter : ""}
+                onChange={(e) => {
+                  if (e.target.value) setSelectedReciter(Number(e.target.value));
+                }}
+                className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-3 py-2 text-sm text-zinc-200 outline-none focus:border-emerald-500/50"
+              >
+                <option value="" disabled>Select a Word-by-Word reciter...</option>
+                {wbwRecitersList.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.reciter_name} {r.style ? `(${r.style})` : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <span className="text-xs font-semibold text-zinc-400">Ayat-by-Ayat (Fallback)</span>
+              <select
+                value={!WBW_RECITERS.includes(selectedReciter) ? selectedReciter : ""}
+                onChange={(e) => {
+                  if (e.target.value) setSelectedReciter(Number(e.target.value));
+                }}
+                className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-3 py-2 text-sm text-zinc-200 outline-none focus:border-emerald-500/50"
+              >
+                <option value="" disabled>Select an Ayat-by-Ayat reciter...</option>
+                {ayahRecitersList.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.reciter_name} {r.style ? `(${r.style})` : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        }
+        description="Choose your preferred reciter. Word-by-word reciters will highlight the exact word being recited."
+      />
+
+      <SettingSection
         icon={<Type className="w-4 h-4 text-emerald-400" />}
         title="Font & Text Size"
         control={
@@ -264,7 +330,7 @@ const Settings = () => {
                     key={preset.val}
                     type="button"
                     onClick={() => setFontSize(preset.val)}
-                    className={`py-1 text-[11px] font-semibold rounded-lg border transition-all cursor-pointer ${
+                    className={`py-1 text-[10px] md:text-[11px] px-0.5 truncate font-semibold rounded-lg border transition-all cursor-pointer ${
                       isActive
                         ? "bg-emerald-500 text-white border-emerald-400 shadow-sm"
                         : "bg-zinc-800/80 text-zinc-400 border-zinc-700/60 hover:bg-zinc-700/80 hover:text-zinc-200"
