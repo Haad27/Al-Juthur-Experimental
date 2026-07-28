@@ -107,7 +107,9 @@ export default function SurahPlayer({
 
     const currentItem = audioQueue[currentAyahIndex];
     let url = currentItem.url;
-    if (!url.startsWith('http')) {
+    if (url.startsWith('//')) {
+      url = `https:${url}`;
+    } else if (!url.startsWith('http')) {
       url = `https://audio.qurancdn.com/${url}`;
     }
 
@@ -122,7 +124,7 @@ export default function SurahPlayer({
         let foundWord = null;
         for (const segment of currentItem.segments) {
           if (timeMs >= segment[2] && timeMs <= segment[3]) {
-             foundWord = segment[0];
+             foundWord = segment[0] + 1; // API is 0-indexed, frontend is 1-indexed
              break;
           }
         }
@@ -143,10 +145,16 @@ export default function SurahPlayer({
         audioStore.setCurrentWord(null);
       }
     };
+    const onError = () => {
+      setPlaying(false);
+      audioStore.setIsPlaying(false);
+      toast.error("Failed to load audio for this reciter. Please change the speaker in Settings.", { id: 'audio-error' });
+    };
 
     audio.addEventListener("timeupdate", onTime);
     audio.addEventListener("loadedmetadata", onLoaded);
     audio.addEventListener("ended", onEnded);
+    audio.addEventListener("error", onError);
 
     audioRef.current?.pause();
     audioRef.current = audio;
@@ -158,10 +166,7 @@ export default function SurahPlayer({
     // Play automatically if playing is true (e.g. moving to next ayah)
     if (playing) {
       audio.play().catch(e => console.error("Playback error", e));
-      const element = document.getElementById(`ayah-${ayahNum}`);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
+      window.dispatchEvent(new CustomEvent('scrollToAyah', { detail: { index: ayahNum - 1 } }));
     }
 
     return () => {
@@ -169,6 +174,7 @@ export default function SurahPlayer({
       audio.removeEventListener("timeupdate", onTime);
       audio.removeEventListener("loadedmetadata", onLoaded);
       audio.removeEventListener("ended", onEnded);
+      audio.removeEventListener("error", onError);
     };
   }, [currentAyahIndex, audioQueue, playbackRate]);
 
@@ -184,10 +190,7 @@ export default function SurahPlayer({
       if (audioQueue[currentAyahIndex]) {
         const ayahNum = parseInt(audioQueue[currentAyahIndex].verse_key.split(":")[1]);
         audioStore.setCurrentAyah(ayahNum);
-        const element = document.getElementById(`ayah-${ayahNum}`);
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
+        window.dispatchEvent(new CustomEvent('scrollToAyah', { detail: { index: ayahNum - 1 } }));
       }
     } else {
       audio.pause();
@@ -266,9 +269,7 @@ export default function SurahPlayer({
         setCurrentAyah((prev) => prev + 1);
 
         if (currentAyahRef.current + 2 <= lastAyahNumber) {
-          document
-            .getElementById(`ayah-${currentAyahRef.current + 2}`)
-            ?.scrollIntoView({ behavior: "smooth", block: "center" });
+          window.dispatchEvent(new CustomEvent('scrollToAyah', { detail: { index: currentAyahRef.current + 1 } }));
           document
             .getElementById(`ayah-${currentAyahRef.current + 2}`)
             ?.classList.add("bg-zinc-800/75");
@@ -359,6 +360,7 @@ export default function SurahPlayer({
                    setStartAyah(val);
                    setCurrentAyahIndex(val - 1);
                    setPlaying(false);
+                   window.dispatchEvent(new CustomEvent('scrollToAyah', { detail: { index: val - 1 } }));
                  }}
                >
                  {Array.from({ length: lastAyahNumber }, (_, i) => i + 1).map(num => (
@@ -475,6 +477,7 @@ export default function SurahPlayer({
                    setStartAyah(val);
                    setCurrentAyahIndex(val - 1);
                    setPlaying(false);
+                   window.dispatchEvent(new CustomEvent('scrollToAyah', { detail: { index: val - 1 } }));
                  }}
                >
                  {Array.from({ length: lastAyahNumber }, (_, i) => i + 1).map(num => (

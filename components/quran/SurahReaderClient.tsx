@@ -7,7 +7,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import NavigatorButton from "@/components/NavigatorButton";
 import { InteractiveAyahWords } from "@/components/quran/InteractiveAyahWords";
-import { Virtuoso } from "react-virtuoso";
+import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { useAudioStore } from "@/lib/stores/audioStore";
 import { cn, convertNumberToArabicNumeral } from "@/lib/utils";
 import BismillahIcon from "@/components/svg/icons/BismillahIcon";
@@ -79,6 +79,17 @@ function processTranslation(rawText: string) {
       clean = clean.substring(0, firstFnMarkerIndex).trim();
     }
   }
+
+  // Extract embedded double-bracket footnotes like: [[ This is a footnote ]]
+  const doubleBracketRegex = /\[\[(.*?)\]\]/g;
+  let dbMatch;
+  while ((dbMatch = doubleBracketRegex.exec(clean)) !== null) {
+    if (dbMatch[1]) {
+      footnotes.push(dbMatch[1].trim());
+    }
+  }
+  // Remove the double-bracket footnotes from the main text
+  clean = clean.replace(/\[\[.*?\]\]/g, '').replace(/\s{2,}/g, ' ').trim();
 
   // Deduplicate identical sentences (e.g. duplicate sentences appended by mistake)
   const sentences = clean.split(/(?<=[.!?])\s+/);
@@ -284,8 +295,21 @@ export default function SurahReaderClient({
   surahWbwTranslation,
 }: SurahReaderClientProps) {
   const { fontSize, showTranslation, showWbw } = useGlobalState();
+  const virtuosoRef = useRef<VirtuosoHandle>(null);
   const show = useScrollDirection();
   const router = useRouter();
+
+  // Auto-scroll listener for audio player
+  useEffect(() => {
+    const handleScroll = (e: any) => {
+      const index = e.detail?.index;
+      if (typeof index === 'number') {
+        virtuosoRef.current?.scrollToIndex({ index, align: 'center', behavior: 'smooth' });
+      }
+    };
+    window.addEventListener('scrollToAyah', handleScroll);
+    return () => window.removeEventListener('scrollToAyah', handleScroll);
+  }, []);
 
   const [collapsed, setCollapsed] = useState(true);
 
@@ -447,6 +471,7 @@ export default function SurahReaderClient({
         </div>
 
         <Virtuoso
+          ref={virtuosoRef}
           useWindowScroll
           totalCount={ayahs.length}
           itemContent={(index) => {
