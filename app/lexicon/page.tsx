@@ -17,6 +17,7 @@ import {
   BookOpenText,
   X,
   ChevronDown,
+  Languages,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useGlobalState } from '@/lib/providers/GlobalStatesProvider';
@@ -106,7 +107,20 @@ function LexiconPageContent() {
   // Scroll & Immersive navigation state
   const [readingProgress, setReadingProgress] = useState(0);
   const [topNavVisible, setTopNavVisible] = useState(true);
+  const [isEnteringImmersive, setIsEnteringImmersive] = useState(false);
   const lastScrollYRef = useRef<number>(0);
+
+  const handleEnterImmersive = (val: boolean) => {
+    if (val) {
+      setIsEnteringImmersive(true);
+      setTimeout(() => {
+        setImmersiveMode(true);
+        setIsEnteringImmersive(false);
+      }, 400);
+    } else {
+      setImmersiveMode(false);
+    }
+  };
 
   useEffect(() => {
     const rootParam = searchParams.get('root');
@@ -140,9 +154,10 @@ function LexiconPageContent() {
       const pct = docHeight > 0 ? Math.min(100, (scrollTop / docHeight) * 100) : 0;
       setReadingProgress(pct);
 
-      if (scrollTop > lastScrollYRef.current && scrollTop > 80) {
+      // Hide top nav when scrolling down, show when scrolling up
+      if (scrollTop > lastScrollYRef.current && scrollTop > 50) {
         setTopNavVisible(false);
-      } else {
+      } else if (scrollTop < lastScrollYRef.current) {
         setTopNavVisible(true);
       }
       lastScrollYRef.current = scrollTop;
@@ -158,7 +173,11 @@ function LexiconPageContent() {
       const tag = (e.target as HTMLElement).tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
       if (e.key === 'r' || e.key === 'R') {
-        setImmersiveMode(!immersiveMode);
+        if (!immersiveMode && !isEnteringImmersive) {
+          handleEnterImmersive(true);
+        } else if (immersiveMode) {
+          handleEnterImmersive(false);
+        }
       }
     };
     window.addEventListener('keydown', onKey);
@@ -186,7 +205,7 @@ function LexiconPageContent() {
         );
         if (matched) {
           setSelectedDictId(matched.dictId);
-          setImmersiveMode(true);
+          handleEnterImmersive(true);
         } else {
           setSelectedDictId('all');
         }
@@ -221,6 +240,31 @@ function LexiconPageContent() {
   // ==========================================
   // LEXICON IMMERSIVE READING MODE (FULL WIDTH)
   // ==========================================
+  
+  if (isEnteringImmersive) {
+    return (
+      <div className={`min-h-screen fixed inset-0 z-[100] flex flex-col items-center justify-center bg-zinc-950 text-amber-500 ${inter.className}`}>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-900/20 via-zinc-950 to-zinc-950" />
+        <div className="relative z-10 flex flex-col items-center gap-8">
+          <div className="relative flex items-center justify-center">
+            <div className="absolute size-28 border-t-2 border-amber-500 rounded-full animate-[spin_1s_linear_infinite]" />
+            <div className="absolute size-24 border-r-2 border-amber-400/60 rounded-full animate-[spin_1.5s_reverse_infinite]" />
+            <div className="absolute size-20 border-b-2 border-amber-600/40 rounded-full animate-[spin_2s_linear_infinite]" />
+            <BookOpenText className="size-8 text-amber-300 animate-pulse" />
+          </div>
+          <div className="flex flex-col items-center gap-2 px-4 text-center">
+            <h2 className="text-lg md:text-3xl font-serif text-amber-200 tracking-widest md:tracking-[0.2em] uppercase">
+              Entering Immersive Mode
+            </h2>
+            <p className="text-[10px] md:text-sm text-amber-500/70 font-mono tracking-widest md:tracking-[0.3em] uppercase animate-pulse">
+              Preparing Classical Lexicon Texts...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (immersiveMode) {
     return (
       <div className={`tafsir-immersive text-white min-h-screen ${inter.className}`}>
@@ -232,7 +276,7 @@ function LexiconPageContent() {
 
         {/* Immersive Top Bar */}
         <div
-          className={`sticky top-0 z-40 border-b px-4 md:px-8 py-3 transition-all duration-300 ${
+          className={`sticky top-0 z-40 border-b px-4 md:px-8 py-3 transition-all duration-200 ${
             topNavVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
           }`}
           style={{
@@ -244,7 +288,7 @@ function LexiconPageContent() {
           <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
               <button
-                onClick={() => setImmersiveMode(false)}
+                onClick={() => handleEnterImmersive(false)}
                 className="flex items-center gap-1.5 text-amber-600/70 hover:text-amber-500 transition text-sm shrink-0"
               >
                 <ArrowLeft className="size-4" />
@@ -286,7 +330,7 @@ function LexiconPageContent() {
 
               {/* Exit Immersive Button */}
               <button
-                onClick={() => setImmersiveMode(false)}
+                onClick={() => handleEnterImmersive(false)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-medium hover:bg-amber-500/20 transition shrink-0"
                 title="Exit Immersive Mode (R)"
               >
@@ -388,15 +432,15 @@ function LexiconPageContent() {
                 <span className="font-bold text-xl tracking-tight text-white">Al-Juthur</span>
               </Link>
               <div className="h-4 w-px bg-zinc-800 hidden sm:block mx-1" />
-              <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 hidden sm:inline-block">
+              <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 hidden sm:inline-block lg:hidden">
                 Lexicon
               </span>
             </div>
             
             {/* Mobile Immersive Mode Toggle */}
             <button
-              onClick={() => setImmersiveMode(true)}
-              className="md:hidden tafsir-immersive-toggle tafsir-immersive-toggle-off !px-3 !py-1.5 text-xs shrink-0"
+              onClick={() => handleEnterImmersive(true)}
+              className="md:!hidden tafsir-immersive-toggle tafsir-immersive-toggle-off !px-3 !py-1.5 text-xs shrink-0"
               title="Enter Lexicon Immersive Mode (R)"
             >
               <BookOpenText className="size-4" />
@@ -426,7 +470,7 @@ function LexiconPageContent() {
           {/* Desktop Immersive Mode Toggle (Far-Right Pinned) */}
           <div className="hidden md:flex items-center shrink-0">
             <button
-              onClick={() => setImmersiveMode(true)}
+              onClick={() => handleEnterImmersive(true)}
               className="tafsir-immersive-toggle tafsir-immersive-toggle-off !px-3.5 !py-1.5 text-sm"
               title="Enter Lexicon Immersive Mode (R)"
             >
@@ -686,13 +730,29 @@ function LexiconPageContent() {
                         )}
                       </div>
 
-                      <button
-                        onClick={() => handleCopyDefinition(entry.definitions.join('\n'), entry.dictName)}
-                        className="p-1.5 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800 transition"
-                        title="Copy Definition"
-                      >
-                        <Copy className="size-4" />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleCopyDefinition(entry.definitions.join('\n'), entry.dictName)}
+                          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 transition text-xs font-medium text-zinc-300"
+                          title="Copy Definition"
+                        >
+                          <Copy className="size-3.5" />
+                          <span className="hidden sm:inline">Copy</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            const cleanText = entry.definitions.join('\n').replace(/<[^>]*>?/gm, '');
+                            sessionStorage.setItem("ai_translator_input", cleanText);
+                            router.push("/ai");
+                          }}
+                          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition text-xs font-medium text-emerald-400"
+                          title="Translate to English"
+                        >
+                          <Languages className="size-3.5 text-emerald-400" />
+                          <span className="hidden sm:inline">Translate to English</span>
+                          <span className="sm:hidden">Translate</span>
+                        </button>
+                      </div>
                     </div>
 
                     <div className="space-y-5">

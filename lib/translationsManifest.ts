@@ -10,52 +10,12 @@ export interface TranslationOption {
 
 export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
   {
-    "identifier": "qurancom.47",
-    "languageCode": "al",
-    "languageLabel": "Albanian",
-    "name": "Albanian",
-    "englishName": "Albanian",
-    "displayLabel": "Albanian: Albanian (Albanian)"
-  },
-  {
-    "identifier": "qurancom.88",
-    "languageCode": "al",
-    "languageLabel": "Albanian",
-    "name": "Hasan Efendi Nahi",
-    "englishName": "Hasan Efendi Nahi",
-    "displayLabel": "Albanian: Hasan Efendi Nahi (Hasan Efendi Nahi)"
-  },
-  {
-    "identifier": "qurancom.89",
-    "languageCode": "al",
-    "languageLabel": "Albanian",
-    "name": "Albanian Translation",
-    "englishName": "Sherif Ahmeti\t",
-    "displayLabel": "Albanian: Sherif Ahmeti\t (Albanian Translation)"
-  },
-  {
     "identifier": "am.sadiq",
     "languageCode": "am",
     "languageLabel": "Am",
     "name": "ሳዲቅ & ሳኒ ሐቢብ",
     "englishName": "ሳዲቅ & ሳኒ ሐቢብ",
     "displayLabel": "Language: ሳዲቅ & ሳኒ ሐቢብ (ሳዲቅ & ሳኒ ሐቢብ)"
-  },
-  {
-    "identifier": "qurancom.236",
-    "languageCode": "am",
-    "languageLabel": "Amazigh",
-    "name": "Ramdane At Mansour",
-    "englishName": "Ramdane At Mansour",
-    "displayLabel": "Amazigh: Ramdane At Mansour (Ramdane At Mansour)"
-  },
-  {
-    "identifier": "qurancom.87",
-    "languageCode": "am",
-    "languageLabel": "Amharic",
-    "name": "Sadiq and Sani",
-    "englishName": "Sadiq and Sani",
-    "displayLabel": "Amharic: Sadiq and Sani (Sadiq and Sani)"
   },
   {
     "identifier": "ar.abdulbasitmurattal",
@@ -98,14 +58,6 @@ export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
     "displayLabel": "Language: Minshawy (Mujawwad) (محمد صديق المنشاوي (المجود))"
   },
   {
-    "identifier": "qurancom.120",
-    "languageCode": "as",
-    "languageLabel": "Assamese",
-    "name": "Shaykh Rafeequl Islam Habibur-Rahman",
-    "englishName": "Shaykh Rafeequl Islam Habibur-Rahman",
-    "displayLabel": "Assamese: Shaykh Rafeequl Islam Habibur-Rahman (Shaykh Rafeequl Islam Habibur-Rahman)"
-  },
-  {
     "identifier": "az.musayev",
     "languageCode": "az",
     "languageLabel": "Az",
@@ -122,76 +74,12 @@ export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
     "displayLabel": "Language: Vasim Mammadaliyev and Ziya Bunyadov (Məmmədəliyev & Bünyadov)"
   },
   {
-    "identifier": "qurancom.75",
-    "languageCode": "az",
-    "languageLabel": "Azeri",
-    "name": "Alikhan Musayev",
-    "englishName": "Alikhan Musayev",
-    "displayLabel": "Azeri: Alikhan Musayev (Alikhan Musayev)"
-  },
-  {
-    "identifier": "qurancom.23",
-    "languageCode": "az",
-    "languageLabel": "Azeri",
-    "name": "Azerbaijani",
-    "englishName": "Azerbaijani",
-    "displayLabel": "Azeri: Azerbaijani (Azerbaijani)"
-  },
-  {
     "identifier": "ba.mehanovic",
     "languageCode": "ba",
     "languageLabel": "Ba",
     "name": "Kur'an - sa prevodom (značenja) na bosanski jezik, utemeljen na Ibn Kesirovom tumačenju, i kratki komentar",
     "englishName": "Quran translation by Muhamed Mehanovic",
     "displayLabel": "Language: Quran translation by Muhamed Mehanovic (Kur'an - sa prevodom (značenja) na bosanski jezik, utemeljen na Ibn Kesirovom tumačenju, i kratki komentar)"
-  },
-  {
-    "identifier": "qurancom.796",
-    "languageCode": "ba",
-    "languageLabel": "Bambara",
-    "name": "Baba Mamady Jani",
-    "englishName": "Baba Mamady Jani",
-    "displayLabel": "Bambara: Baba Mamady Jani (Baba Mamady Jani)"
-  },
-  {
-    "identifier": "qurancom.795",
-    "languageCode": "ba",
-    "languageLabel": "Bambara",
-    "name": "Suliman Kanti",
-    "englishName": "Suliman Kanti",
-    "displayLabel": "Bambara: Suliman Kanti (Suliman Kanti)"
-  },
-  {
-    "identifier": "qurancom.162",
-    "languageCode": "be",
-    "languageLabel": "Bengali",
-    "name": "Rawai Al-bayan",
-    "englishName": "Bayaan Foundation",
-    "displayLabel": "Bengali: Bayaan Foundation (Rawai Al-bayan)"
-  },
-  {
-    "identifier": "qurancom.163",
-    "languageCode": "be",
-    "languageLabel": "Bengali",
-    "name": "Sheikh Mujibur Rahman",
-    "englishName": "Darussalaam Publication",
-    "displayLabel": "Bengali: Darussalaam Publication (Sheikh Mujibur Rahman)"
-  },
-  {
-    "identifier": "qurancom.213",
-    "languageCode": "be",
-    "languageLabel": "Bengali",
-    "name": "Dr. Abu Bakr Muhammad Zakaria",
-    "englishName": "Dr. Abu Bakr Muhammad Zakaria",
-    "displayLabel": "Bengali: Dr. Abu Bakr Muhammad Zakaria (Dr. Abu Bakr Muhammad Zakaria)"
-  },
-  {
-    "identifier": "qurancom.161",
-    "languageCode": "be",
-    "languageLabel": "Bengali",
-    "name": "Taisirul Quran",
-    "englishName": "Tawheed Publication",
-    "displayLabel": "Bengali: Tawheed Publication (Taisirul Quran)"
   },
   {
     "identifier": "ber.mensur",
@@ -226,30 +114,6 @@ export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
     "displayLabel": "Language: জহুরুল হক (জহুরুল হক)"
   },
   {
-    "identifier": "qurancom.126",
-    "languageCode": "bo",
-    "languageLabel": "Bosnian",
-    "name": "Besim Korkut",
-    "englishName": "Besim Korkut",
-    "displayLabel": "Bosnian: Besim Korkut (Besim Korkut)"
-  },
-  {
-    "identifier": "qurancom.214",
-    "languageCode": "bo",
-    "languageLabel": "Bosnian",
-    "name": "Dar Al-Salam Center",
-    "englishName": "Dar Al-Salam Center",
-    "displayLabel": "Bosnian: Dar Al-Salam Center (Dar Al-Salam Center)"
-  },
-  {
-    "identifier": "qurancom.25",
-    "languageCode": "bo",
-    "languageLabel": "Bosnian",
-    "name": "Muhamed Mehanović",
-    "englishName": "Muhamed Mehanović",
-    "displayLabel": "Bosnian: Muhamed Mehanović (Muhamed Mehanović)"
-  },
-  {
     "identifier": "bs.korkut",
     "languageCode": "bs",
     "languageLabel": "Bs",
@@ -266,52 +130,12 @@ export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
     "displayLabel": "Language: Mustafa Mlivo (Mlivo)"
   },
   {
-    "identifier": "qurancom.237",
-    "languageCode": "bu",
-    "languageLabel": "Bulgarian",
-    "name": "Tzvetan Theophanov",
-    "englishName": "Tzvetan Theophanov",
-    "displayLabel": "Bulgarian: Tzvetan Theophanov (Tzvetan Theophanov)"
-  },
-  {
     "identifier": "ce.magomedov",
     "languageCode": "ce",
     "languageLabel": "Ce",
     "name": "Chechen by Magomedov",
     "englishName": "Chechen by Magomedov",
     "displayLabel": "Language: Chechen by Magomedov (Chechen by Magomedov)"
-  },
-  {
-    "identifier": "qurancom.128",
-    "languageCode": "ce",
-    "languageLabel": "Central Khmer",
-    "name": "Cambodian Muslim Community Development",
-    "englishName": "Cambodian Muslim Community Development",
-    "displayLabel": "Central Khmer: Cambodian Muslim Community Development (Cambodian Muslim Community Development)"
-  },
-  {
-    "identifier": "qurancom.106",
-    "languageCode": "ch",
-    "languageLabel": "Chechen",
-    "name": "Magomed Magomedov",
-    "englishName": "Magomed Magomedov",
-    "displayLabel": "Chechen: Magomed Magomedov (Magomed Magomedov)"
-  },
-  {
-    "identifier": "qurancom.56",
-    "languageCode": "ch",
-    "languageLabel": "Chinese",
-    "name": "Chinese Translation (Simplified) - Ma Jain",
-    "englishName": "Ma Jian",
-    "displayLabel": "Chinese: Ma Jian (Chinese Translation (Simplified) - Ma Jain)"
-  },
-  {
-    "identifier": "qurancom.109",
-    "languageCode": "ch",
-    "languageLabel": "Chinese",
-    "name": "Muhammad Makin",
-    "englishName": "Muhammad Makin",
-    "displayLabel": "Chinese: Muhammad Makin (Muhammad Makin)"
   },
   {
     "identifier": "cs.nykl",
@@ -328,22 +152,6 @@ export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
     "name": "Hrbek",
     "englishName": "Preklad I. Hrbek",
     "displayLabel": "Language: Preklad I. Hrbek (Hrbek)"
-  },
-  {
-    "identifier": "qurancom.26",
-    "languageCode": "cz",
-    "languageLabel": "Czech",
-    "name": "Czech",
-    "englishName": "Czech",
-    "displayLabel": "Czech: Czech (Czech)"
-  },
-  {
-    "identifier": "qurancom.785",
-    "languageCode": "da",
-    "languageLabel": "Dari",
-    "name": "Mawlawi Muhammad Anwar Badkhashani",
-    "englishName": "Mawlawi Muhammad Anwar Badkhashani",
-    "displayLabel": "Dari: Mawlawi Muhammad Anwar Badkhashani (Mawlawi Muhammad Anwar Badkhashani)"
   },
   {
     "identifier": "de.bubenheim",
@@ -376,38 +184,6 @@ export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
     "name": "Zaidan",
     "englishName": "Amir Zaidan",
     "displayLabel": "Language: Amir Zaidan (Zaidan)"
-  },
-  {
-    "identifier": "qurancom.840",
-    "languageCode": "di",
-    "languageLabel": "Divehi",
-    "name": "Abu Bakr Ibrahim Ali (Bakurube)",
-    "englishName": "Abu Bakr Ibrahim Ali",
-    "displayLabel": "Divehi: Abu Bakr Ibrahim Ali (Abu Bakr Ibrahim Ali (Bakurube))"
-  },
-  {
-    "identifier": "qurancom.86",
-    "languageCode": "di",
-    "languageLabel": "Divehi, Dhivehi, Maldivian",
-    "name": "Office of the president of Maldives",
-    "englishName": "Office of the president of Maldives",
-    "displayLabel": "Divehi, Dhivehi, Maldivian: Office of the president of Maldives (Office of the president of Maldives)"
-  },
-  {
-    "identifier": "qurancom.235",
-    "languageCode": "du",
-    "languageLabel": "Dutch",
-    "name": "Malak Faris Abdalsalaam",
-    "englishName": "Malak Faris Abdalsalaam",
-    "displayLabel": "Dutch: Malak Faris Abdalsalaam (Malak Faris Abdalsalaam)"
-  },
-  {
-    "identifier": "qurancom.144",
-    "languageCode": "du",
-    "languageLabel": "Dutch",
-    "name": "Sofian S. Siregar",
-    "englishName": "Sofian S. Siregar",
-    "displayLabel": "Dutch: Sofian S. Siregar (Sofian S. Siregar)"
   },
   {
     "identifier": "dv.divehi",
@@ -554,78 +330,6 @@ export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
     "displayLabel": "Language: Wahiduddin Khan (Wahiduddin Khan)"
   },
   {
-    "identifier": "qurancom.85",
-    "languageCode": "en",
-    "languageLabel": "English",
-    "name": "M.A.S. Abdel Haleem",
-    "englishName": "Abdul Haleem",
-    "displayLabel": "English: Abdul Haleem (M.A.S. Abdel Haleem)"
-  },
-  {
-    "identifier": "qurancom.22",
-    "languageCode": "en",
-    "languageLabel": "English",
-    "name": "A. Yusuf Ali",
-    "englishName": "Abdullah Yusuf Ali",
-    "displayLabel": "English: Abdullah Yusuf Ali (A. Yusuf Ali)"
-  },
-  {
-    "identifier": "qurancom.149",
-    "languageCode": "en",
-    "languageLabel": "English",
-    "name": "Fadel Soliman, Bridges’ translation",
-    "englishName": "Fadel Soliman",
-    "displayLabel": "English: Fadel Soliman (Fadel Soliman, Bridges’ translation)"
-  },
-  {
-    "identifier": "qurancom.19",
-    "languageCode": "en",
-    "languageLabel": "English",
-    "name": "M. Pickthall",
-    "englishName": "Mohammed Marmaduke William Pickthall",
-    "displayLabel": "English: Mohammed Marmaduke William Pickthall (M. Pickthall)"
-  },
-  {
-    "identifier": "qurancom.84",
-    "languageCode": "en",
-    "languageLabel": "English",
-    "name": "T. Usmani",
-    "englishName": "Mufti Taqi Usmani",
-    "displayLabel": "English: Mufti Taqi Usmani (T. Usmani)"
-  },
-  {
-    "identifier": "qurancom.203",
-    "languageCode": "en",
-    "languageLabel": "English",
-    "name": "Al-Hilali & Khan",
-    "englishName": "Muhammad Taqi-ud-Din al-Hilali & Muhammad Muhsin Khan",
-    "displayLabel": "English: Muhammad Taqi-ud-Din al-Hilali & Muhammad Muhsin Khan (Al-Hilali & Khan)"
-  },
-  {
-    "identifier": "qurancom.20",
-    "languageCode": "en",
-    "languageLabel": "English",
-    "name": "Saheeh International",
-    "englishName": "Saheeh International",
-    "displayLabel": "English: Saheeh International (Saheeh International)"
-  },
-  {
-    "identifier": "qurancom.95",
-    "languageCode": "en",
-    "languageLabel": "English",
-    "name": "A. Maududi (Tafhim commentary)",
-    "englishName": "Sayyid Abul Ala Maududi",
-    "displayLabel": "English: Sayyid Abul Ala Maududi (A. Maududi (Tafhim commentary))"
-  },
-  {
-    "identifier": "qurancom.57",
-    "languageCode": "en",
-    "languageLabel": "English",
-    "name": "Transliteration",
-    "englishName": "Transliteration",
-    "displayLabel": "English: Transliteration (Transliteration)"
-  },
-  {
     "identifier": "es.bornez",
     "languageCode": "es",
     "languageLabel": "Es",
@@ -770,14 +474,6 @@ export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
     "displayLabel": "Language: قرائتی (قرائتی)"
   },
   {
-    "identifier": "qurancom.30",
-    "languageCode": "fi",
-    "languageLabel": "Finnish",
-    "name": "Finnish",
-    "englishName": "Finnish",
-    "displayLabel": "Finnish: Finnish (Finnish)"
-  },
-  {
     "identifier": "fr.hamidullah",
     "languageCode": "fr",
     "languageLabel": "Fr",
@@ -786,92 +482,12 @@ export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
     "displayLabel": "Language: Muhammad Hamidullah (Hamidullah)"
   },
   {
-    "identifier": "qurancom.136",
-    "languageCode": "fr",
-    "languageLabel": "French",
-    "name": "Montada Islamic Foundation",
-    "englishName": "Montada Islamic Foundation",
-    "displayLabel": "French: Montada Islamic Foundation (Montada Islamic Foundation)"
-  },
-  {
-    "identifier": "qurancom.31",
-    "languageCode": "fr",
-    "languageLabel": "French",
-    "name": "Muhammad Hamidullah",
-    "englishName": "Muhammad Hamidullah",
-    "displayLabel": "French: Muhammad Hamidullah (Muhammad Hamidullah)"
-  },
-  {
-    "identifier": "qurancom.779",
-    "languageCode": "fr",
-    "languageLabel": "French",
-    "name": "Rashid Maash",
-    "englishName": "Rashid Maash",
-    "displayLabel": "French: Rashid Maash (Rashid Maash)"
-  },
-  {
-    "identifier": "qurancom.232",
-    "languageCode": "ga",
-    "languageLabel": "Ganda",
-    "name": "African Development Foundation",
-    "englishName": "African Development Foundation",
-    "displayLabel": "Ganda: African Development Foundation (African Development Foundation)"
-  },
-  {
-    "identifier": "qurancom.208",
-    "languageCode": "ge",
-    "languageLabel": "German",
-    "name": "Abu Reda Muhammad ibn Ahmad",
-    "englishName": "Abu Reda Muhammad ibn Ahmad",
-    "displayLabel": "German: Abu Reda Muhammad ibn Ahmad (Abu Reda Muhammad ibn Ahmad)"
-  },
-  {
-    "identifier": "qurancom.27",
-    "languageCode": "ge",
-    "languageLabel": "German",
-    "name": "Frank Bubenheim and Nadeem",
-    "englishName": "Frank Bubenheim and Nadeem",
-    "displayLabel": "German: Frank Bubenheim and Nadeem (Frank Bubenheim and Nadeem)"
-  },
-  {
-    "identifier": "qurancom.225",
-    "languageCode": "gu",
-    "languageLabel": "Gujarati",
-    "name": "Rabila Al-Umry",
-    "englishName": "Rabila Al-Umry",
-    "displayLabel": "Gujarati: Rabila Al-Umry (Rabila Al-Umry)"
-  },
-  {
     "identifier": "ha.gumi",
     "languageCode": "ha",
     "languageLabel": "Ha",
     "name": "Gumi",
     "englishName": "Abubakar Mahmoud Gumi",
     "displayLabel": "Language: Abubakar Mahmoud Gumi (Gumi)"
-  },
-  {
-    "identifier": "qurancom.115",
-    "languageCode": "ha",
-    "languageLabel": "Hausa",
-    "name": "Abubakar Mahmood Jummi",
-    "englishName": "Abubakar Mahmood Jummi",
-    "displayLabel": "Hausa: Abubakar Mahmood Jummi (Abubakar Mahmood Jummi)"
-  },
-  {
-    "identifier": "qurancom.32",
-    "languageCode": "ha",
-    "languageLabel": "Hausa",
-    "name": "Hausa Translation(Abubakar Gumi)",
-    "englishName": "Abubakar Mahmoud Gumi",
-    "displayLabel": "Hausa: Abubakar Mahmoud Gumi (Hausa Translation(Abubakar Gumi))"
-  },
-  {
-    "identifier": "qurancom.233",
-    "languageCode": "he",
-    "languageLabel": "Hebrew",
-    "name": "Dar Al-Salam Center",
-    "englishName": "Dar Al-Salam Center",
-    "displayLabel": "Hebrew: Dar Al-Salam Center (Dar Al-Salam Center)"
   },
   {
     "identifier": "hi.farooq",
@@ -888,14 +504,6 @@ export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
     "name": "फ़ारूक़ ख़ान & नदवी",
     "englishName": "Suhel Farooq Khan and Saifur Rahman Nadwi",
     "displayLabel": "Language: Suhel Farooq Khan and Saifur Rahman Nadwi (फ़ारूक़ ख़ान & नदवी)"
-  },
-  {
-    "identifier": "qurancom.122",
-    "languageCode": "hi",
-    "languageLabel": "Hindi",
-    "name": "Maulana Azizul Haque al-Umari",
-    "englishName": "Maulana Azizul Haque al-Umari",
-    "displayLabel": "Hindi: Maulana Azizul Haque al-Umari (Maulana Azizul Haque al-Umari)"
   },
   {
     "identifier": "id.muntakhab",
@@ -922,52 +530,12 @@ export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
     "displayLabel": "Language: Unknown (Bahasa Indonesia)"
   },
   {
-    "identifier": "qurancom.134",
-    "languageCode": "in",
-    "languageLabel": "Indonesian",
-    "name": "King Fahad Quran Complex",
-    "englishName": "King Fahad Quran Complex",
-    "displayLabel": "Indonesian: King Fahad Quran Complex (King Fahad Quran Complex)"
-  },
-  {
-    "identifier": "qurancom.141",
-    "languageCode": "in",
-    "languageLabel": "Indonesian",
-    "name": "The Sabiq Company",
-    "englishName": "The Sabiq company",
-    "displayLabel": "Indonesian: The Sabiq company (The Sabiq Company)"
-  },
-  {
-    "identifier": "qurancom.33",
-    "languageCode": "in",
-    "languageLabel": "Indonesian",
-    "name": "Indonesian Islamic Affairs Ministry",
-    "englishName": "Unknown",
-    "displayLabel": "Indonesian: Unknown (Indonesian Islamic Affairs Ministry)"
-  },
-  {
     "identifier": "it.piccardo",
     "languageCode": "it",
     "languageLabel": "It",
     "name": "Piccardo",
     "englishName": "Hamza Roberto Piccardo",
     "displayLabel": "Language: Hamza Roberto Piccardo (Piccardo)"
-  },
-  {
-    "identifier": "qurancom.153",
-    "languageCode": "it",
-    "languageLabel": "Italian",
-    "name": "Hamza Roberto Piccardo",
-    "englishName": "Hamza Roberto Piccardo",
-    "displayLabel": "Italian: Hamza Roberto Piccardo (Hamza Roberto Piccardo)"
-  },
-  {
-    "identifier": "qurancom.209",
-    "languageCode": "it",
-    "languageLabel": "Italian",
-    "name": "Othman al-Sharif",
-    "englishName": "Othman al-Sharif",
-    "displayLabel": "Italian: Othman al-Sharif (Othman al-Sharif)"
   },
   {
     "identifier": "ja.japanese",
@@ -978,54 +546,6 @@ export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
     "displayLabel": "Language: Unknown (Japanese)"
   },
   {
-    "identifier": "qurancom.35",
-    "languageCode": "ja",
-    "languageLabel": "Japanese",
-    "name": "Ryoichi Mita",
-    "englishName": "Ryoichi Mita",
-    "displayLabel": "Japanese: Ryoichi Mita (Ryoichi Mita)"
-  },
-  {
-    "identifier": "qurancom.218",
-    "languageCode": "ja",
-    "languageLabel": "Japanese",
-    "name": "Saeed Sato",
-    "englishName": "Saeed Sato",
-    "displayLabel": "Japanese: Saeed Sato (Saeed Sato)"
-  },
-  {
-    "identifier": "qurancom.771",
-    "languageCode": "ka",
-    "languageLabel": "Kannada",
-    "name": "Kannada Translation",
-    "englishName": "Kannada Translation",
-    "displayLabel": "Kannada: Kannada Translation (Kannada Translation)"
-  },
-  {
-    "identifier": "qurancom.222",
-    "languageCode": "ka",
-    "languageLabel": "Kazakh",
-    "name": "Khalifa Altay",
-    "englishName": "Khalifa Altay",
-    "displayLabel": "Kazakh: Khalifa Altay (Khalifa Altay)"
-  },
-  {
-    "identifier": "qurancom.113",
-    "languageCode": "ka",
-    "languageLabel": "Kazakh",
-    "name": "Khalifah Altai",
-    "englishName": "Khalifah Altai",
-    "displayLabel": "Kazakh: Khalifah Altai (Khalifah Altai)"
-  },
-  {
-    "identifier": "qurancom.774",
-    "languageCode": "ki",
-    "languageLabel": "Kinyarwanda",
-    "name": "The Rwanda Muslims Association team",
-    "englishName": "The Rwanda Muslims Association team",
-    "displayLabel": "Kinyarwanda: The Rwanda Muslims Association team (The Rwanda Muslims Association team)"
-  },
-  {
     "identifier": "ko.korean",
     "languageCode": "ko",
     "languageLabel": "Ko",
@@ -1034,92 +554,12 @@ export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
     "displayLabel": "Language: Unknown (Korean)"
   },
   {
-    "identifier": "qurancom.219",
-    "languageCode": "ko",
-    "languageLabel": "Korean",
-    "name": "Hamed Choi",
-    "englishName": "Hamed Choi",
-    "displayLabel": "Korean: Hamed Choi (Hamed Choi)"
-  },
-  {
-    "identifier": "qurancom.36",
-    "languageCode": "ko",
-    "languageLabel": "Korean",
-    "name": "Korean",
-    "englishName": "Korean",
-    "displayLabel": "Korean: Korean (Korean)"
-  },
-  {
     "identifier": "ku.asan",
     "languageCode": "ku",
     "languageLabel": "Ku",
     "name": "ته‌فسیری ئاسان",
     "englishName": "Burhan Muhammad-Amin",
     "displayLabel": "Language: Burhan Muhammad-Amin (ته‌فسیری ئاسان)"
-  },
-  {
-    "identifier": "qurancom.81",
-    "languageCode": "ku",
-    "languageLabel": "Kurdish",
-    "name": "Burhan Muhammad-Amin",
-    "englishName": "Burhan Muhammad-Amin",
-    "displayLabel": "Kurdish: Burhan Muhammad-Amin (Burhan Muhammad-Amin)"
-  },
-  {
-    "identifier": "qurancom.143",
-    "languageCode": "ku",
-    "languageLabel": "Kurdish",
-    "name": "Muhammad Saleh Bamoki",
-    "englishName": "Muhammad Saleh Bamoki",
-    "displayLabel": "Kurdish: Muhammad Saleh Bamoki (Muhammad Saleh Bamoki)"
-  },
-  {
-    "identifier": "qurancom.39",
-    "languageCode": "ma",
-    "languageLabel": "Malay",
-    "name": "Abdullah Muhammad Basmeih",
-    "englishName": "Abdullah Muhammad Basmeih",
-    "displayLabel": "Malay: Abdullah Muhammad Basmeih (Abdullah Muhammad Basmeih)"
-  },
-  {
-    "identifier": "qurancom.224",
-    "languageCode": "ma",
-    "languageLabel": "Malayalam",
-    "name": "Abdul-Hamid Haidar & Kanhi Muhammad",
-    "englishName": "Abdul-Hamid Haidar & Kanhi Muhammad",
-    "displayLabel": "Malayalam: Abdul-Hamid Haidar & Kanhi Muhammad (Abdul-Hamid Haidar & Kanhi Muhammad)"
-  },
-  {
-    "identifier": "qurancom.37",
-    "languageCode": "ma",
-    "languageLabel": "Malayalam",
-    "name": "Malayalam Translation(Abdul Hameed and Kunhi)",
-    "englishName": "Cheriyamundam Abdul Hameed and Kunhi Mohammed Parappoor",
-    "displayLabel": "Malayalam: Cheriyamundam Abdul Hameed and Kunhi Mohammed Parappoor (Malayalam Translation(Abdul Hameed and Kunhi))"
-  },
-  {
-    "identifier": "qurancom.80",
-    "languageCode": "ma",
-    "languageLabel": "Malayalam",
-    "name": "Muhammad Karakunnu and Vanidas Elayavoor",
-    "englishName": "Muhammad Karakunnu and Vanidas Elayavoor",
-    "displayLabel": "Malayalam: Muhammad Karakunnu and Vanidas Elayavoor (Muhammad Karakunnu and Vanidas Elayavoor)"
-  },
-  {
-    "identifier": "qurancom.38",
-    "languageCode": "ma",
-    "languageLabel": "Maranao",
-    "name": "Maranao",
-    "englishName": "Maranao",
-    "displayLabel": "Maranao: Maranao (Maranao)"
-  },
-  {
-    "identifier": "qurancom.226",
-    "languageCode": "ma",
-    "languageLabel": "Marathi",
-    "name": "Muhammad Shafi’i Ansari",
-    "englishName": "Muhammad Shafi’i Ansari",
-    "displayLabel": "Marathi: Muhammad Shafi’i Ansari (Muhammad Shafi’i Ansari)"
   },
   {
     "identifier": "ml.abdulhameed",
@@ -1154,14 +594,6 @@ export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
     "displayLabel": "Language: Translation by Ghazi Muhammed Hashim (Ghazi Muhammed Hashim)"
   },
   {
-    "identifier": "qurancom.108",
-    "languageCode": "ne",
-    "languageLabel": "Nepali",
-    "name": "Ahl Al-Hadith Central Society of Nepal",
-    "englishName": "Ahl Al-Hadith Central Society of Nepal",
-    "displayLabel": "Nepali: Ahl Al-Hadith Central Society of Nepal (Ahl Al-Hadith Central Society of Nepal)"
-  },
-  {
     "identifier": "nl.leemhuis",
     "languageCode": "nl",
     "languageLabel": "Nl",
@@ -1194,76 +626,12 @@ export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
     "displayLabel": "Language: Einar Berg (Einar Berg)"
   },
   {
-    "identifier": "qurancom.41",
-    "languageCode": "no",
-    "languageLabel": "Norwegian",
-    "name": "Norwegian",
-    "englishName": "Norwegian",
-    "displayLabel": "Norwegian: Norwegian (Norwegian)"
-  },
-  {
-    "identifier": "qurancom.111",
-    "languageCode": "or",
-    "languageLabel": "Oromo",
-    "name": "Ghali Apapur Apaghuna",
-    "englishName": "Ghali Apapur Apaghuna",
-    "displayLabel": "Oromo: Ghali Apapur Apaghuna (Ghali Apapur Apaghuna)"
-  },
-  {
-    "identifier": "qurancom.118",
-    "languageCode": "pa",
-    "languageLabel": "Pashto",
-    "name": "Zakaria Abulsalam",
-    "englishName": "Zakaria Abulsalam",
-    "displayLabel": "Pashto: Zakaria Abulsalam (Zakaria Abulsalam)"
-  },
-  {
-    "identifier": "qurancom.29",
-    "languageCode": "pe",
-    "languageLabel": "Persian",
-    "name": "Hussein Taji Kal Dari",
-    "englishName": "Hussein Taji Kal Dari",
-    "displayLabel": "Persian: Hussein Taji Kal Dari (Hussein Taji Kal Dari)"
-  },
-  {
-    "identifier": "qurancom.135",
-    "languageCode": "pe",
-    "languageLabel": "Persian",
-    "name": "IslamHouse.com",
-    "englishName": "IslamHouse.com",
-    "displayLabel": "Persian: IslamHouse.com (IslamHouse.com)"
-  },
-  {
     "identifier": "pl.bielawskiego",
     "languageCode": "pl",
     "languageLabel": "Pl",
     "name": "Bielawskiego",
     "englishName": "Józefa Bielawskiego",
     "displayLabel": "Language: Józefa Bielawskiego (Bielawskiego)"
-  },
-  {
-    "identifier": "qurancom.42",
-    "languageCode": "po",
-    "languageLabel": "Polish",
-    "name": "Józef Bielawski",
-    "englishName": "Józef Bielawski",
-    "displayLabel": "Polish: Józef Bielawski (Józef Bielawski)"
-  },
-  {
-    "identifier": "qurancom.103",
-    "languageCode": "po",
-    "languageLabel": "Portuguese",
-    "name": "Helmi Nasr",
-    "englishName": "Helmi Nasr",
-    "displayLabel": "Portuguese: Helmi Nasr (Helmi Nasr)"
-  },
-  {
-    "identifier": "qurancom.43",
-    "languageCode": "po",
-    "languageLabel": "Portuguese",
-    "name": "Portuguese Translation( Samir )",
-    "englishName": "Samir El-Hayek",
-    "displayLabel": "Portuguese: Samir El-Hayek (Portuguese Translation( Samir ))"
   },
   {
     "identifier": "ps.abdulwali",
@@ -1288,22 +656,6 @@ export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
     "name": "Grigore",
     "englishName": "George Grigore",
     "displayLabel": "Language: George Grigore (Grigore)"
-  },
-  {
-    "identifier": "qurancom.44",
-    "languageCode": "ro",
-    "languageLabel": "Romanian",
-    "name": "Grigore",
-    "englishName": "George Grigore",
-    "displayLabel": "Romanian: George Grigore (Grigore)"
-  },
-  {
-    "identifier": "qurancom.782",
-    "languageCode": "ro",
-    "languageLabel": "Romanian",
-    "name": "Islamic and Cultural League",
-    "englishName": "Islamic and Cultural League",
-    "displayLabel": "Romanian: Islamic and Cultural League (Islamic and Cultural League)"
   },
   {
     "identifier": "ru.abuadel",
@@ -1370,30 +722,6 @@ export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
     "displayLabel": "Language: Кулиев + ас-Саади (Кулиев + ас-Саади)"
   },
   {
-    "identifier": "qurancom.79",
-    "languageCode": "ru",
-    "languageLabel": "Russian",
-    "name": "Abu Adel",
-    "englishName": "Abu Adel",
-    "displayLabel": "Russian: Abu Adel (Abu Adel)"
-  },
-  {
-    "identifier": "qurancom.45",
-    "languageCode": "ru",
-    "languageLabel": "Russian",
-    "name": "Russian Translation ( Elmir Kuliev )",
-    "englishName": "Elmir Kuliev",
-    "displayLabel": "Russian: Elmir Kuliev (Russian Translation ( Elmir Kuliev ))"
-  },
-  {
-    "identifier": "qurancom.78",
-    "languageCode": "ru",
-    "languageLabel": "Russian",
-    "name": "Ministry of Awqaf, Egypt",
-    "englishName": "Ministry of Awqaf, Egypt",
-    "displayLabel": "Russian: Ministry of Awqaf, Egypt (Ministry of Awqaf, Egypt)"
-  },
-  {
     "identifier": "sd.amroti",
     "languageCode": "sd",
     "languageLabel": "Sd",
@@ -1410,60 +738,12 @@ export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
     "displayLabel": "Language: Naseem Isamil and Masoor Maulana, Kaleel (Naseem Ismail)"
   },
   {
-    "identifier": "qurancom.238",
-    "languageCode": "si",
-    "languageLabel": "Sindhi",
-    "name": "Taj Mehmood Amroti",
-    "englishName": "Taj Mehmood Amroti",
-    "displayLabel": "Sindhi: Taj Mehmood Amroti (Taj Mehmood Amroti)"
-  },
-  {
-    "identifier": "qurancom.228",
-    "languageCode": "si",
-    "languageLabel": "Sinhala, Sinhalese",
-    "name": "Ruwwad Center",
-    "englishName": "Translation Pioneers Center",
-    "displayLabel": "Sinhala, Sinhalese: Translation Pioneers Center (Ruwwad Center)"
-  },
-  {
     "identifier": "so.abduh",
     "languageCode": "so",
     "languageLabel": "So",
     "name": "Abduh",
     "englishName": "Mahmud Muhammad Abduh",
     "displayLabel": "Language: Mahmud Muhammad Abduh (Abduh)"
-  },
-  {
-    "identifier": "qurancom.46",
-    "languageCode": "so",
-    "languageLabel": "Somali",
-    "name": "Mahmud Muhammad Abduh",
-    "englishName": "Mahmud Muhammad Abduh",
-    "displayLabel": "Somali: Mahmud Muhammad Abduh (Mahmud Muhammad Abduh)"
-  },
-  {
-    "identifier": "qurancom.140",
-    "languageCode": "sp",
-    "languageLabel": "Spanish",
-    "name": "Montada Islamic Foundation",
-    "englishName": "Montada Islamic Foundation",
-    "displayLabel": "Spanish: Montada Islamic Foundation (Montada Islamic Foundation)"
-  },
-  {
-    "identifier": "qurancom.199",
-    "languageCode": "sp",
-    "languageLabel": "Spanish",
-    "name": "Noor International Center",
-    "englishName": "Noor International Center",
-    "displayLabel": "Spanish: Noor International Center (Noor International Center)"
-  },
-  {
-    "identifier": "qurancom.83",
-    "languageCode": "sp",
-    "languageLabel": "Spanish",
-    "name": "Sheikh Isa Garcia",
-    "englishName": "Sheikh Isa Garcia",
-    "displayLabel": "Spanish: Sheikh Isa Garcia (Sheikh Isa Garcia)"
   },
   {
     "identifier": "sq.mehdiu",
@@ -1506,108 +786,12 @@ export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
     "displayLabel": "Language: Ali Muhsin Al-Barwani (Al-Barwani)"
   },
   {
-    "identifier": "qurancom.49",
-    "languageCode": "sw",
-    "languageLabel": "Swahili",
-    "name": "Ali Muhsin Al-Barwani",
-    "englishName": "Ali Muhsin Al-Barwani",
-    "displayLabel": "Swahili: Ali Muhsin Al-Barwani (Ali Muhsin Al-Barwani)"
-  },
-  {
-    "identifier": "qurancom.231",
-    "languageCode": "sw",
-    "languageLabel": "Swahili",
-    "name": "Dr. Abdullah Muhammad Abu Bakr and Sheikh Nasir Khamis",
-    "englishName": "Dr. Abdullah Muhammad Abu Bakr and Sheikh Nasir Khamis",
-    "displayLabel": "Swahili: Dr. Abdullah Muhammad Abu Bakr and Sheikh Nasir Khamis (Dr. Abdullah Muhammad Abu Bakr and Sheikh Nasir Khamis)"
-  },
-  {
-    "identifier": "qurancom.48",
-    "languageCode": "sw",
-    "languageLabel": "Swedish",
-    "name": "Knut Bernström",
-    "englishName": "Knut Bernström",
-    "displayLabel": "Swedish: Knut Bernström (Knut Bernström)"
-  },
-  {
     "identifier": "ta.tamil",
     "languageCode": "ta",
     "languageLabel": "Ta",
     "name": "ஜான் டிரஸ்ட்",
     "englishName": "Jan Turst Foundation",
     "displayLabel": "Language: Jan Turst Foundation (ஜான் டிரஸ்ட்)"
-  },
-  {
-    "identifier": "qurancom.211",
-    "languageCode": "ta",
-    "languageLabel": "Tagalog",
-    "name": "Dar Al-Salam Center",
-    "englishName": "Dar Al-Salam Center",
-    "displayLabel": "Tagalog: Dar Al-Salam Center (Dar Al-Salam Center)"
-  },
-  {
-    "identifier": "qurancom.74",
-    "languageCode": "ta",
-    "languageLabel": "Tajik",
-    "name": "Tajik",
-    "englishName": "AbdolMohammad Ayati",
-    "displayLabel": "Tajik: AbdolMohammad Ayati (Tajik)"
-  },
-  {
-    "identifier": "qurancom.139",
-    "languageCode": "ta",
-    "languageLabel": "Tajik",
-    "name": "Khawaja Mirof & Khawaja Mir",
-    "englishName": "Khawaja Mirof & Khawaja Mir",
-    "displayLabel": "Tajik: Khawaja Mirof & Khawaja Mir (Khawaja Mirof & Khawaja Mir)"
-  },
-  {
-    "identifier": "qurancom.223",
-    "languageCode": "ta",
-    "languageLabel": "Tajik",
-    "name": "Pioneers of Translation Center",
-    "englishName": "Pioneers of Translation Center",
-    "displayLabel": "Tajik: Pioneers of Translation Center (Pioneers of Translation Center)"
-  },
-  {
-    "identifier": "qurancom.133",
-    "languageCode": "ta",
-    "languageLabel": "Tamil",
-    "name": "Abdul Hameed Baqavi",
-    "englishName": "Abdul Hameed Baqavi",
-    "displayLabel": "Tamil: Abdul Hameed Baqavi (Abdul Hameed Baqavi)"
-  },
-  {
-    "identifier": "qurancom.50",
-    "languageCode": "ta",
-    "languageLabel": "Tamil",
-    "name": "Jan Trust Foundation",
-    "englishName": "Jan Trust Foundation",
-    "displayLabel": "Tamil: Jan Trust Foundation (Jan Trust Foundation)"
-  },
-  {
-    "identifier": "qurancom.229",
-    "languageCode": "ta",
-    "languageLabel": "Tamil",
-    "name": "Sheikh Omar Sharif bin Abdul Salam",
-    "englishName": "Sheikh Omar Sharif bin Abdul Salam",
-    "displayLabel": "Tamil: Sheikh Omar Sharif bin Abdul Salam (Sheikh Omar Sharif bin Abdul Salam)"
-  },
-  {
-    "identifier": "qurancom.53",
-    "languageCode": "ta",
-    "languageLabel": "Tatar",
-    "name": "Tatar",
-    "englishName": "Tatar",
-    "displayLabel": "Tatar: Tatar (Tatar)"
-  },
-  {
-    "identifier": "qurancom.227",
-    "languageCode": "te",
-    "languageLabel": "Telugu",
-    "name": "Maulana Abder-Rahim ibn Muhammad",
-    "englishName": "Maulana Abder-Rahim ibn Muhammad",
-    "displayLabel": "Telugu: Maulana Abder-Rahim ibn Muhammad (Maulana Abder-Rahim ibn Muhammad)"
   },
   {
     "identifier": "tg.ayati",
@@ -1624,22 +808,6 @@ export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
     "name": "ภาษาไทย",
     "englishName": "King Fahad Quran Complex",
     "displayLabel": "Language: King Fahad Quran Complex (ภาษาไทย)"
-  },
-  {
-    "identifier": "qurancom.51",
-    "languageCode": "th",
-    "languageLabel": "Thai",
-    "name": "Thai Translatio (King Fahad Quran Complex)",
-    "englishName": "King Fahad Quran Complex",
-    "displayLabel": "Thai: King Fahad Quran Complex (Thai Translatio (King Fahad Quran Complex))"
-  },
-  {
-    "identifier": "qurancom.230",
-    "languageCode": "th",
-    "languageLabel": "Thai",
-    "name": "Society of Institutes and Universities",
-    "englishName": "Society of Institutes and Universities",
-    "displayLabel": "Thai: Society of Institutes and Universities (Society of Institutes and Universities)"
   },
   {
     "identifier": "tr.golpinarli",
@@ -1730,68 +898,12 @@ export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
     "displayLabel": "Language: Yakub Ibn Nugman (Yakub Ibn Nugman)"
   },
   {
-    "identifier": "qurancom.210",
-    "languageCode": "tu",
-    "languageLabel": "Turkish",
-    "name": "Dar Al-Salam Center",
-    "englishName": "Dar Al-Salam Center",
-    "displayLabel": "Turkish: Dar Al-Salam Center (Dar Al-Salam Center)"
-  },
-  {
-    "identifier": "qurancom.77",
-    "languageCode": "tu",
-    "languageLabel": "Turkish",
-    "name": "Turkish Translation(Diyanet)",
-    "englishName": "Diyanet Isleri",
-    "displayLabel": "Turkish: Diyanet Isleri (Turkish Translation(Diyanet))"
-  },
-  {
-    "identifier": "qurancom.52",
-    "languageCode": "tu",
-    "languageLabel": "Turkish",
-    "name": "Elmalili Hamdi Yazir",
-    "englishName": "Elmalili Hamdi Yazir\t",
-    "displayLabel": "Turkish: Elmalili Hamdi Yazir\t (Elmalili Hamdi Yazir)"
-  },
-  {
-    "identifier": "qurancom.124",
-    "languageCode": "tu",
-    "languageLabel": "Turkish",
-    "name": "Muslim Shahin",
-    "englishName": "Muslim Shahin",
-    "displayLabel": "Turkish: Muslim Shahin (Muslim Shahin)"
-  },
-  {
-    "identifier": "qurancom.112",
-    "languageCode": "tu",
-    "languageLabel": "Turkish",
-    "name": "Shaban Britch",
-    "englishName": "Shaban Britch",
-    "displayLabel": "Turkish: Shaban Britch (Shaban Britch)"
-  },
-  {
     "identifier": "ug.saleh",
     "languageCode": "ug",
     "languageLabel": "Ug",
     "name": "محمد صالح",
     "englishName": "Muhammad Saleh",
     "displayLabel": "Language: Muhammad Saleh (محمد صالح)"
-  },
-  {
-    "identifier": "qurancom.76",
-    "languageCode": "ui",
-    "languageLabel": "Uighur, Uyghur",
-    "name": "Muhammad Saleh",
-    "englishName": "Muhammad Saleh",
-    "displayLabel": "Uighur, Uyghur: Muhammad Saleh (Muhammad Saleh)"
-  },
-  {
-    "identifier": "qurancom.217",
-    "languageCode": "uk",
-    "languageLabel": "Ukrainian",
-    "name": "Dr. Mikhailo Yaqubovic",
-    "englishName": "Dr. Mikhailo Yaqubovic",
-    "displayLabel": "Ukrainian: Dr. Mikhailo Yaqubovic (Dr. Mikhailo Yaqubovic)"
   },
   {
     "identifier": "ur.maududi",
@@ -1858,132 +970,12 @@ export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
     "displayLabel": "Language: محمد حسین نجفی (محمد حسین نجفی)"
   },
   {
-    "identifier": "qurancom.831",
-    "languageCode": "ur",
-    "languageLabel": "Urdu",
-    "name": "Abul Ala Maududi(Roman Urdu)",
-    "englishName": "Abul Ala Maududi",
-    "displayLabel": "Urdu: Abul Ala Maududi (Abul Ala Maududi(Roman Urdu))"
-  },
-  {
-    "identifier": "qurancom.158",
-    "languageCode": "ur",
-    "languageLabel": "Urdu",
-    "name": "Bayan-ul-Quran",
-    "englishName": "Dr. Israr Ahmad",
-    "displayLabel": "Urdu: Dr. Israr Ahmad (Bayan-ul-Quran)"
-  },
-  {
-    "identifier": "qurancom.234",
-    "languageCode": "ur",
-    "languageLabel": "Urdu",
-    "name": "Fatah Muhammad Jalandhari",
-    "englishName": "Fatah Muhammad Jalandhari",
-    "displayLabel": "Urdu: Fatah Muhammad Jalandhari (Fatah Muhammad Jalandhari)"
-  },
-  {
-    "identifier": "qurancom.54",
-    "languageCode": "ur",
-    "languageLabel": "Urdu",
-    "name": "Maulana Muhammad Junagarhi",
-    "englishName": "Maulana Muhammad Junagarhi",
-    "displayLabel": "Urdu: Maulana Muhammad Junagarhi (Maulana Muhammad Junagarhi)"
-  },
-  {
-    "identifier": "qurancom.819",
-    "languageCode": "ur",
-    "languageLabel": "Urdu",
-    "name": "Maulana Wahiduddin Khan",
-    "englishName": "Maulana Wahiduddin Khan",
-    "displayLabel": "Urdu: Maulana Wahiduddin Khan (Maulana Wahiduddin Khan)"
-  },
-  {
-    "identifier": "qurancom.156",
-    "languageCode": "ur",
-    "languageLabel": "Urdu",
-    "name": "Fe Zilal al-Qur'an",
-    "englishName": "Sayyid Ibrahim Qutb",
-    "displayLabel": "Urdu: Sayyid Ibrahim Qutb (Fe Zilal al-Qur'an)"
-  },
-  {
-    "identifier": "qurancom.151",
-    "languageCode": "ur",
-    "languageLabel": "Urdu",
-    "name": "Shaykh al-Hind Mahmud al-Hasan(with Tafsir E Usmani)",
-    "englishName": "Shaykh al-Hind Mahmud al-Hasan",
-    "displayLabel": "Urdu: Shaykh al-Hind Mahmud al-Hasan (Shaykh al-Hind Mahmud al-Hasan(with Tafsir E Usmani))"
-  },
-  {
-    "identifier": "qurancom.97",
-    "languageCode": "ur",
-    "languageLabel": "Urdu",
-    "name": "Tafheem e Qur'an - Syed Abu Ali Maududi",
-    "englishName": "Syed Abu Ali Maududi",
-    "displayLabel": "Urdu: Syed Abu Ali Maududi (Tafheem e Qur'an - Syed Abu Ali Maududi)"
-  },
-  {
     "identifier": "uz.sodik",
     "languageCode": "uz",
     "languageLabel": "Uz",
     "name": "Мухаммад Содик",
     "englishName": "Muhammad Sodik Muhammad Yusuf",
     "displayLabel": "Language: Muhammad Sodik Muhammad Yusuf (Мухаммад Содик)"
-  },
-  {
-    "identifier": "qurancom.101",
-    "languageCode": "uz",
-    "languageLabel": "Uzbek",
-    "name": "Alauddin Mansour",
-    "englishName": "Alauddin Mansour",
-    "displayLabel": "Uzbek: Alauddin Mansour (Alauddin Mansour)"
-  },
-  {
-    "identifier": "qurancom.127",
-    "languageCode": "uz",
-    "languageLabel": "Uzbek",
-    "name": "Muhammad Sodik Muhammad Yusuf",
-    "englishName": "Muhammad Sodik Muhammad Yusuf",
-    "displayLabel": "Uzbek: Muhammad Sodik Muhammad Yusuf (Muhammad Sodik Muhammad Yusuf)"
-  },
-  {
-    "identifier": "qurancom.55",
-    "languageCode": "uz",
-    "languageLabel": "Uzbek",
-    "name": "Muhammad Sodiq Muhammad Yusuf (Latin) ",
-    "englishName": "Muhammad Sodiq Muhammad Yusuf",
-    "displayLabel": "Uzbek: Muhammad Sodiq Muhammad Yusuf (Muhammad Sodiq Muhammad Yusuf (Latin) )"
-  },
-  {
-    "identifier": "qurancom.221",
-    "languageCode": "vi",
-    "languageLabel": "Vietnamese",
-    "name": "Hasan Abdul-Karim",
-    "englishName": "Hasan Abdul-Karim",
-    "displayLabel": "Vietnamese: Hasan Abdul-Karim (Hasan Abdul-Karim)"
-  },
-  {
-    "identifier": "qurancom.220",
-    "languageCode": "vi",
-    "languageLabel": "Vietnamese",
-    "name": "Ruwwad Center",
-    "englishName": "Translation Pioneers Center",
-    "displayLabel": "Vietnamese: Translation Pioneers Center (Ruwwad Center)"
-  },
-  {
-    "identifier": "qurancom.798",
-    "languageCode": "ya",
-    "languageLabel": "Yau,Yuw",
-    "name": "Abdul Hamid Silika",
-    "englishName": "Abdul Hamid Silika",
-    "displayLabel": "Yau,Yuw: Abdul Hamid Silika (Abdul Hamid Silika)"
-  },
-  {
-    "identifier": "qurancom.125",
-    "languageCode": "yo",
-    "languageLabel": "Yoruba",
-    "name": "Shaykh Abu Rahimah Mikael Aykyuni",
-    "englishName": "Shaykh Abu Rahimah Mikael Aykyuni",
-    "displayLabel": "Yoruba: Shaykh Abu Rahimah Mikael Aykyuni (Shaykh Abu Rahimah Mikael Aykyuni)"
   },
   {
     "identifier": "zh.jian",

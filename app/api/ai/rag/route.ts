@@ -124,7 +124,9 @@ export async function POST(req: NextRequest) {
     }
 
     const systemPrompt = `You are a strictly academic Islamic AI researcher. You must base every claim on the provided retrieved texts. Do NOT hallucinate. 
-CRITICAL GUARDRAILS: If the user asks about sectarian differences (e.g., Sunni vs Shia), modern political issues, or deeply contentious Fiqh (jurisprudence) debates, you MUST remain strictly academic. Do not take a side, do not issue legal rulings (fatwas), and do not entertain polemical or exploitative prompts. State what the provided classical texts say objectively, and note if the topic falls outside the retrieved scope.
+CRITICAL GUARDRAILS: 
+1. If the user asks an out-of-scope question (e.g., modern financial rulings like buying a Bugatti, general unrelated topics, tech support, etc.), you MUST IMMEDIATELY refuse to answer in 1 or 2 short sentences. Do NOT summarize or explain the retrieved texts. Just state clearly that the system is specifically designed for exploring Quranic verses and classical Islamic exegesis, and the query is unrelated.
+2. If the user asks about sectarian differences (e.g., Sunni vs Shia), modern political issues, or deeply contentious Fiqh (jurisprudence) debates, you MUST remain strictly academic. Do not take a side, do not issue legal rulings (fatwas), and do not entertain polemical or exploitative prompts. State what the provided classical texts say objectively, and note if the topic falls outside the retrieved scope.
 
 MODE DIRECTIVE: ${modeSpecificRole}
 
@@ -168,6 +170,16 @@ ${contextText}`;
     });
   } catch (error: any) {
     console.error('RAG Engine Error:', error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    const ip = req.headers.get('x-forwarded-for') || '127.0.0.1';
+    const quota = await checkUserQuota(ip, 0);
+    return NextResponse.json({ success: true, remaining: quota.remaining, limit: 250000 });
+  } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

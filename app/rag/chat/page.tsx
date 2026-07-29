@@ -57,8 +57,22 @@ function RagChatContent() {
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [remainingReqs, setRemainingReqs] = useState<number | null>(null);
+  const [remainingTokens, setRemainingTokens] = useState<number | null>(null);
+  const [tokenLimit, setTokenLimit] = useState<number>(250000);
   const [isModeSwitcherOpen, setIsModeSwitcherOpen] = useState(false);
+
+  useEffect(() => {
+    // Fetch remaining tokens on mount
+    fetch('/api/ai/rag')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setRemainingTokens(data.remaining);
+          if (data.limit) setTokenLimit(data.limit);
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -104,7 +118,7 @@ function RagChatContent() {
       }
 
       if (data.remaining !== undefined) {
-        setRemainingReqs(data.remaining);
+        setRemainingTokens(data.remaining);
       }
 
       setMessages((prev) => [
@@ -196,9 +210,15 @@ function RagChatContent() {
             )}
           </div>
 
-          <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900/60 border border-zinc-800 text-xs text-zinc-400 font-medium">
-            <AlertCircle className="size-3.5 text-emerald-500" />
-            <span>{remainingReqs !== null ? `${remainingReqs} Free Requests Left` : "Free Tier Hybrid RAG"}</span>
+          <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-900/60 border border-zinc-800 text-xs text-zinc-400 font-medium shadow-sm">
+            <Sparkles className="size-3.5 text-emerald-500" />
+            {remainingTokens !== null ? (
+              <span>
+                <strong className="text-emerald-400">{remainingTokens.toLocaleString()}</strong> / {tokenLimit.toLocaleString()} Tokens Left
+              </span>
+            ) : (
+              <span>Free Tier Hybrid RAG</span>
+            )}
           </div>
         </div>
       </nav>

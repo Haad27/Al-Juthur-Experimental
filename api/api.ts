@@ -40,37 +40,6 @@ export const searchQuran = async (query: string) => {
   }
 };
 
-export const fetchSurahTranslation = async (surahId: number) => {
-  try {
-    const response = await fetch(
-      `https://api.alquran.cloud/v1/surah/${surahId}/en.sahih`
-    );
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-    // console.log(data); // --DEBUG
-    return data.data; // Assuming the translation text is in data.data.text
-  } catch (error) {
-    console.error("Error fetching ayah translation:", error);
-  }
-};
-
-export const fetchAyahTranslation = async (surahId: number, ayahId: number) => {
-  try {
-    const response = await fetch(
-      `https://api.alquran.cloud/v1/ayah/${surahId}:${ayahId}/en.sahih`
-    );
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-    // console.log(data); // --DEBUG
-    return data; // Assuming the translation text is in data.data.text
-  } catch (error) {
-    console.log("Error fetching ayah translation:", error);
-  }
-};
 
 export const fetchAyahAudio = async (
   surahId: number,
@@ -106,30 +75,25 @@ export const fetchSurahAudio = async (surahId: number) => {
   }
 };
 
-export const fetchJuz = async (juzId: string | null) => {
-  if (!juzId) {
-    console.log("Invalid juzId provided."); // 🚨
-    return null;
-  }
 
+export const fetchReciters = async () => {
   try {
-    const responseEnglish = await fetch(
-      `https://api.alquran.cloud/v1/juz/${juzId}/en.sahih`
-    );
-    const responseArabic = await fetch(
-      `https://api.alquran.cloud/v1/juz/${juzId}/quran-uthmani`
-    );
-
-    if (!responseEnglish.ok || !responseArabic.ok) {
-      throw new Error(`HTTP error! status: ${responseEnglish.status}`);
-    }
-
-    const english = await responseEnglish.json();
-    const arabic = await responseArabic.json();
-
-    return { arabic, english };
+    const response = await fetch("https://api.quran.com/api/v4/resources/recitations");
+    if (!response.ok) throw new Error("Failed to fetch reciters");
+    return await response.json();
   } catch (error) {
-    console.log(`Error fetching juz: ${error}`);
+    console.error("Error fetching reciters:", error);
+    return { recitations: [] };
+  }
+};
+
+export const fetchChapterAudioSegments = async (reciterId: number, chapterId: number) => {
+  try {
+    const response = await fetch(`https://api.quran.com/api/v4/quran/recitations/${reciterId}?chapter_number=${chapterId}&fields=segments`);
+    if (!response.ok) throw new Error("Failed to fetch audio segments");
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching audio segments:", error);
     return null;
   }
 };

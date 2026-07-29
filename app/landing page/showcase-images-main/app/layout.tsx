@@ -1,0 +1,29 @@
+import { bebasNeue, barlowCondensed, ibmPlexMono} from '@/components/shader/fonts';
+import './globals.css';
+import type { Metadata } from 'next';
+import { Inter, Press_Start_2P } from 'next/font/google';
+
+
+const inter = Inter({ subsets: ['latin'] });
+const pressStart2P = Press_Start_2P({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-press-start',
+});
+
+export const metadata: Metadata = {
+  title: 'Showcase Image Gallery',
+  description: '3D Gallery Resource',
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body className={`${bebasNeue.variable} ${barlowCondensed.variable} ${ibmPlexMono.variable} antialiased ${inter.className} ${pressStart2P.variable}`}>{children}</body>
+    </html>
+  );
+}

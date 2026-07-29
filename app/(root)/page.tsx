@@ -12,7 +12,7 @@ import { motion } from "framer-motion";
 
 // Icons / Lucide React ⭐
 import MenuIcon from "@/components/svg/icons/MenuIcon";
-import { ArchiveIcon, Circle, Sparkle, Trash, X, XIcon } from "lucide-react";
+import { ArchiveIcon, Circle, Sparkle, Trash, X, XIcon, Search } from "lucide-react";
 // Hooks ⭐
 import useSurahNavigation from "@/hooks/useSurahNavigation";
 // Fonts ⭐
@@ -39,6 +39,7 @@ const SurahsList = () => {
   >("Last Read");
 
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [homeSearchQuery, setHomeSearchQuery] = useState("");
   // const [searchResults, setSearchResults] = useState([]);
   const [amount, setAmount] = useState(21);
   // Boolean 🔹
@@ -73,6 +74,14 @@ const SurahsList = () => {
     setSavedAyahs(updated); // <- update the state too
     setDeletedAyah(ayah);
   };
+
+  const filteredHomeSurahs = surahs.filter((surah) => {
+    if (!homeSearchQuery.trim()) return true;
+    const query = homeSearchQuery.toLowerCase().replace(/q/g, "k").replace(/[^a-z0-9]/g, "");
+    const surahName = surah.englishName.toLowerCase().replace(/q/g, "k").replace(/[^a-z0-9]/g, "");
+    const surahTranslation = surah.englishNameTranslation.toLowerCase().replace(/q/g, "k").replace(/[^a-z0-9]/g, "");
+    return surahName.includes(query) || surahTranslation.includes(query) || surah.number.toString() === query;
+  });
 
   return (
     <>
@@ -161,7 +170,7 @@ const SurahsList = () => {
               </h1>
 
               <p className="max-w-md md:text-lg text-base font-medium text-zinc-400">
-                Explore authentic Tafsir, uncover profound classical Lexicons, and reflect on the divine words. Understand the Quran with comprehensive tools designed for deep study.
+                Explore authentic Tafsir and Lexicons. Understand the Quran deeply with our comprehensive tools, including AI translation and RAG.
               </p>
 
               <div className="flex gap-4">
@@ -193,28 +202,28 @@ const SurahsList = () => {
                 Continue Reading
               </h1>
 
-              {recent && (
+              {recent?.number && (
                 <Link href={`/surah/${recent?.number}`}>
-                  <div className="relative overflow-hidden border border-white/50 hover:border-white bg-gradient-to-r from-emerald-500 via-emerald-600 to-emerald-500 group cursor-pointer rounded-xl h-full backdrop-blur-md px-5 py-4 shadow-md transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg z-4 sm:w-64 w-full">
+                  <div className="relative overflow-hidden border border-white/50 hover:border-white bg-gradient-to-r from-emerald-500 via-emerald-600 to-emerald-500 group cursor-pointer rounded-xl h-[86px] backdrop-blur-md px-5 py-4 shadow-md transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg z-4 sm:w-[280px] w-full">
                     {/* Giant Faded Watermark Number */}
                     <div className="absolute -right-1 -bottom-4 text-6xl font-black text-white/50 group-hover:text-white transition-colors duration-500 pointer-events-none select-none leading-none">
                       {recent?.number}
                     </div>
 
                     <div className="relative z-10 flex items-center justify-between gap-4">
-                      <div className="flex flex-col flex-1 space-y-0.5 text-sm">
+                      <div className="flex flex-col flex-1 space-y-0.5 text-sm min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-bold text-emerald-100">{recent?.number}.</span>
-                          <p className="font-semibold text-white text-base">
+                          <span className="text-[11px] font-bold text-emerald-100 whitespace-nowrap">{recent?.number}.</span>
+                          <p className="font-semibold text-white text-base truncate">
                             {recent?.englishName}
                           </p>
                         </div>
-                        <p className="text-xs text-emerald-100/80 pl-4">
+                        <p className="text-xs text-emerald-100/80 pl-4 truncate">
                           {recent?.englishNameTranslation}
                         </p>
                       </div>
 
-                      <p className={`${amiriquran.className} text-xl text-white tracking-wide`}>
+                      <p className={`${amiriquran.className} text-xl text-white tracking-wide whitespace-nowrap shrink-0`}>
                         {recent?.name}
                       </p>
                     </div>
@@ -228,9 +237,21 @@ const SurahsList = () => {
         </div>
 
         <div className="space-y-6">
-          <h2 className="md:text-4xl text-3xl font-semibold text-white">
-            Explore All Surahs
-          </h2>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <h2 className="md:text-4xl text-3xl font-semibold text-white">
+              Explore All Surahs
+            </h2>
+            <div className="relative w-full md:w-72 z-20">
+              <input
+                type="text"
+                placeholder="Search Surah (e.g., Baqarah)"
+                value={homeSearchQuery}
+                onChange={(e) => setHomeSearchQuery(e.target.value)}
+                className="w-full bg-zinc-900/50 border border-zinc-800/80 rounded-xl px-4 py-2.5 text-base md:text-sm text-zinc-300 focus:outline-none focus:border-emerald-500/50 transition-colors placeholder:text-zinc-600"
+              />
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-zinc-500 pointer-events-none" />
+            </div>
+          </div>
           <div
             className={`w-full grid xl:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-6 relative ${inter.className}`}
             id="start_reading"
@@ -275,7 +296,7 @@ const SurahsList = () => {
               size={180}
             />
 
-            {surahs.map((surah: Surah) => (
+            {filteredHomeSurahs.map((surah: Surah) => (
               <Link href={`/surah/${surah.number}`} key={surah.number} prefetch={false}>
                 <div className="relative overflow-hidden border border-emerald-500/50 hover:border-emerald-500 bg-zinc-900/40 group cursor-pointer rounded-xl h-full backdrop-blur-md px-5 py-4 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10 z-4">
                   {/* Giant Faded Watermark Number */}
@@ -410,7 +431,7 @@ const SurahsList = () => {
                   </div>
                 </div>
                 <p className="text-sm text-white">
-                  Al-Juthur. An open-source, multi-lingual platform for deep Quranic study, featuring comprehensive Tafsirs and extensive classical lexicons.
+                  Al-Juthur. A multi-lingual platform for deep Quranic study, featuring comprehensive Tafsirs, translations, AI-powered RAG, and extensive classical lexicons.
                 </p>
               </div>
 
@@ -442,6 +463,22 @@ const SurahsList = () => {
                       Classical Lexicons
                     </Link>
                   </p>
+                  <p>
+                    <Link
+                      href="#"
+                      className="hover:text-gray-300 transition"
+                    >
+                      Translation
+                    </Link>
+                  </p>
+                  <p>
+                    <Link
+                      href="#"
+                      className="hover:text-gray-300 transition"
+                    >
+                      RAG
+                    </Link>
+                  </p>
                 </div>
               </div>
 
@@ -464,7 +501,25 @@ const SurahsList = () => {
                       target="_blank"
                       className="hover:text-gray-300 transition"
                     >
-                      GitHub Tafsir API
+                      Tafsir API by spa5k (GitHub)
+                    </Link>
+                  </p>
+                  <p>
+                    <Link
+                      href="https://github.com/tafsircenter/tafsir-mcp"
+                      target="_blank"
+                      className="hover:text-gray-300 transition"
+                    >
+                      Tafsir MCP (GitHub)
+                    </Link>
+                  </p>
+                  <p>
+                    <Link
+                      href="https://github.com/wizsk/arabic_lexicons"
+                      target="_blank"
+                      className="hover:text-gray-300 transition"
+                    >
+                      Arabic Lexicons by wizsk (GitHub)
                     </Link>
                   </p>
                 </div>
@@ -475,25 +530,26 @@ const SurahsList = () => {
                 <p className="font-semibold text-emerald-500">Legal</p>
                 <div className="underline space-y-1 text-white">
                   <Link
-                    href="#"
+                    href="/privacy"
                     className="hover:text-gray-300 transition block"
                   >
                     Privacy Policy
                   </Link>
 
                   <Link
-                    href="#"
+                    href="/terms"
                     className="hover:text-gray-300 transition block"
                   >
                     Terms of Service
                   </Link>
 
-                  <Link
-                    href="#"
-                    className="hover:text-gray-300 transition block"
-                  >
-                    Contact Us
-                  </Link>
+                  <div className="text-gray-300 block pt-4">
+                    Contact Us:
+                    <br />
+                    <a href="tel:+92309085272" className="hover:text-white transition">
+                      +92 309 085 272
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>

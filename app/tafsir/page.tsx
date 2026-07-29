@@ -118,15 +118,30 @@ export default function TafsirPage() {
   const [activeSurah, setActiveSurah] = useState<number>(1);
   const [tafsirEntries, setTafsirEntries] = useState<TafsirEntry[]>([]);
   const [loadingEntries, setLoadingEntries] = useState<boolean>(false);
+  const [visibleCount, setVisibleCount] = useState<number>(20);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   // Immersive Mode State
   const [readingProgress, setReadingProgress] = useState<number>(0);
   const [currentAyahIndex, setCurrentAyahIndex] = useState<number>(0);
   const [floatNavVisible, setFloatNavVisible] = useState<boolean>(false);
   const [topNavVisible, setTopNavVisible] = useState<boolean>(true);
+  const [isEnteringImmersive, setIsEnteringImmersive] = useState<boolean>(false);
   const lastScrollYRef = useRef<number>(0);
   const floatNavTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const ayahRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const handleEnterImmersive = useCallback((val: boolean) => {
+    if (val) {
+      setIsEnteringImmersive(true);
+      setTimeout(() => {
+        setImmersiveMode(true);
+        setIsEnteringImmersive(false);
+      }, 400);
+    } else {
+      setImmersiveMode(false);
+    }
+  }, [setImmersiveMode]);
 
   // URL param target
   const urlAyah = searchParams?.get("ayah");
@@ -173,13 +188,13 @@ export default function TafsirPage() {
             if (matchedAuthor) {
               setActiveAuthor(matchedAuthor);
               setActiveLangName(matchedLang);
-              setImmersiveMode(true);
+              handleEnterImmersive(true);
             }
           }
         }
       })
       .catch((err) => console.error("Failed to fetch languages:", err));
-  }, [urlAuthor, setImmersiveMode]);
+  }, [urlAuthor, handleEnterImmersive]);
 
   // Fetch full Surah tafsir when author or surah changes
   useEffect(() => {
@@ -203,6 +218,26 @@ export default function TafsirPage() {
         setLoadingEntries(false);
       });
   }, [activeAuthor, activeSurah]);
+
+  // Reset visible count when author or surah changes
+  useEffect(() => {
+    setVisibleCount(20);
+  }, [activeAuthor, activeSurah]);
+
+  // Infinite scroll observer to load more entries
+  useEffect(() => {
+    if (!loadMoreRef.current || tafsirEntries.length <= visibleCount) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((prev) => Math.min(prev + 20, tafsirEntries.length));
+        }
+      },
+      { rootMargin: "600px" }
+    );
+    observer.observe(loadMoreRef.current);
+    return () => observer.disconnect();
+  }, [visibleCount, tafsirEntries.length, activeAuthor, immersiveMode]);
 
   // Flatten all authors with their language info
   const allAuthorsWithLang = useMemo(() => {
@@ -242,12 +277,12 @@ export default function TafsirPage() {
   // Reset immersive mode when leaving author view or unmounting page
   useEffect(() => {
     if (!activeAuthor) {
-      setImmersiveMode(false);
+      handleEnterImmersive(false);
     }
     return () => {
-      setImmersiveMode(false);
+      handleEnterImmersive(false);
     };
-  }, [activeAuthor, setImmersiveMode]);
+  }, [activeAuthor, handleEnterImmersive]);
 
   // Scroll behavior: reading progress bar & headroom hide-on-scroll top nav across modes
   useEffect(() => {
@@ -264,9 +299,9 @@ export default function TafsirPage() {
       setReadingProgress(pct);
 
       // Hide top nav when scrolling down, show when scrolling up
-      if (scrollTop > lastScrollYRef.current && scrollTop > 100) {
+      if (scrollTop > lastScrollYRef.current && scrollTop > 50) {
         setTopNavVisible(false);
-      } else {
+      } else if (scrollTop < lastScrollYRef.current) {
         setTopNavVisible(true);
       }
       lastScrollYRef.current = scrollTop;
@@ -284,28 +319,8 @@ export default function TafsirPage() {
     };
   }, [activeAuthor, immersiveMode]);
 
-  // IntersectionObserver for Ayah index tracking across both Standard and Immersive modes
-  useEffect(() => {
-    if (!activeAuthor || tafsirEntries.length === 0) return;
-
-    // Index observer (tracks which Ayah is currently active on screen)
-    const indexObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const idx = Number((entry.target as HTMLElement).dataset.ayahIdx);
-            if (!isNaN(idx)) setCurrentAyahIndex(idx);
-          }
-        });
-      },
-      { threshold: 0.2, rootMargin: "-10% 0px -40% 0px" }
-    );
-    ayahRefs.current.forEach((el) => { if (el) indexObserver.observe(el); });
-
-    return () => {
-      indexObserver.disconnect();
-    };
-  }, [activeAuthor, tafsirEntries, loadingEntries]);
+  // IntersectionObserver for Ayah index tracking removed to improve performance
+  // and eliminate the "live tracking" effect per user request.
 
   // Keyboard shortcuts in immersive mode
   useEffect(() => {
@@ -314,7 +329,11 @@ export default function TafsirPage() {
       const tag = (e.target as HTMLElement).tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
       if (e.key === "r" || e.key === "R") {
-        setImmersiveMode((p) => !p);
+        if (!immersiveMode && !isEnteringImmersive) {
+          handleEnterImmersive(true);
+        } else if (immersiveMode) {
+          handleEnterImmersive(false);
+        }
       }
       if (immersiveMode) {
         if (e.key === "ArrowDown" || e.key === "j") {
@@ -336,6 +355,11 @@ export default function TafsirPage() {
     if (!urlAyah || !tafsirEntries.length || !activeAuthor) return;
     const n = parseInt(urlAyah, 10);
     if (isNaN(n)) return;
+    
+    if (n > visibleCount) {
+      setVisibleCount(n + 10);
+    }
+    
     // Small delay to allow render
     const t = setTimeout(() => {
       const el = document.getElementById(`ayah-${n}`);
@@ -345,24 +369,36 @@ export default function TafsirPage() {
       }
     }, 400);
     return () => clearTimeout(t);
-  }, [urlAyah, tafsirEntries, activeAuthor]);
+  }, [urlAyah, tafsirEntries, activeAuthor]); // Removed visibleCount to prevent infinite loops on mount
 
   const scrollToAyah = (num: number) => {
-    setCurrentAyahIndex(num - 1);
-    const el = document.getElementById(`ayah-${num}`);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (num > visibleCount) {
+      setVisibleCount(num + 10);
     }
+    setTimeout(() => {
+      setCurrentAyahIndex(num - 1);
+      const el = document.getElementById(`ayah-${num}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 50);
   };
 
   const navigateAyah = useCallback((delta: number) => {
     const nextIdx = Math.max(0, Math.min(tafsirEntries.length - 1, currentAyahIndex + delta));
-    const target = ayahRefs.current[nextIdx];
-    if (target) {
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
-      setCurrentAyahIndex(nextIdx);
+    
+    if (nextIdx + 1 > visibleCount) {
+      setVisibleCount(nextIdx + 10);
     }
-  }, [currentAyahIndex, tafsirEntries.length]);
+
+    setTimeout(() => {
+      const target = ayahRefs.current[nextIdx];
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+        setCurrentAyahIndex(nextIdx);
+      }
+    }, 50);
+  }, [currentAyahIndex, tafsirEntries.length, visibleCount]);
 
 
   // ==========================================
@@ -375,6 +411,30 @@ export default function TafsirPage() {
       activeLangName.toLowerCase().includes("persian");
 
     // ── IMMERSIVE MODE ─────────────────────────────────────────
+    if (isEnteringImmersive) {
+      return (
+        <div className={`min-h-screen fixed inset-0 z-[100] flex flex-col items-center justify-center bg-zinc-950 text-amber-500 ${inter.className}`}>
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-900/20 via-zinc-950 to-zinc-950" />
+          <div className="relative z-10 flex flex-col items-center gap-8">
+            <div className="relative flex items-center justify-center">
+              <div className="absolute size-28 border-t-2 border-amber-500 rounded-full animate-[spin_1s_linear_infinite]" />
+              <div className="absolute size-24 border-r-2 border-amber-400/60 rounded-full animate-[spin_1.5s_reverse_infinite]" />
+              <div className="absolute size-20 border-b-2 border-amber-600/40 rounded-full animate-[spin_2s_linear_infinite]" />
+              <BookOpenText className="size-8 text-amber-300 animate-pulse" />
+            </div>
+            <div className="flex flex-col items-center gap-2 px-4 text-center">
+              <h2 className="text-lg md:text-3xl font-serif text-amber-200 tracking-widest md:tracking-[0.2em] uppercase">
+                Entering Immersive Mode
+              </h2>
+              <p className="text-[10px] md:text-sm text-amber-500/70 font-mono tracking-widest md:tracking-[0.3em] uppercase animate-pulse">
+                Preparing Tafsir Manuscript...
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     if (immersiveMode) {
       return (
         <div className="tafsir-immersive text-white">
@@ -382,7 +442,7 @@ export default function TafsirPage() {
           <div className="fixed top-0 left-0 right-0 z-50 tafsir-reading-progress" style={{ width: `${readingProgress}%` }} />
 
           {/* Immersive Top Bar (Sticky Glassmorphism) */}
-          <div className={`sticky top-0 z-40 border-b px-4 md:px-8 py-3.5 transition-all duration-300 ${topNavVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}
+          <div className={`sticky top-0 z-40 border-b px-4 md:px-8 py-3.5 transition-all duration-200 ${topNavVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}
             style={{ 
               background: "rgba(15, 11, 7, 0.4)", 
               borderColor: "rgba(217, 119, 6, 0.25)",
@@ -391,7 +451,7 @@ export default function TafsirPage() {
             <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
                 <button
-                  onClick={() => { setImmersiveMode(false); setActiveAuthor(null); }}
+                  onClick={() => { handleEnterImmersive(false); setActiveAuthor(null); }}
                   className="flex items-center gap-1.5 text-amber-600/70 hover:text-amber-500 transition text-sm shrink-0"
                 >
                   <ArrowLeft className="size-4" />
@@ -445,7 +505,7 @@ export default function TafsirPage() {
 
                 {/* Exit immersive toggle */}
                 <button
-                  onClick={() => setImmersiveMode(false)}
+                  onClick={() => handleEnterImmersive(false)}
                   className="tafsir-immersive-toggle tafsir-immersive-toggle-on group"
                   title="Exit Immersive Mode"
                 >
@@ -462,7 +522,7 @@ export default function TafsirPage() {
                   value={activeSurah}
                   onChange={(e) => { setActiveSurah(Number(e.target.value)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
                   className="w-full appearance-none text-xs rounded-lg px-3 py-2 pr-7 focus:outline-none"
-                  style={{ background: "rgba(180,120,40,0.08)", border: "1px solid rgba(180,120,40,0.2)", color: "#d97706" }}
+                  style={{ background: "rgba(180,120,40,0.08)", border: "1px solid rgba(16,185,129,0.5)", color: "#d97706" }}
                 >
                   {SURAHS_DATA.map((s) => (
                     <option key={s.number} value={s.number} style={{ background: "#1a1208" }}>
@@ -525,7 +585,7 @@ export default function TafsirPage() {
               </div>
             ) : (
               <div>
-                {tafsirEntries.map((entry, idx) => {
+                {tafsirEntries.slice(0, visibleCount).map((entry, idx) => {
                   const ayahNumber = entry.ayah?.numberInSurah || idx + 1;
                   const arabicText = entry.ayah?.text && entry.ayah.text !== "Arabic Text" ? entry.ayah.text : null;
                   return (
@@ -577,6 +637,11 @@ export default function TafsirPage() {
                     </div>
                   );
                 })}
+                {visibleCount < tafsirEntries.length && (
+                  <div ref={loadMoreRef} className="h-20 w-full flex items-center justify-center">
+                    <div className="size-6 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -592,7 +657,7 @@ export default function TafsirPage() {
           </div>
 
           {/* Mobile bottom ayah scroller */}
-          <div className={`fixed bottom-0 left-0 right-0 z-50 md:hidden transition-all duration-300 ${topNavVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"}`}
+          <div className={`fixed bottom-0 left-0 right-0 z-50 md:hidden transition-all duration-200 ${topNavVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"}`}
             style={{ background: "rgba(15, 11, 7, 0.4)", borderTop: "1px solid rgba(180,120,40,0.25)", padding: "0.5rem 1rem" }}>
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
               {Array.from({ length: currentSurahMeta.numberOfAyahs }, (_, i) => i + 1).map((num) => (
@@ -658,7 +723,7 @@ export default function TafsirPage() {
 
               {/* Right Side: Immersive Mode Toggle (Always Pinned) */}
               <button
-                onClick={() => setImmersiveMode(true)}
+                onClick={() => handleEnterImmersive(true)}
                 className="tafsir-immersive-toggle tafsir-immersive-toggle-off shrink-0 !p-2 md:!px-3 md:!py-1.5"
                 title="Enter Immersive Reading Mode (R)"
               >
@@ -675,7 +740,7 @@ export default function TafsirPage() {
                 <select
                   value={activeSurah}
                   onChange={(e) => setActiveSurah(Number(e.target.value))}
-                  className="w-full appearance-none bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-300 font-medium focus:outline-none focus:border-emerald-500/50 pr-8 shadow-sm truncate"
+                  className="w-full appearance-none bg-zinc-900 border border-emerald-500/50 rounded-lg px-3 py-2 text-xs text-zinc-300 font-medium focus:outline-none focus:border-emerald-500/50 pr-8 shadow-sm truncate"
                 >
                   {SURAHS_DATA.map((s) => (
                     <option key={s.number} value={s.number} className="bg-zinc-900 text-zinc-200">
@@ -792,7 +857,7 @@ export default function TafsirPage() {
               </div>
             ) : (
               <div className="space-y-6">
-                {tafsirEntries.map((entry, idx) => {
+                {tafsirEntries.slice(0, visibleCount).map((entry, idx) => {
                   const ayahNumber = entry.ayah?.numberInSurah || idx + 1;
                   const arabicText = entry.ayah?.text && entry.ayah.text !== "Arabic Text" ? entry.ayah.text : null;
                   return (
@@ -856,6 +921,11 @@ export default function TafsirPage() {
                     </div>
                   );
                 })}
+                {visibleCount < tafsirEntries.length && (
+                  <div ref={loadMoreRef} className="h-20 w-full flex items-center justify-center">
+                    <div className="size-6 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
+                  </div>
+                )}
               </div>
             )}
           </main>
@@ -865,16 +935,12 @@ export default function TafsirPage() {
             <div className="text-[9px] uppercase font-bold text-zinc-500 tracking-widest text-center mb-6">Ayahs</div>
             <div className="flex flex-col items-center gap-2">
               {Array.from({ length: currentSurahMeta.numberOfAyahs }, (_, i) => i + 1).map((num) => {
-                const isActive = (currentAyahIndex + 1) === num;
                 return (
                   <button
                     key={num}
+                    id={`ayah-tracker-${num}`}
                     onClick={() => scrollToAyah(num)}
-                    className={`size-9 rounded-full flex items-center justify-center text-[11px] font-semibold transition-all ${
-                      isActive
-                        ? "bg-emerald-500 text-zinc-950 font-bold shadow-md shadow-emerald-500/20"
-                        : "text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 border border-transparent"
-                    }`}
+                    className="size-9 rounded-full flex items-center justify-center text-[11px] font-semibold transition-all shrink-0 text-zinc-500 hover:bg-emerald-500 hover:text-zinc-950 hover:font-bold hover:shadow-md hover:shadow-emerald-500/20 border border-transparent"
                     title={`Jump to Ayah ${num}`}
                   >
                     {num}

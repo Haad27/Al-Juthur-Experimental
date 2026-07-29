@@ -11,6 +11,9 @@ export interface EmbeddingOptions {
 /**
  * Computes cosine similarity between two numeric vectors.
  */
+
+
+
 export function cosineSimilarity(vecA: number[], vecB: number[]): number {
   if (vecA.length !== vecB.length || vecA.length === 0) return 0;
   let dotProduct = 0;
@@ -24,6 +27,8 @@ export function cosineSimilarity(vecA: number[], vecB: number[]): number {
   if (normA === 0 || normB === 0) return 0;
   return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
 }
+
+
 
 /**
  * Local deterministic semantic hash embedding (384 dimensions).
