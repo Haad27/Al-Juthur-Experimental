@@ -20,7 +20,7 @@ const BottomNav = () => {
   const navItems = [
     {
       label: "Home",
-      href: "/",
+      href: "/home",
       icon: <Home className="w-5 h-5" />,
     },
     {
@@ -45,13 +45,15 @@ const BottomNav = () => {
     },
   ];
 
+  if (pathname === "/") return null;
+
   return (
     <div className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-md z-50 md:hidden">
       <nav className="rounded-full border border-zinc-700/50 border-t-zinc-600/50 bg-zinc-950/60 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] px-2 py-1.5">
         <div className="flex justify-around items-center h-14 relative">
           {navItems.map((item) => {
             const isActive = 
-              (item.label === "Home" && pathname === "/") ||
+              (item.label === "Home" && pathname === "/home") ||
               (item.label === "Surah" && pathname?.startsWith("/surah")) ||
               (item.label === "Tafsir" && pathname?.startsWith("/tafsir")) ||
               (item.label === "Lexicon" && pathname?.startsWith("/lexicon")) ||
