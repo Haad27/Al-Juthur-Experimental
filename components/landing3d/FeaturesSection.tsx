@@ -147,9 +147,7 @@ const FeatureBlock = ({ feature, index }: { feature: typeof features[0], index: 
 
 export default function FeaturesSection() {
   return (
-    <section className="relative w-full bg-black">
-      {/* Section Divider */}
-      <div className="w-full h-32 bg-gradient-to-b from-black via-black to-transparent pointer-events-none z-20 -mt-32 relative" />
+    <section className="relative w-full bg-black pt-16">
       
       {features.map((feature, index) => (
         <FeatureBlock key={index} feature={feature} index={index} />
