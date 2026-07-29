@@ -443,11 +443,12 @@ const CylindricalGallery = forwardRef<CylindricalGalleryHandle, CylindricalGalle
             <Text
               key={i}
               position={[0, 0, 0]}
-              fontSize={0.4}
+              fontSize={0.26}
+              maxWidth={2.4}
               color="#6df4ce"
               anchorX="center"
               anchorY="middle"
-              outlineWidth={0.02}
+              outlineWidth={0.015}
               outlineColor="#000000"
             >
               {caption}

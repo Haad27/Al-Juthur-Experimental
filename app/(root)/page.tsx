@@ -21,12 +21,12 @@ const APP_IMAGES = [
 ];
 
 const APP_CAPTIONS = [
-  "Clean Modern UI",
-  "Quran View",
+  "Modern Interface",
+  "Quran Reader",
   "130+ Tafsirs",
   "8+ Lexicons",
-  "Translate Classical Text",
-  "6 AI Models Trained",
+  "AI Translation",
+  "6 AI Models",
 ];
 
 export default function LandingPage() {
@@ -39,7 +39,7 @@ export default function LandingPage() {
         </div>
 
         {/* Overlay UI */}
-      <div className="absolute inset-0 z-10 pointer-events-none flex flex-col justify-between p-4 md:p-12 lg:p-24">
+      <div className="absolute inset-0 z-10 pointer-events-none flex flex-col justify-between p-4 md:p-12 lg:p-24 pb-20 md:pb-12">
         
         {/* Header / Hook */}
         <motion.div 
@@ -66,7 +66,7 @@ export default function LandingPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 1 }}
-          className="mt-8 flex flex-row gap-3 justify-center md:justify-start pointer-events-auto"
+          className="mt-8 flex flex-row gap-3 justify-center md:justify-start pointer-events-auto mb-6 md:mb-0"
         >
           <Link 
             href="/home" 
