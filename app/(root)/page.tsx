@@ -1,11 +1,13 @@
 'use client'
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Loading from "@/app/loading";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -40,6 +42,8 @@ export default function LandingPage() {
   const mainRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const heroContentRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   // Set up master ScrollTrigger to track overall page progress
   useEffect(() => {
@@ -92,8 +96,14 @@ export default function LandingPage() {
     window.scrollTo({ top: heroHeight + 10, behavior: "smooth" });
   };
 
+  const handleStartUsingIt = () => {
+    setIsLoading(true);
+    router.push("/home");
+  };
+
   return (
     <div ref={mainRef} className="relative w-full bg-black text-white selection:bg-emerald-500/30">
+      {isLoading && <Loading />}
       {/* Fixed 3D Canvas — persists behind entire page */}
       <div className="fixed inset-0 z-0">
         <Scene avatars={APP_IMAGES} captions={APP_CAPTIONS} scrollProgress={scrollProgress} />
@@ -123,13 +133,13 @@ export default function LandingPage() {
 
         {/* Call to Action Buttons */}
         <div className="mt-8 flex flex-row gap-3 justify-center md:justify-start pointer-events-auto mb-6 md:mb-0 animate-fade-in-up">
-          <Link
-            href="/home"
+          <button
+            onClick={handleStartUsingIt}
             className="group relative inline-flex items-center gap-2 px-4 py-3 md:px-8 md:py-4 bg-emerald-500/10 hover:bg-emerald-500/20 backdrop-blur-md text-emerald-400 rounded-full font-semibold text-xs md:text-lg transition-all duration-300 border border-emerald-500/50 hover:border-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)]"
           >
             Start Using It
             <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
-          </Link>
+          </button>
 
           <button
             onClick={handleDiscoverMore}
