@@ -1,72 +1,39 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import PostProcessing from "./PostProcessing";
-import CameraController from "./CameraController";
+import ScrollCameraRig from "./ScrollCameraRig";
 import CylindricalGallery, { CylindricalGalleryHandle } from "./CylindricalGallery";
 import BackgroundGrid from "./BackgroundGrid";
 import { useVirtualScroll } from "./CylindricalGallery/useVirtualScroll";
-import PresetSelector from "./PresetSelector";
+import SectionActivations from "./SectionActivations";
 import QuranCenter from "./QuranCenter";
 import { Leva } from "leva";
-
-const LEVA_THEME = {
-  colors: {
-    elevation1: '#0a0a0a',
-    elevation2: '#141414',
-    elevation3: '#1e1e1e',
-    accent1: '#f5f2ed',
-    accent2: '#3a3836',
-    accent3: '#3a3836',
-    highlight1: '#f5f2ed',
-    highlight2: 'rgba(245,242,237,0.6)',
-    highlight3: 'rgba(245,242,237,0.3)',
-    vivid1: '#f5f2ed',
-  },
-  fonts: {
-    mono: "'IBM Plex Mono', monospace",
-    sans: "'IBM Plex Mono', monospace",
-  },
-  sizes: {
-    titleBarHeight: '28px',
-  },
-  fontSizes: {
-    root: '10px',
-  },
-  borderWidths: {
-    root: '1px',
-    input: '1px',
-    focus: '1px',
-    hover: '1px',
-    active: '1px',
-    folder: '1px',
-  },
-  radii: {
-    xs: '1px',
-    sm: '2px',
-    lg: '2px',
-  },
-}
 
 interface GallerySceneProps {
   avatars: string[];
   captions?: string[];
+  scrollProgress: React.MutableRefObject<number>;
 }
 
 function SceneContent({
   avatars,
   captions = [],
   galleryRef,
+  scrollProgress,
 }: GallerySceneProps & {
-  galleryRef: React.Ref<CylindricalGalleryHandle>;
+  galleryRef: React.RefObject<CylindricalGalleryHandle | null>;
 }) {
   const { scrollOffset, scrollVelocity, frictionRef, update } = useVirtualScroll(0.95);
 
   return (
     <>
       <BackgroundGrid />
-      <CameraController scrollVelocity={scrollVelocity} />
+      <ScrollCameraRig
+        scrollProgress={scrollProgress}
+        scrollVelocity={scrollVelocity}
+      />
       <QuranCenter />
       <CylindricalGallery
         ref={galleryRef}
@@ -79,12 +46,16 @@ function SceneContent({
         preset="greenScifi"
         debugMode="none"
       />
+      <SectionActivations
+        scrollProgress={scrollProgress}
+        galleryRef={galleryRef}
+      />
       <PostProcessing preset="greenScifi" />
     </>
   );
 }
 
-export default function Scene({ avatars, captions }: GallerySceneProps) {
+export default function Scene({ avatars, captions, scrollProgress }: GallerySceneProps) {
   const galleryRef = useRef<CylindricalGalleryHandle>(null);
 
   return (
@@ -115,6 +86,7 @@ export default function Scene({ avatars, captions }: GallerySceneProps) {
           avatars={avatars}
           captions={captions}
           galleryRef={galleryRef}
+          scrollProgress={scrollProgress}
         />
       </Canvas>
       <Leva hidden />

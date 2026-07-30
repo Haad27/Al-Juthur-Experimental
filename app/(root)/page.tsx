@@ -1,13 +1,19 @@
 'use client'
 
+import { useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { ArrowRight, BookOpen, Search, BrainCircuit, Globe } from "lucide-react";
-import FeaturesSection from "@/components/landing3d/FeaturesSection";
-import AboutAppSection from "@/components/landing3d/AboutAppSection";
+import { ArrowRight, ChevronDown } from "lucide-react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const Scene = dynamic(() => import("@/components/landing3d/Scene"), {
+  ssr: false,
+});
+
+const ScrollSections = dynamic(() => import("@/components/landing3d/ScrollSections"), {
   ssr: false,
 });
 
@@ -30,26 +36,82 @@ const APP_CAPTIONS = [
 ];
 
 export default function LandingPage() {
-  return (
-    <main className="relative w-full bg-black text-white selection:bg-emerald-500/30">
-      <section className="relative h-screen w-full overflow-hidden">
-        {/* 3D Background */}
-        <div className="absolute inset-0 z-0 pointer-events-auto">
-          <Scene avatars={APP_IMAGES} captions={APP_CAPTIONS} />
-        </div>
+  const scrollProgress = useRef(0);
+  const mainRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const heroContentRef = useRef<HTMLDivElement>(null);
 
-        {/* Overlay UI */}
-      <div className="absolute inset-0 z-10 pointer-events-none flex flex-col justify-between p-4 md:p-12 lg:p-24 pb-20 md:pb-12">
-        
+  // Set up master ScrollTrigger to track overall page progress
+  useEffect(() => {
+    if (!mainRef.current) return;
+
+    const ctx = gsap.context(() => {
+      ScrollTrigger.create({
+        trigger: mainRef.current,
+        start: "top top",
+        end: "bottom bottom",
+        scrub: 0,
+        onUpdate: (self) => {
+          scrollProgress.current = self.progress;
+        },
+      });
+    });
+
+    // Refresh after fonts/images load
+    const timer = setTimeout(() => ScrollTrigger.refresh(), 800);
+
+    return () => {
+      clearTimeout(timer);
+      ctx.revert();
+    };
+  }, []);
+
+  // Hero content fade-out on scroll
+  useEffect(() => {
+    if (!heroContentRef.current) return;
+
+    const ctx = gsap.context(() => {
+      gsap.to(heroContentRef.current, {
+        opacity: 0,
+        y: -30,
+        ease: "power2.in",
+        scrollTrigger: {
+          trigger: heroContentRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+    });
+
+    return () => ctx.revert();
+  }, []);
+
+  const handleDiscoverMore = () => {
+    const heroHeight = window.innerHeight;
+    window.scrollTo({ top: heroHeight + 10, behavior: "smooth" });
+  };
+
+  return (
+    <div ref={mainRef} className="relative w-full bg-black text-white selection:bg-emerald-500/30">
+      {/* Fixed 3D Canvas — persists behind entire page */}
+      <div className="fixed inset-0 z-0">
+        <Scene avatars={APP_IMAGES} captions={APP_CAPTIONS} scrollProgress={scrollProgress} />
+      </div>
+
+      {/* Hero Overlay — fixed positioned, fades out on scroll */}
+      <div
+        ref={heroContentRef}
+        className="fixed inset-0 z-20 pointer-events-none flex flex-col justify-between p-4 md:p-12 lg:p-24 pb-20 md:pb-12"
+      >
         {/* Header / Hook */}
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1, delay: 0.5 }}
-          className="max-w-md pointer-events-auto"
-        >
+        <div className="max-w-md pointer-events-auto animate-fade-in-left">
           <div className="flex items-center gap-3 mb-4">
-            <img src="/assets/favicon/apple-touch-icon.png" alt="Al Juthur Logo" className="w-8 h-8 md:w-12 md:h-12 object-contain drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+            <img
+              src="/assets/favicon/apple-touch-icon.png"
+              alt="Al Juthur Logo"
+              className="w-8 h-8 md:w-12 md:h-12 object-contain drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+            />
             <h1 className="text-3xl md:text-5xl font-bold text-white tracking-widest uppercase drop-shadow-md">
               Al Juthur
             </h1>
@@ -57,39 +119,30 @@ export default function LandingPage() {
           <p className="text-sm md:text-lg text-zinc-300 font-light leading-relaxed">
             The most comprehensive platform featuring 130+ Tafsirs, 8+ Lexicons, RAG technology, and AI Translation with a Clean Modern UI.
           </p>
-        </motion.div>
-
-        {/* Feature Tags Removed */}
+        </div>
 
         {/* Call to Action Buttons */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 1 }}
-          className="mt-8 flex flex-row gap-3 justify-center md:justify-start pointer-events-auto mb-6 md:mb-0"
-        >
-          <Link 
-            href="/home" 
+        <div className="mt-8 flex flex-row gap-3 justify-center md:justify-start pointer-events-auto mb-6 md:mb-0 animate-fade-in-up">
+          <Link
+            href="/home"
             className="group relative inline-flex items-center gap-2 px-4 py-3 md:px-8 md:py-4 bg-emerald-500/10 hover:bg-emerald-500/20 backdrop-blur-md text-emerald-400 rounded-full font-semibold text-xs md:text-lg transition-all duration-300 border border-emerald-500/50 hover:border-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)]"
           >
             Start Using It
             <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
           </Link>
 
-          <button 
-            onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+          <button
+            onClick={handleDiscoverMore}
             className="group relative inline-flex items-center gap-2 px-4 py-3 md:px-8 md:py-4 bg-white/5 hover:bg-white/10 backdrop-blur-md text-gray-300 hover:text-white rounded-full font-semibold text-xs md:text-lg transition-all duration-300 border border-white/20 hover:border-white/40"
           >
             Discover More
+            <ChevronDown className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-y-0.5 transition-transform" />
           </button>
-        </motion.div>
+        </div>
       </div>
-      </section>
 
-      <AboutAppSection />
-
-      <FeaturesSection />
-
-    </main>
+      {/* Scrollable HTML Content Layer — in normal document flow above canvas */}
+      <ScrollSections />
+    </div>
   );
 }

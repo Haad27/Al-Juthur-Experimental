@@ -32,6 +32,7 @@ interface CylindricalGalleryProps {
 
 export interface CylindricalGalleryHandle {
   downloadAtlas: () => void;
+  getMesh: () => THREE.InstancedMesh | null;
 }
 
 const CylindricalGallery = forwardRef<CylindricalGalleryHandle, CylindricalGalleryProps>(function CylindricalGallery({
@@ -70,6 +71,9 @@ const CylindricalGallery = forwardRef<CylindricalGalleryHandle, CylindricalGalle
       a.href = dataUrl;
       a.download = "texture-atlas.png";
       a.click();
+    },
+    getMesh() {
+      return meshRef.current;
     },
   }), [atlasCanvasRef]);
 
