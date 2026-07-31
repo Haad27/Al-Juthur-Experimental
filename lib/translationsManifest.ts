@@ -9,6 +9,14 @@ export interface TranslationOption {
 
 export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
   {
+    "identifier": "131",
+    "languageCode": "en",
+    "languageLabel": "English",
+    "name": "Dr. Mustafa Khattab, the Clear Quran",
+    "englishName": "Dr. Mustafa Khattab, the Clear Quran",
+    "displayLabel": "English: Dr. Mustafa Khattab, the Clear Quran"
+  },
+  {
     "identifier": "85",
     "languageCode": "english",
     "languageLabel": "English",

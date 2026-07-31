@@ -95,10 +95,26 @@ export default async function SurahPage({
 
   // Pre-compute O(1) lookup map for translations
   const translationMap = new Map<number, string>();
+  const footnoteMap = new Map<number, string[]>();
+  
   translationAyahs.forEach((t, index) => {
-    let cleanText = typeof t.text === "string" ? t.text.replace(/<sup[^>]*>.*?<\/sup>/g, "") : (t.text || "");
+    let cleanText = "";
+    const fIds: string[] = [];
+    
+    if (typeof t.text === "string") {
+      cleanText = t.text.replace(/<sup foot_note=(\d+)>.*?<\/sup>/g, (match: string, id: string) => {
+        fIds.push(id);
+        return "";
+      });
+      // Fallback for any other HTML tags
+      cleanText = cleanText.replace(/<sup[^>]*>.*?<\/sup>/g, "");
+    } else {
+      cleanText = t.text || "";
+    }
+    
     const verseNum = t.verse_number || t.numberInSurah || (index + 1);
     translationMap.set(verseNum, cleanText);
+    footnoteMap.set(verseNum, fIds);
   });
 
   // 5. Merge the local Arabic with the pure English translation
@@ -118,6 +134,7 @@ export default async function SurahPage({
       text: rawText,
       cleanText: removeDiacritics(rawText),
       translation: translationMap.get(localAyah.numberInSurah) || "Translation missing.",
+      footnoteIds: footnoteMap.get(localAyah.numberInSurah) || [],
     };
   });
 

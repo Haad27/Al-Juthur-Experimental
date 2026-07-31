@@ -27,6 +27,7 @@ import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 import { amiri } from "@/app/fonts";
 import useScrollDirection from "@/hooks/useScrollDirection";
 import { KeyValue } from "@/components/ui/key-value";
+import { ALL_TRANSLATION_OPTIONS } from "@/lib/translationsManifest";
 
 interface AyahProps {
   number: number;
@@ -34,6 +35,7 @@ interface AyahProps {
   text: string;
   cleanText: string;
   translation: string;
+  footnoteIds?: string[];
 }
 
 interface SurahReaderClientProps {
@@ -117,6 +119,36 @@ const AyahRow = React.memo(({
   const isCurrentlyPlaying = useAudioStore(s => s.currentAyah === ayah.numberInSurah && s.currentSurah === surahNumber);
   const playAyah = useAudioStore(s => s.playAyah);
   const pause = useAudioStore(s => s.pause);
+  const [showFootnoteIds, setShowFootnoteIds] = useState(false);
+  const [fetchedFootnotes, setFetchedFootnotes] = useState<Record<string, string>>({});
+  const [loadingFootnotes, setLoadingFootnotes] = useState(false);
+
+  const handleToggleFootnotes = async () => {
+    if (!showFootnoteIds) {
+      setShowFootnoteIds(true);
+      if (ayah.footnoteIds && ayah.footnoteIds.length > 0 && Object.keys(fetchedFootnotes).length === 0) {
+        setLoadingFootnotes(true);
+        const newFootnotes = { ...fetchedFootnotes };
+        for (const fId of ayah.footnoteIds) {
+          try {
+            const res = await fetch(`https://api.quran.com/api/v4/foot_notes/${fId}`);
+            if (res.ok) {
+              const data = await res.json();
+              if (data.foot_note) {
+                newFootnotes[fId] = data.foot_note.text;
+              }
+            }
+          } catch(e) {
+            console.error(e);
+          }
+        }
+        setFetchedFootnotes(newFootnotes);
+        setLoadingFootnotes(false);
+      }
+    } else {
+      setShowFootnoteIds(false);
+    }
+  };
 
   const { mushafStyle } = useGlobalState();
 
@@ -261,20 +293,47 @@ const AyahRow = React.memo(({
           const { mainText, footnotes } = processTranslation(ayah.translation);
           return (
             <div className="pt-4 md:ml-8 lg:w-2/3 md:w-4/6 text-left">
-              <p
-                className="text-white md:leading-[1.5] leading-[1.8]"
+              <div
+                className="text-white md:leading-[1.5] leading-[1.8] translation-content"
                 style={{ fontSize: getTranslationFontSize(fontSize) }}
-              >
-                {mainText}
-              </p>
+                dangerouslySetInnerHTML={{ __html: mainText }}
+              />
               {footnotes.length > 0 && (
                 <div className="mt-3 p-3 rounded-xl bg-zinc-900/60 border border-zinc-800/80 text-xs text-zinc-400 italic space-y-1.5">
                   <div className="font-semibold text-emerald-400 not-italic uppercase tracking-wider text-[10px]">
-                    Footnote / Note
+                    Note
                   </div>
                   {footnotes.map((fn, fIdx) => (
                     <p key={fIdx} className="leading-relaxed">{fn}</p>
                   ))}
+                </div>
+              )}
+              
+              {ayah.footnoteIds && ayah.footnoteIds.length > 0 && (
+                <div className="mt-3">
+                  <button
+                    onClick={handleToggleFootnotes}
+                    className="text-xs font-medium text-emerald-500 hover:text-emerald-400 transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    {showFootnoteIds ? "Hide Footnotes" : "See Footnotes"}
+                  </button>
+                  {showFootnoteIds && (
+                    <div className="mt-2 p-3 rounded-xl bg-zinc-900/60 border border-emerald-900/50 text-xs text-zinc-300 space-y-2">
+                      <div className="font-semibold text-emerald-500 uppercase tracking-wider text-[10px]">
+                        Footnotes
+                      </div>
+                      {loadingFootnotes ? (
+                        <p className="text-zinc-500 animate-pulse">Loading footnotes...</p>
+                      ) : (
+                        ayah.footnoteIds.map((fId, idx) => (
+                          <div key={fId} className="leading-relaxed">
+                            <span className="text-emerald-500 font-bold mr-1">[{idx + 1}]</span>
+                            <span dangerouslySetInnerHTML={{ __html: fetchedFootnotes[fId] || "Footnote unavailable." }} />
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -294,7 +353,7 @@ export default function SurahReaderClient({
   ayahParam,
   surahWbwTranslation,
 }: SurahReaderClientProps) {
-  const { fontSize, showTranslation, showWbw } = useGlobalState();
+  const { fontSize, showTranslation, showWbw, translationEdition } = useGlobalState();
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const show = useScrollDirection();
   const router = useRouter();
@@ -408,18 +467,23 @@ export default function SurahReaderClient({
           !show && "-translate-y-24 opacity-0"
         )}
       >
-        {/* Surah Name */}
+        {/* Surah Name & Selected Translation */}
         <div className="flex items-center gap-4">
           <p
-            className={`${amiri.className} dark:text-white text-black font-bold text-lg leading-tight`}
+            className={`${amiri.className} dark:text-white text-black font-bold text-lg leading-tight flex items-center gap-3`}
           >
             {surah?.name}
+            {translationEdition && (
+              <span className="text-xs font-normal font-sans px-2 py-1 bg-zinc-100 dark:bg-zinc-800/80 rounded-md text-zinc-500 dark:text-zinc-400">
+                {ALL_TRANSLATION_OPTIONS.find((t) => t.identifier === translationEdition)?.name || "Translation"}
+              </span>
+            )}
           </p>
         </div>
 
         {/* Desktop Full Navigation */}
         <nav className="hidden lg:flex items-center gap-6 text-zinc-400 text-sm">
-          <Link href="/" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">
+          <Link href="/home" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">
             Home
           </Link>
           <Link href="/tafsir" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">

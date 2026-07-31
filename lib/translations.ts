@@ -12,13 +12,12 @@ export interface TranslationMeta {
  * Retrieves the translation verses for a given Surah from Quran.com API v4,
  * and falls back to a local Clear Quran (131) translation on failure.
  */
-export async function getQuranComSurahTranslation(surahNumber: number, edition: string | number = "20"): Promise<any[]> {
+export async function getQuranComSurahTranslation(surahNumber: number, edition: string | number = "131"): Promise<any[]> {
   // Map legacy editions to Quran.com Resource IDs
   const legacyMap: Record<string, string> = {
     "en.sahih": "20",
-    "en.clearquran": "20",
-    "en.khattab": "20",
-    "131": "20", // Clear Quran is no longer available in free API
+    "en.clearquran": "131",
+    "en.khattab": "131",
     "en.haleem": "85",
     "ur.jalandhry": "54",
     "ur.maududi": "234",
@@ -28,6 +27,21 @@ export async function getQuranComSurahTranslation(surahNumber: number, edition: 
   };
 
   const id = legacyMap[String(edition)] || String(edition);
+  
+  // Intercept 131 (The Clear Quran) and load from local downloaded file
+  if (id === "131") {
+    try {
+      const filePath = path.join(process.cwd(), 'database', 'translations', '131.json');
+      if (fs.existsSync(filePath)) {
+        const fileData = fs.readFileSync(filePath, 'utf-8');
+        const allSurahs = JSON.parse(fileData);
+        return allSurahs[surahNumber] || [];
+      }
+    } catch (e) {
+      console.error("Failed to load local fallback translation for 131", e);
+    }
+    return [];
+  }
   
   try {
     const res = await fetch(`https://api.quran.com/api/v4/quran/translations/${id}?chapter_number=${surahNumber}`, {
