@@ -3,7 +3,7 @@ import SurahReaderClient from "@/components/quran/SurahReaderClient";
 import prisma from "@/lib/prisma";
 import { getSurahWords } from "@/lib/lexicon/service";
 import { SURAHS_DATA } from "@/lib/surahsData";
-import { getLocalSurahTranslation } from "@/lib/translations";
+import { getQuranComSurahTranslation } from "@/lib/translations";
 import { cookies } from "next/headers";
 import fs from "fs";
 import path from "path";
@@ -87,17 +87,19 @@ export default async function SurahPage({
   // 2. Fetch Arabic Ayahs from our massive local Prisma DB (cached in memory after first load)
   const localAyahs = await getAyahsForSurah(surahNumber);
 
-  // 3. Fetch selected translation from local JSON files
-  const translationAyahs = getLocalSurahTranslation(surahNumber, editionParam);
+  // 3. Fetch selected translation from Quran.com API (or local fallback)
+  const translationAyahs = await getQuranComSurahTranslation(surahNumber, editionParam);
 
   // 4. Fetch morphological mapping from our Lexicon service
   const surahWordsMap = getSurahWords(surahNumber);
 
   // Pre-compute O(1) lookup map for translations
   const translationMap = new Map<number, string>();
-  for (const t of translationAyahs) {
-    translationMap.set(t.numberInSurah, t.text);
-  }
+  translationAyahs.forEach((t, index) => {
+    let cleanText = typeof t.text === "string" ? t.text.replace(/<sup[^>]*>.*?<\/sup>/g, "") : (t.text || "");
+    const verseNum = t.verse_number || t.numberInSurah || (index + 1);
+    translationMap.set(verseNum, cleanText);
+  });
 
   // 5. Merge the local Arabic with the pure English translation
   const combinedAyahs = localAyahs.map((localAyah) => {

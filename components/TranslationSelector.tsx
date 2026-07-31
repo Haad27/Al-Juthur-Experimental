@@ -33,7 +33,7 @@ export default function TranslationSelector() {
   const currentOption = useMemo(() => {
     return (
       ALL_TRANSLATION_OPTIONS.find((opt) => opt.identifier === translationEdition) ||
-      ALL_TRANSLATION_OPTIONS.find((opt) => opt.identifier === "en.sahih") ||
+      ALL_TRANSLATION_OPTIONS.find((opt) => opt.identifier === "20") ||
       ALL_TRANSLATION_OPTIONS[0]
     );
   }, [translationEdition]);

@@ -56,9 +56,9 @@ export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
   const [translationEdition, setTranslationEditionState] = useState(() => {
     if (typeof window !== "undefined") {
       const match = document.cookie.match(/(?:^|; )trans=([^;]*)/);
-      return match ? decodeURIComponent(match[1]) : "en.sahih";
+      return match ? decodeURIComponent(match[1]) : "20";
     }
-    return "en.sahih";
+    return "20";
   });
 
   const setTranslationEdition = (edition: string) => {
