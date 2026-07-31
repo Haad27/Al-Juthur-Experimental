@@ -137,7 +137,7 @@ html, body {
 /* Font Face for UthmanicHafs (KFQPC Glyph Font V2 — Madani Mushaf) */
 @font-face {
   font-family: 'UthmanicHafs';
-  src: url('/KFGQPC-KufiExtV14.ttf');
+  src: url('/assets/fonts/UthmanicHafs1Ver18.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
   font-display: swap;

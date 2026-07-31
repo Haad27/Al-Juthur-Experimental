@@ -54,8 +54,15 @@ export default function SurahPlayer({
   const audioStore = useAudioStore();
 
   // Audio effects
-  const correct = useRef(new Audio("/assets/sounds/correct.mp3")).current;
-  const wrong = useRef(new Audio("/assets/sounds/wrong.mp3")).current;
+  const correctRef = useRef<HTMLAudioElement | null>(null);
+  const wrongRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    correctRef.current = new Audio("/assets/sounds/correct.mp3");
+    wrongRef.current = new Audio("/assets/sounds/wrong.mp3");
+    correctRef.current.volume = 0.5;
+    wrongRef.current.volume = 0.5;
+  }, []);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -76,13 +83,6 @@ export default function SurahPlayer({
 
   const [collapsed, setCollapsed] = useState(false);
   const [mobileFabOpen, setMobileFabOpen] = useState(false);
-
-  // +=============- User Experience UseEffects -=============+
-  // Set user-friendly volumes
-  useEffect(() => {
-    correct.volume = 0.5;
-    wrong.volume = 0.5;
-  }, [correct, wrong]);
 
   // Keep ref in sync for SR
   useEffect(() => {
@@ -113,9 +113,16 @@ export default function SurahPlayer({
       url = `https://audio.qurancdn.com/${url}`;
     }
 
-    const audio = new Audio(url);
-    audio.preload = "auto";
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+      audioRef.current.preload = "auto";
+    }
+    const audio = audioRef.current;
+    
+    // Pause previous playback if any, but since we are replacing src, it's fine.
+    audio.src = url;
     audio.playbackRate = playbackRate;
+    audio.load();
 
     const onTime = () => {
       setCurrentTime(audio.currentTime);
@@ -156,9 +163,6 @@ export default function SurahPlayer({
     audio.addEventListener("ended", onEnded);
     audio.addEventListener("error", onError);
 
-    audioRef.current?.pause();
-    audioRef.current = audio;
-
     // Update global state
     const ayahNum = parseInt(currentItem.verse_key.split(":")[1]);
     audioStore.setCurrentAyah(ayahNum);
@@ -170,13 +174,12 @@ export default function SurahPlayer({
     }
 
     return () => {
-      audio.pause();
       audio.removeEventListener("timeupdate", onTime);
       audio.removeEventListener("loadedmetadata", onLoaded);
       audio.removeEventListener("ended", onEnded);
       audio.removeEventListener("error", onError);
     };
-  }, [currentAyahIndex, audioQueue, playbackRate]);
+  }, [currentAyahIndex, audioQueue, playbackRate]); // Don't add playing here to prevent restart
 
   // Separately handle play/pause toggle
   useEffect(() => {
@@ -214,7 +217,7 @@ export default function SurahPlayer({
 
   // Handle Incorrect Pronounciation of Verse
   const handleIncorrect = async (ayahNum?: number) => {
-    wrong.play();
+    wrongRef.current?.play();
     if (mistakeDetection && ayahNum) {
       toast.info("Recitation mistake detected — replaying correct verse audio...");
       try {
@@ -259,7 +262,7 @@ export default function SurahPlayer({
       );
 
       if (similarity > 0.6) {
-        correct.play();
+        correctRef.current?.play();
         arabicTextElement?.classList.add("text-green-500");
         arabicTextElement?.classList.remove("text-red-500");
         document
