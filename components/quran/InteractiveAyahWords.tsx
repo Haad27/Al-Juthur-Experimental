@@ -265,8 +265,12 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
                     </div>
                   )}
 
-                  {/* Deep Lexicon CTA buttons */}
-                  {data.rootQuery ? (
+                  {/* Deep Lexicon CTA buttons or Quranic Initials Message */}
+                  {data.morphology.stem?.toLowerCase().includes('quranic initials') || data.morphology.root?.toLowerCase().includes('quranic initials') ? (
+                    <div className="mt-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs text-center leading-relaxed">
+                      These are <strong>Huroof-e-Muqatta&apos;at</strong> (Quranic Initials). No one knows their true meaning except ALLAH ﷻ.
+                    </div>
+                  ) : data.rootQuery ? (
                     <div className="flex flex-col gap-2 mt-2">
                       <Link
                         href={`/lexicon?root=${encodeURIComponent(data.rootQuery)}`}

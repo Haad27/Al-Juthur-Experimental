@@ -293,11 +293,23 @@ const AyahRow = React.memo(({
           const { mainText, footnotes } = processTranslation(ayah.translation);
           return (
             <div className="pt-4 md:ml-8 lg:w-2/3 md:w-4/6 text-left">
-              <div
-                className="text-white md:leading-[1.5] leading-[1.8] translation-content"
-                style={{ fontSize: getTranslationFontSize(fontSize) }}
-                dangerouslySetInnerHTML={{ __html: mainText }}
-              />
+              <div>
+                <span
+                  className="text-white md:leading-[1.5] leading-[1.8] translation-content"
+                  style={{ fontSize: getTranslationFontSize(fontSize) }}
+                  dangerouslySetInnerHTML={{ __html: mainText }}
+                />
+                {ayah.footnoteIds && ayah.footnoteIds.length > 0 && (
+                  <button
+                    onClick={handleToggleFootnotes}
+                    className="inline-flex items-center justify-center ml-2 text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/20 transition-colors align-middle rounded-full bg-emerald-500/10 p-1.5 cursor-pointer"
+                    title={showFootnoteIds ? "Hide Footnotes" : "Show Footnotes"}
+                  >
+                    <BookOpen size={14} />
+                  </button>
+                )}
+              </div>
+
               {footnotes.length > 0 && (
                 <div className="mt-3 p-3 rounded-xl bg-zinc-900/60 border border-zinc-800/80 text-xs text-zinc-400 italic space-y-1.5">
                   <div className="font-semibold text-emerald-400 not-italic uppercase tracking-wider text-[10px]">
@@ -309,30 +321,20 @@ const AyahRow = React.memo(({
                 </div>
               )}
               
-              {ayah.footnoteIds && ayah.footnoteIds.length > 0 && (
-                <div className="mt-3">
-                  <button
-                    onClick={handleToggleFootnotes}
-                    className="text-xs font-medium text-emerald-500 hover:text-emerald-400 transition-colors flex items-center gap-1 cursor-pointer"
-                  >
-                    {showFootnoteIds ? "Hide Footnotes" : "See Footnotes"}
-                  </button>
-                  {showFootnoteIds && (
-                    <div className="mt-2 p-3 rounded-xl bg-zinc-900/60 border border-emerald-900/50 text-xs text-zinc-300 space-y-2">
-                      <div className="font-semibold text-emerald-500 uppercase tracking-wider text-[10px]">
-                        Footnotes
+              {ayah.footnoteIds && ayah.footnoteIds.length > 0 && showFootnoteIds && (
+                <div className="mt-3 p-3 rounded-xl bg-zinc-900/60 border border-emerald-900/50 text-xs text-zinc-300 space-y-2">
+                  <div className="font-semibold text-emerald-500 uppercase tracking-wider text-[10px]">
+                    Footnotes
+                  </div>
+                  {loadingFootnotes ? (
+                    <p className="text-zinc-500 animate-pulse">Loading footnotes...</p>
+                  ) : (
+                    ayah.footnoteIds.map((fId, idx) => (
+                      <div key={fId} className="leading-relaxed">
+                        <span className="text-emerald-500 font-bold mr-1">[{idx + 1}]</span>
+                        <span dangerouslySetInnerHTML={{ __html: fetchedFootnotes[fId] || "Footnote unavailable." }} />
                       </div>
-                      {loadingFootnotes ? (
-                        <p className="text-zinc-500 animate-pulse">Loading footnotes...</p>
-                      ) : (
-                        ayah.footnoteIds.map((fId, idx) => (
-                          <div key={fId} className="leading-relaxed">
-                            <span className="text-emerald-500 font-bold mr-1">[{idx + 1}]</span>
-                            <span dangerouslySetInnerHTML={{ __html: fetchedFootnotes[fId] || "Footnote unavailable." }} />
-                          </div>
-                        ))
-                      )}
-                    </div>
+                    ))
                   )}
                 </div>
               )}
@@ -474,7 +476,7 @@ export default function SurahReaderClient({
           >
             {surah?.name}
             {translationEdition && (
-              <span className="text-xs font-normal font-sans px-2 py-1 bg-zinc-100 dark:bg-zinc-800/80 rounded-md text-zinc-500 dark:text-zinc-400">
+              <span className="text-xs font-medium font-sans px-2.5 py-1 bg-emerald-500/10 rounded-md text-emerald-600 dark:text-emerald-400">
                 {ALL_TRANSLATION_OPTIONS.find((t) => t.identifier === translationEdition)?.name || "Translation"}
               </span>
             )}
