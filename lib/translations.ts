@@ -28,19 +28,16 @@ export async function getQuranComSurahTranslation(surahNumber: number, edition: 
 
   const id = legacyMap[String(edition)] || String(edition);
   
-  // Intercept 131 (The Clear Quran) and load from local downloaded file
-  if (id === "131") {
-    try {
-      const filePath = path.join(process.cwd(), 'database', 'translations', '131.json');
-      if (fs.existsSync(filePath)) {
-        const fileData = fs.readFileSync(filePath, 'utf-8');
-        const allSurahs = JSON.parse(fileData);
-        return allSurahs[surahNumber] || [];
-      }
-    } catch (e) {
-      console.error("Failed to load local fallback translation for 131", e);
+  // Try loading from local downloaded file first to prevent slow SSR/hanging fetch
+  try {
+    const filePath = path.join(process.cwd(), 'database', 'translations', `${id}.json`);
+    if (fs.existsSync(filePath)) {
+      const fileData = fs.readFileSync(filePath, 'utf-8');
+      const allSurahs = JSON.parse(fileData);
+      return allSurahs[surahNumber] || [];
     }
-    return [];
+  } catch (e) {
+    console.error(`Failed to load local fallback translation for ${id}`, e);
   }
   
   try {
