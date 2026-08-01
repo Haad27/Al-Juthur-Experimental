@@ -52,9 +52,16 @@ export default function LoadingScreen() {
             </div>
             
             {/* Progress Text */}
-            <div className="flex flex-col items-center gap-2 w-full">
-              <div className="flex items-center justify-between w-full text-[10px] font-bold text-emerald-500/80 uppercase tracking-[0.2em]">
-                <span>Initializing 3D</span>
+            <div className="flex flex-col items-center gap-2 w-full mt-4">
+              <div className="text-center text-[10px] font-bold text-emerald-500/80 uppercase tracking-[0.2em] mb-1">
+                Initializing Al Juthur
+              </div>
+              <div className="text-center text-[12px] font-medium text-zinc-400 tracking-wide mb-2">
+                An engaging Quran experience
+              </div>
+              
+              <div className="flex items-center justify-between w-full text-[10px] font-bold text-emerald-500/50 uppercase tracking-[0.2em]">
+                <span>Loading Assets</span>
                 <span>{Math.round(progress)}%</span>
               </div>
               
