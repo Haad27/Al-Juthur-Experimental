@@ -10,3 +10,8 @@ export const inter = {
   className: "font-sans",
   variable: "--font-inter",
 };
+
+export const fraunces = {
+  className: "font-serif",
+  variable: "--font-fraunces",
+};

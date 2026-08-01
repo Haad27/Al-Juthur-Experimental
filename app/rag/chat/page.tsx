@@ -43,6 +43,39 @@ interface Message {
   sources?: SourceItem[];
 }
 
+
+const renderInlineBadges = (children: React.ReactNode): React.ReactNode => {
+  return React.Children.map(children, child => {
+    if (typeof child === 'string') {
+      const parts = child.split(/(\[[^\]]+\])/g);
+      return parts.map((part, i) => {
+        if (
+          part.startsWith('[') && 
+          part.endsWith(']') && 
+          part.length > 2 && 
+          (part.includes('Tafsir') || part.includes('Surah') || part.includes('Adwa') || part.includes('Kathir') || part.includes('Tabari') || part.includes('Qurtubi') || part.includes('Wasit') || part.includes('Root:') || part.match(/\[\d+:\d+\]/))
+        ) {
+          const badgeText = part.slice(1, -1);
+          return (
+            <span key={i} className="inline-flex items-center gap-1 mx-1 px-2 py-0.5 rounded-full bg-emerald-950/20 border border-emerald-500/15 text-emerald-400/75 text-[11px] font-mono not-italic align-middle opacity-80 hover:opacity-100 transition-opacity">
+              <BookOpen className="size-2.5 text-emerald-500/60 shrink-0 inline" />
+              <span>{badgeText}</span>
+            </span>
+          );
+        }
+        return part;
+      });
+    }
+    if (React.isValidElement(child) && (child as any).props?.children) {
+      return React.cloneElement(child, {
+        ...(child as any).props,
+        children: renderInlineBadges((child as any).props.children)
+      });
+    }
+    return child;
+  });
+};
+
 function RagChatContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -76,9 +109,21 @@ function RagChatContent() {
   }, []);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isScrolledUp, setIsScrolledUp] = useState(false);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const handleScroll = () => {
+    if (scrollContainerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 150;
+      setIsScrolledUp(!isNearBottom);
+    }
+  };
+
+  const scrollToBottom = (force = false) => {
+    if (!isScrolledUp || force) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   useEffect(() => {
@@ -104,6 +149,7 @@ function RagChatContent() {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
+    setIsScrolledUp(false); // Force scroll to bottom on new message
 
     try {
       const res = await fetch("/api/ai/rag", {
@@ -294,7 +340,11 @@ function RagChatContent() {
       )}
 
       {/* Chat Area */}
-      <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-8 custom-scrollbar">
+      <main 
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-8 custom-scrollbar"
+      >
         <div className="max-w-[900px] mx-auto space-y-4 sm:space-y-6 pb-4">
           {messages.map((msg, idx) => (
             <div
@@ -322,12 +372,12 @@ function RagChatContent() {
 
               {/* Message Bubble */}
               <div
-                className={`max-w-[90%] sm:max-w-[78%] rounded-2xl px-4 py-3 sm:px-5 sm:py-4.5 shadow-sm ${
+                className={`max-w-[90%] sm:max-w-[80%] rounded-2xl px-4 py-3 sm:px-5 sm:py-4 shadow-sm ${
                   msg.role === "user"
-                    ? "bg-zinc-800/90 border border-zinc-700/60 rounded-tr-sm"
+                    ? "bg-zinc-800/90 border border-zinc-700/60 rounded-tr-sm text-zinc-200"
                     : msg.isScopeInvalid
                     ? "bg-amber-950/30 border border-amber-500/40 rounded-tl-sm text-amber-100"
-                    : "bg-zinc-900/60 border border-zinc-800/90 rounded-tl-sm"
+                    : "bg-zinc-900/80 border border-zinc-800/90 rounded-tl-sm text-zinc-200"
                 }`}
               >
                 {msg.isScopeInvalid && (
@@ -337,8 +387,68 @@ function RagChatContent() {
                   </div>
                 )}
 
-                <div className="prose prose-invert prose-emerald max-w-none text-xs sm:text-sm md:text-base leading-relaxed">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                <div className="prose prose-invert prose-emerald max-w-none text-sm md:text-[15px] leading-relaxed">
+                  <ReactMarkdown 
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      h1: ({node, ...props}) => <h1 className="text-lg sm:text-xl font-bold text-zinc-100 mt-5 mb-3 border-b border-zinc-800 pb-2" {...props} />,
+                      h2: ({node, ...props}) => <h2 className="text-base sm:text-lg font-bold text-zinc-100 mt-4 mb-2" {...props} />,
+                      h3: ({node, ...props}) => <h3 className="text-sm sm:text-base font-semibold text-zinc-200 mt-3 mb-1.5" {...props} />,
+                      strong: ({node, ...props}) => <strong className="font-semibold text-zinc-100" {...props} />,
+                      p: ({node, children, ...props}) => {
+                        const textStr = React.Children.toArray(children).join('');
+                        const arabicMatches = textStr.match(/[\u0600-\u06FF]/g) || [];
+                        const isPredominantlyArabic = arabicMatches.length > 5 && (arabicMatches.length / textStr.length > 0.25);
+                        
+                        if (isPredominantlyArabic) {
+                          return (
+                            <div className="my-4 p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/30 shadow-sm relative overflow-hidden">
+                              <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
+                              <p className={`m-0 ${amiri.className} text-lg md:text-xl text-emerald-200 leading-loose text-right dir-rtl`}>
+                                {children}
+                              </p>
+                            </div>
+                          );
+                        }
+
+                        const isInlineVerseQuote = /\[Surah \d+:\d+\]|\[Surah [^\]]+\]/i.test(textStr) && textStr.includes('"');
+                        if (isInlineVerseQuote && textStr.length < 350 && !textStr.toLowerCase().includes('tafsir')) {
+                          return (
+                            <div className="my-4 p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/30 shadow-sm relative overflow-hidden">
+                              <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
+                              <p className="m-0 italic text-sm sm:text-base text-zinc-200">
+                                {children}
+                              </p>
+                            </div>
+                          );
+                        }
+
+                        return <p className="mb-3 leading-relaxed text-zinc-300" {...props}>{renderInlineBadges(children)}</p>;
+                      },
+                      blockquote: ({node, children}) => {
+                        let textStr = '';
+                        React.Children.forEach(children, c => {
+                          if (typeof c === 'string') textStr += c;
+                          else if (React.isValidElement(c) && (c as any).props?.children) {
+                            textStr += React.Children.toArray((c as any).props.children).join('');
+                          }
+                        });
+                        const hasArabic = /[\u0600-\u06FF]/.test(textStr);
+
+                        return (
+                          <div className="my-4 p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/30 shadow-sm relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
+                            <blockquote className={`m-0 border-none p-0 text-zinc-200 ${hasArabic ? `${amiri.className} text-lg md:text-xl leading-loose text-right text-emerald-200` : 'italic text-sm sm:text-base text-zinc-200'}`}>
+                              {renderInlineBadges(children)}
+                            </blockquote>
+                          </div>
+                        );
+                      },
+                      li: ({node, children, ...props}) => <li className="mb-1 text-zinc-300" {...props}>{renderInlineBadges(children)}</li>
+                    }}
+                  >
+                    {msg.content}
+                  </ReactMarkdown>
                 </div>
 
                 {/* Sources Section */}
