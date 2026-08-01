@@ -180,9 +180,9 @@ export const ALL_TRANSLATION_OPTIONS: TranslationOption[] = [
     "identifier": "151",
     "languageCode": "urdu",
     "languageLabel": "Urdu",
-    "name": "Shaykh al-Hind Mahmud al-Hasan",
-    "englishName": "Shaykh al-Hind Mahmud al-Hasan(with Tafsir E Usmani)",
-    "displayLabel": "Urdu: Shaykh al-Hind Mahmud al-Hasan(with Tafsir E Usmani) (Shaykh al-Hind Mahmud al-Hasan)"
+    "name": "Mufti Taqi Usmani (Asan Tarjuma Quran)",
+    "englishName": "Mufti Taqi Usmani (Asan Tarjuma Quran)",
+    "displayLabel": "Urdu: Mufti Taqi Usmani (Asan Tarjuma Quran) with Footnotes"
   },
   {
     "identifier": "158",
