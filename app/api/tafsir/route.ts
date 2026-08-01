@@ -29,10 +29,8 @@ export async function GET(request: Request) {
         // Virtual Authors (Translations serving as Tafsir)
         const virtualAuthors = [
           { id: 100095, name: "Tafheem e Qur'an - Sayyid Maududi", authorName: "Sayyid Abul Ala Maududi", languageId: 2, era: "Modern & Contemporary (19th-21st CE)" }, // English
-          { id: 100097, name: "Tafheem e Qur'an - Sayyid Maududi", authorName: "Syed Abu Ali Maududi", languageId: 3, era: "Modern & Contemporary (19th-21st CE)" }, // Urdu
           { id: 100158, name: "Bayan-ul-Quran", authorName: "Dr. Israr Ahmad", languageId: 3, era: "Modern & Contemporary (19th-21st CE)" }, // Urdu
           { id: 100084, name: "Taqi Usmani", authorName: "Mufti Taqi Usmani", languageId: 2, era: "Modern & Contemporary (19th-21st CE)" }, // English
-          { id: 100156, name: "Fe Zilal al-Qur'an", authorName: "Sayyid Ibrahim Qutb", languageId: 3, era: "Modern & Contemporary (19th-21st CE)" }, // Urdu
         ];
         
         const tagsMap: Record<number, any[]> = {};
@@ -44,6 +42,14 @@ export async function GET(request: Request) {
         // Add virtual tags
         virtualAuthors.forEach(va => {
           tagsMap[va.id] = [{ id: 999, name: "Translation with Explanation", color: "emerald" }];
+        });
+        
+        // Also tag the existing DB authors that we will upgrade
+        [138, 139, 105].forEach(id => {
+          if (!tagsMap[id]) tagsMap[id] = [];
+          if (!tagsMap[id].find(t => t.id === 999)) {
+            tagsMap[id].push({ id: 999, name: "Translation with Explanation", color: "emerald" });
+          }
         });
 
         const authorsByLang: Record<number, any[]> = {};
@@ -75,11 +81,25 @@ export async function GET(request: Request) {
     if (authorId && surahId && !ayahNum) {
       const parsedAuthorId = parseInt(authorId);
       
-      if (parsedAuthorId > 100000) {
-        // Handle virtual translation-based tafsir
-        const transId = (parsedAuthorId - 100000).toString();
+      const DB_TO_TRANS_MAP: Record<number, string> = {
+        138: "97",  // Maududi UR
+        139: "151", // Taqi Usmani UR
+        105: "156", // Qutb UR
+      };
+      
+      if (parsedAuthorId > 100000 || DB_TO_TRANS_MAP[parsedAuthorId]) {
+        // Handle virtual translation-based tafsir (or upgraded DB ones)
+        const transId = parsedAuthorId > 100000 ? (parsedAuthorId - 100000).toString() : DB_TO_TRANS_MAP[parsedAuthorId];
         const { getQuranComSurahTranslation } = await import('@/lib/translations');
-        const translations = await getQuranComSurahTranslation(parseInt(surahId), transId);
+        
+        // Run both fetches in parallel for efficiency
+        const [translations, ayahs] = await Promise.all([
+          getQuranComSurahTranslation(parseInt(surahId), transId),
+          prisma.ayah.findMany({
+            where: { surahId: parseInt(surahId) },
+            orderBy: { numberInSurah: 'asc' }
+          })
+        ]);
         
         const tafsirs = translations.map((t: any, index: number) => {
           let cleanText = t.text || "";
@@ -94,6 +114,7 @@ export async function GET(request: Request) {
           }
           
           const verseNum = t.verse_number || t.numberInSurah || (index + 1);
+          const arabicAyah = ayahs.find(a => a.numberInSurah === verseNum);
           
           return {
             id: parsedAuthorId * 1000 + verseNum,
@@ -103,10 +124,10 @@ export async function GET(request: Request) {
             text: cleanText,
             footnoteIds: fIds, // We pass footnoteIds to the client
             ayah: {
-              id: verseNum,
+              id: arabicAyah?.id || verseNum,
               surahId: parseInt(surahId),
               numberInSurah: verseNum,
-              text: "Arabic Text", // Fallback, client will handle Arabic text if needed
+              text: arabicAyah?.text || "Arabic Text", 
             },
             author: { name: "Virtual Tafsir" }
           };
