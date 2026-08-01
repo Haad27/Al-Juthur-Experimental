@@ -1,5 +1,5 @@
-/* Google Fonts — for Scheherazade New, Lateef (Nastaliq), Lora (Tafsir serif) */
-@import url('https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;500;600;700&family=Lateef:wght@400;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
+/* Google Fonts — for Scheherazade New, Lateef (Nastaliq), Lora (Tafsir serif), and Noto Nastaliq Urdu (Urdu Tafsir) */
+@import url('https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;500;600;700&family=Lateef:wght@400;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap');
 
 /* Import Tailwind CSS and animations */
 @import "tailwindcss";
@@ -795,3 +795,29 @@ html, body {
 .animate-fade-in-up {
   animation: fadeInUp 1s ease-out 1s both;
 }
+
+@keyframes loading-bar {
+  0% {
+    left: -50%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes pulse-scale {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.6));
+  }
+  50% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 25px rgba(16, 185, 129, 0.9));
+  }
+}
+
+.animate-pulse-scale {
+  animation: pulse-scale 2s ease-in-out infinite;
+}
+
+

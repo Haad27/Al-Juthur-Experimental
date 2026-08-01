@@ -461,6 +461,8 @@ export default function TafsirPage() {
       activeLangName.toLowerCase().includes("arabic") ||
       activeLangName.toLowerCase().includes("urdu") ||
       activeLangName.toLowerCase().includes("persian");
+      
+    const isUrduText = activeLangName.toLowerCase().includes("urdu");
 
     // ── IMMERSIVE MODE ─────────────────────────────────────────
     if (isEnteringImmersive) {
@@ -678,7 +680,7 @@ export default function TafsirPage() {
                       )}
 
                       {/* Tafsir text */}
-                      <TafsirTextRenderer text={entry.text} isArabic={isArabicOrUrdu} immersive={true} />
+                      <TafsirTextRenderer text={entry.text} isArabic={isArabicOrUrdu} isUrdu={isUrduText} immersive={true} />
 
                       {/* Explanation (Footnotes) */}
                       {entry.footnoteIds && entry.footnoteIds.length > 0 && (
@@ -978,7 +980,7 @@ export default function TafsirPage() {
 
                       {/* Tafsir Text */}
                       <div className="pt-2 border-t border-zinc-800/40">
-                        <TafsirTextRenderer text={entry.text} isArabic={isArabicOrUrdu} />
+                        <TafsirTextRenderer text={entry.text} isArabic={isArabicOrUrdu} isUrdu={isUrduText} />
                       </div>
 
                       {/* Explanation (Footnotes) */}

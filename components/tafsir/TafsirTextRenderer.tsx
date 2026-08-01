@@ -5,11 +5,13 @@ import React from "react";
 interface TafsirTextRendererProps {
   text: string;
   isArabic?: boolean;
+  isUrdu?: boolean;
   immersive?: boolean;
 }
 
-export default function TafsirTextRenderer({ text, isArabic, immersive }: TafsirTextRendererProps) {
+export default function TafsirTextRenderer({ text, isArabic, isUrdu, immersive }: TafsirTextRendererProps) {
   if (!text) return null;
+  const isRtl = isArabic || isUrdu;
 
   // 1. First clean outer wrapper divs like <div class=ar lang=ar> or </div>
   let content = text
@@ -104,11 +106,11 @@ export default function TafsirTextRenderer({ text, isArabic, immersive }: Tafsir
     // ── IMMERSIVE MODE RENDERING ──────────────────────────────────────────────
     return (
       <div
-        className={isArabic ? "tafsir-immersive-text-arabic text-center" : "tafsir-immersive-text text-center"}
-        dir={isArabic ? "rtl" : "ltr"}
+        className={isRtl ? "tafsir-immersive-text-arabic text-center" : "tafsir-immersive-text text-center"}
+        dir={isRtl ? "rtl" : "ltr"}
       >
         {blocks.map((block, idx) => {
-          const transformedHtml = transformHtmlForTailwind(block.text, true, !!isArabic);
+          const transformedHtml = transformHtmlForTailwind(block.text, true, !!isRtl);
 
           if (block.type.startsWith("h")) {
             return (
@@ -116,8 +118,9 @@ export default function TafsirTextRenderer({ text, isArabic, immersive }: Tafsir
                 key={idx}
                 className="tafsir-immersive-block"
                 style={{
-                  fontFamily: isArabic ? "Amiri, serif" : "'Lora', Georgia, serif",
-                  fontSize: isArabic ? "1.3rem" : "1.15rem",
+                  fontFamily: isUrdu ? "'Noto Nastaliq Urdu', serif" : isArabic ? "Amiri, serif" : "'Lora', Georgia, serif",
+                  fontSize: isUrdu ? "1.4rem" : isArabic ? "1.3rem" : "1.15rem",
+                  lineHeight: isUrdu ? "2.4" : "1.8",
                   fontWeight: 700,
                   color: "#d97706",
                   borderBottom: "1px solid rgba(180,120,40,0.2)",
@@ -145,10 +148,11 @@ export default function TafsirTextRenderer({ text, isArabic, immersive }: Tafsir
                 key={idx}
                 className="tafsir-immersive-block"
                 style={{
-                  fontFamily: "Amiri, serif",
+                  fontFamily: isUrdu ? "'Noto Nastaliq Urdu', serif" : "Amiri, serif",
                   fontWeight: 700,
                   color: "#b45309",
-                  fontSize: "1.1rem",
+                  fontSize: isUrdu ? "1.2rem" : "1.1rem",
+                  lineHeight: isUrdu ? "2.2" : "1.8",
                   marginTop: "1.5rem",
                   paddingBottom: "0.4rem",
                   borderBottom: "1px solid rgba(180,120,40,0.15)",
@@ -163,7 +167,13 @@ export default function TafsirTextRenderer({ text, isArabic, immersive }: Tafsir
             <p
               key={idx}
               className="tafsir-immersive-block"
-              style={{ marginBottom: "1.25em", textAlign: "center" }}
+              style={{ 
+                marginBottom: "1.25em", 
+                textAlign: "center",
+                fontFamily: isUrdu ? "'Noto Nastaliq Urdu', serif" : undefined,
+                lineHeight: isUrdu ? "2.6" : undefined,
+                fontSize: isUrdu ? "1.3rem" : undefined
+              }}
               dangerouslySetInnerHTML={{ __html: transformedHtml }}
             />
           );
@@ -175,19 +185,24 @@ export default function TafsirTextRenderer({ text, isArabic, immersive }: Tafsir
   // ── STANDARD MODE RENDERING (3-Role Color System) ────────────────────────────
   return (
     <div
-      className={`space-y-4 ${isArabic ? "font-serif text-right" : "text-left"}`}
-      dir={isArabic ? "rtl" : "ltr"}
+      className={`space-y-4 ${isRtl ? "text-right" : "text-left"}`}
+      dir={isRtl ? "rtl" : "ltr"}
+      style={{
+        fontFamily: isUrdu ? "'Noto Nastaliq Urdu', serif" : isArabic ? "Amiri, serif" : undefined,
+        lineHeight: isUrdu ? "2.6" : undefined,
+      }}
     >
       {blocks.map((block, idx) => {
-        const transformedHtml = transformHtmlForTailwind(block.text, false, !!isArabic);
+        const transformedHtml = transformHtmlForTailwind(block.text, false, !!isRtl);
 
         if (block.type.startsWith("h")) {
           return (
             <h3
               key={idx}
               className={`font-bold text-emerald-300/90 text-base md:text-lg my-4 leading-snug ${
-                isArabic ? "border-r-2 border-emerald-500/60 pr-3" : "border-l-2 border-emerald-500/60 pl-3"
+                isRtl ? "border-r-2 border-emerald-500/60 pr-3" : "border-l-2 border-emerald-500/60 pl-3"
               }`}
+              style={{ fontSize: isUrdu ? "1.25rem" : undefined, lineHeight: isUrdu ? "2.2" : undefined }}
               dangerouslySetInnerHTML={{ __html: transformedHtml }}
             />
           );
@@ -205,6 +220,7 @@ export default function TafsirTextRenderer({ text, isArabic, immersive }: Tafsir
             <p
               key={idx}
               className="font-bold text-emerald-300/90 text-base md:text-lg mt-4 pb-1 border-r-2 border-emerald-500/60 pr-3 inline-block"
+              style={{ fontSize: isUrdu ? "1.25rem" : undefined, lineHeight: isUrdu ? "2.2" : undefined }}
               dangerouslySetInnerHTML={{ __html: transformedHtml }}
             />
           );
@@ -213,7 +229,11 @@ export default function TafsirTextRenderer({ text, isArabic, immersive }: Tafsir
         return (
           <p
             key={idx}
-            className="text-stone-300 text-base md:text-lg leading-relaxed whitespace-pre-wrap"
+            className="text-stone-300 text-base md:text-lg whitespace-pre-wrap"
+            style={{ 
+              lineHeight: isUrdu ? "2.6" : "1.625", 
+              fontSize: isUrdu ? "1.25rem" : undefined 
+            }}
             dangerouslySetInnerHTML={{ __html: transformedHtml }}
           />
         );
