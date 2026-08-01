@@ -96,7 +96,7 @@ const matchesSmartSearch = (
   });
 };
 
-const TafsirFootnotesLoader = ({ footnoteIds }: { footnoteIds: string[] }) => {
+const TafsirFootnotesLoader = ({ footnoteIds, isUrdu }: { footnoteIds: string[], isUrdu?: boolean }) => {
   const [fetchedFootnotes, setFetchedFootnotes] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
@@ -138,8 +138,17 @@ const TafsirFootnotesLoader = ({ footnoteIds }: { footnoteIds: string[] }) => {
   return (
     <div className="space-y-3">
       {footnoteIds.map((fId, idx) => (
-        <div key={fId} className="leading-relaxed text-sm text-zinc-300" dir="auto">
-          <span className="text-emerald-500 font-bold mr-2 inline-block" dir="ltr">[{idx + 1}]</span>
+        <div 
+          key={fId} 
+          className="leading-relaxed text-sm text-zinc-300" 
+          dir={isUrdu ? "rtl" : "auto"}
+          style={{
+            fontFamily: isUrdu ? "'Noto Nastaliq Urdu', serif" : undefined,
+            lineHeight: isUrdu ? "2.2" : undefined,
+            fontSize: isUrdu ? "1.1rem" : undefined
+          }}
+        >
+          <span className="text-emerald-500 font-bold mx-2 inline-block" dir="ltr">[{idx + 1}]</span>
           <span dangerouslySetInnerHTML={{ __html: fetchedFootnotes[fId] || "Explanation unavailable." }} />
         </div>
       ))}
@@ -688,7 +697,7 @@ export default function TafsirPage() {
                           <div className="font-semibold text-amber-500/80 uppercase tracking-wider text-[11px] mb-3 font-mono">
                             Explanation
                           </div>
-                          <TafsirFootnotesLoader footnoteIds={entry.footnoteIds} />
+                          <TafsirFootnotesLoader footnoteIds={entry.footnoteIds} isUrdu={isUrduText} />
                         </div>
                       )}
 
@@ -989,7 +998,7 @@ export default function TafsirPage() {
                           <div className="font-semibold text-emerald-500 uppercase tracking-wider text-[11px] mb-3 font-mono">
                             Explanation
                           </div>
-                          <TafsirFootnotesLoader footnoteIds={entry.footnoteIds} />
+                          <TafsirFootnotesLoader footnoteIds={entry.footnoteIds} isUrdu={isUrduText} />
                         </div>
                       )}
                     </div>

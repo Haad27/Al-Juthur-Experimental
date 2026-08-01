@@ -57,6 +57,7 @@ interface AyahRowProps {
   surahWbwTranslation?: Record<string, string>;
   handleCopyAyah: (ayah: AyahProps) => void;
   handleSaveAyah: (ayah: AyahProps) => void;
+  isUrduTranslation: boolean;
 }
 
 function processTranslation(rawText: string) {
@@ -115,6 +116,7 @@ const AyahRow = React.memo(({
   surahWbwTranslation,
   handleCopyAyah,
   handleSaveAyah,
+  isUrduTranslation,
 }: AyahRowProps) => {
   const isCurrentlyPlaying = useAudioStore(s => s.currentAyah === ayah.numberInSurah && s.currentSurah === surahNumber);
   const playAyah = useAudioStore(s => s.playAyah);
@@ -201,7 +203,26 @@ const AyahRow = React.memo(({
     return "4.8rem";
   };
 
-  const getTranslationFontSize = (size: number): string => {
+  const getTranslationFontSize = (size: number, isUrdu: boolean): string => {
+    if (isUrdu) {
+      if (size <= 0.5) return "0.95rem";
+      if (size <= 1)   return "1.05rem";
+      if (size <= 1.5) return "1.1rem";
+      if (size <= 2)   return "1.15rem";
+      if (size <= 2.5) return "1.25rem";
+      if (size <= 3)   return "1.35rem";
+      if (size <= 3.5) return "1.45rem";
+      if (size <= 4)   return "1.5rem";
+      if (size <= 4.5) return "1.57rem";
+      if (size <= 5)   return "1.65rem";
+      if (size <= 5.5) return "1.75rem";
+      if (size <= 6)   return "1.85rem";
+      if (size <= 6.5) return "1.97rem";
+      if (size <= 7)   return "2.1rem";
+      if (size <= 7.5) return "2.25rem";
+      return "2.4rem";
+    }
+    
     if (size <= 0.5) return "0.75rem";
     if (size <= 1)   return "0.85rem";
     if (size <= 1.5) return "0.9rem";
@@ -296,7 +317,13 @@ const AyahRow = React.memo(({
               <div>
                 <span
                   className="text-white md:leading-[1.5] leading-[1.8] translation-content"
-                  style={{ fontSize: getTranslationFontSize(fontSize) }}
+                  style={{ 
+                    fontSize: getTranslationFontSize(fontSize, isUrduTranslation),
+                    fontFamily: isUrduTranslation ? "'Noto Nastaliq Urdu', serif" : undefined,
+                    lineHeight: isUrduTranslation ? "2.6" : undefined,
+                    textAlign: isUrduTranslation ? "right" : undefined,
+                    display: "block"
+                  }}
                   dangerouslySetInnerHTML={{ __html: mainText }}
                 />
                 {(ayah.footnoteIds?.length || footnotes.length > 0) ? (
@@ -330,8 +357,17 @@ const AyahRow = React.memo(({
                         <p className="text-zinc-500 animate-pulse">Loading footnotes...</p>
                       ) : (
                         ayah.footnoteIds.map((fId, idx) => (
-                          <div key={fId} className="leading-relaxed" dir="auto">
-                            <span className="text-emerald-500 font-bold mr-2 inline-block" dir="ltr">[{idx + 1}]</span>
+                          <div 
+                            key={fId} 
+                            className="leading-relaxed" 
+                            dir={isUrduTranslation ? "rtl" : "auto"}
+                            style={{ 
+                              fontFamily: isUrduTranslation ? "'Noto Nastaliq Urdu', serif" : undefined,
+                              lineHeight: isUrduTranslation ? "2.2" : undefined,
+                              fontSize: isUrduTranslation ? "1.1rem" : undefined
+                            }}
+                          >
+                            <span className="text-emerald-500 font-bold mx-2 inline-block" dir="ltr">[{idx + 1}]</span>
                             <span dangerouslySetInnerHTML={{ __html: fetchedFootnotes[fId] || "Footnote unavailable." }} />
                           </div>
                         ))
@@ -377,6 +413,10 @@ export default function SurahReaderClient({
   const [collapsed, setCollapsed] = useState(true);
 
   const surahNumber = surah?.number || 1;
+  
+  const isUrduTranslation = React.useMemo(() => {
+    return ALL_TRANSLATION_OPTIONS.find(t => t.identifier === translationEdition)?.languageCode.toLowerCase() === 'urdu';
+  }, [translationEdition]);
 
   // Clear audio state on unmount or surah change
   useEffect(() => {
@@ -556,6 +596,7 @@ export default function SurahReaderClient({
                 surahWbwTranslation={surahWbwTranslation}
                 handleCopyAyah={handleCopyAyah}
                 handleSaveAyah={handleSaveAyah}
+                isUrduTranslation={isUrduTranslation}
               />
             );
           }}
