@@ -15,6 +15,7 @@ export interface HybridSearchFilters {
   mode?: RagMode;
   keywords?: string[];
   expandedQueryAr?: string;
+  suggestedVerses?: { surah: number; ayah: number }[];
 }
 
 export interface ScoredParentDocument extends RagParentDocument {
@@ -159,6 +160,69 @@ export async function searchHybrid(
   // 3. Reciprocal Rank Fusion (RRF) across Parent Documents
   const allParentIds = new Set<string>([...bm25Matches.keys(), ...vectorMatches.keys()]);
 
+  // --- NEW: LLM Verse Suggestion Structural Fetch ---
+  let suggestedVerseResults: ScoredParentDocument[] = [];
+  console.log('[HYBRID-SEARCH] suggestedVerses received:', filters.suggestedVerses, '| mode:', filters.mode);
+  
+  if (filters.suggestedVerses && filters.suggestedVerses.length > 0 && filters.mode && filters.mode !== 'lexicon') {
+    try {
+      const devDbPath = path.join(process.cwd(), 'prisma', 'dev.db');
+      const devDb = new Database(devDbPath, { readonly: true });
+      const allowedAuthorIds = MODE_AUTHORS[filters.mode] || MODE_AUTHORS.default;
+      
+      console.log('[HYBRID-SEARCH] Fetching tafsir for', filters.suggestedVerses.length, 'suggested verses from authors:', allowedAuthorIds);
+      
+      const numVerses = filters.suggestedVerses.length;
+      let verseResults: any[] = [];
+      
+      for (let i = 0; i < numVerses; i++) {
+        const verse = filters.suggestedVerses[i];
+        let authorLimit = allowedAuthorIds.length;
+        if (numVerses > 2) {
+          authorLimit = i < 2 ? allowedAuthorIds.length : 2; 
+        }
+        
+        const querySql = `
+          SELECT t.id, t.authorId, t.surahId, a.numberInSurah as ayahNo, t.text, au.name as authorName
+          FROM TafsirEntry t
+          JOIN Ayah a ON t.ayahId = a.id
+          JOIN Author au ON t.authorId = au.id
+          WHERE t.authorId IN (${allowedAuthorIds.slice(0, authorLimit).join(',')})
+            AND t.surahId = ? AND a.numberInSurah = ?
+        `;
+        
+        const rows = devDb.prepare(querySql).all(verse.surah, verse.ayah) as any[];
+        console.log(`[HYBRID-SEARCH] Verse ${verse.surah}:${verse.ayah} → ${rows.length} tafsir entries found`);
+        verseResults.push(...rows);
+      }
+      
+      console.log('[HYBRID-SEARCH] Total verse suggestion results:', verseResults.length);
+      
+      if (verseResults.length > 0) {
+        suggestedVerseResults = verseResults.map((row) => ({
+          id: `tafsir-${row.authorId}-${row.surahId}-${row.ayahNo}`,
+          workType: 'tafsir' as const,
+          authorId: row.authorId,
+          authorName: row.authorName,
+          workTitle: row.authorName,
+          language: row.authorId === 61 ? 'en' : 'ar',
+          surahId: row.surahId,
+          ayahId: row.ayahNo,
+          rootWord: null,
+          content: row.text,
+          rrfScore: 0.95,
+          matchedChildSnippets: [row.text.substring(0, 300)],
+          relevanceExplanation: `LLM-suggested verse from ${row.authorName} (${row.surahId}:${row.ayahNo})`
+        }));
+      }
+    } catch (e) {
+      console.warn('[HYBRID-SEARCH] Verse Suggestion Structural Fetch FAILED:', e);
+    }
+  } else {
+    console.log('[HYBRID-SEARCH] No suggested verses to fetch (empty/undefined or lexicon mode)');
+  }
+
+
   // Direct structural fallback: If local vector/BM25 matches are empty OR if we have explicit Surah coordinate (e.g. Surah 1) to guarantee exact verse boundaries
   if ((allParentIds.size === 0 || typeof filters.surahId === 'number') && filters.mode && filters.mode !== 'lexicon') {
     // Check if we have exact surahId and/or ayahId
@@ -267,7 +331,7 @@ export async function searchHybrid(
   const topParents = parentScores.slice(0, topK);
 
   // 4. Retrieve Full Parent Blocks from SQLite
-  const results: ScoredParentDocument[] = [];
+  let results: ScoredParentDocument[] = [];
   for (const item of topParents) {
     const parentRow = db
       .prepare('SELECT * FROM rag_parent_documents WHERE id = ?')
@@ -282,6 +346,25 @@ export async function searchHybrid(
           bm25Matches.has(item.parentId) && vectorMatches.has(item.parentId) ? '+' : ''
         } ${vectorMatches.has(item.parentId) ? 'Semantic Vector' : ''}`.trim(),
       });
+    }
+  }
+
+  // Combine suggested verses
+  if (suggestedVerseResults.length > 0) {
+    results = [...suggestedVerseResults, ...results];
+    
+    // Deduplicate by id (which incorporates authorId+surahId+ayahId)
+    const uniqueMap = new Map<string, ScoredParentDocument>();
+    results.forEach(r => {
+      if (!uniqueMap.has(r.id)) {
+        uniqueMap.set(r.id, r);
+      }
+    });
+    results = Array.from(uniqueMap.values());
+    
+    // Hard cap at topK + 6
+    if (results.length > topK + 6) {
+      results = results.slice(0, topK + 6);
     }
   }
 

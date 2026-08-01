@@ -39,6 +39,15 @@ export async function POST(req: NextRequest) {
     // 1. Run LLM 1 Query Rewriter & Scope Guardrail Check
     const preparedQuery = await prepareRagQuery(message, mode);
 
+    console.log('[RAG-ROUTE] LLM1 Result:', {
+      isScopeValid: preparedQuery.isScopeValid,
+      suggestedVerses: preparedQuery.suggestedVerses,
+      targetSurahAyah: preparedQuery.targetSurahAyah,
+      keywords: preparedQuery.keywords,
+      rootWords: preparedQuery.rootWords,
+      expandedQueryAr: preparedQuery.expandedQueryAr?.substring(0, 100),
+    });
+
     if (!preparedQuery.isScopeValid) {
       return NextResponse.json({
         success: true,
@@ -58,10 +67,19 @@ export async function POST(req: NextRequest) {
         ayahId: preparedQuery.targetSurahAyah?.ayah,
         keywords: preparedQuery.keywords,
         expandedQueryAr: preparedQuery.expandedQueryAr,
-        rootWord: preparedQuery.rootWords?.[0]
+        rootWord: preparedQuery.rootWords?.[0],
+        suggestedVerses: preparedQuery.suggestedVerses
       },
       8
     );
+
+    console.log('[RAG-ROUTE] Hybrid Search returned', documents.length, 'docs:', documents.map(d => ({
+      id: d.id,
+      surah: d.surahId,
+      ayah: d.ayahId,
+      author: d.authorName,
+      explanation: d.relevanceExplanation
+    })));
 
     // 3. Format Context and Sources for Grounded Synthesis
     let contextText = '';

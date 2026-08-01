@@ -92,12 +92,14 @@ export async function generateEmbedding(text: string): Promise<number[]> {
   const apiKeyGemini = process.env.GEMINI_API_KEY;
   if (apiKeyGemini) {
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${apiKeyGemini}`, {
+      // Using gemini-embedding-2 (Google's latest multilingual model, supports Arabic natively) with output dimensionality 768 (Matryoshka truncation)
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:embedContent?key=${apiKeyGemini}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'models/text-embedding-004',
+          model: 'models/gemini-embedding-2',
           content: { parts: [{ text: text.substring(0, 8000) }] },
+          outputDimensionality: 768,
         }),
       });
       if (response.ok) {

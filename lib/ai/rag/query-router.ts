@@ -1,4 +1,5 @@
 import { MODE_AUTHORS } from '../../../scripts/seed_rag_modes';
+import { SURAHS_DATA } from '../../surahsData';
 
 export type RagMode = 'default' | 'classical' | 'grammar' | 'modern' | 'philosophical' | 'lexicon';
 
@@ -10,6 +11,7 @@ export interface PreparedQueryInfo {
   keywords: string[];
   rootWords: string[];
   targetSurahAyah?: { surah?: number; ayah?: number };
+  suggestedVerses?: { surah: number; ayah: number }[];
   mode: RagMode;
 }
 
@@ -65,6 +67,15 @@ const SURAH_NAME_MAP: Record<string, number> = {
   'falaq': 113, 'al-falaq': 113,
   'nas': 114, 'an-nas': 114
 };
+
+/**
+ * Validates if a given surah/ayah combination exists in the Quran.
+ */
+function validateVerseRef(v: { surah: number; ayah: number }): boolean {
+  const surahMeta = SURAHS_DATA.find(s => s.number === v.surah);
+  if (!surahMeta) return false;
+  return v.ayah >= 1 && v.ayah <= surahMeta.numberOfAyahs;
+}
 
 /**
  * Parses explicit Surah:Ayah coordinates or Surah names.
@@ -182,6 +193,7 @@ ACTIVE MODE: "${mode}"
 CRITICAL INSTRUCTIONS:
 1. **Arabic Translation for Vector Search**: You must extract the core concepts from the user's English query and translate them into classical Arabic keywords ("expandedQueryAr"). This is critical because our databases are primarily in Arabic. The translation depth depends on the mode (e.g., Classical and Lexicon require heavy, precise Arabic root extraction).
 2. **Aqeedah & Fiqh Guardrail**: If the ACTIVE MODE is "grammar" or "lexicon", strictly refuse theological (Aqeedah), sectarian, or Fiqh questions. Set isScopeValid to false. If the mode is "default" or "philosophical", these are allowed.
+3. **Verse Suggestion**: If the user's query is thematic (no explicit Surah:Ayah reference), identify up to 5 highly relevant Quranic verses that directly address the topic. These should be specific ayah references the user is likely asking about. If an explicit verse is given (e.g. 2:255), set suggestedVerses to an empty array. Only suggest verses when the query is thematic/topical. CRITICAL: Only suggest verses you are HIGHLY confident about. Each verse must exist in the Quran. If unsure, suggest fewer rather than risk invalid references.
 
 OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
 {
@@ -192,7 +204,8 @@ OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
   "expandedQueryAr": "Exact classical Arabic keywords, vocabulary, and synonyms corresponding to the query for BM25 matching against classical texts. (Must be in Arabic script)",
   "expandedQueryEn": "Expanded English terminology and synonyms.",
   "keywords": ["keyword1", "keyword2", "keyword3"],
-  "rootWords": ["3-letter or 4-letter Arabic root if applicable, e.g. صبر, رحم, علم"]
+  "rootWords": ["3-letter or 4-letter Arabic root if applicable, e.g. صبر, رحم, علم"],
+  "suggestedVerses": [{"surah": 49, "ayah": 10}, {"surah": 49, "ayah": 11}]
 }`;
 
   try {
@@ -200,7 +213,7 @@ OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
 
     // Prioritize direct Gemini API
     if (geminiKey) {
-      const models = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash-lite'];
+      const models = ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-2.5-flash'];
       for (const modelName of models) {
         try {
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiKey}`, {
@@ -213,6 +226,30 @@ OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
               generationConfig: {
                 temperature: 0.1,
                 responseMimeType: 'application/json',
+                responseSchema: {
+                  type: 'OBJECT',
+                  properties: {
+                    isScopeValid: { type: 'BOOLEAN' },
+                    warningMessage: { type: 'STRING' },
+                    targetSurah: { type: 'INTEGER' },
+                    targetAyah: { type: 'INTEGER' },
+                    expandedQueryAr: { type: 'STRING' },
+                    expandedQueryEn: { type: 'STRING' },
+                    keywords: { type: 'ARRAY', items: { type: 'STRING' } },
+                    rootWords: { type: 'ARRAY', items: { type: 'STRING' } },
+                    suggestedVerses: {
+                      type: 'ARRAY',
+                      items: {
+                        type: 'OBJECT',
+                        properties: {
+                          surah: { type: 'INTEGER' },
+                          ayah: { type: 'INTEGER' }
+                        }
+                      }
+                    }
+                  },
+                  required: ['isScopeValid', 'expandedQueryAr', 'expandedQueryEn', 'keywords', 'rootWords', 'suggestedVerses']
+                },
                 maxOutputTokens: 500
               }
             })
@@ -221,9 +258,12 @@ OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
             const data = await res.json();
             rawJsonText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
             if (rawJsonText) break;
+          } else {
+            const errorText = await res.text();
+            console.error(`[QUERY-ROUTER] Gemini API returned ${res.status}:`, errorText);
           }
         } catch (e) {
-          console.warn(`Query Router API error with ${modelName}:`, e);
+          console.error(`[QUERY-ROUTER] API error with ${modelName}:`, e);
         }
       }
     }
@@ -267,6 +307,34 @@ OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
         ...(Array.isArray(parsed.rootWords) ? parsed.rootWords : [])
       ])).filter(r => r && r.length >= 3 && r.length <= 4);
 
+      let validSuggestedVerses: {surah: number, ayah: number}[] = [];
+      if (Array.isArray(parsed.suggestedVerses)) {
+        // Normalize: if the array contains separate {surah: X} and {ayah: Y} objects, merge them
+        const normalized = [];
+        let currentObj: any = {};
+        for (const item of parsed.suggestedVerses) {
+          if (item && typeof item === 'object') {
+            if ('surah' in item && 'ayah' in item) {
+              normalized.push(item);
+            } else if ('surah' in item) {
+              currentObj.surah = item.surah;
+            } else if ('ayah' in item) {
+              currentObj.ayah = item.ayah;
+              if ('surah' in currentObj) {
+                normalized.push({ ...currentObj });
+                currentObj = {};
+              }
+            }
+          }
+        }
+        
+        validSuggestedVerses = normalized.filter((v: any) => 
+          v && typeof v.surah === 'number' && typeof v.ayah === 'number' && validateVerseRef(v)
+        );
+      }
+      
+      console.log('[QUERY-ROUTER] Query:', cleanMessage, '| Suggested Verses:', parsed.suggestedVerses, '| Validated:', validSuggestedVerses);
+
       return {
         isScopeValid: true,
         expandedQueryAr: combinedAr,
@@ -274,6 +342,7 @@ OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
         keywords: combinedKeywords,
         rootWords: combinedRoots,
         targetSurahAyah: surahNum ? { surah: surahNum, ayah: ayahNum } : parsedRef,
+        suggestedVerses: validSuggestedVerses,
         mode
       };
     }
@@ -288,6 +357,7 @@ OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
     keywords: baseKeywords,
     rootWords: Array.from(new Set(baseRoots)),
     targetSurahAyah: parsedRef,
+    suggestedVerses: [],
     mode
   };
 }

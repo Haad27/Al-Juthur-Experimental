@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { clearRagIndex, getRagDb, insertParentDocument, insertChildChunk } from '../lib/ai/rag/db';
 import { splitIntoChildChunks } from '../lib/ai/rag/chunker';
-import { generateLocalSemanticEmbedding } from '../lib/ai/rag/embeddings';
+import { generateEmbedding } from '../lib/ai/rag/embeddings';
 import { getLexiconEntriesForRoot } from '../lib/lexicon/service';
 import Database from 'better-sqlite3';
 import path from 'path';
@@ -31,27 +31,68 @@ const ALL_TAFSIR_AUTHOR_IDS = Array.from(
 
 const ALL_LEXICON_DICT_IDS = MODE_AUTHORS.lexicon;
 
+async function embedWithRateLimit(text: string, requestCount: { count: number; lastReset: number }): Promise<number[]> {
+  // Rate limit: max 80 per minute
+  const now = Date.now();
+  if (now - requestCount.lastReset > 60000) {
+    requestCount.count = 0;
+    requestCount.lastReset = now;
+  }
+  if (requestCount.count >= 80) {
+    const waitTime = 60000 - (now - requestCount.lastReset);
+    console.log(`[RATE LIMIT] Waiting ${Math.ceil(waitTime/1000)}s for cooldown...`);
+    await new Promise(resolve => setTimeout(resolve, waitTime + 1000));
+    requestCount.count = 0;
+    requestCount.lastReset = Date.now();
+  }
+  requestCount.count++;
+  
+  // Retry up to 3 times
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      return await generateEmbedding(text);
+    } catch (err) {
+      if (attempt === 3) throw err;
+      console.warn(`Embedding attempt ${attempt} failed, retrying in 5s...`);
+      await new Promise(resolve => setTimeout(resolve, 5000));
+    }
+  }
+  throw new Error('Should not reach here');
+}
+
 export async function seedAllModesRagIndex(options?: {
   surahs?: number[];
   roots?: string[];
+  fresh?: boolean;
 }): Promise<{
   tafsirIndexed: number;
   lexiconIndexed: number;
 }> {
-  const surahsToSeed = options?.surahs || [1, 2, 18, 36, 67, 112, 113, 114];
+  const surahsToSeed = options?.surahs || Array.from({length: 114}, (_, i) => i + 1);
   const rootsToSeed = options?.roots || [
     'حمد', 'صبر', 'علم', 'عبد', 'ربب', 'رحم', 'ملك', 'هدي', 'نور', 'كتب',
     'بلي', 'شكر', 'غفر', 'حكم', 'عدل', 'صدق', 'كفر', 'شرك', 'نفس', 'قلب'
   ];
 
   console.log('=== Seeding RAG Index for All 6 Modes ===');
-  console.log(`Target Surahs: ${surahsToSeed.join(', ')}`);
+  console.log(`Target Surahs: ${surahsToSeed.length} surahs`);
   console.log(`Target Roots: ${rootsToSeed.join(', ')}`);
-  console.log('Clearing existing RAG SQLite index...');
-  clearRagIndex();
+  
+  // If fresh mode, clear existing index to re-embed with new model
+  if (options?.fresh) {
+    console.log('FRESH MODE: Clearing existing RAG index for full re-embed...');
+    clearRagIndex();
+  }
+  
+  const ragDb = getRagDb();
+  const checkDocStmt = ragDb.prepare('SELECT id FROM rag_parent_documents WHERE id = ?');
 
   let tafsirCount = 0;
   let lexiconCount = 0;
+  let totalEmbeddings = 0;
+  const startTime = Date.now();
+  
+  const requestCount = { count: 0, lastReset: Date.now() };
 
   // 1. Index Tafsir Entries for target Surahs across all 15 authors
   console.log(`\nIndexing Tafsir entries across ${ALL_TAFSIR_AUTHOR_IDS.length} classical/modern books...`);
@@ -77,15 +118,22 @@ export async function seedAllModesRagIndex(options?: {
   const entries = getEntriesStmt.all() as { id: number; authorId: number; surahId: number; ayahNo: number; text: string }[];
   console.log(`Fetched ${entries.length} Tafsir entries to index.`);
 
-  for (const entry of entries) {
+  for (let i = 0; i < entries.length; i++) {
+    const entry = entries[i];
     if (!entry.text || entry.text.trim().length === 0) continue;
+
+    const docId = `tafsir-${entry.authorId}-${entry.surahId}-${entry.ayahNo}`;
+    
+    // Check if it already exists in the RAG DB (by ID)
+    const existing = checkDocStmt.get(docId);
+    if (existing) {
+      continue;
+    }
 
     const author = authorMap.get(entry.authorId);
     const authorName = author ? (author.authorName || author.name) : `Author ${entry.authorId}`;
     const workTitle = author ? author.name : `Tafsir Book ${entry.authorId}`;
     const lang = entry.authorId === 61 ? 'en' : 'ar'; // 61 is English Ibn Kathir
-
-    const docId = `tafsir-${entry.authorId}-${entry.surahId}-${entry.ayahNo}`;
 
     // Insert Parent Block
     const parentDoc = {
@@ -113,33 +161,44 @@ export async function seedAllModesRagIndex(options?: {
     });
 
     for (const spec of childChunkSpecs) {
-      const embedding = generateLocalSemanticEmbedding(spec.content);
+      const embedding = await embedWithRateLimit(spec.content, requestCount);
       insertChildChunk({
         ...spec,
         embedding,
       });
+      totalEmbeddings++;
     }
 
     tafsirCount++;
-    if (tafsirCount % 500 === 0) {
-      console.log(`Indexed ${tafsirCount} Tafsir entries...`);
+    if (tafsirCount % 10 === 0 || i === entries.length - 1) {
+      const percent = ((i + 1) / entries.length * 100).toFixed(2);
+      console.log(`Embedded ${i + 1}/${entries.length} chunks (${percent}% complete)`);
     }
   }
 
   // 2. Index Lexicon entries across target roots
   console.log(`\nIndexing Lexicon roots across ${ALL_LEXICON_DICT_IDS.length} primary dictionaries...`);
+  let lexiconProcessed = 0;
   for (const root of rootsToSeed) {
     const lexResult = getLexiconEntriesForRoot(root);
 
     for (const entry of lexResult.entries) {
       if (!ALL_LEXICON_DICT_IDS.includes(entry.dictId)) continue;
+      
+      const docId = `lexicon-${entry.dictIdent}-${root}`;
+      
+      // Check if it already exists in the RAG DB (by ID)
+      const existing = checkDocStmt.get(docId);
+      if (existing) {
+        continue;
+      }
+      
       const fullContent = entry.definitions
         .map((d) => d.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim())
         .join('\n\n');
 
       if (!fullContent || fullContent.trim().length === 0) continue;
 
-      const docId = `lexicon-${entry.dictIdent}-${root}`;
       const parentDoc = {
         id: docId,
         workType: 'lexicon' as const,
@@ -164,19 +223,31 @@ export async function seedAllModesRagIndex(options?: {
       });
 
       for (const spec of childChunkSpecs) {
-        const embedding = generateLocalSemanticEmbedding(spec.content);
+        const embedding = await embedWithRateLimit(spec.content, requestCount);
         insertChildChunk({
           ...spec,
           embedding,
         });
+        totalEmbeddings++;
       }
 
       lexiconCount++;
+      lexiconProcessed++;
+      if (lexiconProcessed % 5 === 0) {
+        console.log(`Indexed ${lexiconProcessed} Lexicon entries...`);
+      }
     }
   }
 
+  const durationMs = Date.now() - startTime;
+  const mins = Math.floor(durationMs / 60000);
+  const secs = Math.floor((durationMs % 60000) / 1000);
+
   console.log(`\n=== Seeding Complete! ===`);
-  console.log(`Indexed ${tafsirCount} Tafsir entries and ${lexiconCount} Lexicon entries into local RAG database.`);
+  console.log(`Indexed ${tafsirCount} Tafsir entries and ${lexiconCount} Lexicon entries`);
+  console.log(`Total embeddings generated: ${totalEmbeddings}`);
+  console.log(`Total time: ${mins}:${secs.toString().padStart(2, '0')}`);
+  
   return {
     tafsirIndexed: tafsirCount,
     lexiconIndexed: lexiconCount,
@@ -184,7 +255,8 @@ export async function seedAllModesRagIndex(options?: {
 }
 
 if (require.main === module) {
-  seedAllModesRagIndex()
+  // Always run fresh when invoked from CLI to ensure new embeddings
+  seedAllModesRagIndex({ fresh: true })
     .then((res) => {
       console.log('Result:', res);
       process.exit(0);
