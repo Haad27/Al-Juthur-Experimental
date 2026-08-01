@@ -8,6 +8,7 @@ import { ArrowRight, ChevronDown } from "lucide-react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Loading from "@/app/loading";
+import LoadingScreen from "@/components/landing3d/LoadingScreen";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -103,6 +104,7 @@ export default function LandingPage() {
 
   return (
     <div ref={mainRef} className="relative w-full bg-black text-white selection:bg-emerald-500/30">
+      <LoadingScreen />
       {isLoading && <Loading />}
       {/* Fixed 3D Canvas — persists behind entire page */}
       <div className="fixed inset-0 z-0">
