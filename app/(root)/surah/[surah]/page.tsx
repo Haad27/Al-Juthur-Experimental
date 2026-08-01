@@ -102,12 +102,12 @@ export default async function SurahPage({
     const fIds: string[] = [];
     
     if (typeof t.text === "string") {
-      cleanText = t.text.replace(/<sup foot_note=(\d+)>.*?<\/sup>/g, (match: string, id: string) => {
+      cleanText = t.text.replace(/<sup foot_note=["']?(\d+)["']?>.*?<\/sup>/gi, (match: string, id: string) => {
         fIds.push(id);
         return "";
       });
       // Fallback for any other HTML tags
-      cleanText = cleanText.replace(/<sup[^>]*>.*?<\/sup>/g, "");
+      cleanText = cleanText.replace(/<sup[^>]*>.*?<\/sup>/gi, "");
     } else {
       cleanText = t.text || "";
     }

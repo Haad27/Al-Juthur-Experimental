@@ -299,7 +299,7 @@ const AyahRow = React.memo(({
                   style={{ fontSize: getTranslationFontSize(fontSize) }}
                   dangerouslySetInnerHTML={{ __html: mainText }}
                 />
-                {ayah.footnoteIds && ayah.footnoteIds.length > 0 && (
+                {(ayah.footnoteIds?.length || footnotes.length > 0) ? (
                   <button
                     onClick={handleToggleFootnotes}
                     className="inline-flex items-center justify-center ml-2 text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/20 transition-colors align-middle rounded-full bg-emerald-500/10 p-1.5 cursor-pointer"
@@ -307,37 +307,37 @@ const AyahRow = React.memo(({
                   >
                     <BookOpen size={14} />
                   </button>
-                )}
+                ) : null}
               </div>
 
-              {footnotes.length > 0 && (
-                <div className="mt-3 p-3 rounded-xl bg-zinc-900/60 border border-zinc-800/80 text-xs text-zinc-400 italic space-y-1.5">
-                  <div className="font-semibold text-emerald-400 not-italic uppercase tracking-wider text-[10px]">
-                    Note
-                  </div>
-                  {footnotes.map((fn, fIdx) => (
-                    <p key={fIdx} className="leading-relaxed">{fn}</p>
-                  ))}
-                </div>
-              )}
-              
-              {ayah.footnoteIds && ayah.footnoteIds.length > 0 && showFootnoteIds && (
-                <div className="mt-3 p-3 rounded-xl bg-zinc-900/60 border border-emerald-900/50 text-xs text-zinc-300 space-y-2">
-                  <div className="font-semibold text-emerald-500 uppercase tracking-wider text-[10px]">
+              {((ayah.footnoteIds?.length || footnotes.length > 0) && showFootnoteIds) ? (
+                <div className="mt-3 p-4 rounded-xl bg-zinc-900/60 border border-emerald-900/50 text-sm text-zinc-300 space-y-3 max-h-80 overflow-y-auto custom-scrollbar">
+                  <div className="font-semibold text-emerald-500 uppercase tracking-wider text-[11px] sticky top-0 bg-zinc-900/90 py-1 backdrop-blur-sm">
                     Footnotes
                   </div>
-                  {loadingFootnotes ? (
-                    <p className="text-zinc-500 animate-pulse">Loading footnotes...</p>
-                  ) : (
-                    ayah.footnoteIds.map((fId, idx) => (
-                      <div key={fId} className="leading-relaxed">
-                        <span className="text-emerald-500 font-bold mr-1">[{idx + 1}]</span>
-                        <span dangerouslySetInnerHTML={{ __html: fetchedFootnotes[fId] || "Footnote unavailable." }} />
-                      </div>
-                    ))
+                  
+                  {/* Inline/extracted footnotes */}
+                  {footnotes.length > 0 && footnotes.map((fn, fIdx) => (
+                    <div key={`inline-${fIdx}`} className="leading-relaxed text-zinc-400 italic">
+                      {fn}
+                    </div>
+                  ))}
+
+                  {/* API fetched footnotes */}
+                  {ayah.footnoteIds && ayah.footnoteIds.length > 0 && (
+                    loadingFootnotes ? (
+                      <p className="text-zinc-500 animate-pulse">Loading footnotes...</p>
+                    ) : (
+                      ayah.footnoteIds.map((fId, idx) => (
+                        <div key={fId} className="leading-relaxed">
+                          <span className="text-emerald-500 font-bold mr-1">[{idx + 1}]</span>
+                          <span dangerouslySetInnerHTML={{ __html: fetchedFootnotes[fId] || "Footnote unavailable." }} />
+                        </div>
+                      ))
+                    )
                   )}
                 </div>
-              )}
+              ) : null}
             </div>
           );
         })()}
