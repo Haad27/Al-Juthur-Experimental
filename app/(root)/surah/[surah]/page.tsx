@@ -102,9 +102,11 @@ export default async function SurahPage({
     const fIds: string[] = [];
     
     if (typeof t.text === "string") {
+      let fIdsCount = 0;
       cleanText = t.text.replace(/<sup foot_note=["']?(\d+)["']?>.*?<\/sup>/gi, (match: string, id: string) => {
         fIds.push(id);
-        return "";
+        fIdsCount++;
+        return `<span class="text-emerald-500 font-bold mx-1">[${fIdsCount}]</span>`;
       });
       // Fallback for any other HTML tags
       cleanText = cleanText.replace(/<sup[^>]*>.*?<\/sup>/gi, "");
