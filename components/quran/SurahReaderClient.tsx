@@ -62,6 +62,13 @@ interface AyahRowProps {
   translationEdition: string;
 }
 
+function cleanUrduFootnoteText(html: string) {
+  if (!html) return "";
+  return html
+    .replace(/<b class=['"]text-emerald-400[^'"]*['"]>(.*?)<\/b>/gi, '<span class="text-emerald-400 font-bold block mb-2">$1</span>')
+    .replace(/<b class=['"]text-amber-400[^'"]*['"]>(.*?)<\/b>/gi, '<span class="text-emerald-400 font-bold block mt-3 mb-1">$1</span>');
+}
+
 function processTranslation(rawText: string) {
   if (!rawText) return { mainText: "", footnotes: [] as string[] };
 
@@ -131,6 +138,14 @@ const AyahRow = React.memo(({
   const isTafsirEdition = React.useMemo(() => {
     return ["158", "97", "234", "151", "84"].includes(translationEdition);
   }, [translationEdition]);
+
+  const { mainText, footnotes } = React.useMemo(() => {
+    return processTranslation(ayah.translation);
+  }, [ayah.translation]);
+
+  const hasFootnotesAvailable = React.useMemo(() => {
+    return Boolean(ayah.footnoteIds?.length || footnotes.length > 0 || isTafsirEdition);
+  }, [ayah.footnoteIds, footnotes, isTafsirEdition]);
 
   const handleToggleFootnotes = async () => {
     if (!showFootnoteIds) {
@@ -342,112 +357,100 @@ const AyahRow = React.memo(({
           />
         </p>
 
-function cleanUrduFootnoteText(html: string) {
-  if (!html) return "";
-  return html
-    .replace(/<b class=['"]text-emerald-400[^'"]*['"]>(.*?)<\/b>/gi, '<span className="text-emerald-400 font-bold block mb-2">$1</span>')
-    .replace(/<b class=['"]text-amber-400[^'"]*['"]>(.*?)<\/b>/gi, '<span className="text-emerald-400 font-bold block mt-3 mb-1">$1</span>');
-}
+        {showTranslation && (
+          <div className={cn("pt-4 text-left w-full", isUrduTranslation ? "w-full sm:pr-2" : "md:ml-8 lg:w-2/3 md:w-4/6")}>
+            <div>
+              <span
+                className="text-white md:leading-[1.5] leading-[1.8] translation-content"
+                style={{ 
+                  fontSize: getTranslationFontSize(fontSize, isUrduTranslation),
+                  fontFamily: isUrduTranslation ? "'Noto Nastaliq Urdu', serif" : undefined,
+                  lineHeight: isUrduTranslation ? "2.6" : undefined,
+                  textAlign: isUrduTranslation ? "right" : undefined,
+                  direction: isUrduTranslation ? "rtl" : undefined,
+                  display: "block",
+                  width: "100%"
+                }}
+                dangerouslySetInnerHTML={{ __html: mainText }}
+              />
+              {hasFootnotesAvailable ? (
+                <button
+                  onClick={handleToggleFootnotes}
+                  className="inline-flex items-center justify-center p-2 ml-2 mt-2.5 mb-1 transition-all align-middle rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.25)] hover:scale-110 cursor-pointer"
+                  title={showFootnoteIds ? "Hide Footnotes" : "Show Footnotes & Commentary"}
+                >
+                  <BookOpen size={16} className="text-emerald-400" />
+                </button>
+              ) : null}
+            </div>
 
-        {showTranslation && (() => {
-          const { mainText, footnotes } = processTranslation(ayah.translation);
-          const hasFootnotesAvailable = Boolean(ayah.footnoteIds?.length || footnotes.length > 0 || isTafsirEdition);
-          return (
-            <div className={cn("pt-4 text-left w-full", isUrduTranslation ? "w-full sm:pr-2" : "md:ml-8 lg:w-2/3 md:w-4/6")}>
-              <div>
-                <span
-                  className="text-white md:leading-[1.5] leading-[1.8] translation-content"
-                  style={{ 
-                    fontSize: getTranslationFontSize(fontSize, isUrduTranslation),
-                    fontFamily: isUrduTranslation ? "'Noto Nastaliq Urdu', serif" : undefined,
-                    lineHeight: isUrduTranslation ? "2.6" : undefined,
-                    textAlign: isUrduTranslation ? "right" : undefined,
-                    direction: isUrduTranslation ? "rtl" : undefined,
-                    display: "block",
-                    width: "100%"
-                  }}
-                  dangerouslySetInnerHTML={{ __html: mainText }}
-                />
-                {hasFootnotesAvailable ? (
-                  <button
-                    onClick={handleToggleFootnotes}
-                    className="inline-flex items-center justify-center p-2 ml-2 mt-2.5 mb-1 transition-all align-middle rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.25)] hover:scale-110 cursor-pointer"
-                    title={showFootnoteIds ? "Hide Footnotes" : "Show Footnotes & Commentary"}
-                  >
-                    <BookOpen size={16} className="text-emerald-400" />
-                  </button>
-                ) : null}
-              </div>
+            {(hasFootnotesAvailable && showFootnoteIds) ? (
+              <div className="mt-3 p-4 rounded-xl bg-zinc-950/90 border border-emerald-500/30 text-sm text-zinc-100 max-h-80 overflow-y-auto custom-scrollbar relative shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
+                <div className="font-semibold text-emerald-400 uppercase tracking-wider text-[11px] sticky -top-4 -mx-4 px-4 py-2.5 bg-zinc-950/95 backdrop-blur-md z-10 mb-3 border-b border-emerald-500/20 shadow-sm flex items-center justify-between">
+                  <span className="text-emerald-400 font-bold uppercase tracking-wider text-[11px]">
+                    FOOTNOTES & COMMENTARY NOTES
+                  </span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-md border border-emerald-500/30">
+                    {isTafsirEdition ? "EXPLANATIONS" : "FOOTNOTES"}
+                  </span>
+                </div>
+                
+                <div className="space-y-4">
+                  {loadingFootnotes ? (
+                    <p className="text-emerald-400/80 animate-pulse text-xs py-2">Loading notes...</p>
+                  ) : (
+                    <>
+                      {/* Dynamic Tafsir / Explanation Note for Dr. Israr, Maududi, Taqi Usmani */}
+                      {fetchedFootnotes["tafsir_note"] && (
+                        <div 
+                          className="leading-[2.8] text-zinc-100 text-right p-3 rounded-lg bg-zinc-900/60 border border-zinc-800/80 font-nastaliq"
+                          dir={isUrduTranslation ? "rtl" : "auto"}
+                          style={{ 
+                            fontFamily: isUrduTranslation ? "'Noto Nastaliq Urdu', serif" : undefined,
+                            lineHeight: isUrduTranslation ? "2.8" : undefined,
+                            fontSize: isUrduTranslation ? "1.15rem" : undefined,
+                            color: "#f4f4f5"
+                          }}
+                          dangerouslySetInnerHTML={{ __html: cleanUrduFootnoteText(fetchedFootnotes["tafsir_note"]) }}
+                        />
+                      )}
 
-              {(hasFootnotesAvailable && showFootnoteIds) ? (
-                <div className="mt-3 p-4 rounded-xl bg-zinc-950/90 border border-emerald-500/30 text-sm text-zinc-100 max-h-80 overflow-y-auto custom-scrollbar relative shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
-                  <div className="font-semibold text-emerald-400 uppercase tracking-wider text-[11px] sticky -top-4 -mx-4 px-4 py-2.5 bg-zinc-950/95 backdrop-blur-md z-10 mb-3 border-b border-emerald-500/20 shadow-sm flex items-center justify-between">
-                    <span className="text-emerald-400 font-bold uppercase tracking-wider text-[11px]">
-                      FOOTNOTES & COMMENTARY NOTES
-                    </span>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-md border border-emerald-500/30">
-                      {isTafsirEdition ? "EXPLANATIONS" : "FOOTNOTES"}
-                    </span>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    {loadingFootnotes ? (
-                      <p className="text-emerald-400/80 animate-pulse text-xs py-2">Loading notes...</p>
-                    ) : (
-                      <>
-                        {/* Dynamic Tafsir / Explanation Note for Dr. Israr, Maududi, Taqi Usmani */}
-                        {fetchedFootnotes["tafsir_note"] && (
+                      {/* Inline/extracted footnotes */}
+                      {footnotes.length > 0 && footnotes.map((fn, fIdx) => (
+                        <div key={`inline-${fIdx}`} className="leading-relaxed text-zinc-200 p-2.5 rounded bg-zinc-900/60 border border-zinc-800" dir="auto">
+                          {fn}
+                        </div>
+                      ))}
+
+                      {/* API fetched footnotes */}
+                      {ayah.footnoteIds && ayah.footnoteIds.length > 0 && (
+                        ayah.footnoteIds.map((fId, idx) => (
                           <div 
-                            className="leading-[2.8] text-zinc-100 text-right p-3 rounded-lg bg-zinc-900/60 border border-zinc-800/80 font-nastaliq"
+                            key={fId} 
+                            className="leading-relaxed p-2.5 rounded bg-zinc-900/60 border border-zinc-800/80 text-zinc-100" 
                             dir={isUrduTranslation ? "rtl" : "auto"}
                             style={{ 
                               fontFamily: isUrduTranslation ? "'Noto Nastaliq Urdu', serif" : undefined,
-                              lineHeight: isUrduTranslation ? "2.8" : undefined,
-                              fontSize: isUrduTranslation ? "1.15rem" : undefined,
+                              lineHeight: isUrduTranslation ? "2.6" : undefined,
+                              fontSize: isUrduTranslation ? "1.1rem" : undefined,
                               color: "#f4f4f5"
                             }}
-                            dangerouslySetInnerHTML={{ __html: cleanUrduFootnoteText(fetchedFootnotes["tafsir_note"]) }}
-                          />
-                        )}
-
-                        {/* Inline/extracted footnotes */}
-                        {footnotes.length > 0 && footnotes.map((fn, fIdx) => (
-                          <div key={`inline-${fIdx}`} className="leading-relaxed text-zinc-200 p-2.5 rounded bg-zinc-900/60 border border-zinc-800" dir="auto">
-                            {fn}
+                          >
+                            <span className="text-emerald-400 font-bold mx-2 inline-block" dir="ltr">[{idx + 1}]</span>
+                            <span dangerouslySetInnerHTML={{ __html: fetchedFootnotes[fId] || "Footnote unavailable." }} />
                           </div>
-                        ))}
-
-                        {/* API fetched footnotes */}
-                        {ayah.footnoteIds && ayah.footnoteIds.length > 0 && (
-                          ayah.footnoteIds.map((fId, idx) => (
-                            <div 
-                              key={fId} 
-                              className="leading-relaxed p-2.5 rounded bg-zinc-900/60 border border-zinc-800/80 text-zinc-100" 
-                              dir={isUrduTranslation ? "rtl" : "auto"}
-                              style={{ 
-                                fontFamily: isUrduTranslation ? "'Noto Nastaliq Urdu', serif" : undefined,
-                                lineHeight: isUrduTranslation ? "2.6" : undefined,
-                                fontSize: isUrduTranslation ? "1.1rem" : undefined,
-                                color: "#f4f4f5"
-                              }}
-                            >
-                              <span className="text-emerald-400 font-bold mx-2 inline-block" dir="ltr">[{idx + 1}]</span>
-                              <span dangerouslySetInnerHTML={{ __html: fetchedFootnotes[fId] || "Footnote unavailable." }} />
-                            </div>
-                          ))
-                        )}
-                      </>
-                    )}
-                  </div>
+                        ))
+                      )}
+                    </>
+                  )}
                 </div>
-              ) : null}
-            </div>
-          );
-        })()}
+              </div>
+            ) : null}
+          </div>
+        )}
       </div>
     </div>
   );
-
 });
 
 export default function SurahReaderClient({
