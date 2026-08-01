@@ -311,31 +311,33 @@ const AyahRow = React.memo(({
               </div>
 
               {((ayah.footnoteIds?.length || footnotes.length > 0) && showFootnoteIds) ? (
-                <div className="mt-3 p-4 rounded-xl bg-zinc-900/60 border border-emerald-900/50 text-sm text-zinc-300 space-y-3 max-h-80 overflow-y-auto custom-scrollbar">
-                  <div className="font-semibold text-emerald-500 uppercase tracking-wider text-[11px] sticky top-0 bg-zinc-900/90 py-1 backdrop-blur-sm">
+                <div className="mt-3 p-4 rounded-xl bg-zinc-900/60 border border-emerald-900/50 text-sm text-zinc-300 max-h-80 overflow-y-auto custom-scrollbar relative">
+                  <div className="font-semibold text-emerald-500 uppercase tracking-wider text-[11px] sticky -top-4 -mx-4 px-4 py-3 bg-zinc-900/95 backdrop-blur-md z-10 mb-3 border-b border-emerald-900/30 shadow-sm">
                     Footnotes
                   </div>
                   
-                  {/* Inline/extracted footnotes */}
-                  {footnotes.length > 0 && footnotes.map((fn, fIdx) => (
-                    <div key={`inline-${fIdx}`} className="leading-relaxed text-zinc-400 italic">
-                      {fn}
-                    </div>
-                  ))}
+                  <div className="space-y-3">
+                    {/* Inline/extracted footnotes */}
+                    {footnotes.length > 0 && footnotes.map((fn, fIdx) => (
+                      <div key={`inline-${fIdx}`} className="leading-relaxed text-zinc-400 italic" dir="auto">
+                        {fn}
+                      </div>
+                    ))}
 
-                  {/* API fetched footnotes */}
-                  {ayah.footnoteIds && ayah.footnoteIds.length > 0 && (
-                    loadingFootnotes ? (
-                      <p className="text-zinc-500 animate-pulse">Loading footnotes...</p>
-                    ) : (
-                      ayah.footnoteIds.map((fId, idx) => (
-                        <div key={fId} className="leading-relaxed">
-                          <span className="text-emerald-500 font-bold mr-1">[{idx + 1}]</span>
-                          <span dangerouslySetInnerHTML={{ __html: fetchedFootnotes[fId] || "Footnote unavailable." }} />
-                        </div>
-                      ))
-                    )
-                  )}
+                    {/* API fetched footnotes */}
+                    {ayah.footnoteIds && ayah.footnoteIds.length > 0 && (
+                      loadingFootnotes ? (
+                        <p className="text-zinc-500 animate-pulse">Loading footnotes...</p>
+                      ) : (
+                        ayah.footnoteIds.map((fId, idx) => (
+                          <div key={fId} className="leading-relaxed" dir="auto">
+                            <span className="text-emerald-500 font-bold mr-2 inline-block" dir="ltr">[{idx + 1}]</span>
+                            <span dangerouslySetInnerHTML={{ __html: fetchedFootnotes[fId] || "Footnote unavailable." }} />
+                          </div>
+                        ))
+                      )
+                    )}
+                  </div>
                 </div>
               ) : null}
             </div>

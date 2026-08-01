@@ -43,6 +43,7 @@ interface TafsirEntry {
   text: string;
   ayah?: Ayah;
   author?: Author;
+  footnoteIds?: string[];
 }
 
 const getTagColorClass = (color?: string) => {
@@ -93,6 +94,57 @@ const matchesSmartSearch = (
   return queryTokens.every((token) => {
     return normalizedTarget.includes(token) || strippedTarget.includes(token);
   });
+};
+
+const TafsirFootnotesLoader = ({ footnoteIds }: { footnoteIds: string[] }) => {
+  const [fetchedFootnotes, setFetchedFootnotes] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    setLoading(true);
+    const fetchAll = async () => {
+      const newFootnotes = { ...fetchedFootnotes };
+      let updated = false;
+      for (const fId of footnoteIds) {
+        if (!newFootnotes[fId]) {
+          try {
+            const res = await fetch(`https://api.quran.com/api/v4/foot_notes/${fId}`);
+            if (res.ok) {
+              const data = await res.json();
+              if (data.foot_note) {
+                newFootnotes[fId] = data.foot_note.text;
+                updated = true;
+              }
+            }
+          } catch(e) {
+            console.error(e);
+          }
+        }
+      }
+      if (isMounted) {
+        if (updated) setFetchedFootnotes(newFootnotes);
+        setLoading(false);
+      }
+    };
+    fetchAll();
+    return () => { isMounted = false; };
+  }, [footnoteIds]);
+
+  if (loading && Object.keys(fetchedFootnotes).length === 0) {
+    return <p className="text-zinc-500 animate-pulse text-xs">Loading explanation...</p>;
+  }
+
+  return (
+    <div className="space-y-3">
+      {footnoteIds.map((fId, idx) => (
+        <div key={fId} className="leading-relaxed text-sm text-zinc-300" dir="auto">
+          <span className="text-emerald-500 font-bold mr-2 inline-block" dir="ltr">[{idx + 1}]</span>
+          <span dangerouslySetInnerHTML={{ __html: fetchedFootnotes[fId] || "Explanation unavailable." }} />
+        </div>
+      ))}
+    </div>
+  );
 };
 
 export default function TafsirPage() {
@@ -628,6 +680,16 @@ export default function TafsirPage() {
                       {/* Tafsir text */}
                       <TafsirTextRenderer text={entry.text} isArabic={isArabicOrUrdu} immersive={true} />
 
+                      {/* Explanation (Footnotes) */}
+                      {entry.footnoteIds && entry.footnoteIds.length > 0 && (
+                        <div className="mt-6 pt-4 border-t border-amber-900/30">
+                          <div className="font-semibold text-amber-500/80 uppercase tracking-wider text-[11px] mb-3 font-mono">
+                            Explanation
+                          </div>
+                          <TafsirFootnotesLoader footnoteIds={entry.footnoteIds} />
+                        </div>
+                      )}
+
                       {/* Ornamental divider */}
                       {idx < tafsirEntries.length - 1 && (
                         <div className="tafsir-immersive-divider mt-6">
@@ -918,6 +980,16 @@ export default function TafsirPage() {
                       <div className="pt-2 border-t border-zinc-800/40">
                         <TafsirTextRenderer text={entry.text} isArabic={isArabicOrUrdu} />
                       </div>
+
+                      {/* Explanation (Footnotes) */}
+                      {entry.footnoteIds && entry.footnoteIds.length > 0 && (
+                        <div className="mt-6 pt-4 border-t border-emerald-900/30">
+                          <div className="font-semibold text-emerald-500 uppercase tracking-wider text-[11px] mb-3 font-mono">
+                            Explanation
+                          </div>
+                          <TafsirFootnotesLoader footnoteIds={entry.footnoteIds} />
+                        </div>
+                      )}
                     </div>
                   );
                 })}
