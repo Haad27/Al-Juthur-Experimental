@@ -22,6 +22,7 @@ import {
 import { inter, amiri } from "@/app/fonts";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { RAG_MODES, RagModeInfo } from "@/lib/ai/rag/modes-config";
 
 interface SourceItem {
@@ -52,7 +53,7 @@ function RagChatContent() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: `As-salamu alaykum! I am the Quranic RAG Engine operating in **${currentModeInfo.name}**.\n\nI will retrieve and synthesize insights strictly from:\n${currentModeInfo.sources.map(s => `- *${s}*`).join("\n")}\n\nAsk me your inquiry below!`
+      content: `As-salamu alaykum! I am **Sheikh Juthur**, your Quranic RAG Engine operating in **${currentModeInfo.name}**.\n\nI will retrieve and synthesize insights strictly from:\n${currentModeInfo.sources.map(s => `- *${s}*`).join("\n")}\n\nAsk me your inquiry below!`
     }
   ]);
   const [input, setInput] = useState("");
@@ -90,7 +91,7 @@ function RagChatContent() {
     setMessages([
       {
         role: "assistant",
-        content: `As-salamu alaykum! Switched to **${info.name}**.\n\nSearching strictly within:\n${info.sources.map(s => `- *${s}*`).join("\n")}\n\nHow can I help you?`
+        content: `As-salamu alaykum! I am **Sheikh Juthur**. Switched to **${info.name}**.\n\nSearching strictly within:\n${info.sources.map(s => `- *${s}*`).join("\n")}\n\nHow can I help you?`
       }
     ]);
   }, [activeModeId]);
@@ -111,25 +112,84 @@ function RagChatContent() {
         body: JSON.stringify({ message: userText, mode: activeModeId })
       });
 
-      const data = await res.json();
-
-      if (!data.success && !data.isScopeInvalid) {
-        throw new Error(data.error || "Failed to generate response.");
-      }
-
-      if (data.remaining !== undefined) {
-        setRemainingTokens(data.remaining);
-      }
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: data.text,
-          isScopeInvalid: data.isScopeInvalid,
-          sources: data.sources || []
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        // Handle immediate JSON responses (e.g., LLM 1 Guardrail triggers or quota errors)
+        const data = await res.json();
+        
+        if (!data.success && !data.isScopeInvalid) {
+          throw new Error(data.error || "Failed to generate response.");
         }
-      ]);
+
+        if (data.remaining !== undefined) {
+          setRemainingTokens(data.remaining);
+        }
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content: data.text,
+            isScopeInvalid: data.isScopeInvalid,
+            sources: data.sources || []
+          }
+        ]);
+        return;
+      }
+
+      // Handle Streaming SSE for LLM 2
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error("No readable stream available.");
+
+      const decoder = new TextDecoder("utf-8");
+      let done = false;
+      let assistantMessage: Message = { role: "assistant", content: "", sources: [] };
+      
+      // Append an empty assistant message first
+      setMessages((prev) => [...prev, assistantMessage]);
+
+      let lastUpdateTime = Date.now();
+      
+      while (!done) {
+        const { value, done: readerDone } = await reader.read();
+        done = readerDone;
+        
+        if (value) {
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split("\n");
+          
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              const dataStr = line.replace("data: ", "").trim();
+              if (!dataStr) continue;
+              
+              try {
+                const data = JSON.parse(dataStr);
+                
+                if (data.type === "metadata") {
+                  assistantMessage.sources = data.sources || [];
+                  if (data.remaining !== undefined) setRemainingTokens(data.remaining);
+                } else if (data.text) {
+                  assistantMessage.content += data.text;
+                }
+              } catch (e) {
+                // Ignore incomplete JSON chunks from SSE chunking
+              }
+            }
+          }
+          
+          // Throttle React state updates to every 50ms to prevent stream glitching
+          const now = Date.now();
+          if (now - lastUpdateTime > 50 || done) {
+            lastUpdateTime = now;
+            setMessages((prev) => {
+              const newMessages = [...prev];
+              newMessages[newMessages.length - 1] = { ...assistantMessage };
+              return newMessages;
+            });
+          }
+        }
+      }
     } catch (err: any) {
       toast.error(err.message);
       setMessages((prev) => [
@@ -278,7 +338,7 @@ function RagChatContent() {
                 )}
 
                 <div className="prose prose-invert prose-emerald max-w-none text-xs sm:text-sm md:text-base leading-relaxed">
-                  <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
                 </div>
 
                 {/* Sources Section */}

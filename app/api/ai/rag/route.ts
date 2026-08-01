@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkUserQuota } from '@/lib/ai/quota-manager';
-import { executeWithFallback } from '@/lib/ai/model-router';
+import { executeWithFallback, executeWithFallbackStream } from '@/lib/ai/model-router';
 import { estimateTokens } from '@/lib/ai/token-budget';
 import { prepareRagQuery, RagMode } from '@/lib/ai/rag/query-router';
 import { searchHybrid, ScoredParentDocument } from '@/lib/ai/rag/hybrid-search';
@@ -102,10 +102,30 @@ export async function POST(req: NextRequest) {
             : doc.rootWord
               ? `Root [${doc.rootWord}]`
               : 'Classical Text';
-          return `[Source ${idx + 1}: ${doc.workTitle} (${doc.authorName}) | ${ref} | Lang: ${doc.language.toUpperCase()}]\n${doc.content.substring(0, 2500)}`;
+              
+          // 1. Include the beginning of the entry to provide introductory context (isnad, primary opinion)
+          let docText = doc.content.substring(0, 1500);
+          
+          // 2. Stitch in the exact snippets that triggered the vector/keyword match if they are deep in the text
+          if (doc.matchedChildSnippets && doc.matchedChildSnippets.length > 0) {
+            // Deduplicate snippets (BM25 and Vector might match the same chunk)
+            const uniqueSnippets = Array.from(new Set(doc.matchedChildSnippets));
+            const extraSnippets = uniqueSnippets
+              .map(s => s.trim())
+              // Prevent duplication: if the snippet is already in the first 1500 chars, skip it
+              .filter(s => s.length > 50 && !docText.includes(s.substring(0, 50)))
+              .join('\n\n... [Continuation] ...\n');
+              
+            if (extraSnippets.length > 0) {
+              docText += '\n\n... [Relevant Excerpts Deep Within The Text] ...\n' + extraSnippets.substring(0, 2000);
+            }
+          }
+
+          return `[Source ${idx + 1}: ${doc.workTitle} (${doc.authorName}) | ${ref} | Lang: ${doc.language.toUpperCase()}]\n${docText}`;
         }).join("\n\n---\n\n");
 
       documents.forEach((doc: ScoredParentDocument) => {
+        const cleanContent = doc.content.replace(/<[^>]*>?/gm, '');
         retrievedSources.push({
           id: doc.id,
           book: doc.workTitle,
@@ -113,7 +133,7 @@ export async function POST(req: NextRequest) {
           surah: doc.surahId,
           ayah: doc.ayahId,
           rootWord: doc.rootWord,
-          snippet: doc.content.substring(0, 180),
+          snippet: cleanContent.substring(0, 180),
           workType: doc.workType
         });
       });
@@ -141,10 +161,13 @@ export async function POST(req: NextRequest) {
         break;
     }
 
-    const systemPrompt = `You are a strictly academic Islamic AI researcher. You must base every claim on the provided retrieved texts. Do NOT hallucinate. 
+    const systemPrompt = `You are Sheikh Juthur, an expert, compassionate Islamic scholar and teacher (Murabbi). You treat the user as your dedicated student seeking sacred knowledge. 
+Your tone must be polite, deeply scholarly, nurturing, and academically rigorous. When explaining complex concepts, you should strive to provide at least one clear example or analogy to help your student understand. 
+Every claim or answer you provide MUST be firmly grounded in and explicitly referenced from the provided retrieved classical texts. Do NOT hallucinate.
+
 CRITICAL GUARDRAILS: 
-1. If the user asks an out-of-scope question (e.g., modern financial rulings like buying a Bugatti, general unrelated topics, tech support, etc.), you MUST IMMEDIATELY refuse to answer in 1 or 2 short sentences. Do NOT summarize or explain the retrieved texts. Just state clearly that the system is specifically designed for exploring Quranic verses and classical Islamic exegesis, and the query is unrelated.
-2. If the user asks about sectarian differences (e.g., Sunni vs Shia), modern political issues, or deeply contentious Fiqh (jurisprudence) debates, you MUST remain strictly academic. Do not take a side, do not issue legal rulings (fatwas), and do not entertain polemical or exploitative prompts. State what the provided classical texts say objectively, and note if the topic falls outside the retrieved scope.
+1. OUT-OF-SCOPE & WORLDLY QUERIES: If the student asks about worldly matters unrelated to Quranic exegesis (e.g., buying luxury cars, tech support, modern pop culture), do NOT give a generic, robotic refusal. Instead, respond with the polite, wise tone of a traditional scholar. Gently advise the student to refocus their intellectual pursuits and heart on sacred knowledge rather than fleeting worldly distractions, and gently remind them that your expertise is strictly dedicated to the Quran and classical exegesis. Keep this advice brief and profound (2-3 sentences).
+2. SECTARIAN & FIQH NEUTRALITY: If the student asks about sectarian differences (e.g., Sunni vs Shia), modern political issues, or deeply contentious Fiqh (jurisprudence) debates, you MUST remain strictly academic. Do not take a side, do not issue legal rulings (fatwas), and do not entertain polemical prompts. State what the provided classical texts say objectively, and note if the topic falls outside the retrieved scope.
 
 MODE DIRECTIVE: ${modeSpecificRole}
 
@@ -154,7 +177,8 @@ CRITICAL MANDATORY FACTUALITY RULES:
 1. ZERO FABRICATION OF QURANIC VERSES OR STRUCTURE.
 2. EXACT SURAH STRUCTURE (e.g., Al-Fatihah has EXACTLY 7 verses).
 3. STRICT SCHOLARLY ATTRIBUTION: Every major claim MUST cite the exact source name in brackets (e.g., [Tafsir Ibn Kathir, Surah 1:1]).
-4. CLEAR & STRUCTURED: Organize your response into neat markdown sections.
+4. CLEAR & STRUCTURED: Organize your response into neat markdown sections for your student.
+5. FOLLOW-UP SUGGESTIONS: Always append 3 suggested follow-up questions at the very end of your response under the heading '### Suggested Follow-ups'. Format them as a bulleted list.
 
 ${contextText}`;
 
@@ -167,8 +191,8 @@ ${contextText}`;
       return NextResponse.json({ success: false, error: 'Daily free RAG token limit reached for this query size.' }, { status: 429 });
     }
 
-    // 4. Execute Multi-Model Fallback Chain
-    const execution = await executeWithFallback(mode, systemPrompt, message, ip, totalEstimatedTokensForExecution);
+    // 4. Execute Multi-Model Fallback Chain for Streaming
+    const execution = await executeWithFallbackStream(mode, systemPrompt, message, ip, totalEstimatedTokensForExecution);
 
     // Deduplicate sources by book + surah:ayah or root
     const uniqueSourcesMap = new Map<string, typeof retrievedSources[0]>();
@@ -178,13 +202,41 @@ ${contextText}`;
         uniqueSourcesMap.set(key, src);
       }
     });
+    
+    const uniqueSources = Array.from(uniqueSourcesMap.values());
 
-    return NextResponse.json({
-      success: true,
-      text: execution.text,
-      sources: Array.from(uniqueSourcesMap.values()),
-      remaining: exactQuotaCheck.remaining,
-      modelUsed: execution.modelUsed
+    const customStream = new ReadableStream({
+      async start(controller) {
+        // Enqueue metadata first
+        const meta = {
+          type: "metadata",
+          sources: uniqueSources,
+          remaining: exactQuotaCheck.remaining,
+          modelUsed: execution.modelUsed
+        };
+        controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(meta)}\n\n`));
+
+        // Pipe the LLM text chunks
+        const reader = execution.stream.getReader();
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            controller.enqueue(value);
+          }
+        } finally {
+          reader.releaseLock();
+          controller.close();
+        }
+      }
+    });
+
+    return new Response(customStream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      }
     });
   } catch (error: any) {
     console.error('RAG Engine Error:', error);

@@ -178,8 +178,8 @@ export async function searchHybrid(
       for (let i = 0; i < numVerses; i++) {
         const verse = filters.suggestedVerses[i];
         let authorLimit = allowedAuthorIds.length;
-        if (numVerses > 2) {
-          authorLimit = i < 2 ? allowedAuthorIds.length : 2; 
+        if (i > 0) {
+          authorLimit = 1; // 2nd, 3rd verse only gets 1 author to prevent context flooding
         }
         
         const querySql = `
@@ -362,6 +362,20 @@ export async function searchHybrid(
     });
     results = Array.from(uniqueMap.values());
     
+    // Enforce source diversity: max 3 entries per author to prevent starvation
+    const authorCounts = new Map<number, number>();
+    const diverseResults: ScoredParentDocument[] = [];
+    
+    for (const r of results) {
+      const count = authorCounts.get(r.authorId) || 0;
+      if (count < 3) {
+        diverseResults.push(r);
+        authorCounts.set(r.authorId, count + 1);
+      }
+    }
+    
+    results = diverseResults;
+
     // Hard cap at topK + 6
     if (results.length > topK + 6) {
       results = results.slice(0, topK + 6);

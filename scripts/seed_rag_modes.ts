@@ -11,7 +11,7 @@ const prisma = new PrismaClient();
 
 // Target Authors across the 6 Modes
 export const MODE_AUTHORS = {
-  default: [24, 61, 22, 21, 18, 20], // Ibn Kathir Ar/En, Tabari, Baghawi, Qurtubi, Tahrir wa al-Tanwir
+  default: [61, 22, 21, 18, 20], // Ibn Kathir En, Tabari, Baghawi, Qurtubi, Tahrir wa al-Tanwir
   classical: [24, 61, 22, 7],         // Ibn Kathir Ar/En, Tabari, Al-Durr al-Manthur
   grammar: [10, 4, 31],               // Al-Kashshaf, Al-Bahr al-Muhit, I'rab al-Qur'an (Darwish)
   modern: [20, 3, 23],                // Tahrir wa al-Tanwir, Adwa' al-Bayan, Al-Tafsir al-Wasit

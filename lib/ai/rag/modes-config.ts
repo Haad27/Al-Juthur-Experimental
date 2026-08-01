@@ -19,7 +19,7 @@ export const RAG_MODES: RagModeInfo[] = [
     badgeColor: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
     targetIntent: "Direct answers and general Quranic queries using the safest, most universally accepted classical and comprehensive commentaries.",
     sources: [
-      "Tafsir Ibn Kathir (Arabic & English)",
+      "Tafsir Ibn Kathir (English)",
       "Tafsir al-Tabari (Jami' al-Bayan)",
       "Tafsir al-Baghawi (Ma'alim al-Tanzil)",
       "Tafsir al-Qurtubi (Al-Jami' li-Ahkam al-Qur'an)",

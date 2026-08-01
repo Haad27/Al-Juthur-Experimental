@@ -201,7 +201,7 @@ OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
   "warningMessage": "Only if isScopeValid is false, state why clearly and suggest switching to Default Mode.",
   "targetSurah": null or exact Surah number (1 to 114) if the query mentions a specific Surah (e.g. Al-Fatihah is 1),
   "targetAyah": null or exact Ayah number if mentioned,
-  "expandedQueryAr": "Exact classical Arabic keywords, vocabulary, and synonyms corresponding to the query for BM25 matching against classical texts. (Must be in Arabic script)",
+  "expandedQueryAr": "Exact classical Arabic keywords, vocabulary, and synonyms corresponding to the query for BM25 matching. (Leave this EMPTY if you successfully identify a specific targetSurah and targetAyah, to save processing time)",
   "expandedQueryEn": "Expanded English terminology and synonyms.",
   "keywords": ["keyword1", "keyword2", "keyword3"],
   "rootWords": ["3-letter or 4-letter Arabic root if applicable, e.g. صبر, رحم, علم"],
