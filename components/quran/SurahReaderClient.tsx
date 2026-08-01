@@ -22,6 +22,8 @@ import {
   Save,
   ScrollText,
   BookOpen,
+  Library,
+  MessageSquareText,
 } from "lucide-react";
 import SurahPlayer from "@/components/SurahPlayer";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
@@ -65,8 +67,11 @@ interface AyahRowProps {
 function cleanUrduFootnoteText(html: string) {
   if (!html) return "";
   return html
-    .replace(/<b class=['"]text-emerald-400[^'"]*['"]>(.*?)<\/b>/gi, '<span class="text-emerald-400 font-bold block mb-2">$1</span>')
-    .replace(/<b class=['"]text-amber-400[^'"]*['"]>(.*?)<\/b>/gi, '<span class="text-emerald-400 font-bold block mt-3 mb-1">$1</span>');
+    .replace(/<b class=['"]?text-emerald-400[^>]*>(.*?)<\/b>/gi, '<span class="text-zinc-300 font-semibold block mb-2">$1</span>')
+    .replace(/<b class=['"]?text-amber-400[^>]*>(.*?)<\/b>/gi, '<span class="text-zinc-300 font-semibold block mt-3 mb-1">$1</span>')
+    .replace(/<span class=['"]?text-emerald-400[^>]*>(.*?)<\/span>/gi, '<span class="text-zinc-300 font-semibold block mb-2">$1</span>')
+    .replace(/class=['"]text-emerald-400['"]/g, 'class="text-zinc-300"')
+    .replace(/class=['"]text-emerald-500['"]/g, 'class="text-zinc-400"');
 }
 
 function processTranslation(rawText: string) {
@@ -358,7 +363,7 @@ const AyahRow = React.memo(({
         </p>
 
         {showTranslation && (
-          <div className={cn("pt-4 text-left w-full", isUrduTranslation ? "w-full sm:pr-2" : "md:ml-8 lg:w-2/3 md:w-4/6")}>
+          <div className={cn("pt-4 text-left w-full", isUrduTranslation ? "w-full sm:pr-8 md:pr-16 lg:pr-26" : "md:ml-8 lg:w-2/3 md:w-4/6")}>
             <div>
               <span
                 className="text-white md:leading-[1.5] leading-[1.8] translation-content"
@@ -379,7 +384,7 @@ const AyahRow = React.memo(({
                   className="inline-flex items-center justify-center p-2 ml-2 mt-2.5 mb-1 transition-all align-middle rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.25)] hover:scale-110 cursor-pointer"
                   title={showFootnoteIds ? "Hide Footnotes" : "Show Footnotes & Commentary"}
                 >
-                  <BookOpen size={16} className="text-emerald-400" />
+                  <MessageSquareText size={16} />
                 </button>
               ) : null}
             </div>
