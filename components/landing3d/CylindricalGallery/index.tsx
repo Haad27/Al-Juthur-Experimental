@@ -4,7 +4,7 @@ import { useRef, useMemo, useEffect, useImperativeHandle, forwardRef } from "rea
 import { useFrame } from "@react-three/fiber";
 import { useControls } from "leva";
 import * as THREE from "three";
-import { Text } from "@react-three/drei";
+import { Html } from "@react-three/drei";
 import { vertexShader, fragmentShader } from "./cylinderShader";
 import { useTextureAtlas } from "./useTextureAtlas";
 import {
@@ -444,19 +444,23 @@ const CylindricalGallery = forwardRef<CylindricalGalleryHandle, CylindricalGalle
           const imgIndex = textureIndices[i];
           const caption = captions[imgIndex % captions.length] || "";
           return (
-            <Text
+            <Html
               key={i}
               position={[0, 0, 0]}
-              fontSize={0.26}
-              maxWidth={2.4}
-              color="#6df4ce"
-              anchorX="center"
-              anchorY="middle"
-              outlineWidth={0.015}
-              outlineColor="#000000"
+              transform
+              center
+              style={{
+                color: "#6df4ce",
+                fontWeight: 700,
+                fontSize: "1.8rem",
+                textShadow: "-2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000",
+                whiteSpace: "nowrap",
+                pointerEvents: "none",
+                userSelect: "none"
+              }}
             >
               {caption}
-            </Text>
+            </Html>
           );
         })}
       </group>
