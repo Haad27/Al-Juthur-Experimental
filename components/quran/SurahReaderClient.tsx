@@ -342,6 +342,13 @@ const AyahRow = React.memo(({
           />
         </p>
 
+function cleanUrduFootnoteText(html: string) {
+  if (!html) return "";
+  return html
+    .replace(/<b class=['"]text-emerald-400[^'"]*['"]>(.*?)<\/b>/gi, '<span className="text-emerald-400 font-bold block mb-2">$1</span>')
+    .replace(/<b class=['"]text-amber-400[^'"]*['"]>(.*?)<\/b>/gi, '<span className="text-emerald-400 font-bold block mt-3 mb-1">$1</span>');
+}
+
         {showTranslation && (() => {
           const { mainText, footnotes } = processTranslation(ayah.translation);
           const hasFootnotesAvailable = Boolean(ayah.footnoteIds?.length || footnotes.length > 0 || isTafsirEdition);
@@ -364,25 +371,26 @@ const AyahRow = React.memo(({
                 {hasFootnotesAvailable ? (
                   <button
                     onClick={handleToggleFootnotes}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 mt-2.5 mb-1 align-middle rounded-full bg-gradient-to-r from-emerald-500/20 to-amber-500/20 hover:from-emerald-500/30 hover:to-amber-500/30 border border-emerald-400/50 text-emerald-300 hover:text-emerald-200 text-xs font-semibold shadow-[0_0_12px_rgba(16,185,129,0.3)] hover:shadow-[0_0_16px_rgba(16,185,129,0.5)] hover:scale-105 transition-all cursor-pointer"
-                    title={showFootnoteIds ? "Hide Footnotes & Notes" : "Show Footnotes & Notes"}
+                    className="inline-flex items-center justify-center p-2 ml-2 mt-2.5 mb-1 transition-all align-middle rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.25)] hover:scale-110 cursor-pointer"
+                    title={showFootnoteIds ? "Hide Footnotes" : "Show Footnotes & Commentary"}
                   >
-                    <BookOpen size={14} className="text-emerald-400 animate-pulse" />
-                    <span dir={isUrduTranslation ? "rtl" : "ltr"}>{showFootnoteIds ? (isUrduTranslation ? "حواشی بند کریں" : "Hide Notes") : (isUrduTranslation ? "حواشی و توضیحات" : "View Notes & Footnotes")}</span>
+                    <BookOpen size={16} className="text-emerald-400" />
                   </button>
                 ) : null}
               </div>
 
               {(hasFootnotesAvailable && showFootnoteIds) ? (
-                <div className="mt-3 p-4 rounded-xl bg-zinc-900/80 border border-emerald-500/40 text-sm text-zinc-300 max-h-80 overflow-y-auto custom-scrollbar relative shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
-                  <div className="font-semibold text-emerald-400 uppercase tracking-wider text-[11px] sticky -top-4 -mx-4 px-4 py-3 bg-zinc-900/95 backdrop-blur-md z-10 mb-3 border-b border-emerald-500/30 shadow-sm flex items-center justify-between">
-                    <span>{isUrduTranslation ? "حواشی و تفسیری حاشیہ" : "Footnotes & Commentary Notes"}</span>
-                    <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-md border border-emerald-500/30">
-                      {isTafsirEdition ? "Explanations" : "Footnotes"}
+                <div className="mt-3 p-4 rounded-xl bg-zinc-950/90 border border-emerald-500/30 text-sm text-zinc-100 max-h-80 overflow-y-auto custom-scrollbar relative shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
+                  <div className="font-semibold text-emerald-400 uppercase tracking-wider text-[11px] sticky -top-4 -mx-4 px-4 py-2.5 bg-zinc-950/95 backdrop-blur-md z-10 mb-3 border-b border-emerald-500/20 shadow-sm flex items-center justify-between">
+                    <span className="text-emerald-400 font-bold uppercase tracking-wider text-[11px]">
+                      FOOTNOTES & COMMENTARY NOTES
+                    </span>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-md border border-emerald-500/30">
+                      {isTafsirEdition ? "EXPLANATIONS" : "FOOTNOTES"}
                     </span>
                   </div>
                   
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {loadingFootnotes ? (
                       <p className="text-emerald-400/80 animate-pulse text-xs py-2">Loading notes...</p>
                     ) : (
@@ -390,20 +398,21 @@ const AyahRow = React.memo(({
                         {/* Dynamic Tafsir / Explanation Note for Dr. Israr, Maududi, Taqi Usmani */}
                         {fetchedFootnotes["tafsir_note"] && (
                           <div 
-                            className="leading-relaxed text-zinc-200 p-3 rounded-lg bg-emerald-950/20 border border-emerald-500/20"
+                            className="leading-[2.8] text-zinc-100 text-right p-3 rounded-lg bg-zinc-900/60 border border-zinc-800/80 font-nastaliq"
                             dir={isUrduTranslation ? "rtl" : "auto"}
                             style={{ 
                               fontFamily: isUrduTranslation ? "'Noto Nastaliq Urdu', serif" : undefined,
-                              lineHeight: isUrduTranslation ? "2.3" : undefined,
-                              fontSize: isUrduTranslation ? "1.1rem" : undefined
+                              lineHeight: isUrduTranslation ? "2.8" : undefined,
+                              fontSize: isUrduTranslation ? "1.15rem" : undefined,
+                              color: "#f4f4f5"
                             }}
-                            dangerouslySetInnerHTML={{ __html: fetchedFootnotes["tafsir_note"] }}
+                            dangerouslySetInnerHTML={{ __html: cleanUrduFootnoteText(fetchedFootnotes["tafsir_note"]) }}
                           />
                         )}
 
                         {/* Inline/extracted footnotes */}
                         {footnotes.length > 0 && footnotes.map((fn, fIdx) => (
-                          <div key={`inline-${fIdx}`} className="leading-relaxed text-zinc-300 italic p-2 rounded bg-zinc-800/40" dir="auto">
+                          <div key={`inline-${fIdx}`} className="leading-relaxed text-zinc-200 p-2.5 rounded bg-zinc-900/60 border border-zinc-800" dir="auto">
                             {fn}
                           </div>
                         ))}
@@ -413,12 +422,13 @@ const AyahRow = React.memo(({
                           ayah.footnoteIds.map((fId, idx) => (
                             <div 
                               key={fId} 
-                              className="leading-relaxed p-2 rounded bg-zinc-800/40" 
+                              className="leading-relaxed p-2.5 rounded bg-zinc-900/60 border border-zinc-800/80 text-zinc-100" 
                               dir={isUrduTranslation ? "rtl" : "auto"}
                               style={{ 
                                 fontFamily: isUrduTranslation ? "'Noto Nastaliq Urdu', serif" : undefined,
-                                lineHeight: isUrduTranslation ? "2.2" : undefined,
-                                fontSize: isUrduTranslation ? "1.1rem" : undefined
+                                lineHeight: isUrduTranslation ? "2.6" : undefined,
+                                fontSize: isUrduTranslation ? "1.1rem" : undefined,
+                                color: "#f4f4f5"
                               }}
                             >
                               <span className="text-emerald-400 font-bold mx-2 inline-block" dir="ltr">[{idx + 1}]</span>

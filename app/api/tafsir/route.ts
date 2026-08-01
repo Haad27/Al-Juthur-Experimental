@@ -111,7 +111,7 @@ export async function GET(request: Request) {
                 authorId: parsedAuthorId,
                 surahId: parseInt(surahId),
                 ayahId: vNum,
-                text: `<b class='text-emerald-400 block mb-2 font-bold font-nastaliq'>بیان القرآن (ڈاکٹر اسرار احمد):</b>\n\n<div class='leading-relaxed text-zinc-200 mt-2 font-nastaliq'>${a.text}</div>`,
+                text: `<div class='text-zinc-100 leading-[2.8] text-right font-nastaliq' style="font-family: 'Noto Nastaliq Urdu', serif; line-height: 2.8; font-size: 1.15rem; color: #f4f4f5;">${a.text}</div>`,
                 ayah: {
                   id: arabicAyah?.id || vNum,
                   surahId: parseInt(surahId),
@@ -220,7 +220,7 @@ export async function GET(request: Request) {
                   authorId: parsedAuthorId,
                   surahId: parsedSurahId,
                   ayahId: parsedAyahNum,
-                  text: `<b class='text-emerald-400 block mb-2 font-bold font-nastaliq'>بیان القرآن (ڈاکٹر اسرار احمد):</b>\n\n<div class='leading-relaxed text-zinc-200 mt-2 font-nastaliq'>${match.text}</div>`,
+                  text: `<div class='text-zinc-100 leading-[2.8] text-right font-nastaliq' style="font-family: 'Noto Nastaliq Urdu', serif; line-height: 2.8; font-size: 1.15rem; color: #f4f4f5;">${match.text}</div>`,
                   ayah: {
                     id: arabicAyah?.id || parsedAyahNum,
                     surahId: parsedSurahId,
