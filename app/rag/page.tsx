@@ -16,10 +16,12 @@ import {
 } from "lucide-react";
 import { inter } from "@/app/fonts";
 import { RAG_MODES } from "@/lib/ai/rag/modes-config";
+import Loading from "@/app/loading";
 
 export default function RagLandingPage() {
   const router = useRouter();
   const [showDataInfo, setShowDataInfo] = useState(false);
+  const [isLoadingMode, setIsLoadingMode] = useState(false);
 
   return (
     <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-slate-100 flex flex-col pb-16 ${inter.className}`}>
@@ -27,7 +29,7 @@ export default function RagLandingPage() {
       <div className="sticky top-0 z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-4 md:px-8 py-3">
         <div className="max-w-[1700px] mx-auto relative flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 sm:gap-3">
-            <Link href="/" className="flex items-center gap-2 shrink-0">
+            <Link href="/home" className="flex items-center gap-2 shrink-0">
               <LogoIcon className="w-8 h-8 rounded-[20%]" />
               <span className="font-bold text-lg sm:text-xl tracking-tight text-white whitespace-nowrap">Al-Juthur</span>
             </Link>
@@ -35,7 +37,7 @@ export default function RagLandingPage() {
 
           {/* Desktop Navigation Links */}
           <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-6 text-zinc-400 text-sm font-medium">
-            <Link href="/" className="hover:text-zinc-200 transition">
+            <Link href="/home" className="hover:text-zinc-200 transition">
               Home
             </Link>
             <Link href="/tafsir" className="hover:text-zinc-200 transition">
@@ -203,7 +205,10 @@ export default function RagLandingPage() {
                 {/* Launch Button */}
                 <div className="pt-4 mt-4 border-t border-zinc-800/80">
                   <button
-                    onClick={() => router.push(`/rag/chat?mode=${mode.id}`)}
+                    onClick={() => {
+                      setIsLoadingMode(true);
+                      router.push(`/rag/chat?mode=${mode.id}`);
+                    }}
                     className="w-full py-2 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500 border border-emerald-500/30 hover:border-emerald-500 text-emerald-400 hover:text-white font-semibold text-xs sm:text-sm flex items-center justify-between transition-all duration-200 shadow-sm group/btn"
                   >
                     <span className="truncate">Launch {mode.shortName}</span>
@@ -223,6 +228,9 @@ export default function RagLandingPage() {
         </div>
 
       </main>
+      
+      {/* Loading Overlay when switching models */}
+      {isLoadingMode && <Loading />}
     </div>
   );
 }

@@ -17,7 +17,7 @@ const Support = () => {
         Al-Juthur - Github
       </Link>
       <Link
-        href="/"
+        href="/home"
         className="px-5 py-2 mt-4 bg-emerald-500 hover:bg-zinc-700 text-white rounded-xl text-sm font-medium transition"
       >
         Go back

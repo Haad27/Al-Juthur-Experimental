@@ -1048,7 +1048,7 @@ export default function TafsirPage() {
         <div className="max-w-[1700px] mx-auto relative flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Logo and App Name */}
           <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-2">
+            <Link href="/home" className="flex items-center gap-2">
               <LogoIcon className="text-white size-6 hidden md:block" />
               <p className="font-bold text-lg md:text-xl text-white hidden md:block">Al-Juthur</p>
             </Link>
@@ -1056,7 +1056,7 @@ export default function TafsirPage() {
 
           {/* Desktop Full Navigation (Same as Homepage) */}
           <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-6 text-zinc-400 text-sm font-medium">
-            <Link href="/" className="cursor-pointer hover:text-gray-300 transition text-zinc-400">
+            <Link href="/home" className="cursor-pointer hover:text-gray-300 transition text-zinc-400">
               Home
             </Link>
             <Link href="/tafsir" className="cursor-pointer text-white font-medium">

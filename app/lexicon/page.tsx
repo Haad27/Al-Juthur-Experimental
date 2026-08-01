@@ -427,7 +427,7 @@ function LexiconPageContent() {
           <div className="flex items-center justify-between w-full md:w-auto">
             {/* Left Logo & Badge */}
             <div className="flex items-center gap-3">
-              <Link href="/" className="flex items-center gap-2">
+              <Link href="/home" className="flex items-center gap-2">
                 <LogoIcon className="w-8 h-8 rounded-[20%]" />
                 <span className="font-bold text-xl tracking-tight text-white">Al-Juthur</span>
               </Link>
@@ -450,7 +450,7 @@ function LexiconPageContent() {
 
           {/* Desktop Navigation Links */}
           <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-6 text-zinc-400 text-sm font-medium">
-            <Link href="/" className="hover:text-zinc-200 transition">
+            <Link href="/home" className="hover:text-zinc-200 transition">
               Home
             </Link>
             <Link href="/tafsir" className="hover:text-zinc-200 transition">

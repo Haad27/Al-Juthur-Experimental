@@ -14,7 +14,7 @@ export default function AiScholarPage() {
       <header className="border-b border-neutral-800/80 bg-neutral-900/40 backdrop-blur-md px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link
-            href="/"
+            href="/home"
             className="p-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white transition"
           >
             <ArrowLeft className="w-5 h-5" />
