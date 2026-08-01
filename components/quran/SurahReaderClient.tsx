@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { fetchAyahAudio } from "@/api/api";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -329,10 +330,16 @@ const AyahRow = React.memo(({
                 {(ayah.footnoteIds?.length || footnotes.length > 0) ? (
                   <button
                     onClick={handleToggleFootnotes}
-                    className="inline-flex items-center justify-center ml-2 text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/20 transition-colors align-middle rounded-full bg-emerald-500/10 p-1.5 cursor-pointer"
+                    className="inline-flex items-center justify-center ml-2 hover:bg-emerald-500/20 transition-colors align-middle rounded-full bg-emerald-500/10 p-1.5 cursor-pointer"
                     title={showFootnoteIds ? "Hide Footnotes" : "Show Footnotes"}
                   >
-                    <BookOpen size={14} />
+                    <Image 
+                      src="/assets/bookmark.png" 
+                      alt="Footnote" 
+                      width={14} 
+                      height={14} 
+                      className="opacity-90"
+                    />
                   </button>
                 ) : null}
               </div>
