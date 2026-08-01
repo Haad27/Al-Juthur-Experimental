@@ -29,7 +29,7 @@ export async function GET(request: Request) {
         // Virtual Authors (Translations serving as Tafsir)
         const virtualAuthors = [
           { id: 100095, name: "Tafheem e Qur'an - Sayyid Maududi", authorName: "Sayyid Abul Ala Maududi", languageId: 2, era: "Modern & Contemporary (19th-21st CE)" }, // English
-          { id: 100158, name: "Bayan-ul-Quran", authorName: "Dr. Israr Ahmad", languageId: 3, era: "Modern & Contemporary (19th-21st CE)" }, // Urdu
+          { id: 100158, name: "Bayan-ul-Quran", authorName: "Dr. Israr Ahmad", languageId: 10, era: "Modern & Contemporary (19th-21st CE)" }, // Urdu
           { id: 100084, name: "Taqi Usmani", authorName: "Mufti Taqi Usmani", languageId: 2, era: "Modern & Contemporary (19th-21st CE)" }, // English
         ];
         
@@ -45,7 +45,7 @@ export async function GET(request: Request) {
         });
         
         // Also tag the existing DB authors that we will upgrade
-        [138, 139, 105].forEach(id => {
+        [138, 139, 105, 158, 100158].forEach(id => {
           if (!tagsMap[id]) tagsMap[id] = [];
           if (!tagsMap[id].find(t => t.id === 999)) {
             tagsMap[id].push({ id: 999, name: "Translation with Explanation", color: "emerald" });
@@ -77,6 +77,9 @@ export async function GET(request: Request) {
       }
     }
 
+    // Check for Dr. Israr Ahmad local Bayan-ul-Quran tafsir files
+    const isDrIsrar = (id: string | number) => id === 158 || id === 100158 || id === "158" || id === "100158";
+
     // 2. Query all Ayahs + Tafsir for a specific Author and Surah (Full Surah Reader Mode)
     if (authorId && surahId && !ayahNum) {
       const parsedAuthorId = parseInt(authorId);
@@ -85,7 +88,45 @@ export async function GET(request: Request) {
         138: "97",  // Maududi UR
         139: "151", // Taqi Usmani UR
         105: "156", // Qutb UR
+        158: "158", // Israr UR
       };
+
+      if (isDrIsrar(parsedAuthorId)) {
+        const fs = await import('fs');
+        const path = await import('path');
+        const israrFile = path.join(process.cwd(), 'database', 'downloaded_tafsirs', 'ur-tafsir-bayan-ul-quran', `${surahId}.json`);
+        if (fs.existsSync(israrFile)) {
+          try {
+            const raw = fs.readFileSync(israrFile, 'utf8');
+            const parsed = JSON.parse(raw);
+            const ayahs = await prisma.ayah.findMany({
+              where: { surahId: parseInt(surahId) },
+              orderBy: { numberInSurah: 'asc' }
+            });
+            const tafsirs = (parsed.ayahs || []).map((a: any) => {
+              const vNum = a.ayah;
+              const arabicAyah = ayahs.find(ar => ar.numberInSurah === vNum);
+              return {
+                id: 100158 * 1000 + vNum,
+                authorId: parsedAuthorId,
+                surahId: parseInt(surahId),
+                ayahId: vNum,
+                text: `<b class='text-emerald-400 block mb-2 font-bold font-nastaliq'>بیان القرآن (ڈاکٹر اسرار احمد):</b>\n\n<div class='leading-relaxed text-zinc-200 mt-2 font-nastaliq'>${a.text}</div>`,
+                ayah: {
+                  id: arabicAyah?.id || vNum,
+                  surahId: parseInt(surahId),
+                  numberInSurah: vNum,
+                  text: arabicAyah?.text || "Arabic Text",
+                },
+                author: { name: "Dr. Israr Ahmad", authorName: "Dr. Israr Ahmad" }
+              };
+            });
+            return NextResponse.json({ success: true, data: tafsirs });
+          } catch(e) {
+            console.error("Error loading Israr local file", e);
+          }
+        }
+      }
       
       if (parsedAuthorId > 100000 || DB_TO_TRANS_MAP[parsedAuthorId]) {
         // Handle virtual translation-based tafsir (or upgraded DB ones)
@@ -155,12 +196,53 @@ export async function GET(request: Request) {
 
     // 3. Query a specific Ayah within a Surah for an Author
     if (surahId && ayahNum && authorId) {
+      const parsedAuthorId = parseInt(authorId);
+      const parsedSurahId = parseInt(surahId);
+      const parsedAyahNum = parseInt(ayahNum);
+
+      if (isDrIsrar(parsedAuthorId)) {
+        const fs = await import('fs');
+        const path = await import('path');
+        const israrFile = path.join(process.cwd(), 'database', 'downloaded_tafsirs', 'ur-tafsir-bayan-ul-quran', `${surahId}.json`);
+        if (fs.existsSync(israrFile)) {
+          try {
+            const raw = fs.readFileSync(israrFile, 'utf8');
+            const parsed = JSON.parse(raw);
+            const match = (parsed.ayahs || []).find((a: any) => a.ayah === parsedAyahNum);
+            if (match) {
+              const arabicAyah = await prisma.ayah.findFirst({
+                where: { surahId: parsedSurahId, numberInSurah: parsedAyahNum }
+              });
+              return NextResponse.json({
+                success: true,
+                data: [{
+                  id: 100158 * 1000 + parsedAyahNum,
+                  authorId: parsedAuthorId,
+                  surahId: parsedSurahId,
+                  ayahId: parsedAyahNum,
+                  text: `<b class='text-emerald-400 block mb-2 font-bold font-nastaliq'>بیان القرآن (ڈاکٹر اسرار احمد):</b>\n\n<div class='leading-relaxed text-zinc-200 mt-2 font-nastaliq'>${match.text}</div>`,
+                  ayah: {
+                    id: arabicAyah?.id || parsedAyahNum,
+                    surahId: parsedSurahId,
+                    numberInSurah: parsedAyahNum,
+                    text: arabicAyah?.text || "Arabic Text"
+                  },
+                  author: { name: "Dr. Israr Ahmad", authorName: "Dr. Israr Ahmad" }
+                }]
+              });
+            }
+          } catch(e) {
+            console.error("Error reading Israr single verse", e);
+          }
+        }
+      }
+
       const tafsirs = await prisma.tafsirEntry.findMany({
         where: {
-          authorId: parseInt(authorId),
-          surahId: parseInt(surahId),
+          authorId: parsedAuthorId,
+          surahId: parsedSurahId,
           ayah: {
-            numberInSurah: parseInt(ayahNum)
+            numberInSurah: parsedAyahNum
           }
         },
         include: {

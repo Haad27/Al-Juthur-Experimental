@@ -59,6 +59,7 @@ interface AyahRowProps {
   handleCopyAyah: (ayah: AyahProps) => void;
   handleSaveAyah: (ayah: AyahProps) => void;
   isUrduTranslation: boolean;
+  translationEdition: string;
 }
 
 function processTranslation(rawText: string) {
@@ -118,6 +119,7 @@ const AyahRow = React.memo(({
   handleCopyAyah,
   handleSaveAyah,
   isUrduTranslation,
+  translationEdition,
 }: AyahRowProps) => {
   const isCurrentlyPlaying = useAudioStore(s => s.currentAyah === ayah.numberInSurah && s.currentSurah === surahNumber);
   const playAyah = useAudioStore(s => s.playAyah);
@@ -126,25 +128,54 @@ const AyahRow = React.memo(({
   const [fetchedFootnotes, setFetchedFootnotes] = useState<Record<string, string>>({});
   const [loadingFootnotes, setLoadingFootnotes] = useState(false);
 
+  const isTafsirEdition = React.useMemo(() => {
+    return ["158", "97", "234", "151", "84"].includes(translationEdition);
+  }, [translationEdition]);
+
   const handleToggleFootnotes = async () => {
     if (!showFootnoteIds) {
       setShowFootnoteIds(true);
-      if (ayah.footnoteIds && ayah.footnoteIds.length > 0 && Object.keys(fetchedFootnotes).length === 0) {
+      if (Object.keys(fetchedFootnotes).length === 0) {
         setLoadingFootnotes(true);
         const newFootnotes = { ...fetchedFootnotes };
-        for (const fId of ayah.footnoteIds) {
+
+        // 1. If it's a translation with Tafsir/Commentary (Dr. Israr, Maududi, Taqi Usmani)
+        if (isTafsirEdition) {
           try {
-            const res = await fetch(`https://api.quran.com/api/v4/foot_notes/${fId}`);
+            let authorId = "100158";
+            if (translationEdition === "97" || translationEdition === "234") authorId = "138";
+            if (translationEdition === "151" || translationEdition === "84") authorId = "139";
+            if (translationEdition === "158") authorId = "158";
+
+            const res = await fetch(`/api/tafsir?authorId=${authorId}&surahId=${surahNumber}&ayahId=${ayah.numberInSurah}`);
             if (res.ok) {
               const data = await res.json();
-              if (data.foot_note) {
-                newFootnotes[fId] = data.foot_note.text;
+              if (data.data && data.data[0]?.text) {
+                newFootnotes["tafsir_note"] = data.data[0].text;
               }
             }
           } catch(e) {
-            console.error(e);
+            console.error("Error fetching dynamic tafsir note:", e);
           }
         }
+
+        // 2. Standard Quran.com API footnotes
+        if (ayah.footnoteIds && ayah.footnoteIds.length > 0) {
+          for (const fId of ayah.footnoteIds) {
+            try {
+              const res = await fetch(`https://api.quran.com/api/v4/foot_notes/${fId}`);
+              if (res.ok) {
+                const data = await res.json();
+                if (data.foot_note) {
+                  newFootnotes[fId] = data.foot_note.text;
+                }
+              }
+            } catch(e) {
+              console.error(e);
+            }
+          }
+        }
+
         setFetchedFootnotes(newFootnotes);
         setLoadingFootnotes(false);
       }
@@ -313,8 +344,9 @@ const AyahRow = React.memo(({
 
         {showTranslation && (() => {
           const { mainText, footnotes } = processTranslation(ayah.translation);
+          const hasFootnotesAvailable = Boolean(ayah.footnoteIds?.length || footnotes.length > 0 || isTafsirEdition);
           return (
-            <div className="pt-4 md:ml-8 lg:w-2/3 md:w-4/6 text-left">
+            <div className={cn("pt-4 text-left w-full", isUrduTranslation ? "w-full sm:pr-2" : "md:ml-8 lg:w-2/3 md:w-4/6")}>
               <div>
                 <span
                   className="text-white md:leading-[1.5] leading-[1.8] translation-content"
@@ -323,62 +355,78 @@ const AyahRow = React.memo(({
                     fontFamily: isUrduTranslation ? "'Noto Nastaliq Urdu', serif" : undefined,
                     lineHeight: isUrduTranslation ? "2.6" : undefined,
                     textAlign: isUrduTranslation ? "right" : undefined,
-                    display: "block"
+                    direction: isUrduTranslation ? "rtl" : undefined,
+                    display: "block",
+                    width: "100%"
                   }}
                   dangerouslySetInnerHTML={{ __html: mainText }}
                 />
-                {(ayah.footnoteIds?.length || footnotes.length > 0) ? (
+                {hasFootnotesAvailable ? (
                   <button
                     onClick={handleToggleFootnotes}
-                    className="inline-flex items-center justify-center ml-2 hover:bg-emerald-500/20 transition-colors align-middle rounded-full bg-emerald-500/10 p-1.5 cursor-pointer"
-                    title={showFootnoteIds ? "Hide Footnotes" : "Show Footnotes"}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 mt-2.5 mb-1 align-middle rounded-full bg-gradient-to-r from-emerald-500/20 to-amber-500/20 hover:from-emerald-500/30 hover:to-amber-500/30 border border-emerald-400/50 text-emerald-300 hover:text-emerald-200 text-xs font-semibold shadow-[0_0_12px_rgba(16,185,129,0.3)] hover:shadow-[0_0_16px_rgba(16,185,129,0.5)] hover:scale-105 transition-all cursor-pointer"
+                    title={showFootnoteIds ? "Hide Footnotes & Notes" : "Show Footnotes & Notes"}
                   >
-                    <Image 
-                      src="/assets/bookmark.png" 
-                      alt="Footnote" 
-                      width={14} 
-                      height={14} 
-                      className="opacity-90"
-                    />
+                    <BookOpen size={14} className="text-emerald-400 animate-pulse" />
+                    <span dir={isUrduTranslation ? "rtl" : "ltr"}>{showFootnoteIds ? (isUrduTranslation ? "حواشی بند کریں" : "Hide Notes") : (isUrduTranslation ? "حواشی و توضیحات" : "View Notes & Footnotes")}</span>
                   </button>
                 ) : null}
               </div>
 
-              {((ayah.footnoteIds?.length || footnotes.length > 0) && showFootnoteIds) ? (
-                <div className="mt-3 p-4 rounded-xl bg-zinc-900/60 border border-emerald-900/50 text-sm text-zinc-300 max-h-80 overflow-y-auto custom-scrollbar relative">
-                  <div className="font-semibold text-emerald-500 uppercase tracking-wider text-[11px] sticky -top-4 -mx-4 px-4 py-3 bg-zinc-900/95 backdrop-blur-md z-10 mb-3 border-b border-emerald-900/30 shadow-sm">
-                    Footnotes
+              {(hasFootnotesAvailable && showFootnoteIds) ? (
+                <div className="mt-3 p-4 rounded-xl bg-zinc-900/80 border border-emerald-500/40 text-sm text-zinc-300 max-h-80 overflow-y-auto custom-scrollbar relative shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+                  <div className="font-semibold text-emerald-400 uppercase tracking-wider text-[11px] sticky -top-4 -mx-4 px-4 py-3 bg-zinc-900/95 backdrop-blur-md z-10 mb-3 border-b border-emerald-500/30 shadow-sm flex items-center justify-between">
+                    <span>{isUrduTranslation ? "حواشی و تفسیری حاشیہ" : "Footnotes & Commentary Notes"}</span>
+                    <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-md border border-emerald-500/30">
+                      {isTafsirEdition ? "Explanations" : "Footnotes"}
+                    </span>
                   </div>
                   
                   <div className="space-y-3">
-                    {/* Inline/extracted footnotes */}
-                    {footnotes.length > 0 && footnotes.map((fn, fIdx) => (
-                      <div key={`inline-${fIdx}`} className="leading-relaxed text-zinc-400 italic" dir="auto">
-                        {fn}
-                      </div>
-                    ))}
-
-                    {/* API fetched footnotes */}
-                    {ayah.footnoteIds && ayah.footnoteIds.length > 0 && (
-                      loadingFootnotes ? (
-                        <p className="text-zinc-500 animate-pulse">Loading footnotes...</p>
-                      ) : (
-                        ayah.footnoteIds.map((fId, idx) => (
+                    {loadingFootnotes ? (
+                      <p className="text-emerald-400/80 animate-pulse text-xs py-2">Loading notes...</p>
+                    ) : (
+                      <>
+                        {/* Dynamic Tafsir / Explanation Note for Dr. Israr, Maududi, Taqi Usmani */}
+                        {fetchedFootnotes["tafsir_note"] && (
                           <div 
-                            key={fId} 
-                            className="leading-relaxed" 
+                            className="leading-relaxed text-zinc-200 p-3 rounded-lg bg-emerald-950/20 border border-emerald-500/20"
                             dir={isUrduTranslation ? "rtl" : "auto"}
                             style={{ 
                               fontFamily: isUrduTranslation ? "'Noto Nastaliq Urdu', serif" : undefined,
-                              lineHeight: isUrduTranslation ? "2.2" : undefined,
+                              lineHeight: isUrduTranslation ? "2.3" : undefined,
                               fontSize: isUrduTranslation ? "1.1rem" : undefined
                             }}
-                          >
-                            <span className="text-emerald-500 font-bold mx-2 inline-block" dir="ltr">[{idx + 1}]</span>
-                            <span dangerouslySetInnerHTML={{ __html: fetchedFootnotes[fId] || "Footnote unavailable." }} />
+                            dangerouslySetInnerHTML={{ __html: fetchedFootnotes["tafsir_note"] }}
+                          />
+                        )}
+
+                        {/* Inline/extracted footnotes */}
+                        {footnotes.length > 0 && footnotes.map((fn, fIdx) => (
+                          <div key={`inline-${fIdx}`} className="leading-relaxed text-zinc-300 italic p-2 rounded bg-zinc-800/40" dir="auto">
+                            {fn}
                           </div>
-                        ))
-                      )
+                        ))}
+
+                        {/* API fetched footnotes */}
+                        {ayah.footnoteIds && ayah.footnoteIds.length > 0 && (
+                          ayah.footnoteIds.map((fId, idx) => (
+                            <div 
+                              key={fId} 
+                              className="leading-relaxed p-2 rounded bg-zinc-800/40" 
+                              dir={isUrduTranslation ? "rtl" : "auto"}
+                              style={{ 
+                                fontFamily: isUrduTranslation ? "'Noto Nastaliq Urdu', serif" : undefined,
+                                lineHeight: isUrduTranslation ? "2.2" : undefined,
+                                fontSize: isUrduTranslation ? "1.1rem" : undefined
+                              }}
+                            >
+                              <span className="text-emerald-400 font-bold mx-2 inline-block" dir="ltr">[{idx + 1}]</span>
+                              <span dangerouslySetInnerHTML={{ __html: fetchedFootnotes[fId] || "Footnote unavailable." }} />
+                            </div>
+                          ))
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
@@ -604,6 +652,7 @@ export default function SurahReaderClient({
                 handleCopyAyah={handleCopyAyah}
                 handleSaveAyah={handleSaveAyah}
                 isUrduTranslation={isUrduTranslation}
+                translationEdition={translationEdition}
               />
             );
           }}
