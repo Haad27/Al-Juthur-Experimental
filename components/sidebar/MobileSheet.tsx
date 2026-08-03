@@ -7,6 +7,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Sheet } from "../ui/sheet";
 import { Input } from "../ui/input";
 import Settings from "../Settings";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import {
   SheetTrigger,
@@ -47,7 +48,7 @@ const MobileSheet = ({
       {surahNumber ? (
         <div
           className={cn(
-            "fixed w-full lg:hidden flex flex-col gap-2 transition-all duration-300 p-2 pl-4 pr-2 bg-zinc-950/40 border-b border-zinc-800/80 min-h-16 z-99999",
+            "fixed w-full lg:hidden flex flex-col gap-2 transition-all duration-300 p-2 pl-4 pr-2 bg-zinc-950/90 backdrop-blur-xl border-b border-zinc-800/80 min-h-16 z-[99999]",
             show ? "top-0" : "-top-24"
           )}
         >
@@ -59,33 +60,37 @@ const MobileSheet = ({
             </div>
             <button 
               onClick={() => { setActiveTab("settings"); setIsOpen(true); }} 
-              className="p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white transition-colors"
+              className="p-1.5 rounded-lg bg-zinc-900 border border-emerald-500/60 shadow-[0_0_12px_rgba(16,185,129,0.4)] text-emerald-400 hover:text-emerald-300 hover:shadow-[0_0_16px_rgba(16,185,129,0.6)] transition-all duration-300"
             >
               <SlidersHorizontal className="size-4" />
             </button>
           </div>
           <div className="flex w-full gap-2 items-center">
             <div className="relative flex-1 min-w-0">
-              <select
-                value={surahNumber}
-                onChange={(e) => {
-                  router.push(`/surah/${e.target.value}`);
+              <Select
+                value={surahNumber.toString()}
+                onValueChange={(value) => {
+                  router.push(`/surah/${value}`);
                 }}
-                className="w-full appearance-none bg-zinc-900 border border-emerald-500/50 rounded-lg px-3 py-2 text-xs text-zinc-300 font-medium focus:outline-none focus:border-emerald-400 pr-8 shadow-sm truncate"
               >
-                {SURAHS_DATA.map((s) => (
-                  <option key={s.number} value={s.number} className="bg-zinc-900 text-zinc-200">
-                    {s.number}. {s.englishName}
-                  </option>
-                ))}
-              </select>
-              <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 size-3.5 text-zinc-500 pointer-events-none rotate-90" />
+                <SelectTrigger className="w-full h-[38px] bg-zinc-900 border-emerald-500/50 rounded-lg text-xs text-zinc-300 font-medium focus:ring-0 shadow-sm pr-8">
+                  <SelectValue placeholder="Select Surah" />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-900 border-zinc-800 max-h-[300px]">
+                  {SURAHS_DATA.map((s) => (
+                    <SelectItem key={s.number} value={s.number.toString()} className="text-zinc-200 focus:bg-emerald-600 focus:text-white cursor-pointer transition-colors text-xs">
+                      {s.number}. {s.englishName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="relative w-28 shrink-0">
-              <select
-                onChange={(e) => {
-                  const ayahNumber = e.target.value;
+              <Select
+                value=""
+                onValueChange={(value) => {
+                  const ayahNumber = value;
                   const element = document.getElementById(`ayah-${ayahNumber}`);
                   if (element) {
                     element.scrollIntoView({ behavior: "auto", block: "center" });
@@ -96,16 +101,18 @@ const MobileSheet = ({
                     router.replace(`/surah/${surahNumber}?ayah=${ayahNumber}`);
                   }
                 }}
-                className="w-full appearance-none bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-300 font-medium focus:outline-none focus:border-emerald-500/50 pr-8 shadow-sm"
               >
-                <option value="" disabled selected className="bg-zinc-900 text-zinc-200">Ayah...</option>
-                {Array.from({ length: SURAHS_DATA.find((s) => s.number === surahNumber)?.numberOfAyahs || 1 }, (_, i) => i + 1).map((num) => (
-                  <option key={num} value={num} className="bg-zinc-900 text-zinc-200">
-                    Ayah {num}
-                  </option>
-                ))}
-              </select>
-              <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 size-3.5 text-zinc-500 pointer-events-none rotate-90" />
+                <SelectTrigger className="w-full h-[38px] bg-zinc-900 border-zinc-800 rounded-lg text-xs text-zinc-300 font-medium focus:ring-0 shadow-sm pr-8">
+                  <SelectValue placeholder="Ayah..." />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-900 border-zinc-800 max-h-[300px]">
+                  {Array.from({ length: SURAHS_DATA.find((s) => s.number === surahNumber)?.numberOfAyahs || 1 }, (_, i) => i + 1).map((num) => (
+                    <SelectItem key={num} value={num.toString()} className="text-zinc-200 focus:bg-emerald-600 focus:text-white cursor-pointer transition-colors text-xs">
+                      Ayah {num}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>

@@ -57,9 +57,29 @@ export function splitIntoChildChunks(
       // Now add current paragraph words
       currentWords.push(...pWords);
 
-      // If a single paragraph is larger than maxWordsPerChunk, split by sentences
+      // If a single paragraph is larger than maxWordsPerChunk, split by isnad/sentence boundaries
       while (currentWords.length > maxWordsPerChunk) {
-        const slice = currentWords.slice(0, maxWordsPerChunk);
+        let splitIndex = maxWordsPerChunk;
+        
+        // Search backwards from maxWordsPerChunk down to 100 words for a good breaking point
+        for (let i = maxWordsPerChunk; i > 100; i--) {
+          const word = currentWords[i];
+          const prevWord = currentWords[i - 1] || '';
+          
+          // 1. Break BEFORE an isnad marker
+          if (word === 'حدثنا' || word === 'أخبرنا' || word === 'أنبأنا' || word === 'قال' || word === 'حدثني') {
+            splitIndex = i;
+            break;
+          }
+          
+          // 2. Break AFTER a sentence boundary
+          if (prevWord.endsWith('.') || prevWord.endsWith('!') || prevWord.endsWith('؟') || prevWord.endsWith(':')) {
+            splitIndex = i;
+            break;
+          }
+        }
+        
+        const slice = currentWords.slice(0, splitIndex);
         chunks.push({
           id: `${parentId}-c${chunkIndex++}`,
           parentId,
@@ -72,7 +92,7 @@ export function splitIntoChildChunks(
           language: metadata.language,
           rootWord: metadata.rootWord,
         });
-        currentWords = currentWords.slice(maxWordsPerChunk - overlapWords);
+        currentWords = currentWords.slice(splitIndex - Math.min(splitIndex, overlapWords));
       }
     }
   }

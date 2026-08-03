@@ -31,7 +31,7 @@ const SECTIONS: SectionData[] = [
     title: "The Mushaf",
     subtitle: "Full Reading Experience",
     description:
-      "Navigate the Qur'an verse-by-verse with a pristine, distraction-free interface. Beautiful Arabic typography with smooth navigation that feels natural.",
+      "Navigate the Quran verse by verse with a pristine and immersive interface. Beautiful Arabic typography with smooth navigation that feels completely natural.",
     accentColor: "#6df4ce",
     align: "left",
   },
@@ -41,7 +41,7 @@ const SECTIONS: SectionData[] = [
     title: "130+ Tafsirs",
     subtitle: "Classical & Contemporary",
     description:
-      "Access over 130 tafsir sources organized by era and methodology. From the classical works of Ibn Kathir and al-Tabari to modern scholarly interpretations.",
+      "Access over 130 tafsir sources organized by era and methodology. From the classical works of Ibn Kathir to modern scholarly interpretations.",
     accentColor: "#6df4ce",
     align: "right",
   },
@@ -49,9 +49,9 @@ const SECTIONS: SectionData[] = [
     id: "lexicon",
     icon: <BookText className="w-6 h-6" />,
     title: "8+ Classical Lexicons",
-    subtitle: "Root-Word Morphology",
+    subtitle: "Root Word Morphology",
     description:
-      "Dive into root-word morphology and meaning sourced from Lisan al-Arab, Mufradat al-Raghib, Lane's Lexicon, and more. Understand every word at its deepest level.",
+      "Dive into root word morphology and meaning sourced from Lisan al Arab, Mufradat al Raghib and more. Understand every word at its deepest level.",
     accentColor: "#6df4ce",
     align: "left",
   },
@@ -61,7 +61,7 @@ const SECTIONS: SectionData[] = [
     title: "RAG AI",
     subtitle: "6 Specialized Modes",
     description:
-      "Intelligent retrieval that matches your query intent to the right classical sources. Six specialized modes ensure every question gets the most relevant scholarly context.",
+      "Our AI model is trained directly on classical tafsir and lexicons to answer precise questions. Get intelligent answers backed by traditional scholarly sources.",
     accentColor: "#6df4ce",
     align: "right",
   },
@@ -71,7 +71,7 @@ const SECTIONS: SectionData[] = [
     title: "AI Translation",
     subtitle: "Precision Meets Clarity",
     description:
-      "Classical Arabic rendered into clear modern language without losing precision. Every nuance preserved, every meaning accessible.",
+      "Classical Arabic rendered into clear modern language without losing precision. Every nuance preserved and every meaning made accessible.",
     accentColor: "#6df4ce",
     align: "left",
   },
@@ -99,8 +99,8 @@ function FeatureCard({ section }: { section: SectionData }) {
           ease: "power2.out",
           scrollTrigger: {
             trigger: cardRef.current,
-            start: "top 80%",
-            end: "top 30%",
+            start: "top 85%",
+            end: "bottom 15%",
             toggleActions: "play reverse play reverse",
           },
         }

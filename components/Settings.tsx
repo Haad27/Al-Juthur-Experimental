@@ -174,9 +174,9 @@ const Settings = () => {
     <div className="p-4 space-y-4 max-w-md overflow-y-auto scrollable-container max-h-[calc(100vh-190px)]">
       <SettingSection
         icon={<Globe className="w-4 h-4 text-emerald-400" />}
-        title="Translation Language"
+        title="Translation"
         control={<TranslationSelector />}
-        description="Search & select from 124 local offline translations grouped by language."
+        description="Search & select from 127 translations grouped by language."
       />
 
       <SettingSection

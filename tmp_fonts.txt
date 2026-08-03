@@ -1,0 +1,21 @@
+Created At: 2026-08-02T01:26:47+05:00
+Completed At: 2026-08-02T01:26:47+05:00
+File Path: `file:///d:/Documents/Deeper%20Dive%20in%20Quran/app/fonts.ts`
+Total Lines: 13
+Total Bytes: 193
+Showing lines 1 to 13
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: export const amiri = {
+2:   className: "font-serif",
+3: };
+4: 
+5: export const amiriquran = {
+6:   className: "font-serif",
+7: };
+8: 
+9: export const inter = {
+10:   className: "font-sans",
+11:   variable: "--font-inter",
+12: };
+13: 
+The above content shows the entire, complete file contents of the requested file.

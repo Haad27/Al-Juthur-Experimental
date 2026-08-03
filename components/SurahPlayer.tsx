@@ -339,7 +339,7 @@ export default function SurahPlayer({
       <div>
         <button
           onClick={() => setMobileFabOpen(!mobileFabOpen)}
-          className="fixed bottom-[calc(6.75rem+env(safe-area-inset-bottom,0px))] right-4 md:right-8 z-50 size-12 md:size-14 rounded-full bg-emerald-600 border border-emerald-400/40 text-white shadow-2xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+          className="fixed bottom-[calc(6.75rem+env(safe-area-inset-bottom,0px))] md:bottom-8 right-4 md:right-8 z-50 size-12 md:size-14 rounded-full bg-emerald-600 border border-emerald-400/40 text-white shadow-2xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
           title="Audio Recitation Controls"
         >
           {playing ? (
@@ -356,7 +356,7 @@ export default function SurahPlayer({
             initial={{ opacity: 0, y: 15, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 15, scale: 0.95 }}
-            className="fixed bottom-[calc(10.25rem+env(safe-area-inset-bottom,0px))] right-4 md:right-8 z-50 w-64 bg-zinc-900/95 border border-zinc-800 rounded-2xl p-4 shadow-2xl backdrop-blur-xl space-y-4 text-white"
+            className="fixed bottom-[calc(10.25rem+env(safe-area-inset-bottom,0px))] md:bottom-[5.5rem] right-4 md:right-8 z-50 w-64 bg-zinc-900/95 border border-zinc-800 rounded-2xl p-4 shadow-2xl backdrop-blur-xl space-y-4 text-white"
           >
             <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Recitation Player</span>
@@ -460,47 +460,6 @@ export default function SurahPlayer({
         )}
       </div>
 
-      {/* Desktop-only Go to Ayah FAB */}
-      <div className="hidden md:block fixed bottom-[calc(6.75rem+4.5rem)] right-8 z-50">
-        <Popover>
-          <PopoverTrigger asChild>
-            <button
-              className="size-14 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 shadow-xl flex items-center justify-center transition-all hover:scale-105 hover:bg-zinc-700 active:scale-95"
-              title="Go to Verse"
-            >
-              <BookOpen className="size-6" />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent side="left" className="w-56 bg-zinc-900 border-zinc-800 rounded-2xl p-4 shadow-2xl">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 block mb-3 border-b border-zinc-800 pb-2">Go to Ayah</span>
-            <select
-              className="w-full bg-zinc-950/60 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white outline-none cursor-pointer"
-              defaultValue=""
-              onChange={(e) => {
-                const val = Number(e.target.value);
-                if (val > 0) {
-                  window.dispatchEvent(new CustomEvent('scrollToAyah', { detail: { index: val - 1 } }));
-                  // Highlight
-                  setTimeout(() => {
-                    const element = document.getElementById(`ayah-${val}`);
-                    if (element) {
-                      const c = ["dark:bg-[#1c1c1cff]", "bg-[var(--sephia-300)]"];
-                      element.classList.add(...c);
-                      setTimeout(() => element.classList.remove(...c), 2000);
-                    }
-                  }, 300);
-                }
-                e.target.value = "";
-              }}
-            >
-              <option value="" disabled className="bg-zinc-900 text-zinc-400">Select Verse...</option>
-              {Array.from({ length: lastAyahNumber }, (_, i) => i + 1).map(num => (
-                <option key={num} value={num} className="bg-zinc-800">Ayah {num}</option>
-              ))}
-            </select>
-          </PopoverContent>
-        </Popover>
-      </div>
     </AnimatePresence>
   );
 }

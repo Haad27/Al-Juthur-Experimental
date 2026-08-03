@@ -273,9 +273,12 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                       </div>
                     )}
                   </div>
-                  <div className="relative inline-flex items-center bg-emerald-950/20 border border-emerald-500/40 rounded-md hover:bg-emerald-900/40 transition-colors mt-1">
+                  <div className="relative inline-flex items-center bg-emerald-950/20 border border-emerald-500/40 rounded-md hover:bg-emerald-900/40 transition-colors mt-1 cursor-pointer">
+                    <span className="text-[11px] text-emerald-400 font-medium py-1 pl-2 pr-6 truncate pointer-events-none">
+                      {RAG_MODES.find(m => m.id === selectedModeId)?.shortName || "Select Mode"}
+                    </span>
                     <select 
-                      className="appearance-none bg-transparent text-[11px] text-emerald-400 outline-none cursor-pointer py-1 pl-2 pr-6 w-auto truncate font-medium"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       value={selectedModeId}
                       onChange={(e) => setSelectedModeId(e.target.value)}
                     >

@@ -112,7 +112,7 @@ function EnglishOverlay({
           transition: "transform 0.3s ease",
         }}
       >
-        In the name of God, the Most Gracious, the Most Merciful
+        In the name of ALLAH ﷻ, the Most Gracious, the Most Merciful
       </div>
     </Html>
   );

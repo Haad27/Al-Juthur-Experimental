@@ -6,10 +6,9 @@ interface TafsirTextRendererProps {
   text: string;
   isArabic?: boolean;
   isUrdu?: boolean;
-  immersive?: boolean;
 }
 
-export default function TafsirTextRenderer({ text, isArabic, isUrdu, immersive }: TafsirTextRendererProps) {
+export default function TafsirTextRenderer({ text, isArabic, isUrdu }: TafsirTextRendererProps) {
   if (!text) return null;
   const isRtl = isArabic || isUrdu;
 
@@ -25,42 +24,49 @@ export default function TafsirTextRenderer({ text, isArabic, isUrdu, immersive }
   content = content.replace(/<br\s*\/?>/gi, "\n");
 
   // Helper to transform HTML span classes into styled classes
-  const transformHtmlForTailwind = (rawHtml: string, isImmersive: boolean, isAr: boolean) => {
+  const transformHtmlForTailwind = (rawHtml: string, isAr: boolean) => {
     let html = rawHtml;
 
-    if (isImmersive) {
-      // Immersive mode: warm golden styling for embedded Quran verses
-      html = html.replace(
-        /<span[^>]*class="qpc-hafs"[^>]*>/gi,
-        '<span style="font-family:Amiri,serif;color:#fef3c7;font-size:1.2em;line-height:2.2;margin:0 0.25em;">'
-      );
-      // Highlights in immersive — warm amber
-      html = html.replace(
-        /<span[^>]*class="hlt"[^>]*>/gi,
-        '<span style="color:#fbbf24;">'
-      );
-      // Gray/secondary text in immersive
-      html = html.replace(
-        /<span[^>]*class="gray"[^>]*>/gi,
-        '<span style="color:#9a7c5a;font-style:italic;">'
-      );
-    } else {
-      // Standard mode (3-Role Color System)
-      // 1. Quranic Verse Citations → Soft amber citation chip (tinted background, not harsh text)
-      html = html.replace(
-        /<span[^>]*class="qpc-hafs"[^>]*>/gi,
-        '<span class="bg-amber-950/60 text-amber-200/90 border border-amber-500/30 px-2 py-0.5 rounded-md font-serif text-lg md:text-xl leading-loose inline-block mx-1 my-0.5 shadow-sm">'
-      );
-      // 2. Phrase Highlights → Soft warm amber text
-      html = html.replace(
-        /<span[^>]*class="hlt"[^>]*>/gi,
-        '<span class="text-amber-300/90 font-semibold">'
-      );
-      // 3. Footnotes / Gray Text → Muted neutral pill
-      html = html.replace(
-        /<span[^>]*class="gray"[^>]*>/gi,
-        '<span class="text-zinc-400 italic bg-zinc-800/40 px-1.5 py-0.5 rounded border border-zinc-700/40 inline-block my-0.5 text-xs md:text-sm">'
-      );
+    // Helper to wrap raw Arabic text in a styled span, ignoring HTML tags
+    const applyArabicFont = (text: string) => {
+      return text.replace(/(<[^>]+>)|([^<]+)/g, (match, tag, content) => {
+        if (tag) return tag;
+        if (content) {
+          return content.replace(
+            /([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u08E4-\u08FE\uFB50-\uFDFF\uFE70-\uFEFF]+(?:[\s\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u08E4-\u08FE\uFB50-\uFDFF\uFE70-\uFEFF\d\(\)\[\]«».,;:؟!]+)*[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u08E4-\u08FE\uFB50-\uFDFF\uFE70-\uFEFF]+|[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u08E4-\u08FE\uFB50-\uFDFF\uFE70-\uFEFF]+)/g,
+            '<span style="font-family: \'UthmanicHafs\', serif; font-size: 1.35em; line-height: 2.2; font-weight: normal; color: #f1f5f9; display: inline-block; text-align: right;" dir="rtl">$1</span>'
+          );
+        }
+        return match;
+      });
+    };
+
+    // Standard mode (3-Role Color System)
+    // 1. Quranic Verse Citations → Soft amber citation chip (tinted background, not harsh text)
+    html = html.replace(
+      /<span[^>]*class="qpc-hafs"[^>]*>/gi,
+      '<span class="bg-amber-950/60 text-amber-200/90 border border-amber-500/30 px-2 py-0.5 rounded-md font-serif text-lg md:text-xl leading-loose inline-block mx-1 my-0.5 shadow-sm" style="font-family: \'UthmanicHafs\', serif;">'
+    );
+    // 2. Phrase Highlights → Soft warm amber text
+    html = html.replace(
+      /<span[^>]*class="hlt"[^>]*>/gi,
+      '<span class="text-amber-300/90 font-semibold">'
+    );
+    // 3. Footnotes / Gray Text → Green container (for long quotes) or muted pill (for short words)
+    html = html.replace(
+      /<span[^>]*class="gray"[^>]*>([\s\S]*?)<\/span>/gi,
+      (match, innerText) => {
+        // If the text is short (e.g., less than 50 characters), it's probably just a small translation of a word
+        if (innerText.length < 50) {
+          return `<span class="text-zinc-400 italic bg-zinc-800/40 px-1.5 py-0.5 rounded border border-zinc-700/40 inline-block my-0.5 text-xs md:text-sm">${innerText}</span>`;
+        }
+        // For longer texts (usually full Ayats), use the green block
+        return `<span class="block my-4 p-4 border-l-4 border-emerald-500 bg-emerald-950/30 rounded-r-xl text-emerald-100/90 text-sm md:text-base italic shadow-sm">${innerText}</span>`;
+      }
+    );
+
+    if (!isAr) {
+      html = applyArabicFont(html);
     }
 
     return html;
@@ -102,87 +108,6 @@ export default function TafsirTextRenderer({ text, isArabic, isUrdu, immersive }
       });
   }
 
-  if (immersive) {
-    // ── IMMERSIVE MODE RENDERING ──────────────────────────────────────────────
-    return (
-      <div
-        className={isRtl ? "tafsir-immersive-text-arabic text-center" : "tafsir-immersive-text text-center"}
-        dir={isRtl ? "rtl" : "ltr"}
-      >
-        {blocks.map((block, idx) => {
-          const transformedHtml = transformHtmlForTailwind(block.text, true, !!isRtl);
-
-          if (block.type.startsWith("h")) {
-            return (
-              <h3
-                key={idx}
-                className="tafsir-immersive-block"
-                style={{
-                  fontFamily: isUrdu ? "'Noto Nastaliq Urdu', serif" : isArabic ? "Amiri, serif" : "'Lora', Georgia, serif",
-                  fontSize: isUrdu ? "1.4rem" : isArabic ? "1.3rem" : "1.15rem",
-                  lineHeight: isUrdu ? "2.4" : "1.8",
-                  fontWeight: 700,
-                  color: "#d97706",
-                  borderBottom: "1px solid rgba(180,120,40,0.2)",
-                  paddingBottom: "0.5rem",
-                  marginTop: "2rem",
-                  marginBottom: "1rem",
-                  letterSpacing: "0.01em",
-                  textAlign: "center",
-                }}
-                dangerouslySetInnerHTML={{ __html: transformedHtml }}
-              />
-            );
-          }
-
-          // Arabic section labels
-          const isArabicHeader =
-            block.text.includes("شرح الكلمات") ||
-            block.text.includes("معنى الآية") ||
-            block.text.includes("هداية الآيات") ||
-            (block.text.length < 35 && block.text.endsWith(":"));
-
-          if (isArabicHeader) {
-            return (
-              <p
-                key={idx}
-                className="tafsir-immersive-block"
-                style={{
-                  fontFamily: isUrdu ? "'Noto Nastaliq Urdu', serif" : "Amiri, serif",
-                  fontWeight: 700,
-                  color: "#b45309",
-                  fontSize: isUrdu ? "1.2rem" : "1.1rem",
-                  lineHeight: isUrdu ? "2.2" : "1.8",
-                  marginTop: "1.5rem",
-                  paddingBottom: "0.4rem",
-                  borderBottom: "1px solid rgba(180,120,40,0.15)",
-                  textAlign: "center",
-                }}
-                dangerouslySetInnerHTML={{ __html: transformedHtml }}
-              />
-            );
-          }
-
-          return (
-            <p
-              key={idx}
-              className="tafsir-immersive-block"
-              style={{ 
-                marginBottom: "1.25em", 
-                textAlign: "center",
-                fontFamily: isUrdu ? "'Noto Nastaliq Urdu', serif" : undefined,
-                lineHeight: isUrdu ? "2.6" : undefined,
-                fontSize: isUrdu ? "1.3rem" : undefined
-              }}
-              dangerouslySetInnerHTML={{ __html: transformedHtml }}
-            />
-          );
-        })}
-      </div>
-    );
-  }
-
-  // ── STANDARD MODE RENDERING (3-Role Color System) ────────────────────────────
   return (
     <div
       className={`space-y-4 ${isRtl ? "text-right" : "text-left"}`}
@@ -193,7 +118,7 @@ export default function TafsirTextRenderer({ text, isArabic, isUrdu, immersive }
       }}
     >
       {blocks.map((block, idx) => {
-        const transformedHtml = transformHtmlForTailwind(block.text, false, !!isRtl);
+        const transformedHtml = transformHtmlForTailwind(block.text, !!isRtl);
 
         if (block.type.startsWith("h")) {
           return (

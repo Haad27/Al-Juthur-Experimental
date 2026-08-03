@@ -4,7 +4,7 @@ import { useRef, useMemo, useEffect, useImperativeHandle, forwardRef } from "rea
 import { useFrame } from "@react-three/fiber";
 import { useControls } from "leva";
 import * as THREE from "three";
-import { Html } from "@react-three/drei";
+
 import { vertexShader, fragmentShader } from "./cylinderShader";
 import { useTextureAtlas } from "./useTextureAtlas";
 import {
@@ -33,6 +33,45 @@ interface CylindricalGalleryProps {
 export interface CylindricalGalleryHandle {
   downloadAtlas: () => void;
   getMesh: () => THREE.InstancedMesh | null;
+}
+
+function CaptionBadge({ caption }: { caption: string }) {
+  const texture = useMemo(() => {
+    if (typeof document === "undefined") return null;
+    const canvas = document.createElement("canvas");
+    canvas.width = 1024;
+    canvas.height = 256;
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.clearRect(0, 0, 1024, 256);
+      ctx.font = "bold 88px 'Inter', 'Segoe UI', system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      // Glowing Cyan-Emerald Fill
+      ctx.fillStyle = "#6df4ce";
+      ctx.fillText(caption, 512, 128);
+    }
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.minFilter = THREE.LinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    return tex;
+  }, [caption]);
+
+  if (!texture) return null;
+
+  return (
+    <mesh>
+      <planeGeometry args={[4.8, 1.2]} />
+      <meshBasicMaterial
+        map={texture}
+        transparent={true}
+        depthWrite={false}
+        toneMapped={false}
+        side={THREE.DoubleSide}
+      />
+    </mesh>
+  );
 }
 
 const CylindricalGallery = forwardRef<CylindricalGalleryHandle, CylindricalGalleryProps>(function CylindricalGallery({
@@ -444,23 +483,7 @@ const CylindricalGallery = forwardRef<CylindricalGalleryHandle, CylindricalGalle
           const imgIndex = textureIndices[i];
           const caption = captions[imgIndex % captions.length] || "";
           return (
-            <Html
-              key={i}
-              position={[0, 0, 0]}
-              transform
-              center
-              style={{
-                color: "#6df4ce",
-                fontWeight: 700,
-                fontSize: "1.8rem",
-                textShadow: "-2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000",
-                whiteSpace: "nowrap",
-                pointerEvents: "none",
-                userSelect: "none"
-              }}
-            >
-              {caption}
-            </Html>
+            <CaptionBadge key={i} caption={caption} />
           );
         })}
       </group>
