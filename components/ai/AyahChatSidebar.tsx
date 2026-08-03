@@ -228,7 +228,7 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 z-[100] lg:hidden backdrop-blur-sm"
+            className="fixed inset-0 bg-black/60 z-[100] xl:hidden backdrop-blur-sm"
           />
           
           {/* Sidebar / Bottom Sheet */}
@@ -238,13 +238,13 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
             exit={{ x: "100%", y: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className={cn(
-              "fixed z-[101] lg:z-50 bg-zinc-950/95 lg:bg-zinc-900/95 backdrop-blur-md border-l border-emerald-500/20 shadow-2xl flex flex-col items-start",
-              "top-0 right-0 h-screen w-full sm:w-96 lg:w-[400px] xl:w-[450px]", // Desktop right sidebar
-              "max-lg:bottom-0 max-lg:top-auto max-lg:h-[85vh] max-lg:rounded-t-3xl max-lg:border-t" // Mobile bottom sheet
+              "fixed z-[101] xl:z-50 bg-zinc-950/95 xl:bg-zinc-900/95 backdrop-blur-md border-l border-emerald-500/20 shadow-2xl flex flex-col items-start",
+              "top-0 right-0 h-screen w-full sm:w-96 xl:w-[450px]", // Desktop right sidebar
+              "max-xl:bottom-0 max-xl:top-auto max-xl:h-[85vh] max-xl:rounded-t-3xl max-xl:border-t" // Mobile bottom sheet
             )}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-3 sm:p-4 border-b border-emerald-500/20 bg-zinc-900/80 rounded-t-3xl lg:rounded-none w-full shadow-sm relative">
+            <div className="flex items-center justify-between p-3 sm:p-4 border-b border-emerald-500/20 bg-zinc-900/80 rounded-t-3xl xl:rounded-none w-full shadow-sm relative">
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <div className="p-2 bg-emerald-500/10 rounded-full border border-emerald-500/20 shrink-0">
                   <Bot size={20} className="text-emerald-400" />

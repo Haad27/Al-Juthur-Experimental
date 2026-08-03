@@ -355,6 +355,20 @@ const AyahRow = React.memo(({
             <Play className="text-zinc-400" size={18} />
           )}
         </div>
+        <Link
+          href={`/tafsir?surah=${surahNumber}&ayah=${ayah.numberInSurah}`}
+          className="p-2 rounded-full hover:bg-zinc-800 transition-colors cursor-pointer inline-flex items-center justify-center"
+          title="Read Tafsir"
+        >
+          <ScrollText className="text-emerald-500 hover:text-emerald-400" size={18} />
+        </Link>
+        <Link
+          href={`/lexicon?surah=${surahNumber}&ayah=${ayah.numberInSurah}`}
+          className="p-2 rounded-full hover:bg-zinc-800 transition-colors cursor-pointer inline-flex items-center justify-center"
+          title="Read Lexicon"
+        >
+          <Library className="text-amber-500 hover:text-amber-400" size={18} />
+        </Link>
       </div>
 
       <div className="text-right sm:order-2 order-1 flex flex-col w-full">
@@ -472,7 +486,7 @@ const AyahRow = React.memo(({
                   }}
                   className="relative group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-emerald-950/80 to-teal-950/80 border border-emerald-500/50 transition-all hover:border-emerald-400 hover:scale-[1.02] cursor-pointer"
                 >
-                  <Bot size={14} className="text-emerald-400 group-hover:animate-bounce" />
+                  <Bot size={14} className="text-emerald-400 animate-bounce" />
                   <span className="text-[11px] font-bold tracking-wide uppercase text-emerald-300 group-hover:text-white">
                     ✨ Ask Tafsir Scholar
                   </span>
