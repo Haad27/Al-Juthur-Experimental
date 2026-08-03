@@ -524,6 +524,13 @@ export default function SurahReaderClient({
   
   const [aiChatContext, setAiChatContext] = useState<{ surah: number; ayah: number } | null>(null);
 
+  const handleOpenAiChat = (surah: number, ayah: number) => {
+    setAiChatContext({ surah, ayah });
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("close-left-sidebar"));
+    }
+  };
+
   // Auto-scroll listener for audio player
   useEffect(() => {
     const handleScroll = (e: any) => {
@@ -726,7 +733,7 @@ export default function SurahReaderClient({
                 surahWbwTranslation={surahWbwTranslation}
                 handleCopyAyah={handleCopyAyah}
                 handleSaveAyah={handleSaveAyah}
-                onOpenAiChat={(surah, ayah) => setAiChatContext({ surah, ayah })}
+                onOpenAiChat={handleOpenAiChat}
                 isUrduTranslation={isUrduTranslation}
                 translationEdition={translationEdition}
               />

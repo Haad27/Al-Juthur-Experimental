@@ -35,13 +35,18 @@ const Sidebar = () => {
 
   // USESTATES END
 
-  // Load all surahs for the Surah panel
   useEffect(() => {
     const load = async () => {
       const res = await fetchAllSurahs();
       setSurahs(res.data);
     };
     load();
+    
+    const handleCloseLeftSidebar = () => {
+      setIsCollapsed(true);
+    };
+    window.addEventListener("close-left-sidebar", handleCloseLeftSidebar);
+    return () => window.removeEventListener("close-left-sidebar", handleCloseLeftSidebar);
   }, []);
 
   const toggleSidebar = () => setIsCollapsed((c) => !c);
