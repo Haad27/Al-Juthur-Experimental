@@ -187,6 +187,14 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
         const data = wordDataMap[wordIdx];
         const meaning = wbwTranslation?.[`${ayahNumber}:${wordIdx}`];
 
+        // The Uthmanic Hafs V18 font has a known OpenType bug where Sifr marks (U+06DF, U+06E0)
+        // fail to combine with their base letters, rendering an ugly dotted circle.
+        // We strip them specifically for this font family so it looks perfect.
+        let displayWord = word;
+        if (mushafFontClass.includes('v1') || mushafFontClass.includes('v2') || mushafFontClass.includes('uthmani')) {
+          displayWord = word.replace(/[\u06DF\u06E0]/g, '');
+        }
+
         return (
           <Popover key={idx} onOpenChange={(open) => { if (open) handleWordClick(wordIdx); }}>
             <PopoverTrigger asChild>
@@ -200,7 +208,7 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
                   }
                 }}
               >
-                <span id={`word-${ayahNumber}-${wordIdx}`} className={`text-white group-hover:text-emerald-300 ${mushafFontClass} transition-all duration-150`}>{word}</span>
+                <span id={`word-${ayahNumber}-${wordIdx}`} className={`text-white group-hover:text-emerald-300 ${mushafFontClass} transition-all duration-150`}>{displayWord}</span>
                 {showWbw && meaning && (
                   <span className="text-[10px] sm:text-[11px] text-zinc-500 dark:text-zinc-400 group-hover:text-emerald-200 font-sans tracking-tight mt-0.5 block max-w-[90px] truncate text-center select-none transition-colors duration-150" dir="ltr">
                     {meaning}
@@ -234,8 +242,8 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="p-2 rounded-xl bg-slate-800/60 border border-slate-800">
                       <span className="text-slate-400 block mb-0.5">Root Word</span>
-                      <span className="font-arabic text-base font-bold text-emerald-300">
-                        {data.morphology.root || 'N/A'}
+                      <span className={`text-base font-bold text-emerald-300 ${(!data.morphology.root || data.morphology.stem?.toLowerCase().includes('quranic initials') || data.morphology.root?.toLowerCase().includes('quranic initials')) ? 'font-sans text-sm' : 'font-arabic'}`}>
+                        {(data.morphology.stem?.toLowerCase().includes('quranic initials') || data.morphology.root?.toLowerCase().includes('quranic initials')) ? 'None' : (data.morphology.root || 'N/A')}
                       </span>
                     </div>
                     <div className="p-2 rounded-xl bg-slate-800/60 border border-slate-800">
