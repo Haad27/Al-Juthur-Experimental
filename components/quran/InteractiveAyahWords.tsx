@@ -189,10 +189,11 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
 
         // The Uthmanic Hafs V18 font has a known OpenType bug where Sifr marks (U+06DF, U+06E0)
         // fail to combine with their base letters, rendering an ugly dotted circle.
-        // We strip them specifically for this font family so it looks perfect.
+        // To fix this without losing the small circle, we wrap the base letter and the mark
+        // in Amiri font which renders it flawlessly.
         let displayWord = word;
         if (mushafFontClass.includes('v1') || mushafFontClass.includes('v2') || mushafFontClass.includes('uthmani')) {
-          displayWord = word.replace(/[\u06DF\u06E0]/g, '');
+          displayWord = word.replace(/(\S)([\u06DF\u06E0])/g, '<span class="font-mushaf-warsh">$1$2</span>');
         }
 
         return (
@@ -208,9 +209,13 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
                   }
                 }}
               >
-                <span id={`word-${ayahNumber}-${wordIdx}`} className={`text-white group-hover:text-emerald-300 ${mushafFontClass} transition-all duration-150`}>{displayWord}</span>
+                <span 
+                  id={`word-${ayahNumber}-${wordIdx}`} 
+                  className={`text-white group-hover:text-emerald-300 ${mushafFontClass} transition-all duration-150`}
+                  dangerouslySetInnerHTML={{ __html: displayWord }}
+                />
                 {showWbw && meaning && (
-                  <span className="text-[10px] sm:text-[11px] text-zinc-500 dark:text-zinc-400 group-hover:text-emerald-200 font-sans tracking-tight mt-0.5 block max-w-[90px] truncate text-center select-none transition-colors duration-150" dir="ltr">
+                  <span className="text-[10px] sm:text-[11px] text-zinc-500 dark:text-zinc-400 group-hover:text-emerald-200 font-sans tracking-tight mt-0.5 block whitespace-nowrap text-center select-none transition-colors duration-150" dir="ltr">
                     {meaning}
                   </span>
                 )}
