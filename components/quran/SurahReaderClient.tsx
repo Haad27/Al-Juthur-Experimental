@@ -669,35 +669,6 @@ export default function SurahReaderClient({
               </span>
             )}
           </p>
-
-          <div className="ml-4 flex items-center bg-zinc-800/20 dark:bg-zinc-800/50 rounded-full px-3 py-1 border border-zinc-200 dark:border-zinc-700/50">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mr-2">Go to Ayah</span>
-            <select
-              className="bg-transparent dark:text-white text-black font-mono text-sm outline-none cursor-pointer"
-              onChange={(e) => {
-                const val = Number(e.target.value);
-                if (val > 0 && virtuosoRef.current) {
-                  virtuosoRef.current.scrollToIndex({ index: val - 1, align: 'center', behavior: 'smooth' });
-                  setTimeout(() => {
-                    const element = document.getElementById(`ayah-${val}`);
-                    if (element) {
-                      const c = ["dark:bg-[#1c1c1cff]", "bg-[var(--sephia-300)]"];
-                      element.classList.add(...c);
-                      setTimeout(() => element.classList.remove(...c), 2000);
-                    }
-                  }, 300);
-                }
-                // Reset select back to default so it can be selected again
-                e.target.value = "";
-              }}
-              defaultValue=""
-            >
-              <option value="" disabled className="dark:bg-zinc-800">Select...</option>
-              {Array.from({ length: surah?.numberOfAyahs || ayahs.length }, (_, i) => i + 1).map(num => (
-                <option key={num} value={num} className="dark:bg-zinc-800">{num}</option>
-              ))}
-            </select>
-          </div>
         </div>
 
         {/* Desktop Full Navigation */}

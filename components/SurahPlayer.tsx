@@ -322,19 +322,19 @@ export default function SurahPlayer({
           }}
         />
       )}
-      {/* Mobile Floating Action Button (FAB) & Vertical Controls Card */}
-      <div className="md:hidden">
+      {/* Floating Action Button (FAB) & Vertical Controls Card (Mobile + Desktop) */}
+      <div>
         <button
           onClick={() => setMobileFabOpen(!mobileFabOpen)}
-          className="fixed bottom-[calc(6.75rem+env(safe-area-inset-bottom,0px))] right-4 z-50 size-12 rounded-full bg-emerald-600 border border-emerald-400/40 text-white shadow-2xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+          className="fixed bottom-[calc(6.75rem+env(safe-area-inset-bottom,0px))] right-4 md:right-8 z-50 size-12 md:size-14 rounded-full bg-emerald-600 border border-emerald-400/40 text-white shadow-2xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
           title="Audio Recitation Controls"
         >
           {playing ? (
-            <Pause className="size-5" />
+            <Pause className="size-5 md:size-6" />
           ) : recording ? (
-            <Mic className="size-5 text-emerald-300 animate-pulse" />
+            <Mic className="size-5 md:size-6 text-emerald-300 animate-pulse" />
           ) : (
-            <Mic className="size-5 text-white" />
+            <Mic className="size-5 md:size-6 text-white" />
           )}
         </button>
 
@@ -343,7 +343,7 @@ export default function SurahPlayer({
             initial={{ opacity: 0, y: 15, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 15, scale: 0.95 }}
-            className="fixed bottom-[calc(10.25rem+env(safe-area-inset-bottom,0px))] right-4 z-50 w-64 bg-zinc-900/95 border border-zinc-800 rounded-2xl p-4 shadow-2xl backdrop-blur-xl space-y-4 text-white"
+            className="fixed bottom-[calc(10.25rem+env(safe-area-inset-bottom,0px))] right-4 md:right-8 z-50 w-64 bg-zinc-900/95 border border-zinc-800 rounded-2xl p-4 shadow-2xl backdrop-blur-xl space-y-4 text-white"
           >
             <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Recitation Player</span>
@@ -427,34 +427,6 @@ export default function SurahPlayer({
           </motion.div>
         )}
       </div>
-
-      {/* Desktop Floating Mic Button */}
-      <div className="hidden md:block">
-        <button
-          onClick={() => {
-            if (recording) {
-              requestMic();
-            } else {
-              if (localStorage.getItem("hasSeenReciteGuide") === "true") {
-                unlockAudio();
-                requestMic();
-              } else {
-                setShowReciteGuide(true);
-              }
-            }
-          }}
-          className="fixed bottom-8 right-8 z-50 size-14 rounded-full bg-emerald-600 border border-emerald-400/40 text-white shadow-[0_8px_30px_rgb(16,185,129,0.3)] flex items-center justify-center transition-all hover:scale-105 hover:bg-emerald-500 active:scale-95"
-          title={recording ? "Stop Recording" : "Voice Recite Assistant"}
-        >
-          {recording ? (
-            <Mic className="size-6 text-emerald-100 animate-pulse" />
-          ) : (
-            <Mic className="size-6 text-white" />
-          )}
-        </button>
-      </div>
-
-      {/* Desktop Horizontal Player Bar */}
       <div className="hidden md:block">
         {!collapsed ? (
           <motion.div
