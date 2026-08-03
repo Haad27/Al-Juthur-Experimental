@@ -16,9 +16,10 @@ export default function LexiconTextRenderer({ text }: LexiconTextRendererProps) 
     .trim();
 
   // Transform raw HTML tags for 3-Role Color System (soft amber chips for root terms & quotes)
+  // We use em-based or inherited sizes so it scales correctly for both English (text-base) and Arabic (text-3xl)
   content = content
-    .replace(/<b([^>]*)>(.*?)<\/b>/gi, '<b$1 class="bg-amber-950/60 text-amber-200/90 border border-amber-500/30 px-1.5 py-0.5 rounded-md font-semibold text-xs md:text-sm inline-block mx-0.5 shadow-sm">$2</b>')
-    .replace(/<span class="text-amber-500 font-bold">/gi, '<span class="bg-amber-950/60 text-amber-200/90 border border-amber-500/30 px-1.5 py-0.5 rounded-md font-semibold text-xs md:text-sm inline-block mx-0.5 shadow-sm">');
+    .replace(/<b([^>]*)>(.*?)<\/b>/gi, '<b$1 class="bg-amber-950/60 text-amber-200/90 border border-amber-500/30 px-2 py-0.5 rounded-md font-bold shadow-sm inline-block mx-1">$2</b>')
+    .replace(/<span class="text-amber-500 font-bold">/gi, '<span class="bg-amber-950/60 text-amber-200/90 border border-amber-500/30 px-2 py-0.5 rounded-md font-bold shadow-sm inline-block mx-1">');
 
   const lines = content
     .split(/\n+/)
@@ -32,15 +33,14 @@ export default function LexiconTextRenderer({ text }: LexiconTextRendererProps) 
         const isArabicLine = /[\u0600-\u06FF]/.test(line) && (line.match(/[\u0600-\u06FF]/g)?.length || 0) > line.length * 0.3;
 
         if (isArabicLine) {
-          // Wrap Arabic lines in a Tafsir-like green container
+          // Render plain Arabic text with beautiful font, no heavy green wrapper
           return (
-            <div key={idx} className="block my-4 p-4 md:p-6 border-l-4 border-emerald-500 bg-emerald-950/30 rounded-r-xl shadow-sm text-right overflow-x-hidden">
-              <p
-                className="font-mushaf-uthmani text-2xl md:text-3xl text-emerald-100/90 leading-loose md:leading-loose"
-                dir="rtl"
-                dangerouslySetInnerHTML={{ __html: line }}
-              />
-            </div>
+            <p
+              key={idx}
+              className="font-mushaf-uthmani text-2xl md:text-3xl text-stone-200 leading-loose md:leading-[2.5] text-right my-2"
+              dir="rtl"
+              dangerouslySetInnerHTML={{ __html: line }}
+            />
           );
         }
 
