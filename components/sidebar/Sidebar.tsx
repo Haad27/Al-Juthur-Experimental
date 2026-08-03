@@ -10,6 +10,7 @@ import JuzList from "../JuzList";
 import { Input } from "../ui/input";
 import { useParams } from "next/navigation";
 import Settings from "../Settings";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { motion } from "framer-motion";
 import { BookOpen, SlidersHorizontal, Search } from "lucide-react";
@@ -114,17 +115,48 @@ const Sidebar = () => {
           </div>
         )}
 
-        {/* Search Input (Only shown on Surah tab) */}
+        {/* Search Input and Verse Selector (Only shown on Surah tab) */}
         {!isCollapsed && activeTab === "surah" && (
-          <div className="mt-4 mx-4 relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
-            <Input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search Surah by name..."
-              className="pl-9 pr-3 py-2 bg-zinc-900/80 dark:bg-zinc-900/80 dark:text-zinc-100 border border-zinc-800 focus:border-emerald-500/60 rounded-xl text-xs placeholder:text-zinc-500 transition-all shadow-inner"
-            />
+          <div className="mt-4 mx-4 flex flex-col gap-2">
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
+              <Input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search Surah by name..."
+                className="pl-9 pr-3 py-2 bg-zinc-900/80 dark:bg-zinc-900/80 dark:text-zinc-100 border border-zinc-800 focus:border-emerald-500/60 rounded-xl text-xs placeholder:text-zinc-500 transition-all shadow-inner"
+              />
+            </div>
+
+            {surahNumber > 0 && surahs.length > 0 && (
+              <div className="flex items-center gap-2 bg-zinc-900/50 border border-zinc-800/80 rounded-xl px-3 py-1.5 shadow-inner">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-500 shrink-0">Go to Ayah:</span>
+                <Select
+                  value=""
+                  onValueChange={(value) => {
+                    const val = Number(value);
+                    if (val > 0) {
+                      window.dispatchEvent(new CustomEvent('jumpToAyah', { detail: { index: val - 1 } }));
+                    }
+                  }}
+                >
+                  <SelectTrigger className="flex-1 h-7 bg-transparent border-0 shadow-none hover:bg-zinc-800/50 rounded-lg dark:text-zinc-200 text-black font-mono text-xs focus:ring-0">
+                    <SelectValue placeholder="Select..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-900 border-zinc-800 max-h-[300px]">
+                    {Array.from(
+                      { length: surahs.find(s => s.number === surahNumber)?.numberOfAyahs || 1 },
+                      (_, i) => i + 1
+                    ).map(num => (
+                      <SelectItem key={num} value={num.toString()} className="text-zinc-200 focus:bg-emerald-600 focus:text-white cursor-pointer transition-colors">
+                        Ayah {num}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
         )}
 

@@ -25,6 +25,7 @@ import {
   Library,
   MessageSquareText,
   Bot,
+  Loader2,
 } from "lucide-react";
 import SurahPlayer from "@/components/SurahPlayer";
 import AyahChatSidebar from "@/components/ai/AyahChatSidebar";
@@ -543,11 +544,34 @@ export default function SurahReaderClient({
         virtuosoRef.current?.scrollToIndex({ index, align: 'center', behavior: 'smooth' });
       }
     };
+    const handleJump = (e: any) => {
+      const index = e.detail?.index;
+      if (typeof index === 'number') {
+        setIsNavigatingAyah(true);
+        setTimeout(() => {
+          virtuosoRef.current?.scrollToIndex({ index, align: 'center', behavior: 'smooth' });
+          setTimeout(() => {
+            const element = document.getElementById(`ayah-${index + 1}`);
+            if (element) {
+              const c = ["dark:bg-[#1c1c1cff]", "bg-[var(--sephia-300)]"];
+              element.classList.add(...c);
+              setTimeout(() => element.classList.remove(...c), 2000);
+            }
+            setIsNavigatingAyah(false);
+          }, 300);
+        }, 100);
+      }
+    };
     window.addEventListener('scrollToAyah', handleScroll);
-    return () => window.removeEventListener('scrollToAyah', handleScroll);
+    window.addEventListener('jumpToAyah', handleJump);
+    return () => {
+      window.removeEventListener('scrollToAyah', handleScroll);
+      window.removeEventListener('jumpToAyah', handleJump);
+    }
   }, []);
 
   const [collapsed, setCollapsed] = useState(true);
+  const [isNavigatingAyah, setIsNavigatingAyah] = useState(false);
 
   const surahNumber = surah?.number || 1;
   
@@ -572,7 +596,7 @@ export default function SurahReaderClient({
     if (ayahParam && ayahs.length > 0) {
       const ayahIndex = ayahs.findIndex(a => a.numberInSurah.toString() === ayahParam);
       if (ayahIndex !== -1) {
-        toast("Scrolling to requested Ayah");
+        setIsNavigatingAyah(true);
         
         setTimeout(() => {
           virtuosoRef.current?.scrollToIndex({ index: ayahIndex, align: 'center', behavior: 'smooth' });
@@ -586,6 +610,7 @@ export default function SurahReaderClient({
                 element.classList.remove(...c);
               }, 2000);
             }
+            setIsNavigatingAyah(false);
           }, 300);
         }, 100);
       } else {
@@ -647,14 +672,25 @@ export default function SurahReaderClient({
 
   return (
     <div className="flex w-full min-h-screen relative overflow-hidden">
+      {/* Loading Overlay */}
+      {isNavigatingAyah && (
+        <div className="fixed inset-0 z-[99999] bg-zinc-950/60 backdrop-blur-sm flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4 bg-zinc-900 border border-zinc-800 p-8 rounded-3xl shadow-2xl">
+            <Loader2 className="size-10 animate-spin text-emerald-500" />
+            <p className="text-zinc-300 font-medium tracking-wide">Navigating to Verse...</p>
+          </div>
+        </div>
+      )}
+
       <section className={cn(
         "flex items-center flex-col dark:bg-zinc-900 bg-[var(--sephia-primary)] dark:text-white text-black relative pb-10 md:pb-4 transition-all duration-300",
         aiChatContext ? "w-full lg:w-[calc(100%-400px)] xl:w-[calc(100%-450px)]" : "w-full flex-1"
       )}>
         <div
           className={cn(
-          "hidden md:flex items-center justify-between w-full md:min-h-14 px-6 py-3 sticky top-0 backdrop-blur-lg dark:bg-zinc-900/90 border-b bg-[var(--sephia-200)] dark:border-zinc-800/80 border-white/10 transition-all duration-300 z-50 shadow-sm",
-          !show && "-translate-y-24 opacity-0"
+          "hidden md:flex fixed items-center justify-between md:min-h-14 px-6 py-3 backdrop-blur-lg dark:bg-zinc-900/90 border-b bg-[var(--sephia-200)] dark:border-zinc-800/80 border-white/10 transition-all duration-300 z-50 shadow-sm",
+          show ? "top-0" : "-top-24",
+          aiChatContext ? "w-full lg:w-[calc(100%-400px)] xl:w-[calc(100%-450px)]" : "w-[calc(100%-350px)]"
         )}
       >
         {/* Surah Name & Selected Translation */}
