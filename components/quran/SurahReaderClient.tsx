@@ -648,7 +648,7 @@ export default function SurahReaderClient({
   return (
     <div className="flex w-full min-h-screen relative overflow-hidden">
       <section className={cn(
-        "flex items-center flex-col dark:bg-zinc-900 bg-[var(--sephia-primary)] dark:text-white text-black relative pb-28 md:pb-12 transition-all duration-300",
+        "flex items-center flex-col dark:bg-zinc-900 bg-[var(--sephia-primary)] dark:text-white text-black relative pb-10 md:pb-4 transition-all duration-300",
         aiChatContext ? "w-full lg:w-[calc(100%-400px)] xl:w-[calc(100%-450px)]" : "w-full flex-1"
       )}>
         <div

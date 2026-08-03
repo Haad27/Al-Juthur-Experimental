@@ -15,6 +15,7 @@ import {
   Play,
   Mic,
   MicOff,
+  BookOpen
 } from "lucide-react";
 
 // Package/Library to check similarity between sentences
@@ -50,8 +51,20 @@ export default function SurahPlayer({
   lastAyahNumber,
   router,
 }: SurahPlayerProps) {
-  const { mistakeDetection, selectedReciter } = useGlobalState();
+  const { mistakeDetection, selectedReciter, setSelectedReciter } = useGlobalState();
   const audioStore = useAudioStore();
+
+  const [reciters, setReciters] = useState<any[]>([]);
+
+  useEffect(() => {
+    import("@/api/api").then((module) => {
+      module.fetchReciters().then((res) => {
+        if (res?.recitations) {
+          setReciters(res.recitations);
+        }
+      });
+    });
+  }, []);
 
   // Audio effects
   const correctRef = useRef<HTMLAudioElement | null>(null);
@@ -405,6 +418,25 @@ export default function SurahPlayer({
               ))}
             </div>
 
+            {/* Reciter Selector */}
+            <div className="flex flex-col gap-1 mt-2">
+               <span className="text-xs text-zinc-400">Reciter:</span>
+               <select 
+                 className="bg-zinc-950/60 border border-zinc-800 rounded-lg px-2 py-1.5 text-xs text-white outline-none cursor-pointer w-full"
+                 value={selectedReciter || 7}
+                 onChange={(e) => {
+                   setSelectedReciter(Number(e.target.value));
+                   setPlaying(false);
+                 }}
+               >
+                 {reciters.map(r => (
+                   <option key={r.id} value={r.id} className="bg-zinc-800">
+                     {r.reciter_name} {r.style ? `(${r.style})` : ''}
+                   </option>
+                 ))}
+               </select>
+            </div>
+
             {/* Recite Mic Toggle */}
             <button
               onClick={() => {
@@ -427,124 +459,47 @@ export default function SurahPlayer({
           </motion.div>
         )}
       </div>
-      <div className="hidden md:block">
-        {!collapsed ? (
-          <motion.div
-            key="controls"
-            layout
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ opacity: { duration: 0.2 } }}
-            className="flex justify-center items-center gap-3 backdrop-blur-md dark:bg-zinc-800/90 p-3 sm:w-fit w-full rounded-full shadow-lg"
-          >
-            <button
-              onClick={() => setCollapsed(true)}
-              className="p-1 text-white hover:bg-white/10 rounded-full"
-            >
-              <ChevronDown className="size-6 dark:text-white text-black" />
-            </button>
-            <div className="flex flex-col items-center relative">
-              <button className="p-1 cursor-pointer">
-                {recording ? (
-                  <Mic
-                    className="size-5 animate-pulse text-emerald-400"
-                    onClick={requestMic}
-                  />
-                ) : (
-                  <MicOff
-                    className="size-5 text-emerald-500"
-                    onClick={() => {
-                      if (localStorage.getItem("hasSeenReciteGuide") === "true") {
-                        unlockAudio();
-                        requestMic();
-                      } else {
-                        setShowReciteGuide(true);
-                      }
-                    }}
-                  />
-                )}
-              </button>
-            </div>
 
-            {/* Start Ayah Selector Desktop */}
-            <div className="flex items-center bg-zinc-700/50 rounded-full px-3 py-1 mr-1">
-               <span className="text-[10px] uppercase font-bold text-emerald-400 mr-2">Start Ayah</span>
-               <select 
-                 className="bg-transparent text-white font-mono text-sm outline-none cursor-pointer"
-                 value={startAyah}
-                 onChange={(e) => {
-                   const val = Number(e.target.value);
-                   setStartAyah(val);
-                   setCurrentAyahIndex(val - 1);
-                   setPlaying(false);
-                   window.dispatchEvent(new CustomEvent('scrollToAyah', { detail: { index: val - 1 } }));
-                 }}
-               >
-                 {Array.from({ length: lastAyahNumber }, (_, i) => i + 1).map(num => (
-                   <option key={num} value={num} className="bg-zinc-800">{num}</option>
-                 ))}
-               </select>
-            </div>
-
+      {/* Desktop-only Go to Ayah FAB */}
+      <div className="hidden md:block fixed bottom-[calc(6.75rem+4.5rem)] right-8 z-50">
+        <Popover>
+          <PopoverTrigger asChild>
             <button
-              onClick={() => skip(-10)}
-              className="p-2 text-white hover:bg-white/10 rounded-full"
+              className="size-14 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 shadow-xl flex items-center justify-center transition-all hover:scale-105 hover:bg-zinc-700 active:scale-95"
+              title="Go to Verse"
             >
-              <SkipBackIcon className="size-5" />
+              <BookOpen className="size-6" />
             </button>
-            <button
-              onClick={handlePlayPause}
-              className="p-2 text-white hover:bg-white/10 rounded-full"
+          </PopoverTrigger>
+          <PopoverContent side="left" className="w-56 bg-zinc-900 border-zinc-800 rounded-2xl p-4 shadow-2xl">
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 block mb-3 border-b border-zinc-800 pb-2">Go to Ayah</span>
+            <select
+              className="w-full bg-zinc-950/60 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white outline-none cursor-pointer"
+              defaultValue=""
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                if (val > 0) {
+                  window.dispatchEvent(new CustomEvent('scrollToAyah', { detail: { index: val - 1 } }));
+                  // Highlight
+                  setTimeout(() => {
+                    const element = document.getElementById(`ayah-${val}`);
+                    if (element) {
+                      const c = ["dark:bg-[#1c1c1cff]", "bg-[var(--sephia-300)]"];
+                      element.classList.add(...c);
+                      setTimeout(() => element.classList.remove(...c), 2000);
+                    }
+                  }, 300);
+                }
+                e.target.value = "";
+              }}
             >
-              {playing ? (
-                <Pause className="size-5" />
-              ) : (
-                <Play className="size-5" />
-              )}
-            </button>
-            <button
-              onClick={() => skip(10)}
-              className="p-2 text-white hover:bg-white/10 rounded-full"
-            >
-              <SkipForwardIcon className="size-5" />
-            </button>
-            <span className="md:block hidden font-mono text-xs text-white">
-              {formatTime(currentTime)} / {formatTime(duration)}
-            </span>
-            <Popover>
-              <PopoverTrigger className="p-2 text-white hover:bg-white/10 rounded-full">
-                {playbackRate}×
-              </PopoverTrigger>
-              <PopoverContent className="space-y-1 rounded-lg bg-zinc-800 p-2 shadow-lg">
-                {playbackRates.map((rate) => (
-                  <div
-                    key={rate}
-                    onClick={() => setPlaybackRate(rate)}
-                    className={`cursor-pointer rounded px-3 py-1 hover:bg-white/20 ${
-                      playbackRate === rate ? "bg-white/20" : ""
-                    }`}
-                  >
-                    {rate}×
-                  </div>
-                ))}
-              </PopoverContent>
-            </Popover>
-          </motion.div>
-        ) : (
-          <motion.button
-            key="collapsed"
-            layout
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ opacity: { duration: 0.2 } }}
-            onClick={() => setCollapsed(false)}
-            className="rounded-full p-2 bg-zinc-800/80 text-white shadow-lg"
-          >
-            <ChevronUp className="size-6" />
-          </motion.button>
-        )}
+              <option value="" disabled className="bg-zinc-900 text-zinc-400">Select Verse...</option>
+              {Array.from({ length: lastAyahNumber }, (_, i) => i + 1).map(num => (
+                <option key={num} value={num} className="bg-zinc-800">Ayah {num}</option>
+              ))}
+            </select>
+          </PopoverContent>
+        </Popover>
       </div>
     </AnimatePresence>
   );
