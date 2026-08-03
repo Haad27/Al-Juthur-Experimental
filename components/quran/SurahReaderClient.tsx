@@ -570,19 +570,24 @@ export default function SurahReaderClient({
   // Scroll to the selected ayah (if provided via the "ayah" search param)
   useEffect(() => {
     if (ayahParam && ayahs.length > 0) {
-      const element = document.getElementById(`ayah-${ayahParam}`);
-      if (element) {
+      const ayahIndex = ayahs.findIndex(a => a.numberInSurah.toString() === ayahParam);
+      if (ayahIndex !== -1) {
         toast("Scrolling to requested Ayah");
-        const c = ["dark:bg-[#1c1c1cff]", "bg-[var(--sephia-300)]"];
-        element.classList.add(...c);
-
-        element.scrollIntoView({ behavior: "auto", block: "center" });
-
-        const b = setTimeout(() => {
-          element.classList.remove(...c);
-        }, 2000);
-
-        return () => clearTimeout(b);
+        
+        setTimeout(() => {
+          virtuosoRef.current?.scrollToIndex({ index: ayahIndex, align: 'center', behavior: 'smooth' });
+          
+          setTimeout(() => {
+            const element = document.getElementById(`ayah-${ayahParam}`);
+            if (element) {
+              const c = ["dark:bg-[#1c1c1cff]", "bg-[var(--sephia-300)]"];
+              element.classList.add(...c);
+              setTimeout(() => {
+                element.classList.remove(...c);
+              }, 2000);
+            }
+          }, 300);
+        }, 100);
       } else {
         toast("Requested ayah was not found");
       }
@@ -655,7 +660,7 @@ export default function SurahReaderClient({
         {/* Surah Name & Selected Translation */}
         <div className="flex items-center gap-4">
           <p
-            className={`${amiri.className} dark:text-white text-black font-bold text-lg leading-tight flex items-center gap-3`}
+            className={`font-mushaf-v2 dark:text-white text-black text-2xl leading-tight flex items-center gap-3`}
           >
             {surah?.name}
             {translationEdition && (
@@ -664,6 +669,35 @@ export default function SurahReaderClient({
               </span>
             )}
           </p>
+
+          <div className="ml-4 flex items-center bg-zinc-800/20 dark:bg-zinc-800/50 rounded-full px-3 py-1 border border-zinc-200 dark:border-zinc-700/50">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mr-2">Go to Ayah</span>
+            <select
+              className="bg-transparent dark:text-white text-black font-mono text-sm outline-none cursor-pointer"
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                if (val > 0 && virtuosoRef.current) {
+                  virtuosoRef.current.scrollToIndex({ index: val - 1, align: 'center', behavior: 'smooth' });
+                  setTimeout(() => {
+                    const element = document.getElementById(`ayah-${val}`);
+                    if (element) {
+                      const c = ["dark:bg-[#1c1c1cff]", "bg-[var(--sephia-300)]"];
+                      element.classList.add(...c);
+                      setTimeout(() => element.classList.remove(...c), 2000);
+                    }
+                  }, 300);
+                }
+                // Reset select back to default so it can be selected again
+                e.target.value = "";
+              }}
+              defaultValue=""
+            >
+              <option value="" disabled className="dark:bg-zinc-800">Select...</option>
+              {Array.from({ length: surah?.numberOfAyahs || ayahs.length }, (_, i) => i + 1).map(num => (
+                <option key={num} value={num} className="dark:bg-zinc-800">{num}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Desktop Full Navigation */}
@@ -708,7 +742,7 @@ export default function SurahReaderClient({
             </div>
 
             <div className="text-right">
-              <p className={`${amiri.className} text-4xl md:text-6xl text-amber-100/90 font-normal leading-normal`}>
+              <p className={`font-mushaf-v2 text-5xl md:text-7xl text-amber-100/90 font-normal leading-normal`}>
                 {surah?.name}
               </p>
             </div>
