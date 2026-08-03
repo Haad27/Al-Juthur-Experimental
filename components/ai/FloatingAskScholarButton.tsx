@@ -26,7 +26,7 @@ export default function FloatingAskScholarButton({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 50, scale: 0.8 }}
           transition={{ type: "spring", stiffness: 200, damping: 20 }}
-          className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-[90] flex items-center justify-center"
+          className="fixed bottom-[calc(6rem+env(safe-area-inset-bottom,0px))] right-6 md:bottom-8 md:right-8 z-[90] flex items-center justify-center"
         >
           {/* Calming glow ring that pulses */}
           <div className="absolute inset-0 rounded-full bg-emerald-400/20 blur-xl animate-pulse scale-150 pointer-events-none" />
@@ -48,7 +48,7 @@ export default function FloatingAskScholarButton({
             <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/0 via-emerald-500/10 to-teal-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
             
             <div className="relative flex items-center justify-center">
-              <Bot className="size-6 text-emerald-400 group-hover:text-emerald-300 transition-colors drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
+              <Bot className="size-6 text-emerald-400 group-hover:text-emerald-300 transition-colors drop-shadow-[0_0_8px_rgba(52,211,153,0.5)] animate-bounce" />
               {/* Little sparkles that appear on hover */}
               <Sparkles className="absolute -top-1 -right-1 size-3 text-teal-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100" />
             </div>
