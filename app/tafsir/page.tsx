@@ -2,11 +2,13 @@
 
 import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X } from "lucide-react";
+import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot } from "lucide-react";
 import LogoIcon from "@/components/svg/icons/LogoIcon";
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
 import TafsirTextRenderer from "@/components/tafsir/TafsirTextRenderer";
 import { amiriquran, inter } from "@/app/fonts";
+import AyahChatSidebar from "@/components/ai/AyahChatSidebar";
+import FloatingAskScholarButton from "@/components/ai/FloatingAskScholarButton";
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -159,7 +161,6 @@ const TafsirFootnotesLoader = ({ footnoteIds, isUrdu }: { footnoteIds: string[],
 export default function TafsirPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { immersiveMode, setImmersiveMode } = useGlobalState();
   const [languages, setLanguages] = useState<Language[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("All");
   const [selectedEra, setSelectedEra] = useState<string>("All Eras");
@@ -182,27 +183,12 @@ export default function TafsirPage() {
   const [visibleCount, setVisibleCount] = useState<number>(20);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-  // Immersive Mode State
-  const [readingProgress, setReadingProgress] = useState<number>(0);
-  const [currentAyahIndex, setCurrentAyahIndex] = useState<number>(0);
-  const [floatNavVisible, setFloatNavVisible] = useState<boolean>(false);
   const [topNavVisible, setTopNavVisible] = useState<boolean>(true);
-  const [isEnteringImmersive, setIsEnteringImmersive] = useState<boolean>(false);
-  const lastScrollYRef = useRef<number>(0);
-  const floatNavTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [currentAyahIndex, setCurrentAyahIndex] = useState<number>(0);
   const ayahRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const lastScrollYRef = useRef<number>(0);
 
-  const handleEnterImmersive = useCallback((val: boolean) => {
-    if (val) {
-      setIsEnteringImmersive(true);
-      setTimeout(() => {
-        setImmersiveMode(true);
-        setIsEnteringImmersive(false);
-      }, 400);
-    } else {
-      setImmersiveMode(false);
-    }
-  }, [setImmersiveMode]);
+  const [aiChatContext, setAiChatContext] = useState<{ surah: number; ayah: number } | null>(null);
 
   // URL param target
   const urlAyah = searchParams?.get("ayah");
@@ -249,13 +235,12 @@ export default function TafsirPage() {
             if (matchedAuthor) {
               setActiveAuthor(matchedAuthor);
               setActiveLangName(matchedLang);
-              handleEnterImmersive(true);
             }
           }
         }
       })
       .catch((err) => console.error("Failed to fetch languages:", err));
-  }, [urlAuthor, handleEnterImmersive]);
+  }, [urlAuthor]);
 
   // Fetch full Surah tafsir when author or surah changes
   useEffect(() => {
@@ -298,7 +283,7 @@ export default function TafsirPage() {
     );
     observer.observe(loadMoreRef.current);
     return () => observer.disconnect();
-  }, [visibleCount, tafsirEntries.length, activeAuthor, immersiveMode]);
+  }, [visibleCount, tafsirEntries.length, activeAuthor]);
 
   // Flatten all authors with their language info
   const allAuthorsWithLang = useMemo(() => {
@@ -335,29 +320,15 @@ export default function TafsirPage() {
     }
   }, [urlSurah]);
 
-  // Reset immersive mode when leaving author view or unmounting page
-  useEffect(() => {
-    if (!activeAuthor) {
-      handleEnterImmersive(false);
-    }
-    return () => {
-      handleEnterImmersive(false);
-    };
-  }, [activeAuthor, handleEnterImmersive]);
 
-  // Scroll behavior: reading progress bar & headroom hide-on-scroll top nav across modes
+
+  // Scroll behavior: headroom hide-on-scroll top nav across modes
   useEffect(() => {
     if (!activeAuthor) return;
-    if (immersiveMode) {
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-    }
     setTopNavVisible(true);
 
     const onScroll = () => {
       const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const pct = docHeight > 0 ? Math.min(100, (scrollTop / docHeight) * 100) : 0;
-      setReadingProgress(pct);
 
       // Hide top nav when scrolling down, show when scrolling up
       if (scrollTop > lastScrollYRef.current && scrollTop > 50) {
@@ -366,50 +337,16 @@ export default function TafsirPage() {
         setTopNavVisible(true);
       }
       lastScrollYRef.current = scrollTop;
-
-      // Show float nav on scroll, hide after idle
-      setFloatNavVisible(true);
-      if (floatNavTimerRef.current) clearTimeout(floatNavTimerRef.current);
-      floatNavTimerRef.current = setTimeout(() => setFloatNavVisible(false), 2000);
     };
     
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       window.removeEventListener("scroll", onScroll);
-      if (floatNavTimerRef.current) clearTimeout(floatNavTimerRef.current);
     };
-  }, [activeAuthor, immersiveMode]);
+  }, [activeAuthor]);
 
   // IntersectionObserver for Ayah index tracking removed to improve performance
   // and eliminate the "live tracking" effect per user request.
-
-  // Keyboard shortcuts in immersive mode
-  useEffect(() => {
-    if (!activeAuthor) return;
-    const onKey = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement).tagName;
-      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
-      if (e.key === "r" || e.key === "R") {
-        if (!immersiveMode && !isEnteringImmersive) {
-          handleEnterImmersive(true);
-        } else if (immersiveMode) {
-          handleEnterImmersive(false);
-        }
-      }
-      if (immersiveMode) {
-        if (e.key === "ArrowDown" || e.key === "j") {
-          e.preventDefault();
-          navigateAyah(1);
-        }
-        if (e.key === "ArrowUp" || e.key === "k") {
-          e.preventDefault();
-          navigateAyah(-1);
-        }
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [activeAuthor, immersiveMode, currentAyahIndex, tafsirEntries.length]);
 
   // Auto-scroll to target ayah from URL param after entries load
   useEffect(() => {
@@ -473,300 +410,17 @@ export default function TafsirPage() {
       
     const isUrduText = activeLangName.toLowerCase().includes("urdu");
 
-    // ── IMMERSIVE MODE ─────────────────────────────────────────
-    if (isEnteringImmersive) {
-      return (
-        <div className={`min-h-screen fixed inset-0 z-[100] flex flex-col items-center justify-center bg-zinc-950 text-amber-500 ${inter.className}`}>
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-900/20 via-zinc-950 to-zinc-950" />
-          <div className="relative z-10 flex flex-col items-center gap-8">
-            <div className="relative flex items-center justify-center">
-              <div className="absolute size-28 border-t-2 border-amber-500 rounded-full animate-[spin_1s_linear_infinite]" />
-              <div className="absolute size-24 border-r-2 border-amber-400/60 rounded-full animate-[spin_1.5s_reverse_infinite]" />
-              <div className="absolute size-20 border-b-2 border-amber-600/40 rounded-full animate-[spin_2s_linear_infinite]" />
-              <BookOpenText className="size-8 text-amber-300 animate-pulse" />
-            </div>
-            <div className="flex flex-col items-center gap-2 px-4 text-center">
-              <h2 className="text-lg md:text-3xl font-serif text-amber-200 tracking-widest md:tracking-[0.2em] uppercase">
-                Entering Immersive Mode
-              </h2>
-              <p className="text-[10px] md:text-sm text-amber-500/70 font-mono tracking-widest md:tracking-[0.3em] uppercase animate-pulse">
-                Preparing Tafsir Manuscript...
-              </p>
-            </div>
-          </div>
-        </div>
-      );
-    }
 
-    if (immersiveMode) {
-      return (
-        <div className="tafsir-immersive text-white">
-          {/* Reading Progress Bar (Fixed) */}
-          <div className="fixed top-0 left-0 right-0 z-50 tafsir-reading-progress" style={{ width: `${readingProgress}%` }} />
-
-          {/* Immersive Top Bar (Sticky Glassmorphism) */}
-          <div className={`sticky top-0 z-40 border-b px-4 md:px-8 py-3.5 transition-all duration-200 ${topNavVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}
-            style={{ 
-              background: "rgba(15, 11, 7, 0.4)", 
-              borderColor: "rgba(217, 119, 6, 0.25)",
-              boxShadow: "0 10px 30px -10px rgba(0, 0, 0, 0.8), 0 0 15px rgba(217, 119, 6, 0.1)"
-            }}>
-            <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <button
-                  onClick={() => { handleEnterImmersive(false); setActiveAuthor(null); }}
-                  className="flex items-center gap-1.5 text-amber-600/70 hover:text-amber-500 transition text-sm shrink-0"
-                >
-                  <ArrowLeft className="size-4" />
-                  <span className="hidden sm:inline text-xs">Library</span>
-                </button>
-                <div className="h-4 w-px shrink-0" style={{ background: "rgba(180,120,40,0.25)" }} />
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold truncate" style={{ fontFamily: "'Lora', serif", color: "#e8d0b0" }}>
-                    {activeAuthor.name}
-                  </p>
-                  {activeAuthor.authorName && (
-                    <p className="text-xs truncate" style={{ color: "rgba(180,120,40,0.7)" }}>{activeAuthor.authorName}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 shrink-0">
-                {/* Surah selector in immersive mode */}
-                <div className="relative hidden sm:block">
-                  <select
-                    value={activeSurah}
-                    onChange={(e) => { setActiveSurah(Number(e.target.value)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="appearance-none text-xs rounded-lg px-3 py-1.5 pr-7 focus:outline-none"
-                    style={{ background: "rgba(180,120,40,0.1)", border: "1px solid rgba(180,120,40,0.25)", color: "#d97706" }}
-                  >
-                    {SURAHS_DATA.map((s) => (
-                      <option key={s.number} value={s.number} style={{ background: "#1a1208" }}>
-                        {s.number}. {s.englishName}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 size-3 pointer-events-none rotate-90" style={{ color: "#d97706" }} />
-                </div>
-
-                {/* Ayah selector in immersive mode */}
-                <div className="relative hidden sm:block">
-                  <select
-                    value={currentAyahIndex + 1}
-                    onChange={(e) => scrollToAyah(Number(e.target.value))}
-                    className="appearance-none text-xs rounded-lg px-3 py-1.5 pr-7 focus:outline-none"
-                    style={{ background: "rgba(180,120,40,0.1)", border: "1px solid rgba(180,120,40,0.25)", color: "#d97706" }}
-                  >
-                    {Array.from({ length: currentSurahMeta.numberOfAyahs }, (_, i) => i + 1).map((num) => (
-                      <option key={num} value={num} style={{ background: "#1a1208" }}>
-                        Ayah {num}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 size-3 pointer-events-none rotate-90" style={{ color: "#d97706" }} />
-                </div>
-
-                {/* Exit immersive toggle */}
-                <button
-                  onClick={() => handleEnterImmersive(false)}
-                  className="tafsir-immersive-toggle tafsir-immersive-toggle-on group"
-                  title="Exit Immersive Mode"
-                >
-                  <X className="size-4 text-amber-200 group-hover:text-white transition stroke-[2.5]" />
-                  <span className="font-semibold tracking-wide text-amber-100 group-hover:text-white">Exit</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Mobile surah & ayah selector */}
-            <div className="sm:hidden mt-2 flex items-center gap-2">
-              <div className="relative flex-1">
-                <select
-                  value={activeSurah}
-                  onChange={(e) => { setActiveSurah(Number(e.target.value)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                  className="w-full appearance-none text-xs rounded-lg px-3 py-2 pr-7 focus:outline-none"
-                  style={{ background: "rgba(180,120,40,0.08)", border: "1px solid rgba(16,185,129,0.5)", color: "#d97706" }}
-                >
-                  {SURAHS_DATA.map((s) => (
-                    <option key={s.number} value={s.number} style={{ background: "#1a1208" }}>
-                      {s.number}. {s.englishName}
-                    </option>
-                  ))}
-                </select>
-                <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 size-3 pointer-events-none rotate-90" style={{ color: "#d97706" }} />
-              </div>
-              
-              <div className="relative w-28 shrink-0">
-                <select
-                  value={currentAyahIndex + 1}
-                  onChange={(e) => scrollToAyah(Number(e.target.value))}
-                  className="w-full appearance-none text-xs rounded-lg px-3 py-2 pr-7 focus:outline-none"
-                  style={{ background: "rgba(180,120,40,0.08)", border: "1px solid rgba(180,120,40,0.2)", color: "#d97706" }}
-                >
-                  {Array.from({ length: currentSurahMeta.numberOfAyahs }, (_, i) => i + 1).map((num) => (
-                    <option key={num} value={num} style={{ background: "#1a1208" }}>
-                      Ayah {num}
-                    </option>
-                  ))}
-                </select>
-                <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 size-3 pointer-events-none rotate-90" style={{ color: "#d97706" }} />
-              </div>
-            </div>
-          </div>
-
-          {/* Immersive Content */}
-          <div className="tafsir-immersive-content">
-            {/* Surah Banner */}
-            <div className="tafsir-immersive-surah-banner">
-              <p className="text-xs uppercase tracking-[0.25em] mb-3" style={{ color: "rgba(180,120,40,0.5)", fontFamily: "'Lora', serif" }}>
-                Surah {currentSurahMeta.number} · {currentSurahMeta.revelationType} · {currentSurahMeta.numberOfAyahs} Ayahs
-              </p>
-              <h2 style={{ fontFamily: "'Lora', Georgia, serif", fontSize: "clamp(1.5rem, 4vw, 2.25rem)", fontWeight: 700, color: "#e8d0b0", marginBottom: "0.5rem" }}>
-                {currentSurahMeta.englishName}
-              </h2>
-              <p style={{ fontFamily: "'Lora', serif", color: "rgba(180,120,40,0.6)", fontSize: "0.9rem", fontStyle: "italic", marginBottom: "1.25rem" }}>
-                {currentSurahMeta.englishNameTranslation}
-              </p>
-              {currentSurahMeta.number !== 9 && (
-                <p className="tafsir-immersive-arabic" style={{ fontSize: "clamp(1.5rem, 5vw, 2.2rem)", border: "none", padding: "0.5rem 0", margin: 0 }}>
-                  بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
-                </p>
-              )}
-            </div>
-
-            {/* Loading */}
-            {loadingEntries ? (
-              <div className="flex flex-col items-center justify-center py-24 gap-4">
-                <div className="size-10 rounded-full animate-spin" style={{ border: "3px solid rgba(180,120,40,0.15)", borderTopColor: "#d97706" }} />
-                <p style={{ color: "rgba(180,120,40,0.5)", fontFamily: "'Lora', serif", fontSize: "0.875rem" }}>
-                  Loading {currentSurahMeta.englishName}...
-                </p>
-              </div>
-            ) : tafsirEntries.length === 0 ? (
-              <div className="text-center py-16" style={{ color: "rgba(180,120,40,0.4)", fontFamily: "'Lora', serif" }}>
-                No entries found for this Surah.
-              </div>
-            ) : (
-              <div>
-                {tafsirEntries.slice(0, visibleCount).map((entry, idx) => {
-                  const ayahNumber = entry.ayah?.numberInSurah || idx + 1;
-                  const arabicText = entry.ayah?.text && entry.ayah.text !== "Arabic Text" ? entry.ayah.text : null;
-                  return (
-                    <div
-                      key={entry.id || idx}
-                      id={`ayah-${ayahNumber}`}
-                      data-ayah-idx={idx}
-                      ref={(el) => { ayahRefs.current[idx] = el; }}
-                      className="tafsir-immersive-ayah scroll-mt-24"
-                    >
-                      {/* Ayah header */}
-                      <div className="flex items-center justify-between mb-4 tafsir-immersive-block">
-                        <div className="flex items-center gap-3">
-                          <span className="tafsir-immersive-ayah-badge">{ayahNumber}</span>
-                          <span style={{ fontFamily: "'Lora', serif", fontSize: "0.8rem", color: "rgba(180,120,40,0.5)", letterSpacing: "0.05em" }}>
-                            {activeSurah}:{ayahNumber}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => {
-                              const cleanText = entry.text.replace(/<[^>]*>?/gm, '');
-                              navigator.clipboard.writeText(cleanText);
-                              toast("Copied to clipboard!", { className: "bg-zinc-900 text-amber-200 border-amber-800" });
-                            }}
-                            title="Copy"
-                            className="tafsir-float-btn"
-                            style={{ width: "2rem", height: "2rem" }}
-                          >
-                            <Copy className="size-3" />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Arabic verse */}
-                      {arabicText && (
-                        <p className="tafsir-immersive-arabic tafsir-immersive-block">{arabicText}</p>
-                      )}
-
-                      {/* Tafsir text */}
-                      <TafsirTextRenderer text={entry.text} isArabic={isArabicOrUrdu} isUrdu={isUrduText} immersive={true} />
-
-                      {/* Explanation (Footnotes) */}
-                      {entry.footnoteIds && entry.footnoteIds.length > 0 && (
-                        <div className="mt-6 pt-4 border-t border-amber-900/30">
-                          <div className="font-semibold text-amber-500/80 uppercase tracking-wider text-[11px] mb-3 font-mono">
-                            Explanation
-                          </div>
-                          <TafsirFootnotesLoader footnoteIds={entry.footnoteIds} isUrdu={isUrduText} />
-                        </div>
-                      )}
-
-                      {/* Ornamental divider */}
-                      {idx < tafsirEntries.length - 1 && (
-                        <div className="tafsir-immersive-divider mt-6">
-                          <span className="tafsir-immersive-divider-icon">✦ ✦ ✦</span>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-                {visibleCount < tafsirEntries.length && (
-                  <div ref={loadMoreRef} className="h-20 w-full flex items-center justify-center">
-                    <div className="size-6 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Floating side navigation (desktop) */}
-          <div className={`tafsir-float-nav tafsir-float-nav-left hidden md:flex ${floatNavVisible ? "visible" : ""}`}>
-            <button className="tafsir-float-btn" onClick={() => navigateAyah(-1)} title="Previous Ayah (↑)">
-              <ChevronUp className="size-4" />
-            </button>
-            <button className="tafsir-float-btn" onClick={() => navigateAyah(1)} title="Next Ayah (↓)">
-              <ChevronDown className="size-4" />
-            </button>
-          </div>
-
-          {/* Mobile bottom ayah scroller */}
-          <div className={`fixed bottom-0 left-0 right-0 z-50 md:hidden transition-all duration-200 ${topNavVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"}`}
-            style={{ background: "rgba(15, 11, 7, 0.4)", borderTop: "1px solid rgba(180,120,40,0.25)", padding: "0.5rem 1rem" }}>
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-              {Array.from({ length: currentSurahMeta.numberOfAyahs }, (_, i) => i + 1).map((num) => (
-                <button
-                  key={num}
-                  onClick={() => scrollToAyah(num)}
-                  className="flex-shrink-0 size-8 rounded-lg flex items-center justify-center font-bold text-xs transition-all"
-                  style={{
-                    background: num === (tafsirEntries[currentAyahIndex]?.ayah?.numberInSurah || 1) ? "rgba(180,120,40,0.3)" : "rgba(180,120,40,0.08)",
-                    border: "1px solid rgba(180,120,40,0.2)",
-                    color: "#d97706",
-                  }}
-                >
-                  {num}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Reading position indicator */}
-          <div className="tafsir-reading-indicator hidden md:block">
-            Ayah {currentAyahIndex + 1} of {tafsirEntries.length}
-          </div>
-        </div>
-      );
-    }
 
     // ── STANDARD MODE ──────────────────────────────────────────
     return (
       <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white ${inter.className}`}>
-        {/* Top Navigation Bar */}
-        <div className="sticky top-0 z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-3 md:px-8 py-3 md:py-4">
+        {/* Top Navigation Bar (Mobile Only) */}
+        <div className={`md:hidden sticky top-0 z-40 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/80 px-3 py-3 transition-all duration-300 ${topNavVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}>
           <div className="max-w-[1700px] mx-auto">
             {/* Top Row: Back, Title, Immersive Toggle */}
             <div className="flex items-center justify-between gap-2 md:gap-4 w-full">
-              {/* Left Side: Back + Title (Always Pinned) */}
+              {/* Left Side: Back + Title */}
               <div className="flex items-center gap-2 md:gap-4 min-w-0">
                 <button
                   onClick={() => setActiveAuthor(null)}
@@ -778,32 +432,22 @@ export default function TafsirPage() {
                 
                 <div className="h-4 w-px bg-zinc-800 hidden md:block mx-1 shrink-0" />
                 
-                <div className="min-w-0">
-                  <h1 className="text-sm md:text-lg font-bold text-white flex items-center gap-2 truncate">
-                    <span className="truncate">{activeAuthor.name}</span>
-                    <span className="hidden sm:inline-flex text-[10px] md:text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-normal shrink-0 items-center justify-center">
+                <div className="flex flex-col min-w-0 justify-center">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <h1 className="text-sm md:text-base font-bold text-zinc-100 leading-tight truncate">
+                      {activeAuthor.name.replace(/\s*\([^)]*\)\s*$/, '').trim()}
+                    </h1>
+                    <span className="inline-flex text-[9px] px-1.5 py-0.5 rounded-sm bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-semibold uppercase tracking-wider shrink-0 mt-0.5">
                       {activeLangName}
                     </span>
-                  </h1>
+                  </div>
                   {activeAuthor.authorName && (
-                    <p className="hidden md:flex text-xs text-zinc-400 items-center gap-1.5 mt-0.5 truncate">
-                      <User className="size-3 text-emerald-400 shrink-0" />
-                      <span className="truncate">{activeAuthor.authorName}</span>
+                    <p className="hidden md:flex text-[11px] text-zinc-500 truncate">
+                      {activeAuthor.authorName}
                     </p>
                   )}
                 </div>
               </div>
-
-              {/* Right Side: Immersive Mode Toggle (Always Pinned) */}
-              <button
-                onClick={() => handleEnterImmersive(true)}
-                className="tafsir-immersive-toggle tafsir-immersive-toggle-off shrink-0 !p-2 md:!px-3 md:!py-1.5"
-                title="Enter Immersive Reading Mode (R)"
-              >
-                <BookOpenText className="size-4" />
-                <span className="hidden md:inline ml-2 text-sm font-medium">Immersive Mode</span>
-                <span className="tafsir-kb-hint hidden md:inline ml-2">R</span>
-              </button>
             </div>
 
             {/* Bottom Row (Mobile Only): Surah & Ayah Dropdowns */}
@@ -842,13 +486,39 @@ export default function TafsirPage() {
             </div>
           </div>
         </div>
-
         {/* Layout: Sidebar + Main Content + Right Ayah Navigator */}
-        <div className="max-w-[1700px] mx-auto flex min-h-[calc(100vh-73px)]">
+        <div className="max-w-[1700px] mx-auto flex min-h-screen">
           {/* Left Sidebar: 114 Surahs */}
-          <aside className="hidden md:flex flex-col w-72 border-r border-zinc-800/60 bg-zinc-950/50 sticky top-[73px] h-[calc(100vh-73px)] overflow-y-auto custom-scrollbar">
-            <div className="p-4 border-b border-zinc-800/60 sticky top-0 bg-zinc-950/90 z-10">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+          <aside className="hidden md:flex flex-col w-72 border-r border-zinc-800/60 bg-zinc-950/50 sticky top-0 h-screen overflow-y-auto custom-scrollbar">
+            <div className="p-4 border-b border-zinc-800/60 sticky top-0 bg-zinc-950/90 z-10 flex flex-col gap-4">
+              {/* Tafsir Header Info */}
+              <div className="flex items-start gap-3">
+                <button
+                  onClick={() => setActiveAuthor(null)}
+                  className="flex items-center justify-center p-2 rounded-lg bg-zinc-900/80 border border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-800/80 transition-all text-zinc-400 hover:text-white shrink-0"
+                  title="Back to All Tafsirs"
+                >
+                  <ArrowLeft className="size-4" />
+                </button>
+                <div className="flex flex-col min-w-0 justify-center py-0.5">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <h1 className="text-sm font-bold text-zinc-100 leading-snug break-words">
+                      {activeAuthor.name.replace(/\s*\([^)]*\)\s*$/, '').trim()}
+                    </h1>
+                    <span className="inline-flex text-[9px] px-1.5 py-0.5 rounded-sm bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold uppercase tracking-wider shrink-0">
+                      {activeLangName}
+                    </span>
+                  </div>
+                  {activeAuthor.authorName && (
+                    <p className="text-[11px] text-zinc-500 truncate mt-0.5">
+                      {activeAuthor.authorName}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Sidebar Header */}
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 pt-2 border-t border-zinc-800/50">
                 Surahs (1 - 114)
               </h2>
             </div>
@@ -886,6 +556,7 @@ export default function TafsirPage() {
 
           {/* Main Content Area */}
           <main className="flex-1 p-4 md:p-8 space-y-8 min-w-0">
+
             {/* Surah Banner Header */}
             <div className="relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-gradient-to-r from-emerald-950/40 via-zinc-900/60 to-zinc-900/40 p-6 md:p-8">
               <div className="absolute -right-10 -bottom-10 size-48 rounded-full bg-emerald-500/10 blur-3xl" />
@@ -903,7 +574,7 @@ export default function TafsirPage() {
                   </h2>
                 </div>
                 <div className="text-right">
-                  <h3 className={`${amiriquran.className} text-3xl md:text-4xl text-emerald-300`}>
+                  <h3 className={`font-mushaf-uthmani text-4xl md:text-[2.75rem] text-emerald-300`}>
                     {currentSurahMeta.name}
                   </h3>
                 </div>
@@ -911,7 +582,7 @@ export default function TafsirPage() {
 
               {currentSurahMeta.number !== 9 && (
                 <div className="mt-6 pt-6 border-t border-zinc-800/60 text-center">
-                  <p className={`${amiriquran.className} text-2xl md:text-3xl text-amber-100/90 tracking-wide`}>
+                  <p className={`font-mushaf-uthmani text-[1.65rem] md:text-4xl text-amber-100/90 tracking-wide leading-loose`}>
                     بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
                   </p>
                 </div>
@@ -975,13 +646,22 @@ export default function TafsirPage() {
                             <span className="hidden sm:inline">Translate to English</span>
                             <span className="sm:hidden">Translate</span>
                           </button>
+                          <button
+                            onClick={() => setAiChatContext({ surah: activeSurah, ayah: ayahNumber })}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition text-xs font-medium text-emerald-400 group"
+                            title="Ask Scholar"
+                          >
+                            <Bot className="size-3.5 text-emerald-400 group-hover:scale-110 transition-transform" />
+                            <span className="hidden sm:inline">Ask Scholar</span>
+                            <span className="sm:hidden">Ask</span>
+                          </button>
                         </div>
                       </div>
 
                       {/* Arabic Verse */}
                       {arabicText && (
                         <div className="py-2">
-                          <p className={`${amiriquran.className} text-2xl md:text-3xl text-right leading-loose text-amber-100 font-normal`} dir="rtl">
+                          <p className={`font-mushaf-uthmani text-[1.65rem] md:text-4xl text-right leading-loose text-amber-100 font-normal`} dir="rtl" style={{ lineHeight: '2.4' }}>
                             {arabicText}
                           </p>
                         </div>
@@ -1033,6 +713,20 @@ export default function TafsirPage() {
             </div>
           </aside>
         </div>
+
+        <AyahChatSidebar
+          surahNumber={aiChatContext?.surah || 0}
+          ayahNumber={aiChatContext?.ayah || 0}
+          isOpen={!!aiChatContext}
+          onClose={() => setAiChatContext(null)}
+          initialModeId="default"
+        />
+
+        <FloatingAskScholarButton
+          onClick={() => setAiChatContext({ surah: activeSurah, ayah: currentAyahIndex + 1 })}
+          label="Ask Tafsir Scholar"
+          isVisible={!aiChatContext}
+        />
       </div>
     );
   }

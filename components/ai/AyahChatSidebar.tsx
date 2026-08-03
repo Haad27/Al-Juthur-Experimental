@@ -34,6 +34,8 @@ interface AyahChatSidebarProps {
   ayahNumber: number;
   isOpen: boolean;
   onClose: () => void;
+  initialModeId?: string;
+  rootWord?: string;
 }
 
 const renderInlineBadges = (children: React.ReactNode): React.ReactNode => {
@@ -68,11 +70,11 @@ const renderInlineBadges = (children: React.ReactNode): React.ReactNode => {
   });
 };
 
-export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClose }: AyahChatSidebarProps) {
+export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClose, initialModeId, rootWord }: AyahChatSidebarProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedModeId, setSelectedModeId] = useState("default");
+  const [selectedModeId, setSelectedModeId] = useState(initialModeId || "default");
   
   const [remainingTokens, setRemainingTokens] = useState<number | null>(null);
   const [tokenLimit, setTokenLimit] = useState<number>(250000);
@@ -96,15 +98,23 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
   }, [isOpen]);
 
   useEffect(() => {
-    if (isOpen && surahNumber && ayahNumber) {
+    if (isOpen) {
+      if (initialModeId && selectedModeId !== initialModeId) {
+        setSelectedModeId(initialModeId);
+      }
+      
+      const contextStr = rootWord 
+        ? `I see you are exploring the root word **${rootWord}**. How can I help you?`
+        : `I see you are reading **Surah ${surahNumber}, Ayah ${ayahNumber}**. How can I help you?`;
+
       setMessages([
         { 
           role: "assistant", 
-          content: `As-salamu alaykum! I am **Sheikh Juthur**. Switched to **${currentModeInfo.name}**.\n\nSearching strictly within:\n${currentModeInfo.sources.map(s => `- *${s}*`).join("\n")}\n\nI see you are reading **Surah ${surahNumber}, Ayah ${ayahNumber}**. How can I help you?` 
+          content: `As-salamu alaykum! I am **Sheikh Juthur**. Switched to **${currentModeInfo.name}**.\n\nSearching strictly within:\n${currentModeInfo.sources.map(s => `- *${s}*`).join("\n")}\n\n${contextStr}` 
         }
       ]);
     }
-  }, [isOpen, surahNumber, ayahNumber, selectedModeId]);
+  }, [isOpen, surahNumber, ayahNumber, selectedModeId, initialModeId, rootWord]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -121,7 +131,11 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
 
     try {
       // Inject the selected verse context explicitly so the RAG knows what the user is talking about
-      const enrichedQuery = `[System Context: The user is currently viewing Surah ${surahNumber}, Ayah ${ayahNumber}. They are asking a question about this specific verse.]\n\nUser Question: ${userText}`;
+      const contextPrefix = rootWord 
+        ? `[System Context: The user is currently exploring the root word "${rootWord}" in Lexicon mode. They are asking a question about this specific root.]`
+        : `[System Context: The user is currently viewing Surah ${surahNumber}, Ayah ${ayahNumber}. They are asking a question about this specific verse.]`;
+      
+      const enrichedQuery = `${contextPrefix}\n\nUser Question: ${userText}`;
 
       const res = await fetch("/api/ai/rag", {
         method: "POST",

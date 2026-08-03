@@ -18,11 +18,14 @@ import {
   X,
   ChevronDown,
   Languages,
+  Bot,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useGlobalState } from '@/lib/providers/GlobalStatesProvider';
 import LexiconTextRenderer from '@/components/lexicon/LexiconTextRenderer';
 import { amiriquran, inter } from '@/app/fonts';
+import AyahChatSidebar from '@/components/ai/AyahChatSidebar';
+import FloatingAskScholarButton from '@/components/ai/FloatingAskScholarButton';
 
 interface DictionaryInfo {
   id: number;
@@ -98,6 +101,8 @@ function LexiconPageContent() {
   const [activeRoot, setActiveRoot] = useState(initialRoot);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<RootLexiconResult | null>(null);
+  
+  const [aiChatContext, setAiChatContext] = useState<{ root: string } | null>(null);
   const [dictionaries, setDictionaries] = useState<DictionaryInfo[]>([]);
   const [pdfDictionaries, setPdfDictionaries] = useState<PdfDictionaryInfo[]>([]);
   const [selectedDictId, setSelectedDictId] = useState<number | 'all'>('all');
@@ -520,6 +525,15 @@ function LexiconPageContent() {
                           <span className="hidden sm:inline">Translate to English</span>
                           <span className="sm:hidden">Translate</span>
                         </button>
+                        <button
+                          onClick={() => setAiChatContext({ root: activeRoot })}
+                          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition text-xs font-medium text-emerald-400 group"
+                          title="Ask Lexicon Scholar"
+                        >
+                          <Bot className="size-3.5 text-emerald-400 group-hover:scale-110 transition-transform" />
+                          <span className="hidden sm:inline">Ask Scholar</span>
+                          <span className="sm:hidden">Ask</span>
+                        </button>
                       </div>
                     </div>
 
@@ -623,6 +637,21 @@ function LexiconPageContent() {
 
           </div>
         )}
+
+        <AyahChatSidebar
+          surahNumber={0}
+          ayahNumber={0}
+          isOpen={!!aiChatContext}
+          onClose={() => setAiChatContext(null)}
+          initialModeId="lexicon"
+          rootWord={aiChatContext?.root}
+        />
+
+        <FloatingAskScholarButton
+          onClick={() => setAiChatContext({ root: activeRoot })}
+          label="Ask Lexicon Scholar"
+          isVisible={!aiChatContext && !!result}
+        />
       </div>
     </div>
   );
