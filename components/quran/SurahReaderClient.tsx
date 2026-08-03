@@ -24,8 +24,10 @@ import {
   BookOpen,
   Library,
   MessageSquareText,
+  Bot,
 } from "lucide-react";
 import SurahPlayer from "@/components/SurahPlayer";
+import AyahChatSidebar from "@/components/ai/AyahChatSidebar";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 import { amiri } from "@/app/fonts";
 import useScrollDirection from "@/hooks/useScrollDirection";
@@ -60,6 +62,7 @@ interface AyahRowProps {
   surahWbwTranslation?: Record<string, string>;
   handleCopyAyah: (ayah: AyahProps) => void;
   handleSaveAyah: (ayah: AyahProps) => void;
+  onOpenAiChat: (surahNumber: number, ayahNumber: number) => void;
   isUrduTranslation: boolean;
   translationEdition: string;
 }
@@ -148,6 +151,7 @@ const AyahRow = React.memo(({
   surahWbwTranslation,
   handleCopyAyah,
   handleSaveAyah,
+  onOpenAiChat,
   isUrduTranslation,
   translationEdition,
 }: AyahRowProps) => {
@@ -157,6 +161,13 @@ const AyahRow = React.memo(({
   const [showFootnoteIds, setShowFootnoteIds] = useState(false);
   const [fetchedFootnotes, setFetchedFootnotes] = useState<Record<string, string>>({});
   const [loadingFootnotes, setLoadingFootnotes] = useState(false);
+  const [pulseAi, setPulseAi] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && !localStorage.getItem("ayah_ai_seen")) {
+      setPulseAi(true);
+    }
+  }, []);
 
   const isTafsirEdition = React.useMemo(() => {
     return ["158", "97", "234", "151", "84"].includes(translationEdition);
@@ -356,7 +367,7 @@ const AyahRow = React.memo(({
           className="p-2 rounded-full hover:bg-zinc-800 transition-colors cursor-pointer inline-flex items-center justify-center"
           title="Read Lexicon"
         >
-          <BookOpen className="text-amber-500 hover:text-amber-400" size={18} />
+          <Library className="text-amber-500 hover:text-amber-400" size={18} />
         </Link>
       </div>
 
@@ -469,6 +480,28 @@ const AyahRow = React.memo(({
                 </div>
               </div>
             ) : null}
+
+            {/* AI Action Button */}
+            <div className="mt-5 mb-2 flex">
+              <button
+                onClick={() => {
+                  setPulseAi(false);
+                  if (typeof window !== "undefined") {
+                    localStorage.setItem("ayah_ai_seen", "true");
+                  }
+                  onOpenAiChat(surahNumber, ayah.numberInSurah);
+                }}
+                className={cn(
+                  "inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold transition-all duration-300",
+                  "bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30",
+                  "hover:from-emerald-500/30 hover:to-teal-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)]",
+                  pulseAi && "animate-pulse shadow-[0_0_20px_rgba(16,185,129,0.4)]"
+                )}
+              >
+                <Bot size={16} className={cn(pulseAi && "animate-bounce")} />
+                <span>✨ Ask Tafsir Scholar</span>
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -488,6 +521,8 @@ export default function SurahReaderClient({
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const show = useScrollDirection();
   const router = useRouter();
+  
+  const [aiChatContext, setAiChatContext] = useState<{ surah: number; ayah: number } | null>(null);
 
   // Auto-scroll listener for audio player
   useEffect(() => {
@@ -595,9 +630,13 @@ export default function SurahReaderClient({
   }, [surahNumber]);
 
   return (
-    <section className="w-full flex items-center flex-col dark:bg-zinc-900 bg-[var(--sephia-primary)] flex-1 dark:text-white text-black relative pb-28 md:pb-12">
-      <div
-        className={cn(
+    <div className="flex w-full min-h-screen relative overflow-hidden">
+      <section className={cn(
+        "flex items-center flex-col dark:bg-zinc-900 bg-[var(--sephia-primary)] dark:text-white text-black relative pb-28 md:pb-12 transition-all duration-300",
+        aiChatContext ? "w-full lg:w-[calc(100%-400px)] xl:w-[calc(100%-450px)]" : "w-full flex-1"
+      )}>
+        <div
+          className={cn(
           "hidden md:flex items-center justify-between w-full md:min-h-14 px-6 py-3 sticky top-0 backdrop-blur-lg dark:bg-zinc-900/90 border-b bg-[var(--sephia-200)] dark:border-zinc-800/80 border-white/10 transition-all duration-300 z-50 shadow-sm",
           !show && "-translate-y-24 opacity-0"
         )}
@@ -687,6 +726,7 @@ export default function SurahReaderClient({
                 surahWbwTranslation={surahWbwTranslation}
                 handleCopyAyah={handleCopyAyah}
                 handleSaveAyah={handleSaveAyah}
+                onOpenAiChat={(surah, ayah) => setAiChatContext({ surah, ayah })}
                 isUrduTranslation={isUrduTranslation}
                 translationEdition={translationEdition}
               />
@@ -717,6 +757,14 @@ export default function SurahReaderClient({
           />
         </div>
       </div>
-    </section>
+      </section>
+
+      <AyahChatSidebar
+        surahNumber={aiChatContext?.surah || 0}
+        ayahNumber={aiChatContext?.ayah || 0}
+        isOpen={!!aiChatContext}
+        onClose={() => setAiChatContext(null)}
+      />
+    </div>
   );
 }
