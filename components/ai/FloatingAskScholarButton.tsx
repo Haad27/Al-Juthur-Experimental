@@ -53,6 +53,7 @@ export default function FloatingAskScholarButton({
               <Sparkles className="absolute -top-1 -right-1 size-3 text-teal-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100" />
             </div>
 
+            {/* Desktop: Animated on hover */}
             <motion.div
               initial={false}
               animate={{
@@ -60,12 +61,19 @@ export default function FloatingAskScholarButton({
                 opacity: isHovered ? 1 : 0,
                 marginLeft: isHovered ? "0.25rem" : 0
               }}
-              className="overflow-hidden whitespace-nowrap flex items-center"
+              className="hidden md:flex overflow-hidden whitespace-nowrap items-center"
             >
               <span className="text-sm font-semibold tracking-wide text-emerald-100 group-hover:text-white pr-2">
                 {label}
               </span>
             </motion.div>
+
+            {/* Mobile: Always visible, shorter text */}
+            <div className="flex md:hidden overflow-hidden whitespace-nowrap items-center ml-1">
+              <span className="text-[13px] font-bold tracking-wide text-emerald-100 pr-1">
+                {label.replace(" Tafsir ", " ").replace(" Lexicon ", " ")}
+              </span>
+            </div>
           </button>
         </motion.div>
       )}
