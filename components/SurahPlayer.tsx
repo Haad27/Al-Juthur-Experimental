@@ -428,6 +428,32 @@ export default function SurahPlayer({
         )}
       </div>
 
+      {/* Desktop Floating Mic Button */}
+      <div className="hidden md:block">
+        <button
+          onClick={() => {
+            if (recording) {
+              requestMic();
+            } else {
+              if (localStorage.getItem("hasSeenReciteGuide") === "true") {
+                unlockAudio();
+                requestMic();
+              } else {
+                setShowReciteGuide(true);
+              }
+            }
+          }}
+          className="fixed bottom-8 right-8 z-50 size-14 rounded-full bg-emerald-600 border border-emerald-400/40 text-white shadow-[0_8px_30px_rgb(16,185,129,0.3)] flex items-center justify-center transition-all hover:scale-105 hover:bg-emerald-500 active:scale-95"
+          title={recording ? "Stop Recording" : "Voice Recite Assistant"}
+        >
+          {recording ? (
+            <Mic className="size-6 text-emerald-100 animate-pulse" />
+          ) : (
+            <Mic className="size-6 text-white" />
+          )}
+        </button>
+      </div>
+
       {/* Desktop Horizontal Player Bar */}
       <div className="hidden md:block">
         {!collapsed ? (
