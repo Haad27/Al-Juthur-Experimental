@@ -688,7 +688,7 @@ export default function SurahReaderClient({
       )}>
         <div
           className={cn(
-          "hidden md:flex fixed items-center justify-between md:min-h-14 px-6 py-3 backdrop-blur-lg dark:bg-zinc-900/90 border-b bg-[var(--sephia-200)] dark:border-zinc-800/80 border-white/10 transition-all duration-300 z-50 shadow-sm",
+          "hidden md:flex fixed items-center justify-between md:min-h-14 px-6 py-3 backdrop-blur-xl dark:bg-zinc-950/40 bg-white/10 border-b dark:border-zinc-800/50 border-black/10 transition-all duration-300 z-50",
           show ? "top-0" : "-top-24",
           aiChatContext ? "w-full lg:w-[calc(100%-400px)] xl:w-[calc(100%-450px)]" : "w-[calc(100%-350px)]"
         )}
@@ -729,7 +729,7 @@ export default function SurahReaderClient({
 
       <div className="flex flex-col w-full min-h-screen lg:px-24 px-0">
         {/* Explore Container Hero Header */}
-        <div className="relative pt-28 md:pt-10 pb-8 pl-4 pr-1 md:px-8 max-w-7xl mx-auto w-full border-b border-zinc-800/80 mb-8">
+        <div className="relative pt-28 md:pt-24 pb-8 pl-4 pr-1 md:px-8 max-w-7xl mx-auto w-full border-b border-zinc-800/80 mb-8">
           <div className="absolute left-10 top-10 size-96 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 relative z-10">
             <div className="space-y-3">
