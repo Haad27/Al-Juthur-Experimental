@@ -422,7 +422,11 @@ function LexiconPageContent() {
   return (
     <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-slate-100 pb-24 ${inter.className}`}>
       {/* Global Top Navigation Bar (Transparent Glassy Backdrop on Mobile & Desktop) */}
-      <div className="sticky top-0 z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-4 md:px-8 py-3">
+      <div 
+        className={`sticky top-0 z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-4 md:px-8 py-3 transition-transform duration-300 ${
+          topNavVisible ? 'translate-y-0' : '-translate-y-full md:translate-y-0'
+        }`}
+      >
         <div className="max-w-[1700px] mx-auto relative flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex items-center justify-between w-full md:w-auto">
             {/* Left Logo & Badge */}

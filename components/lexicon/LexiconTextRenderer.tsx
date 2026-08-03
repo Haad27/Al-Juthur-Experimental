@@ -46,13 +46,21 @@ export default function LexiconTextRenderer({ text, isImmersive }: LexiconTextRe
           );
         }
 
+        // For lines that are mostly English but contain Arabic words, style the Arabic words
+        const styledLine = line.replace(
+          /([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+(?:\s+[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+)*)/g,
+          `<span class="${amiriquran.className} ${
+            isImmersive ? "text-xl md:text-2xl text-amber-200/90" : "text-lg md:text-xl text-stone-200"
+          }" dir="rtl">$&</span>`
+        );
+
         return (
           <p
             key={idx}
             className={`${
               isImmersive ? "text-base md:text-lg text-amber-100/80" : "text-sm md:text-base text-stone-300"
             } leading-relaxed`}
-            dangerouslySetInnerHTML={{ __html: line }}
+            dangerouslySetInnerHTML={{ __html: styledLine }}
           />
         );
       })}
