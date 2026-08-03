@@ -355,20 +355,6 @@ const AyahRow = React.memo(({
             <Play className="text-zinc-400" size={18} />
           )}
         </div>
-        <Link
-          href={`/tafsir?surah=${surahNumber}&ayah=${ayah.numberInSurah}`}
-          className="p-2 rounded-full hover:bg-zinc-800 transition-colors cursor-pointer inline-flex items-center justify-center"
-          title="Read Tafsir"
-        >
-          <ScrollText className="text-emerald-500 hover:text-emerald-400" size={18} />
-        </Link>
-        <Link
-          href={`/lexicon?surah=${surahNumber}&ayah=${ayah.numberInSurah}`}
-          className="p-2 rounded-full hover:bg-zinc-800 transition-colors cursor-pointer inline-flex items-center justify-center"
-          title="Read Lexicon"
-        >
-          <Library className="text-amber-500 hover:text-amber-400" size={18} />
-        </Link>
       </div>
 
       <div className="text-right sm:order-2 order-1 flex flex-col w-full">
@@ -407,15 +393,6 @@ const AyahRow = React.memo(({
                 }}
                 dangerouslySetInnerHTML={{ __html: mainText }}
               />
-              {hasFootnotesAvailable ? (
-                <button
-                  onClick={handleToggleFootnotes}
-                  className="inline-flex items-center justify-center p-2 ml-2 mt-2.5 mb-1 transition-all align-middle rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.25)] hover:scale-110 cursor-pointer"
-                  title={showFootnoteIds ? "Hide Footnotes" : "Show Footnotes & Commentary"}
-                >
-                  <MessageSquareText size={16} />
-                </button>
-              ) : null}
             </div>
 
             {(hasFootnotesAvailable && showFootnoteIds) ? (
@@ -481,26 +458,39 @@ const AyahRow = React.memo(({
               </div>
             ) : null}
 
-            {/* AI Action Button */}
-            <div className="mt-5 mb-2 flex">
-              <button
-                onClick={() => {
-                  setPulseAi(false);
-                  if (typeof window !== "undefined") {
-                    localStorage.setItem("ayah_ai_seen", "true");
-                  }
-                  onOpenAiChat(surahNumber, ayah.numberInSurah);
-                }}
-                className={cn(
-                  "inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold transition-all duration-300",
-                  "bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30",
-                  "hover:from-emerald-500/30 hover:to-teal-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)]",
-                  pulseAi && "animate-pulse shadow-[0_0_20px_rgba(16,185,129,0.4)]"
-                )}
-              >
-                <Bot size={16} className={cn(pulseAi && "animate-bounce")} />
-                <span>✨ Ask Tafsir Scholar</span>
-              </button>
+            {/* Actions: AI Chat & Footnotes */}
+            <div className="mt-5 mb-2 flex flex-wrap items-center gap-3">
+              <div className="relative inline-block">
+                <div className="absolute inset-0 bg-emerald-500/30 blur-md rounded-full animate-pulse"></div>
+                <button
+                  onClick={() => {
+                    setPulseAi(false);
+                    if (typeof window !== "undefined") {
+                      localStorage.setItem("ayah_ai_seen", "true");
+                    }
+                    onOpenAiChat(surahNumber, ayah.numberInSurah);
+                  }}
+                  className="relative group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-emerald-950/80 to-teal-950/80 border border-emerald-500/50 transition-all hover:border-emerald-400 hover:scale-[1.02] cursor-pointer"
+                >
+                  <Bot size={14} className="text-emerald-400 group-hover:animate-bounce" />
+                  <span className="text-[11px] font-bold tracking-wide uppercase text-emerald-300 group-hover:text-white">
+                    ✨ Ask Tafsir Scholar
+                  </span>
+                </button>
+              </div>
+
+              {hasFootnotesAvailable && (
+                <button
+                  onClick={handleToggleFootnotes}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-emerald-950/80 to-teal-950/80 border border-emerald-500/50 hover:border-emerald-400 transition-all shadow-[0_0_10px_rgba(16,185,129,0.15)] hover:shadow-[0_0_15px_rgba(16,185,129,0.25)] hover:scale-[1.02] cursor-pointer group"
+                  title={showFootnoteIds ? "Hide Footnotes" : "Show Footnotes & Commentary"}
+                >
+                  <MessageSquareText size={14} className="text-emerald-400 group-hover:text-emerald-300" />
+                  <span className="text-[11px] font-bold tracking-wide uppercase text-emerald-300 group-hover:text-white">
+                    {showFootnoteIds ? "Hide Notes" : "Footnotes"}
+                  </span>
+                </button>
+              )}
             </div>
           </div>
         )}

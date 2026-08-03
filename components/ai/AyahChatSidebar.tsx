@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, Bot, User, Loader2, BookOpen, Layers, ShieldAlert, Sparkles, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { X, Send, Bot, User, Loader2, BookOpen, Layers, ShieldAlert, Sparkles, AlertTriangle, CheckCircle2, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { RAG_MODES, RagModeInfo } from "@/lib/ai/rag/modes-config";
 import ReactMarkdown from "react-markdown";
@@ -253,21 +253,24 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold text-emerald-400 leading-tight">Tafsir Scholar AI</h3>
                     {remainingTokens !== null && (
-                      <div className="hidden sm:flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-mono text-emerald-400 shrink-0">
+                      <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-mono text-emerald-400 shrink-0">
                         <Sparkles className="size-2.5" />
                         {remainingTokens.toLocaleString()}
                       </div>
                     )}
                   </div>
-                  <select 
-                    className="bg-emerald-950/20 text-[11px] text-emerald-400 border border-emerald-500/40 rounded-md outline-none cursor-pointer mt-1 py-1 px-1.5 w-auto pr-6 truncate hover:bg-emerald-900/40 transition-colors font-medium"
-                    value={selectedModeId}
-                    onChange={(e) => setSelectedModeId(e.target.value)}
-                  >
-                    {RAG_MODES.map(m => (
-                      <option key={m.id} value={m.id} className="bg-zinc-900 text-zinc-300">{m.shortName}</option>
-                    ))}
-                  </select>
+                  <div className="relative inline-flex items-center bg-emerald-950/20 border border-emerald-500/40 rounded-md hover:bg-emerald-900/40 transition-colors mt-1">
+                    <select 
+                      className="appearance-none bg-transparent text-[11px] text-emerald-400 outline-none cursor-pointer py-1 pl-2 pr-6 w-auto truncate font-medium"
+                      value={selectedModeId}
+                      onChange={(e) => setSelectedModeId(e.target.value)}
+                    >
+                      {RAG_MODES.map(m => (
+                        <option key={m.id} value={m.id} className="bg-zinc-900 text-zinc-300">{m.shortName}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 size-3.5 text-emerald-400 pointer-events-none" />
+                  </div>
                 </div>
               </div>
               <button 
