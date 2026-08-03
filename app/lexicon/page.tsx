@@ -94,8 +94,6 @@ function LexiconPageContent() {
   const initialRoot = searchParams.get('root') || 'رحم';
   const urlAuthor = searchParams.get('author');
 
-  const { immersiveMode, setImmersiveMode } = useGlobalState();
-
   const [searchQuery, setSearchQuery] = useState(initialRoot);
   const [activeRoot, setActiveRoot] = useState(initialRoot);
   const [loading, setLoading] = useState(false);
@@ -104,23 +102,10 @@ function LexiconPageContent() {
   const [pdfDictionaries, setPdfDictionaries] = useState<PdfDictionaryInfo[]>([]);
   const [selectedDictId, setSelectedDictId] = useState<number | 'all'>('all');
 
-  // Scroll & Immersive navigation state
+  // Scroll navigation state
   const [readingProgress, setReadingProgress] = useState(0);
   const [topNavVisible, setTopNavVisible] = useState(true);
-  const [isEnteringImmersive, setIsEnteringImmersive] = useState(false);
   const lastScrollYRef = useRef<number>(0);
-
-  const handleEnterImmersive = (val: boolean) => {
-    if (val) {
-      setIsEnteringImmersive(true);
-      setTimeout(() => {
-        setImmersiveMode(true);
-        setIsEnteringImmersive(false);
-      }, 400);
-    } else {
-      setImmersiveMode(false);
-    }
-  };
 
   useEffect(() => {
     const rootParam = searchParams.get('root');
@@ -167,27 +152,9 @@ function LexiconPageContent() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Keyboard shortcut (R) for Lexicon Immersive Mode
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement).tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-      if (e.key === 'r' || e.key === 'R') {
-        if (!immersiveMode && !isEnteringImmersive) {
-          handleEnterImmersive(true);
-        } else if (immersiveMode) {
-          handleEnterImmersive(false);
-        }
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [immersiveMode, setImmersiveMode]);
-
   // Cleanup on unmount
   useEffect(() => {
-    return () => setImmersiveMode(false);
-  }, [setImmersiveMode]);
+  }, []);
 
   const loadRootLexicon = async (root: string) => {
     setLoading(true);
@@ -205,7 +172,6 @@ function LexiconPageContent() {
         );
         if (matched) {
           setSelectedDictId(matched.dictId);
-          handleEnterImmersive(true);
         } else {
           setSelectedDictId('all');
         }
@@ -238,185 +204,6 @@ function LexiconPageContent() {
     }) || [];
 
   // ==========================================
-  // LEXICON IMMERSIVE READING MODE (FULL WIDTH)
-  // ==========================================
-  
-  if (isEnteringImmersive) {
-    return (
-      <div className={`min-h-screen fixed inset-0 z-[100] flex flex-col items-center justify-center bg-zinc-950 text-amber-500 ${inter.className}`}>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-900/20 via-zinc-950 to-zinc-950" />
-        <div className="relative z-10 flex flex-col items-center gap-8">
-          <div className="relative flex items-center justify-center">
-            <div className="absolute size-28 border-t-2 border-amber-500 rounded-full animate-[spin_1s_linear_infinite]" />
-            <div className="absolute size-24 border-r-2 border-amber-400/60 rounded-full animate-[spin_1.5s_reverse_infinite]" />
-            <div className="absolute size-20 border-b-2 border-amber-600/40 rounded-full animate-[spin_2s_linear_infinite]" />
-            <BookOpenText className="size-8 text-amber-300 animate-pulse" />
-          </div>
-          <div className="flex flex-col items-center gap-2 px-4 text-center">
-            <h2 className="text-lg md:text-3xl font-serif text-amber-200 tracking-widest md:tracking-[0.2em] uppercase">
-              Entering Immersive Mode
-            </h2>
-            <p className="text-[10px] md:text-sm text-amber-500/70 font-mono tracking-widest md:tracking-[0.3em] uppercase animate-pulse">
-              Preparing Classical Lexicon Texts...
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (immersiveMode) {
-    return (
-      <div className={`tafsir-immersive text-white min-h-screen ${inter.className}`}>
-        {/* Reading Progress Bar (Fixed) */}
-        <div
-          className="fixed top-0 left-0 right-0 z-50 tafsir-reading-progress"
-          style={{ width: `${readingProgress}%` }}
-        />
-
-        {/* Immersive Top Bar */}
-        <div
-          className={`sticky top-0 z-40 border-b px-4 md:px-8 py-3 transition-all duration-200 ${
-            topNavVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
-          }`}
-          style={{
-            background: 'rgba(15, 11, 7, 0.4)',
-            borderColor: 'rgba(217, 119, 6, 0.25)',
-            boxShadow: '0 10px 30px -10px rgba(0, 0, 0, 0.8), 0 0 15px rgba(217, 119, 6, 0.1)',
-          }}
-        >
-          <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <button
-                onClick={() => handleEnterImmersive(false)}
-                className="flex items-center gap-1.5 text-amber-600/70 hover:text-amber-500 transition text-sm shrink-0"
-              >
-                <ArrowLeft className="size-4" />
-                <span className="hidden sm:inline text-xs">Standard View</span>
-              </button>
-              <div className="h-4 w-px shrink-0" style={{ background: 'rgba(180,120,40,0.25)' }} />
-              <div className="min-w-0 flex items-center gap-2">
-                <p
-                  className="text-lg font-bold font-arabic"
-                  style={{ fontFamily: "'Amiri', serif", color: '#e8d0b0' }}
-                >
-                  {result?.normalizedRoot || activeRoot}
-                </p>
-                <span className="text-xs text-amber-500/80 font-mono hidden sm:inline">
-                  [{result?.normalizedRoot.split('').join(' - ')}]
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 shrink-0">
-              {/* Dictionary Selector Dropdown in Immersive Top Bar */}
-              {result?.entries && result.entries.length > 0 && (
-                <div className="relative">
-                  <select
-                    value={selectedDictId}
-                    onChange={(e) => setSelectedDictId(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-                    className="appearance-none bg-amber-950/40 border border-amber-500/30 text-amber-300 text-xs rounded-lg px-3 py-1.5 pr-8 focus:outline-none cursor-pointer"
-                  >
-                    <option value="all" className="bg-zinc-900 text-white">All Dictionaries ({result.entries.length})</option>
-                    {result.entries.map((entry) => (
-                      <option key={entry.dictId} value={entry.dictId} className="bg-zinc-900 text-white">
-                        {entry.dictName}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 size-3 text-amber-400 pointer-events-none" />
-                </div>
-              )}
-
-              {/* Exit Immersive Button */}
-              <button
-                onClick={() => handleEnterImmersive(false)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-medium hover:bg-amber-500/20 transition shrink-0"
-                title="Exit Immersive Mode (R)"
-              >
-                <X className="size-3.5" />
-                <span>Exit</span>
-                <span className="text-[10px] opacity-75 font-mono hidden md:inline">R</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Immersive Main Reading Content */}
-        <div className="tafsir-immersive-content max-w-6xl mx-auto px-4 sm:px-6 md:px-10 py-6 space-y-6">
-          {/* Micro-Compact Immersive Root Banner */}
-          <div className="flex items-center justify-between gap-4 border-b border-amber-500/20 pb-4">
-            <div className="flex items-center gap-3 min-w-0">
-              <span className="text-[10px] uppercase font-bold tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-full shrink-0">
-                Root
-              </span>
-              <h1 className={`${amiriquran.className} text-3xl sm:text-4xl text-amber-100 tracking-wide font-normal truncate`}>
-                {result?.normalizedRoot}
-              </h1>
-            </div>
-
-            {result?.structuredLane && (
-              <div className="bg-amber-950/30 border border-amber-500/25 rounded-lg px-3 py-1 text-center shrink-0 flex items-center gap-2">
-                <span className="text-[11px] text-amber-400/80 uppercase font-bold tracking-wider">Quran Freq:</span>
-                <span className="text-sm font-bold text-amber-300 font-mono">
-                  {result.structuredLane.quran_frequency}x
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Morphological Derivations Horizontal Scroll */}
-          {result?.structuredLane && result.structuredLane.morphological_forms.length > 0 && (
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 bg-amber-950/20 border border-amber-500/20 rounded-xl px-3">
-              <span className="text-[10px] uppercase font-bold text-amber-400/80 tracking-wider shrink-0 mr-1 flex items-center gap-1">
-                <Layers className="size-3 text-amber-400" />
-                <span>Derivations ({result.structuredLane.morphological_forms.length}):</span>
-              </span>
-              {result.structuredLane.morphological_forms.map((form, idx) => (
-                <div
-                  key={idx}
-                  className="px-2.5 py-0.5 rounded-md bg-amber-900/25 border border-amber-500/30 text-xs flex items-center gap-1.5 shrink-0 whitespace-nowrap"
-                >
-                  <span className="font-bold text-amber-200 font-arabic">{form.example_word}</span>
-                  <span className="text-amber-400/70 text-[11px]">• {form.form_name}</span>
-                  <span className="text-[10px] bg-amber-500/10 px-1 py-0.2 rounded text-amber-300 font-mono">
-                    {form.occurrences}x
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Definitions List */}
-          <div className="space-y-10">
-            {filteredEntries.map((entry, idx) => (
-              <div key={entry.dictId || idx} className="space-y-4 border-b border-amber-500/15 pb-10">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-bold text-amber-300 flex items-center gap-2 font-serif">
-                    <BookOpen className="size-5 text-amber-500" />
-                    <span>{entry.dictName}</span>
-                    {entry.isEnglish && (
-                      <span className="text-[10px] uppercase px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono">
-                        EN
-                      </span>
-                    )}
-                  </h2>
-                </div>
-
-                {entry.definitions.map((def, dIdx) => (
-                  <div key={dIdx} className="tafsir-immersive-block visible pl-2 sm:pl-4">
-                    <LexiconTextRenderer text={def} isImmersive={true} />
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ==========================================
   // STANDARD LEXICON MODE (PINNED GLOSSY TOP BAR + 3-COLUMN DESKTOP)
   // ==========================================
   return (
@@ -440,16 +227,6 @@ function LexiconPageContent() {
                 Lexicon
               </span>
             </div>
-            
-            {/* Mobile Immersive Mode Toggle */}
-            <button
-              onClick={() => handleEnterImmersive(true)}
-              className="md:!hidden tafsir-immersive-toggle tafsir-immersive-toggle-off !px-3 !py-1.5 text-xs shrink-0"
-              title="Enter Lexicon Immersive Mode (R)"
-            >
-              <BookOpenText className="size-4" />
-              <span>Immersive</span>
-            </button>
           </div>
 
           {/* Desktop Navigation Links */}
@@ -470,19 +247,6 @@ function LexiconPageContent() {
               RAG Bot
             </Link>
           </nav>
-
-          {/* Desktop Immersive Mode Toggle (Far-Right Pinned) */}
-          <div className="hidden md:flex items-center shrink-0">
-            <button
-              onClick={() => handleEnterImmersive(true)}
-              className="tafsir-immersive-toggle tafsir-immersive-toggle-off !px-3.5 !py-1.5 text-sm"
-              title="Enter Lexicon Immersive Mode (R)"
-            >
-              <BookOpenText className="size-4" />
-              <span>Immersive Mode</span>
-              <span className="tafsir-kb-hint ml-1">R</span>
-            </button>
-          </div>
 
           {/* MOBILE ONLY: Pinned Dropdowns for Dictionaries & PDF Lexicons */}
           {result?.entries && result.entries.length > 0 && (
