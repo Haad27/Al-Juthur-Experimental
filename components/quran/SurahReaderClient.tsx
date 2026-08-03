@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { fetchAyahAudio } from "@/api/api";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import NavigatorButton from "@/components/NavigatorButton";
 import { InteractiveAyahWords } from "@/components/quran/InteractiveAyahWords";
@@ -12,6 +13,7 @@ import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { useAudioStore } from "@/lib/stores/audioStore";
 import { cn, convertNumberToArabicNumeral } from "@/lib/utils";
 import BismillahIcon from "@/components/svg/icons/BismillahIcon";
+import LogoIcon from "@/components/svg/icons/LogoIcon";
 import {
   ArrowLeft,
   Check,
@@ -673,14 +675,34 @@ export default function SurahReaderClient({
   return (
     <div className="flex w-full min-h-screen relative overflow-hidden">
       {/* Loading Overlay */}
-      {isNavigatingAyah && (
-        <div className="fixed inset-0 z-[99999] bg-zinc-950/60 backdrop-blur-sm flex items-center justify-center">
-          <div className="flex flex-col items-center gap-4 bg-zinc-900 border border-zinc-800 p-8 rounded-3xl shadow-2xl">
-            <Loader2 className="size-10 animate-spin text-emerald-500" />
-            <p className="text-zinc-300 font-medium tracking-wide">Navigating to Verse...</p>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {isNavigatingAyah && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[99999] bg-zinc-950/80 backdrop-blur-md flex items-center justify-center"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 10, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.9, y: 10, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              className="relative flex flex-col items-center gap-6 bg-zinc-900/90 border border-emerald-500/30 p-10 rounded-3xl shadow-[0_0_50px_rgba(16,185,129,0.15)] overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 to-transparent animate-pulse" />
+              <div className="relative z-10 flex items-center justify-center">
+                <div className="absolute size-16 border-2 border-emerald-500/20 border-t-emerald-400 rounded-full animate-spin shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
+                <LogoIcon className="size-6 text-emerald-400 animate-pulse drop-shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
+              </div>
+              <div className="relative z-10 space-y-1.5 text-center mt-2">
+                <p className="text-zinc-100 font-bold tracking-[0.2em] uppercase text-xs">Navigating</p>
+                <p className="text-emerald-500/80 text-[10px] font-mono tracking-wider">LOCATING VERSE...</p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <section className={cn(
         "flex items-center flex-col dark:bg-zinc-900 bg-[var(--sephia-primary)] dark:text-white text-black relative pb-10 md:pb-4 transition-all duration-300",
