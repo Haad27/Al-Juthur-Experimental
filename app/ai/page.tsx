@@ -250,55 +250,57 @@ export default function AiTranslatorPage() {
               
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                 {/* Global Copy Actions */}
-                <div className="flex items-center gap-1.5 bg-neutral-900/50 rounded-lg p-1 border border-neutral-800">
-                  <span className="text-xs font-medium text-neutral-500 px-2">Copy All:</span>
-                  <button
-                    onClick={() => copyAll('english')}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition cursor-pointer text-neutral-400 hover:text-white hover:bg-neutral-800"
-                    title="Copy English Only"
-                  >
-                    {copiedIndex === 'all-english' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>English</span>
-                  </button>
-                  <button
-                    onClick={() => copyAll('reader')}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition cursor-pointer text-neutral-400 hover:text-white hover:bg-neutral-800"
-                    title="Copy Reader Mode Format"
-                  >
-                    {copiedIndex === 'all-reader' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>Reader</span>
-                  </button>
-                  <button
-                    onClick={() => copyAll('original')}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition cursor-pointer text-neutral-400 hover:text-white hover:bg-neutral-800"
-                    title="Copy Original Mode Format"
-                  >
-                    {copiedIndex === 'all-original' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>Original</span>
-                  </button>
+                <div className="flex items-center p-1.5 rounded-xl bg-slate-900/60 border border-slate-700/50 shadow-inner backdrop-blur-md">
+                  <span className="text-[10px] font-bold text-slate-400 px-3 uppercase tracking-widest hidden sm:block">Copy</span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => copyAll('english')}
+                      className="group flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-300 hover:bg-emerald-500/20 hover:text-emerald-300 hover:shadow-[0_0_15px_rgba(16,185,129,0.15)] text-slate-300"
+                      title="Copy English Only"
+                    >
+                      {copiedIndex === 'all-english' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors" />}
+                      <span>English</span>
+                    </button>
+                    <button
+                      onClick={() => copyAll('reader')}
+                      className="group flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-300 hover:bg-emerald-500/20 hover:text-emerald-300 hover:shadow-[0_0_15px_rgba(16,185,129,0.15)] text-slate-300"
+                      title="Copy Reader Mode Format"
+                    >
+                      {copiedIndex === 'all-reader' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors" />}
+                      <span>Reader</span>
+                    </button>
+                    <button
+                      onClick={() => copyAll('original')}
+                      className="group flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-300 hover:bg-emerald-500/20 hover:text-emerald-300 hover:shadow-[0_0_15px_rgba(16,185,129,0.15)] text-slate-300"
+                      title="Copy Original Mode Format"
+                    >
+                      {copiedIndex === 'all-original' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors" />}
+                      <span>Original</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Layout Toggles */}
-                <div className="flex items-center bg-neutral-900 rounded-lg p-1 border border-neutral-800">
+                <div className="flex items-center p-1.5 rounded-xl bg-slate-900/60 border border-slate-700/50 shadow-inner backdrop-blur-md">
                   <button
                     onClick={() => setViewMode('cards')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition cursor-pointer ${
-                      viewMode === 'cards' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'text-neutral-400 hover:text-white'
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-300 cursor-pointer ${
+                      viewMode === 'cards' ? 'bg-emerald-500/20 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
                     }`}
                     title="Card view"
                   >
-                    <LayoutGrid className="w-3.5 h-3.5" />
-                    <span>Reader Mode</span>
+                    <LayoutGrid className="w-4 h-4" />
+                    <span>Reader</span>
                   </button>
                   <button
                     onClick={() => setViewMode('table')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition cursor-pointer ${
-                      viewMode === 'table' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'text-neutral-400 hover:text-white'
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-300 cursor-pointer ${
+                      viewMode === 'table' ? 'bg-emerald-500/20 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
                     }`}
                     title="Table view"
                   >
-                    <Columns className="w-3.5 h-3.5" />
-                    <span>Classic Split</span>
+                    <Columns className="w-4 h-4" />
+                    <span>Classic</span>
                   </button>
                 </div>
               </div>
@@ -306,91 +308,45 @@ export default function AiTranslatorPage() {
 
             {/* Rendering: Reader Mode (Cards) */}
             {viewMode === 'cards' ? (
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-8 pb-10">
                 {aiTranslationData.map((row, idx) => (
-                  <div key={idx} className="bg-neutral-900/40 border border-neutral-800 rounded-2xl p-5 md:p-6 hover:border-neutral-700/80 transition space-y-4 shadow-xl animate-fadeIn">
+                  <div key={idx} className="relative overflow-hidden bg-slate-900/40 border border-slate-700/50 rounded-3xl p-6 md:p-10 hover:border-emerald-500/30 transition-all duration-500 hover:shadow-[0_0_40px_rgba(16,185,129,0.06)] space-y-8 shadow-2xl backdrop-blur-xl group animate-fadeIn">
+                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                     {/* Arabic Box */}
-                    <div className="border-r-4 border-emerald-500/40 pr-4 text-right" dir="rtl">
-                      <p className="font-serif text-xl leading-loose text-emerald-100 tracking-wide">
+                    <div className="relative border-r-4 border-emerald-500/50 pr-6 md:pr-8 text-right" dir="rtl">
+                      <p className="font-serif text-2xl md:text-3xl leading-relaxed text-emerald-50 tracking-wide">
                         {row.sourceText}
                       </p>
                     </div>
                     {/* Divider */}
-                    <div className="h-px bg-neutral-800/80 w-full" />
+                    <div className="relative h-px bg-gradient-to-r from-transparent via-slate-600/50 to-transparent w-full" />
                     {/* English Box */}
-                    <div className="flex flex-col gap-3">
-                      <p className="text-neutral-300 leading-relaxed text-sm md:text-base font-sans">
+                    <div className="relative pl-2 md:pl-4">
+                      <p className="text-slate-300 leading-loose text-base md:text-lg font-sans">
                         {row.transcreatedText}
                       </p>
-                      <div className="flex flex-wrap items-center gap-2 pt-2">
-                        <button
-                          onClick={() => copySegment(row.transcreatedText, `${idx}-eng`)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 transition text-xs font-medium text-neutral-400 hover:text-white cursor-pointer"
-                        >
-                          {copiedIndex === `${idx}-eng` ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                          <span>English Only</span>
-                        </button>
-                        <button
-                          onClick={() => copySegment(`${row.sourceText}\n\n${row.transcreatedText}`, `${idx}-reader`)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 transition text-xs font-medium text-neutral-400 hover:text-white cursor-pointer"
-                        >
-                          {copiedIndex === `${idx}-reader` ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                          <span>Reader Mode</span>
-                        </button>
-                        <button
-                          onClick={() => copySegment(`${row.transcreatedText}\n\n${row.sourceText}`, `${idx}-original`)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 transition text-xs font-medium text-neutral-400 hover:text-white cursor-pointer"
-                        >
-                          {copiedIndex === `${idx}-original` ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                          <span>Original Mode</span>
-                        </button>
-                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
               /* Rendering: Classic Split (Table) */
-              <div className="w-full overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900/30 backdrop-blur-md">
+              <div className="w-full overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-900/40 backdrop-blur-xl shadow-2xl mb-10">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-neutral-800/80">
-                      <th className="p-4 border-b border-neutral-700 font-bold text-sm text-neutral-200 w-1/2 border-r">Transcreated Text</th>
-                      <th className="p-4 border-b border-neutral-700 font-bold text-sm text-neutral-200 w-1/2 text-right">Source Text</th>
+                    <tr className="bg-slate-800/80 border-b border-slate-700/50">
+                      <th className="p-6 font-bold text-xs text-slate-300 w-1/2 border-r border-slate-700/50 uppercase tracking-widest">English Translation</th>
+                      <th className="p-6 font-bold text-xs text-emerald-400 w-1/2 text-right uppercase tracking-widest">Original Arabic</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-slate-700/50">
                     {aiTranslationData.map((row, idx) => (
-                      <tr key={idx} className="border-b border-neutral-800 last:border-0 hover:bg-neutral-800/20 transition">
-                        <td className="p-5 align-top text-sm leading-relaxed text-neutral-300 border-r border-neutral-800">
-                          <div className="mb-4">
-                            {row.transcreatedText}
-                          </div>
-                          <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-neutral-800/50">
-                            <button
-                              onClick={() => copySegment(row.transcreatedText, `${idx}-eng-table`)}
-                              className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-neutral-800/50 hover:bg-neutral-700 transition text-[11px] font-medium text-neutral-400 hover:text-white cursor-pointer"
-                            >
-                              {copiedIndex === `${idx}-eng-table` ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                              <span>English Only</span>
-                            </button>
-                            <button
-                              onClick={() => copySegment(`${row.sourceText}\n\n${row.transcreatedText}`, `${idx}-reader-table`)}
-                              className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-neutral-800/50 hover:bg-neutral-700 transition text-[11px] font-medium text-neutral-400 hover:text-white cursor-pointer"
-                            >
-                              {copiedIndex === `${idx}-reader-table` ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                              <span>Reader Mode</span>
-                            </button>
-                            <button
-                              onClick={() => copySegment(`${row.transcreatedText}\n\n${row.sourceText}`, `${idx}-original-table`)}
-                              className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-neutral-800/50 hover:bg-neutral-700 transition text-[11px] font-medium text-neutral-400 hover:text-white cursor-pointer"
-                            >
-                              {copiedIndex === `${idx}-original-table` ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                              <span>Original Mode</span>
-                            </button>
-                          </div>
+                      <tr key={idx} className="group hover:bg-slate-800/30 transition-colors duration-300">
+                        <td className="p-6 md:p-8 align-top text-base leading-relaxed text-slate-300 border-r border-slate-700/50 relative">
+                          <div className="absolute inset-y-0 left-0 w-1 bg-emerald-500/0 group-hover:bg-emerald-500/40 transition-colors duration-300" />
+                          {row.transcreatedText}
                         </td>
-                        <td className="p-5 align-top font-serif text-lg leading-loose text-emerald-100 text-right" dir="rtl">
+                        <td className="p-6 md:p-8 align-top font-serif text-xl md:text-2xl leading-loose text-emerald-50 text-right" dir="rtl">
                           {row.sourceText}
                         </td>
                       </tr>
