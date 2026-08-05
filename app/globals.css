@@ -213,7 +213,7 @@ html, body {
 .font-mushaf-v1 {
   font-family: 'UthmanicHafs', 'Amiri', serif;
   font-weight: 400;
-  letter-spacing: 0.025em;
+  letter-spacing: normal;
 }
 
 /* 3. Indo-Pak Nastaliq — authentic Nastaleeq woff2 */
@@ -226,14 +226,14 @@ html, body {
 .font-mushaf-uthmani-simple {
   font-family: 'UthmanicHafs18', 'Amiri', serif;
   font-weight: 400;
-  letter-spacing: 0.01em;
+  letter-spacing: normal;
 }
 
 /* 5. KFQPC Premium — UthmanicHafs V18 (higher quality) */
 .font-mushaf-kfqpc {
   font-family: 'UthmanicHafs18', 'UthmanicHafs', serif;
   font-weight: 400;
-  letter-spacing: -0.01em;
+  letter-spacing: normal;
 }
 
 /* 6. Indo-Pak 15 Lines — Scheherazade New (airier, 15-line spacing) */
@@ -252,7 +252,7 @@ html, body {
 .font-mushaf-naskh {
   font-family: 'NotoNaskhArabic', 'Amiri', serif;
   font-weight: 400;
-  letter-spacing: 0.015em;
+  letter-spacing: normal;
 }
 
 /* 9. Warsh / Amiri — Amiri italic (Warsh Qirat classical style) */
@@ -260,7 +260,7 @@ html, body {
   font-family: 'Amiri', serif;
   font-style: italic;
   font-weight: 400;
-  letter-spacing: 0.025em;
+  letter-spacing: normal;
 }
 
 /* Legacy compat aliases */

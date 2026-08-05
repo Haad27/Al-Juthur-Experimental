@@ -355,10 +355,12 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                             const arabicMatches = textStr.match(/[\u0600-\u06FF]/g) || [];
                             const isPredominantlyArabic = arabicMatches.length > 5 && (arabicMatches.length / textStr.length > 0.25);
                             
+                            const containerClasses = "quran-block my-2 p-3 rounded-lg bg-emerald-950/20 border border-emerald-500/30 shadow-sm relative overflow-hidden [&_.quran-block]:!p-0 [&_.quran-block]:!m-0 [&_.quran-block:not(:first-child)]:!mt-3 [&_.quran-block]:!border-none [&_.quran-block]:!bg-transparent [&_.quran-block]:!shadow-none [&_.quran-block>.quran-bar]:!hidden";
+
                             if (isPredominantlyArabic) {
                               return (
-                                <div className="my-2 p-3 rounded-lg bg-emerald-950/20 border border-emerald-500/30 shadow-sm relative overflow-hidden">
-                                  <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
+                                <div className={containerClasses}>
+                                  <div className="quran-bar absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
                                   <p className={`m-0 ${amiri.className} text-base md:text-lg text-emerald-200 leading-loose text-right dir-rtl`}>
                                     {children}
                                   </p>
@@ -369,8 +371,8 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                             const isInlineVerseQuote = /\[Surah \d+:\d+\]|\[Surah [^\]]+\]/i.test(textStr) && textStr.includes('"');
                             if (isInlineVerseQuote && textStr.length < 350 && !textStr.toLowerCase().includes('tafsir')) {
                               return (
-                                <div className="my-2 p-3 rounded-lg bg-emerald-950/20 border border-emerald-500/30 shadow-sm relative overflow-hidden">
-                                  <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
+                                <div className={containerClasses}>
+                                  <div className="quran-bar absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
                                   <p className="m-0 italic text-[13px] sm:text-sm text-zinc-200">
                                     {children}
                                   </p>
@@ -378,7 +380,7 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                               );
                             }
 
-                            return <p className="mb-2" {...props}>{renderInlineBadges(children)}</p>;
+                            return <p className="mb-2 [&:last-child]:mb-0" {...props}>{renderInlineBadges(children)}</p>;
                           },
                           blockquote: ({node, children}) => {
                             let textStr = '';
@@ -389,10 +391,11 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                               }
                             });
                             const hasArabic = /[\u0600-\u06FF]/.test(textStr);
+                            const containerClasses = "quran-block my-2 p-3 rounded-lg bg-emerald-950/20 border border-emerald-500/30 shadow-sm relative overflow-hidden [&_.quran-block]:!p-0 [&_.quran-block]:!m-0 [&_.quran-block:not(:first-child)]:!mt-3 [&_.quran-block]:!border-none [&_.quran-block]:!bg-transparent [&_.quran-block]:!shadow-none [&_.quran-block>.quran-bar]:!hidden";
 
                             return (
-                              <div className="my-2 p-3 rounded-lg bg-emerald-950/20 border border-emerald-500/30 shadow-sm relative overflow-hidden">
-                                <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
+                              <div className={containerClasses}>
+                                <div className="quran-bar absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
                                 <blockquote className={`m-0 border-none p-0 text-zinc-200 ${hasArabic ? `${amiri.className} text-base md:text-lg leading-loose text-right text-emerald-200` : 'italic text-[13px] sm:text-sm text-zinc-200'}`}>
                                   {renderInlineBadges(children)}
                                 </blockquote>

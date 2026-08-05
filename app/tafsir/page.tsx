@@ -414,7 +414,7 @@ export default function TafsirPage() {
 
     // ── STANDARD MODE ──────────────────────────────────────────
     return (
-      <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white ${inter.className}`}>
+      <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white ${inter.className} transition-all duration-300 ${!!aiChatContext ? "xl:pr-[450px]" : ""}`}>
         {/* Top Navigation Bar (Mobile Only) */}
         <div className={`md:hidden sticky top-0 z-40 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/80 px-3 py-3 transition-all duration-300 ${topNavVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}>
           <div className="max-w-[1700px] mx-auto">
@@ -555,7 +555,7 @@ export default function TafsirPage() {
           </aside>
 
           {/* Main Content Area */}
-          <main className="flex-1 p-4 md:p-8 space-y-8 min-w-0">
+          <main className="flex-1 p-4 md:p-8 space-y-8 min-w-0 transition-all duration-300">
 
             {/* Surah Banner Header */}
             <div className="relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-gradient-to-r from-emerald-950/40 via-zinc-900/60 to-zinc-900/40 p-6 md:p-8">

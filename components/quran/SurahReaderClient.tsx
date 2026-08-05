@@ -333,14 +333,15 @@ const AyahRow = React.memo(({
   return (
     <div
       className={cn(
-        "sm:px-8 pl-4 pr-1 sm:py-12 py-4 flex flex-col items-end justify-end sm:flex-row sm:gap-12 gap-4 transition-all duration-700 relative",
-        isCurrentlyPlaying ? "border-[1px] border-zinc-700/60 dark:border-zinc-700/60 bg-zinc-950/80 dark:bg-[#111113] shadow-[0_10px_60px_-15px_rgba(0,0,0,0.8),0_0_20px_rgba(16,185,129,0.1)] ring-1 ring-white/5 scale-[1.03] z-50 rounded-[2rem] mx-2 sm:mx-6 sm:my-8 my-4" : "border-b-[0.1px] border-b-[var(--sephia-500)] dark:border-b-[#262629ff] rounded-none",
+        "transition-all duration-700 relative flex flex-col",
+        isCurrentlyPlaying ? "p-2 sm:p-6 border-[1px] border-zinc-700/60 dark:border-zinc-700/60 bg-zinc-950/80 dark:bg-[#111113] shadow-[0_10px_60px_-15px_rgba(0,0,0,0.8),0_0_20px_rgba(16,185,129,0.1)] ring-1 ring-white/5 scale-[1.03] z-50 rounded-[2rem] mx-2 sm:mx-6 sm:my-8 my-4 max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" : "border-b-[0.1px] border-b-[var(--sephia-500)] dark:border-b-[#262629ff] rounded-none",
         isOtherPlaying ? "opacity-20 blur-[3px] scale-[0.98] grayscale pointer-events-none" : "opacity-100 blur-none grayscale-0"
       )}
       id={`ayah-${ayah.numberInSurah}`}
     >
       {isCurrentlyPlaying && (
-        <div className="absolute sm:top-4 top-2 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-zinc-900/90 border border-emerald-500/30 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full shadow-2xl z-20 backdrop-blur-md">
+        <div className="sticky top-0 z-50 flex justify-center w-full mb-4 sm:mb-8 mt-2 sm:mt-0 pointer-events-none">
+          <div className="pointer-events-auto flex items-center gap-3 bg-zinc-900/95 border border-emerald-500/30 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full shadow-2xl backdrop-blur-md">
           <div className="flex items-center gap-2 pr-2 border-r border-zinc-800">
             <div className="flex items-end gap-[2px] h-3">
               <span className="w-[2px] h-full bg-emerald-400 animate-pulse" style={{ animationDelay: '0.1s' }}></span>
@@ -387,8 +388,10 @@ const AyahRow = React.memo(({
             </button>
           </div>
         </div>
+        </div>
       )}
-      <div className="h-full flex flex-row sm:order-1 order-2 sm:flex-col gap-3 sm:justify-center items-center transition-all duration-300 relative z-10">
+      <div className={cn("flex flex-col items-end justify-end sm:flex-row sm:gap-12 gap-4 w-full", !isCurrentlyPlaying && "sm:px-8 pl-4 pr-1 sm:py-12 py-4")}>
+      <div className="h-full flex flex-row sm:order-1 order-2 sm:flex-col gap-3 sm:justify-center items-center transition-all duration-300 relative z-10 shrink-0">
         <p className="text-lg font-light text-zinc-400 ">
           {surahNumber}:{ayah.numberInSurah}
         </p>
@@ -558,6 +561,7 @@ const AyahRow = React.memo(({
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

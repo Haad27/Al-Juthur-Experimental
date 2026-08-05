@@ -7,6 +7,8 @@ import { toast } from "sonner";
 interface GlobalState {
   fontSize: number;
   setFontSize: React.Dispatch<React.SetStateAction<number>>;
+  wbwFontSize: number;
+  setWbwFontSize: React.Dispatch<React.SetStateAction<number>>;
   mistakeDetection: boolean;
   setMistakeDetection: React.Dispatch<React.SetStateAction<boolean>>;
   showTranslation: boolean;
@@ -49,6 +51,7 @@ export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
   children,
 }) => {
   const [fontSize, setFontSize] = useState(3);
+  const [wbwFontSize, setWbwFontSize] = useState(3);
   const [mistakeDetection, setMistakeDetection] = useState(false);
   const [immersiveMode, setImmersiveMode] = useState(false);
   const [showTranslation, setShowTranslation] = useState(true);
@@ -253,6 +256,8 @@ function parseMarkdownTable(text: string): Array<{ transcreatedText: string, sou
       value={{
         fontSize,
         setFontSize,
+        wbwFontSize,
+        setWbwFontSize,
         mistakeDetection,
         setMistakeDetection,
         immersiveMode,

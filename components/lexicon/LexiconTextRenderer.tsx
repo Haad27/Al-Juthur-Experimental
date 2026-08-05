@@ -33,22 +33,28 @@ export default function LexiconTextRenderer({ text }: LexiconTextRendererProps) 
         const isArabicLine = /[\u0600-\u06FF]/.test(line) && (line.match(/[\u0600-\u06FF]/g)?.length || 0) > line.length * 0.3;
 
         if (isArabicLine) {
+          // Fix Uthmani sifr mark dotted circle bug
+          const displayLine = line.replace(/(\S)([\u06DF\u06E0])/g, '<span class="font-mushaf-warsh">$1$2</span>');
+
           // Render plain Arabic text with beautiful font, no heavy green wrapper
           return (
             <p
               key={idx}
               className="font-mushaf-uthmani text-2xl md:text-3xl text-stone-200 leading-loose md:leading-[2.5] text-right my-2"
               dir="rtl"
-              dangerouslySetInnerHTML={{ __html: line }}
+              dangerouslySetInnerHTML={{ __html: displayLine }}
             />
           );
         }
 
         // For lines that are mostly English but contain Arabic words, style the Arabic words
-        const styledLine = line.replace(
+        let styledLine = line.replace(
           /([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+(?:\s+[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+)*)/g,
           `<span class="font-mushaf-uthmani text-xl md:text-2xl text-emerald-200/90 leading-normal inline-block mx-1" dir="rtl">$&</span>`
         );
+
+        // Fix Uthmani sifr mark dotted circle bug within mixed text lines
+        styledLine = styledLine.replace(/(\S)([\u06DF\u06E0])/g, '<span class="font-mushaf-warsh">$1$2</span>');
 
         return (
           <p

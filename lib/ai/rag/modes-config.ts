@@ -100,5 +100,18 @@ export const RAG_MODES: RagModeInfo[] = [
     ],
     warning: "NOTE: Lexicon Mode is strictly bounded to root semantics, word definitions, and morphological forms. For full verse tafsir or practical rulings, switch to Default Mode.",
     description: "Searches primary classical Arabic dictionaries to reveal the precise semantic root journey and classical range of meaning for Quranic vocabulary."
+  },
+  {
+    id: "dream",
+    name: "7. Dream Arabic (Grammar Curriculum)",
+    shortName: "Dream Arabic",
+    badge: "Bayyinah Curriculum",
+    badgeColor: "bg-indigo-500/10 text-indigo-400 border-indigo-500/30",
+    targetIntent: "Advanced Arabic grammar, rules, tables, and sentence structures strictly based on the Dream Curriculum.",
+    sources: [
+      "Bayyinah Dream Textbook"
+    ],
+    warning: "NOTE: Dream Mode searches exclusively through an Arabic Grammar textbook, not the Quran. It will not suggest verses or provide standard Tafsir.",
+    description: "Expert Arabic grammar instruction pulling directly from the Bayyinah Dream Curriculum textbook lessons."
   }
 ];

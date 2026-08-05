@@ -40,24 +40,32 @@ async function embedWithRateLimit(text: string, requestCount: { count: number; l
   }
   if (requestCount.count >= 80) {
     const waitTime = 60000 - (now - requestCount.lastReset);
-    console.log(`[RATE LIMIT] Waiting ${Math.ceil(waitTime/1000)}s for cooldown...`);
+    console.log(`[RATE LIMIT] Waiting ${Math.ceil(waitTime / 1000)}s for cooldown...`);
     await new Promise(resolve => setTimeout(resolve, waitTime + 1000));
     requestCount.count = 0;
     requestCount.lastReset = Date.now();
   }
   requestCount.count++;
-  
-  // Retry up to 3 times
-  for (let attempt = 1; attempt <= 3; attempt++) {
+
+  // Infinite retry loop for network drops (like sleeping/waking laptop)
+  let attempt = 1;
+  while (true) {
     try {
       return await generateEmbedding(text);
-    } catch (err) {
-      if (attempt === 3) throw err;
-      console.warn(`Embedding attempt ${attempt} failed, retrying in 5s...`);
-      await new Promise(resolve => setTimeout(resolve, 5000));
+    } catch (err: any) {
+      const isNetworkDrop = err?.message?.includes('fetch failed') || err?.message?.includes('ECONNRESET') || err?.code === 'ECONNRESET';
+
+      // If it's just a temporary network drop (e.g. laptop went to sleep), wait and retry indefinitely
+      if (isNetworkDrop || attempt <= 3) {
+        console.warn(`[NETWORK] Embedding attempt ${attempt} failed (Network dropped/Sleep mode). Retrying in 10 seconds...`);
+        await new Promise(resolve => setTimeout(resolve, 10000));
+        attempt++;
+      } else {
+        // If it's a fatal API error (like invalid key) and we tried 3 times, throw it
+        throw err;
+      }
     }
   }
-  throw new Error('Should not reach here');
 }
 
 export async function seedAllModesRagIndex(options?: {
@@ -68,7 +76,7 @@ export async function seedAllModesRagIndex(options?: {
   tafsirIndexed: number;
   lexiconIndexed: number;
 }> {
-  const surahsToSeed = options?.surahs || Array.from({length: 114}, (_, i) => i + 1);
+  const surahsToSeed = options?.surahs || Array.from({ length: 114 }, (_, i) => i + 1);
   const rootsToSeed = options?.roots || [
     'حمد', 'صبر', 'علم', 'عبد', 'ربب', 'رحم', 'ملك', 'هدي', 'نور', 'كتب',
     'بلي', 'شكر', 'غفر', 'حكم', 'عدل', 'صدق', 'كفر', 'شرك', 'نفس', 'قلب'
@@ -77,13 +85,15 @@ export async function seedAllModesRagIndex(options?: {
   console.log('=== Seeding RAG Index for All 6 Modes ===');
   console.log(`Target Surahs: ${surahsToSeed.length} surahs`);
   console.log(`Target Roots: ${rootsToSeed.join(', ')}`);
-  
+
   // If fresh mode, clear existing index to re-embed with new model
   if (options?.fresh) {
     console.log('FRESH MODE: Clearing existing RAG index for full re-embed...');
     clearRagIndex();
+  } else {
+    console.log('RESUME MODE: Continuing from where we left off (skipping already embedded chunks)...');
   }
-  
+
   const ragDb = getRagDb();
   const checkDocStmt = ragDb.prepare('SELECT id FROM rag_parent_documents WHERE id = ?');
 
@@ -91,12 +101,12 @@ export async function seedAllModesRagIndex(options?: {
   let lexiconCount = 0;
   let totalEmbeddings = 0;
   const startTime = Date.now();
-  
+
   const requestCount = { count: 0, lastReset: Date.now() };
 
   // 1. Index Tafsir Entries for target Surahs across all 15 authors
   console.log(`\nIndexing Tafsir entries across ${ALL_TAFSIR_AUTHOR_IDS.length} classical/modern books...`);
-  
+
   // Direct SQLite query on dev.db for maximum speed and zero memory bloat
   const devDbPath = path.join(process.cwd(), 'prisma', 'dev.db');
   const devDb = new Database(devDbPath, { readonly: true });
@@ -123,7 +133,7 @@ export async function seedAllModesRagIndex(options?: {
     if (!entry.text || entry.text.trim().length === 0) continue;
 
     const docId = `tafsir-${entry.authorId}-${entry.surahId}-${entry.ayahNo}`;
-    
+
     // Check if it already exists in the RAG DB (by ID)
     const existing = checkDocStmt.get(docId);
     if (existing) {
@@ -184,15 +194,15 @@ export async function seedAllModesRagIndex(options?: {
 
     for (const entry of lexResult.entries) {
       if (!ALL_LEXICON_DICT_IDS.includes(entry.dictId)) continue;
-      
+
       const docId = `lexicon-${entry.dictIdent}-${root}`;
-      
+
       // Check if it already exists in the RAG DB (by ID)
       const existing = checkDocStmt.get(docId);
       if (existing) {
         continue;
       }
-      
+
       const fullContent = entry.definitions
         .map((d) => d.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim())
         .join('\n\n');
@@ -247,7 +257,7 @@ export async function seedAllModesRagIndex(options?: {
   console.log(`Indexed ${tafsirCount} Tafsir entries and ${lexiconCount} Lexicon entries`);
   console.log(`Total embeddings generated: ${totalEmbeddings}`);
   console.log(`Total time: ${mins}:${secs.toString().padStart(2, '0')}`);
-  
+
   return {
     tafsirIndexed: tafsirCount,
     lexiconIndexed: lexiconCount,
@@ -255,8 +265,8 @@ export async function seedAllModesRagIndex(options?: {
 }
 
 if (require.main === module) {
-  // Always run fresh when invoked from CLI to ensure new embeddings
-  seedAllModesRagIndex({ fresh: true })
+  // Pass fresh: false to ensure we don't wipe progress if the script restarts!
+  seedAllModesRagIndex({ fresh: false })
     .then((res) => {
       console.log('Result:', res);
       process.exit(0);

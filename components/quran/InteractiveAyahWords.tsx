@@ -45,7 +45,7 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
   wbwTranslation,
   showWbw = true,
 }) => {
-  const { mushafStyle } = useGlobalState();
+  const { mushafStyle, wbwFontSize = 3 } = useGlobalState();
   const isPlaying = useAudioStore((state) => state.isPlaying);
 
   const mushafFontClass = React.useMemo(() => {
@@ -122,6 +122,7 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
              tokens.forEach(t => {
                if (t.wordIndex !== null) {
                  document.getElementById(`word-${ayahNumber}-${t.wordIndex}`)?.classList.remove('!text-emerald-400', 'scale-110');
+                 document.getElementById(`meaning-${ayahNumber}-${t.wordIndex}`)?.classList.remove('!text-emerald-400', 'font-semibold');
                }
              });
              const ayahTextEl = document.getElementById(`atext-${ayahNumber}`);
@@ -138,15 +139,18 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
              if (!el) return;
              if (t.wordIndex === currentWord) {
                el.classList.add('!text-emerald-400', 'scale-110');
+               document.getElementById(`meaning-${ayahNumber}-${t.wordIndex}`)?.classList.add('!text-emerald-400', 'font-semibold');
              } else {
                el.classList.remove('!text-emerald-400', 'scale-110');
+               document.getElementById(`meaning-${ayahNumber}-${t.wordIndex}`)?.classList.remove('!text-emerald-400', 'font-semibold');
              }
            });
          } else {
            // Ayah-by-ayah highlighting fallback (if segments not available)
-           tokens.forEach(t => {
+            tokens.forEach(t => {
              if (t.wordIndex !== null) {
                document.getElementById(`word-${ayahNumber}-${t.wordIndex}`)?.classList.add('!text-emerald-400');
+               document.getElementById(`meaning-${ayahNumber}-${t.wordIndex}`)?.classList.add('!text-emerald-400');
              }
            });
            const ayahTextEl = document.getElementById(`atext-${ayahNumber}`);
@@ -156,6 +160,7 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
           tokens.forEach(t => {
              if (t.wordIndex !== null) {
                document.getElementById(`word-${ayahNumber}-${t.wordIndex}`)?.classList.remove('!text-emerald-400', 'scale-110');
+               document.getElementById(`meaning-${ayahNumber}-${t.wordIndex}`)?.classList.remove('!text-emerald-400', 'font-semibold');
              }
           });
           const ayahTextEl = document.getElementById(`atext-${ayahNumber}`);
@@ -176,7 +181,10 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
             <span key={idx} className="inline-flex flex-col items-center justify-end px-1 py-0.5 text-zinc-400 select-none min-w-[2rem]">
               <span>{word}</span>
               {showWbw && (
-                <span className="text-[10px] sm:text-[11px] mt-0.5 block opacity-0 pointer-events-none select-none">
+                <span 
+                  className="mt-0.5 block opacity-0 pointer-events-none select-none"
+                  style={{ fontSize: `${0.5 + (wbwFontSize * 0.1)}rem` }}
+                >
                   -
                 </span>
               )}
@@ -188,13 +196,14 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
         const meaning = wbwTranslation?.[`${ayahNumber}:${wordIdx}`];
 
         // The Uthmanic Hafs V18 font has a known OpenType bug where Sifr marks (U+06DF, U+06E0)
-        // fail to combine with their base letters, rendering an ugly dotted circle.
-        // To fix this without losing the small circle, we wrap the base letter and the mark
+        // and small meem marks (U+06D2, U+06E2, U+06ED) fail to combine with their base letters, 
+        // rendering an ugly dotted circle or mixing with the word.
+        // To fix this without losing the small circle/meem, we wrap the base letter and the mark
         // in IndoPak 15-line font (which has a straight Alif matching Uthmani) which renders it flawlessly.
         // We override line-height to 1 to prevent it from elevating the flex item.
         let displayWord = word;
         if (mushafFontClass.includes('v1') || mushafFontClass.includes('v2') || mushafFontClass.includes('uthmani') || mushafFontClass.includes('kfqpc')) {
-          displayWord = word.replace(/(\S)([\u06DF\u06E0])/g, '<span class="font-mushaf-indopak-15" style="line-height: 1 !important; display: inline-block;">$1$2</span>');
+          displayWord = word.replace(/(\S)([\u06DF\u06E0\u06D2\u06E2\u06ED])/g, '<span class="font-mushaf-indopak-15" style="line-height: 1 !important; display: inline-block;">$1$2</span>');
         }
 
         return (
@@ -216,7 +225,12 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
                   dangerouslySetInnerHTML={{ __html: displayWord }}
                 />
                 {showWbw && meaning && (
-                  <span className="text-[10px] sm:text-[11px] text-zinc-500 dark:text-zinc-400 group-hover:text-emerald-200 font-sans tracking-tight mt-0.5 block whitespace-nowrap text-center select-none transition-colors duration-150" dir="ltr">
+                  <span 
+                    id={`meaning-${ayahNumber}-${wordIdx}`} 
+                    className="text-zinc-500 dark:text-zinc-400 group-hover:text-emerald-200 font-sans tracking-tight mt-0.5 block whitespace-nowrap text-center select-none transition-colors duration-150" 
+                    dir="ltr"
+                    style={{ fontSize: `${0.5 + (wbwFontSize * 0.1)}rem` }}
+                  >
                     {meaning}
                   </span>
                 )}

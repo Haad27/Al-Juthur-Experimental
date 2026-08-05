@@ -122,6 +122,8 @@ const Settings = () => {
   const {
     fontSize,
     setFontSize,
+    wbwFontSize,
+    setWbwFontSize,
     mistakeDetection,
     setMistakeDetection,
     showTranslation,
@@ -154,6 +156,10 @@ const Settings = () => {
 
   const handleFontSizeChange = (value: number[]) => {
     setFontSize(value[0]);
+  };
+
+  const handleWbwFontSizeChange = (val: number[]) => {
+    setWbwFontSize(val[0]);
   };
 
   const fontPresets = [
@@ -341,9 +347,27 @@ const Settings = () => {
                 );
               })}
             </div>
+
+            <div className="pt-4 border-t border-zinc-800/60 mt-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs text-zinc-400 font-medium">Word-by-Word Scale</span>
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                  {wbwFontSize === 0 ? "Default" : `${wbwFontSize}x`}
+                </span>
+              </div>
+              <Slider
+                value={[wbwFontSize]}
+                defaultValue={[3]}
+                max={8}
+                min={0.5}
+                step={0.5}
+                onValueChange={handleWbwFontSizeChange}
+                className="w-full py-1"
+              />
+            </div>
           </div>
         }
-        description="Adjust Arabic and translation text sizing to suit your reading comfort."
+        description="Adjust text size for comfortable reading. The text scale adjusts the Arabic text and standard translation, while the word-by-word scale independently controls the size of the inline translation."
       />
 
       <SettingSection

@@ -5,15 +5,24 @@ import LogoIcon from "@/components/svg/icons/LogoIcon";
 export default function SurahLoading() {
   return (
     <div className="min-h-screen bg-[var(--sephia-primary)] dark:bg-zinc-950 w-full flex flex-col items-center justify-center p-6 text-center">
-      <div className="flex flex-col items-center gap-6 animate-pulse">
+      {/* Ambient Background Glows */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] rounded-full bg-emerald-500/10 blur-[120px] animate-pulse" style={{ animationDuration: '8s' }} />
+        <div className="absolute bottom-[10%] -right-[10%] w-[60%] h-[60%] rounded-full bg-teal-500/10 blur-[120px] animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
+      </div>
+
+      <div className="flex flex-col items-center gap-6 animate-pulse relative z-10">
         <div className="relative flex items-center justify-center w-24 h-24">
+          {/* Ripple Rings */}
+          <div className="absolute inset-0 rounded-full border border-emerald-500/40 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" />
+          <div className="absolute inset-0 rounded-full border border-emerald-500/30 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" style={{ animationDelay: '1s' }} />
+          <div className="absolute inset-0 rounded-full border border-emerald-500/20 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" style={{ animationDelay: '2s' }} />
+
           <img
             src="/assets/favicon/apple-touch-icon.png"
             alt="Al Juthur Logo"
-            className="w-16 h-16 object-contain animate-pulse-scale"
+            className="w-16 h-16 object-contain animate-pulse-scale drop-shadow-[0_0_15px_rgba(16,185,129,0.8)] relative z-10"
           />
-          <div className="absolute inset-0 rounded-full border-t-2 border-emerald-500/50 border-r-2 border-transparent animate-spin" style={{ animationDuration: '1.5s' }}></div>
-          <div className="absolute inset-2 rounded-full border-b-2 border-emerald-400/30 border-l-2 border-transparent animate-spin" style={{ animationDuration: '2s', animationDirection: 'reverse' }}></div>
         </div>
         
         <div className="flex flex-col items-center gap-2 w-full mt-2">

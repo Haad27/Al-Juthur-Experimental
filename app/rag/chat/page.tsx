@@ -400,10 +400,12 @@ function RagChatContent() {
                         const arabicMatches = textStr.match(/[\u0600-\u06FF]/g) || [];
                         const isPredominantlyArabic = arabicMatches.length > 5 && (arabicMatches.length / textStr.length > 0.25);
                         
+                        const containerClasses = "quran-block my-4 p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/30 shadow-sm relative overflow-hidden [&_.quran-block]:!p-0 [&_.quran-block]:!m-0 [&_.quran-block:not(:first-child)]:!mt-4 [&_.quran-block]:!border-none [&_.quran-block]:!bg-transparent [&_.quran-block]:!shadow-none [&_.quran-block>.quran-bar]:!hidden";
+
                         if (isPredominantlyArabic) {
                           return (
-                            <div className="my-4 p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/30 shadow-sm relative overflow-hidden">
-                              <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
+                            <div className={containerClasses}>
+                              <div className="quran-bar absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
                               <p className={`m-0 ${amiri.className} text-lg md:text-xl text-emerald-200 leading-loose text-right dir-rtl`}>
                                 {children}
                               </p>
@@ -414,8 +416,8 @@ function RagChatContent() {
                         const isInlineVerseQuote = /\[Surah \d+:\d+\]|\[Surah [^\]]+\]/i.test(textStr) && textStr.includes('"');
                         if (isInlineVerseQuote && textStr.length < 350 && !textStr.toLowerCase().includes('tafsir')) {
                           return (
-                            <div className="my-4 p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/30 shadow-sm relative overflow-hidden">
-                              <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
+                            <div className={containerClasses}>
+                              <div className="quran-bar absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
                               <p className="m-0 italic text-sm sm:text-base text-zinc-200">
                                 {children}
                               </p>
@@ -423,7 +425,7 @@ function RagChatContent() {
                           );
                         }
 
-                        return <p className="mb-3 leading-relaxed text-zinc-300" {...props}>{renderInlineBadges(children)}</p>;
+                        return <p className="mb-3 leading-relaxed text-zinc-300 [&:last-child]:mb-0" {...props}>{renderInlineBadges(children)}</p>;
                       },
                       blockquote: ({node, children}) => {
                         let textStr = '';
@@ -434,10 +436,11 @@ function RagChatContent() {
                           }
                         });
                         const hasArabic = /[\u0600-\u06FF]/.test(textStr);
+                        const containerClasses = "quran-block my-4 p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/30 shadow-sm relative overflow-hidden [&_.quran-block]:!p-0 [&_.quran-block]:!m-0 [&_.quran-block:not(:first-child)]:!mt-4 [&_.quran-block]:!border-none [&_.quran-block]:!bg-transparent [&_.quran-block]:!shadow-none [&_.quran-block>.quran-bar]:!hidden";
 
                         return (
-                          <div className="my-4 p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/30 shadow-sm relative overflow-hidden">
-                            <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
+                          <div className={containerClasses}>
+                            <div className="quran-bar absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
                             <blockquote className={`m-0 border-none p-0 text-zinc-200 ${hasArabic ? `${amiri.className} text-lg md:text-xl leading-loose text-right text-emerald-200` : 'italic text-sm sm:text-base text-zinc-200'}`}>
                               {renderInlineBadges(children)}
                             </blockquote>

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, Sparkles } from "lucide-react";
+import { Bot, Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface FloatingAskScholarButtonProps {
@@ -17,6 +17,7 @@ export default function FloatingAskScholarButton({
   isVisible = true,
 }: FloatingAskScholarButtonProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [isCollapsedMobile, setIsCollapsedMobile] = useState(false);
 
   return (
     <AnimatePresence>
@@ -68,12 +69,24 @@ export default function FloatingAskScholarButton({
               </span>
             </motion.div>
 
-            {/* Mobile: Always visible, shorter text */}
-            <div className="flex md:hidden overflow-hidden whitespace-nowrap items-center ml-1">
-              <span className="text-[13px] font-bold tracking-wide text-emerald-100 pr-1">
-                {label.replace(" Tafsir ", " ").replace(" Lexicon ", " ")}
-              </span>
-            </div>
+            {/* Mobile: Always visible (unless collapsed), shorter text */}
+            {!isCollapsedMobile && (
+              <div className="flex md:hidden overflow-hidden whitespace-nowrap items-center ml-1">
+                <span className="text-[13px] font-bold tracking-wide text-emerald-100 pr-1">
+                  {label.replace(" Tafsir ", " ").replace(" Lexicon ", " ")}
+                </span>
+                <div 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsCollapsedMobile(true);
+                  }}
+                  className="p-1 -mr-2 ml-1 text-emerald-300/80 hover:text-emerald-100 rounded-full hover:bg-white/10 transition-colors cursor-pointer"
+                  aria-label="Collapse button"
+                >
+                  <X className="size-3.5" />
+                </div>
+              </div>
+            )}
           </button>
         </motion.div>
       )}

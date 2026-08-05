@@ -37,9 +37,20 @@ export default function LoadingScreen() {
           transition={{ duration: 0.8, ease: "easeInOut" }}
           className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black"
         >
-          <div className="w-64 flex flex-col items-center gap-6">
-            {/* Logo and Spinner */}
+          {/* Ambient Background Glows */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+            <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] rounded-full bg-emerald-500/10 blur-[120px] animate-pulse" style={{ animationDuration: '8s' }} />
+            <div className="absolute bottom-[10%] -right-[10%] w-[60%] h-[60%] rounded-full bg-teal-500/10 blur-[120px] animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
+          </div>
+
+          <div className="w-64 flex flex-col items-center gap-6 relative z-10">
+            {/* Logo and Rings */}
             <div className="relative flex items-center justify-center w-24 h-24">
+              {/* Ripple Rings */}
+              <div className="absolute inset-0 rounded-full border border-emerald-500/40 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" />
+              <div className="absolute inset-0 rounded-full border border-emerald-500/30 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" style={{ animationDelay: '1s' }} />
+              <div className="absolute inset-0 rounded-full border border-emerald-500/20 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" style={{ animationDelay: '2s' }} />
+
               <motion.img
                 src="/assets/favicon/apple-touch-icon.png"
                 alt="Al Juthur Logo"
@@ -47,8 +58,6 @@ export default function LoadingScreen() {
                 animate={{ scale: [1, 1.05, 1] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               />
-              <div className="absolute inset-0 rounded-full border-t-2 border-emerald-500/50 border-r-2 border-transparent animate-spin" style={{ animationDuration: '1.5s' }}></div>
-              <div className="absolute inset-2 rounded-full border-b-2 border-emerald-400/30 border-l-2 border-transparent animate-spin" style={{ animationDuration: '2s', animationDirection: 'reverse' }}></div>
             </div>
             
             {/* Progress Text */}
