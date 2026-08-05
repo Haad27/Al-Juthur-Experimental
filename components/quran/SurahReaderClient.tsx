@@ -331,13 +331,23 @@ const AyahRow = React.memo(({
   return (
     <div
       className={cn(
-        "border-b-[0.1px] border-b-[var(--sephia-500)] dark:border-b-[#262629ff] sm:px-8 pl-4 pr-1 sm:py-12 py-4 flex flex-col items-end justify-end sm:flex-row sm:gap-12 gap-4 transition-all duration-500",
-        isCurrentlyPlaying ? "border border-emerald-500/60 dark:border-emerald-500/50 bg-emerald-500/10 dark:bg-emerald-950/30 shadow-[0_0_40px_rgba(16,185,129,0.2)] scale-[1.02] z-10 rounded-2xl mx-2 sm:mx-4 sm:my-4 my-2" : "border-transparent",
-        isOtherPlaying ? "opacity-30 blur-[2px] scale-[0.98] grayscale-[30%]" : "opacity-100 blur-none scale-100 grayscale-0"
+        "sm:px-8 pl-4 pr-1 sm:py-12 py-4 flex flex-col items-end justify-end sm:flex-row sm:gap-12 gap-4 transition-all duration-700 relative",
+        isCurrentlyPlaying ? "border-[1px] border-zinc-700/60 dark:border-zinc-700/60 bg-zinc-950/80 dark:bg-[#111113] shadow-[0_10px_60px_-15px_rgba(0,0,0,0.8),0_0_20px_rgba(16,185,129,0.1)] ring-1 ring-white/5 scale-[1.03] z-50 rounded-[2rem] mx-2 sm:mx-6 sm:my-8 my-4" : "border-b-[0.1px] border-b-[var(--sephia-500)] dark:border-b-[#262629ff] rounded-none",
+        isOtherPlaying ? "opacity-20 blur-[3px] scale-[0.98] grayscale pointer-events-none" : "opacity-100 blur-none grayscale-0"
       )}
       id={`ayah-${ayah.numberInSurah}`}
     >
-      <div className="h-full flex flex-row sm:order-1 order-2 sm:flex-col gap-3 sm:justify-center items-center transition-all duration-300">
+      {isCurrentlyPlaying && (
+        <div className="absolute sm:top-4 top-2 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full shadow-lg z-10 backdrop-blur-sm">
+          <div className="flex items-end gap-[2px] h-3">
+            <span className="w-[2px] h-full bg-emerald-400 animate-pulse" style={{ animationDelay: '0.1s' }}></span>
+            <span className="w-[2px] h-2/3 bg-emerald-400 animate-pulse" style={{ animationDelay: '0.2s' }}></span>
+            <span className="w-[2px] h-full bg-emerald-400 animate-pulse" style={{ animationDelay: '0.3s' }}></span>
+          </div>
+          <span className="text-[9px] font-bold text-emerald-400 tracking-[0.2em] uppercase">Now Playing</span>
+        </div>
+      )}
+      <div className="h-full flex flex-row sm:order-1 order-2 sm:flex-col gap-3 sm:justify-center items-center transition-all duration-300 relative z-10">
         <p className="text-lg font-light text-zinc-400 ">
           {surahNumber}:{ayah.numberInSurah}
         </p>
