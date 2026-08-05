@@ -158,7 +158,9 @@ const AyahRow = React.memo(({
   isUrduTranslation,
   translationEdition,
 }: AyahRowProps) => {
-  const isCurrentlyPlaying = useAudioStore(s => s.currentAyah === ayah.numberInSurah && s.currentSurah === surahNumber);
+  const isCurrentlyPlaying = useAudioStore(s => s.isPlaying && s.currentAyah === ayah.numberInSurah && s.currentSurah === surahNumber);
+  const isPlaying = useAudioStore(s => s.isPlaying);
+  const isOtherPlaying = isPlaying && !isCurrentlyPlaying;
   const playAyah = useAudioStore(s => s.playAyah);
   const pause = useAudioStore(s => s.pause);
   const [showFootnoteIds, setShowFootnoteIds] = useState(false);
@@ -328,7 +330,11 @@ const AyahRow = React.memo(({
 
   return (
     <div
-      className="border-b-[0.1px] border-b-[var(--sephia-500)] dark:border-b-[#262629ff] sm:px-8 pl-4 pr-1 sm:py-12 py-4 flex flex-col items-end justify-end sm:flex-row sm:gap-12 gap-4 transition-all duration-300"
+      className={cn(
+        "border-b-[0.1px] border-b-[var(--sephia-500)] dark:border-b-[#262629ff] sm:px-8 pl-4 pr-1 sm:py-12 py-4 flex flex-col items-end justify-end sm:flex-row sm:gap-12 gap-4 transition-all duration-500",
+        isCurrentlyPlaying ? "border border-emerald-500/60 dark:border-emerald-500/50 bg-emerald-500/10 dark:bg-emerald-950/30 shadow-[0_0_40px_rgba(16,185,129,0.2)] scale-[1.02] z-10 rounded-2xl mx-2 sm:mx-4 sm:my-4 my-2" : "border-transparent",
+        isOtherPlaying ? "opacity-30 blur-[2px] scale-[0.98] grayscale-[30%]" : "opacity-100 blur-none scale-100 grayscale-0"
+      )}
       id={`ayah-${ayah.numberInSurah}`}
     >
       <div className="h-full flex flex-row sm:order-1 order-2 sm:flex-col gap-3 sm:justify-center items-center transition-all duration-300">
