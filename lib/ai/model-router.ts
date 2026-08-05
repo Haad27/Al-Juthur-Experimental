@@ -80,7 +80,7 @@ export async function executeWithFallback(
           contents: [
             { role: 'user', parts: [{ text: `${systemPrompt}\n\nUSER INQUIRY: ${userPrompt}` }] }
           ],
-          generationConfig: { temperature: 0.2, maxOutputTokens: 2500 } // Low temp for academic precision
+          generationConfig: { temperature: 0.2, maxOutputTokens: 8192 } // Low temp for academic precision
         }),
       });
 
@@ -147,7 +147,7 @@ export async function executeWithFallbackStream(
           contents: [
             { role: 'user', parts: [{ text: `${systemPrompt}\n\nUSER INQUIRY: ${userPrompt}` }] }
           ],
-          generationConfig: { temperature: 0.2, maxOutputTokens: 2500 }
+          generationConfig: { temperature: 0.2, maxOutputTokens: 8192 }
         }),
       });
 

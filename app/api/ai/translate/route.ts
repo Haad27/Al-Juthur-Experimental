@@ -179,7 +179,7 @@ function parseMarkdownTable(text: string): Array<{ transcreatedText: string, sou
   return rows;
 }
 
-function splitTextIntoChunks(text: string, maxChars: number = 8000): string[] {
+function splitTextIntoChunks(text: string, maxChars: number = 4000): string[] {
   if (text.length <= maxChars) return [text];
   
   const chunks: string[] = [];
@@ -189,11 +189,24 @@ function splitTextIntoChunks(text: string, maxChars: number = 8000): string[] {
   const paragraphs = text.split('\n\n');
   
   for (const p of paragraphs) {
-    if ((currentChunk.length + p.length + 2) > maxChars && currentChunk.length > 0) {
-      chunks.push(currentChunk.trim());
-      currentChunk = '';
+    if (p.length > maxChars) {
+      // If a single paragraph is too large, split it by periods or question marks
+      const sentences = p.split(/([.؟!\n])/g); 
+      for(let i=0; i<sentences.length; i+=2) {
+          let s = sentences[i] + (sentences[i+1] || '');
+          if ((currentChunk.length + s.length + 1) > maxChars && currentChunk.length > 0) {
+             chunks.push(currentChunk.trim());
+             currentChunk = '';
+          }
+          currentChunk += (currentChunk ? ' ' : '') + s;
+      }
+    } else {
+      if ((currentChunk.length + p.length + 2) > maxChars && currentChunk.length > 0) {
+        chunks.push(currentChunk.trim());
+        currentChunk = '';
+      }
+      currentChunk += (currentChunk ? '\n\n' : '') + p;
     }
-    currentChunk += (currentChunk ? '\n\n' : '') + p;
   }
   
   if (currentChunk.trim().length > 0) {
@@ -255,7 +268,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Process the text in chunks to bypass API token/context limits sequentially via stream
-    const chunks = splitTextIntoChunks(text, 8000);
+    const chunks = splitTextIntoChunks(text, 4000);
     let chunksProcessed = 0;
 
     const customStream = new ReadableStream({
