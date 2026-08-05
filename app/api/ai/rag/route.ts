@@ -59,6 +59,8 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Perform Hybrid Search (BM25 + Vector + Mode & exact Surah filtering)
+    // For Dream mode, this will smartly pull the exact 4-5 paragraphs of grammar rules needed
+    // Instead of passing the entire 450KB cheat sheet and burning all tokens.
     const documents = await searchHybrid(
       message,
       {
@@ -70,7 +72,7 @@ export async function POST(req: NextRequest) {
         rootWord: preparedQuery.rootWords?.[0],
         suggestedVerses: preparedQuery.suggestedVerses
       },
-      8
+      8 // Top 8 relevant rule blocks
     );
 
     console.log('[RAG-ROUTE] Hybrid Search returned', documents.length, 'docs:', documents.map(d => ({
