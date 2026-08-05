@@ -181,6 +181,7 @@ function parseMarkdownTable(text: string): Array<{ transcreatedText: string, sou
       const decoder = new TextDecoder("utf-8");
       let fullText = "";
       let lastParseTime = 0;
+      let wasTruncated = false;
       
       while (true) {
         const { done, value } = await reader.read();
@@ -195,6 +196,9 @@ function parseMarkdownTable(text: string): Array<{ transcreatedText: string, sou
             if (!dataStr) continue;
             try {
               const data = JSON.parse(dataStr);
+              if (data.finishReason === "MAX_TOKENS") {
+                wasTruncated = true;
+              }
               if (data.text) {
                 fullText += data.text;
                 
@@ -215,6 +219,14 @@ function parseMarkdownTable(text: string): Array<{ transcreatedText: string, sou
       }
       
       const finalParsed = parseMarkdownTable(fullText);
+      
+      if (wasTruncated) {
+        finalParsed.push({
+          sourceText: "⚠️ **تنبيه:** لقد قمنا بترجمة أقصى ما يمكن. يرجى نسخ الجزء المتبقي والمحاولة مرة أخرى.",
+          transcreatedText: "⚠️ **Notice:** Your text was extremely long, so the system translated as much as it could. Please copy the remaining untranslated portion and submit it again to continue."
+        });
+      }
+
       if (finalParsed.length > 0) {
         setAiTranslationData(finalParsed);
       } else {

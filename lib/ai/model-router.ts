@@ -193,6 +193,9 @@ export async function executeWithFallbackStream(
                       if (data.usageMetadata.promptTokenCount) apiPromptTokens = data.usageMetadata.promptTokenCount;
                       if (data.usageMetadata.candidatesTokenCount) apiCompletionTokens = data.usageMetadata.candidatesTokenCount;
                     }
+                    if (data.candidates?.[0]?.finishReason) {
+                      controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ finishReason: data.candidates[0].finishReason })}\n\n`));
+                    }
                   } catch (e) {
                     // Ignore incomplete JSON chunks from SSE
                   }
