@@ -201,6 +201,7 @@ export default function SurahPlayer({
     if (!audio) return;
     
     if (playing) {
+      setMobileFabOpen(false);
       audio.play().catch(e => console.error(e));
       audioStore.setIsPlaying(true);
       
@@ -215,6 +216,31 @@ export default function SurahPlayer({
       audioStore.setIsPlaying(false);
     }
   }, [playing]);
+
+  useEffect(() => {
+    const handlePausePlayer = () => {
+      setPlaying(false);
+      audioStore.setIsPlaying(false);
+    };
+
+    const handleChangeAyah = (e: any) => {
+      const targetAyah = e.detail?.ayah;
+      if (typeof targetAyah === 'number' && targetAyah >= 1 && targetAyah <= lastAyahNumber) {
+        setCurrentAyahIndex(targetAyah - 1);
+        setStartAyah(targetAyah);
+        setPlaying(true);
+        audioStore.setIsPlaying(true);
+      }
+    };
+
+    window.addEventListener('pausePlayerAudio', handlePausePlayer);
+    window.addEventListener('changePlayerAyah', handleChangeAyah);
+
+    return () => {
+      window.removeEventListener('pausePlayerAudio', handlePausePlayer);
+      window.removeEventListener('changePlayerAyah', handleChangeAyah);
+    };
+  }, [lastAyahNumber]);
 
   // Audio Controls
   const handlePlayPause = () => {
@@ -338,20 +364,19 @@ export default function SurahPlayer({
         />
       )}
       {/* Floating Action Button (FAB) & Vertical Controls Card (Mobile + Desktop) */}
-      <div>
-        <button
-          onClick={() => setMobileFabOpen(!mobileFabOpen)}
-          className="fixed bottom-[calc(6.75rem+env(safe-area-inset-bottom,0px))] md:bottom-8 right-4 md:right-8 z-50 size-12 md:size-14 rounded-full bg-emerald-600 border border-emerald-400/40 text-white shadow-2xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
-          title="Audio Recitation Controls"
-        >
-          {playing ? (
-            <Pause className="size-5 md:size-6" />
-          ) : recording ? (
-            <Mic className="size-5 md:size-6 text-emerald-300 animate-pulse" />
-          ) : (
-            <Mic className="size-5 md:size-6 text-white" />
-          )}
-        </button>
+      {!(playing || audioStore.isPlaying) && (
+        <div>
+          <button
+            onClick={() => setMobileFabOpen(!mobileFabOpen)}
+            className="fixed bottom-[calc(6.75rem+env(safe-area-inset-bottom,0px))] md:bottom-8 right-4 md:right-8 z-50 size-12 md:size-14 rounded-full bg-emerald-600 border border-emerald-400/40 text-white shadow-2xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+            title="Audio Recitation Controls"
+          >
+            {recording ? (
+              <Mic className="size-5 md:size-6 text-emerald-300 animate-pulse" />
+            ) : (
+              <Mic className="size-5 md:size-6 text-white" />
+            )}
+          </button>
 
         {mobileFabOpen && (
           <motion.div
@@ -460,7 +485,8 @@ export default function SurahPlayer({
             </button>
           </motion.div>
         )}
-      </div>
+        </div>
+      )}
 
     </AnimatePresence>
   );

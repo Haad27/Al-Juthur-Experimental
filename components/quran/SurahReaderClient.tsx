@@ -28,6 +28,8 @@ import {
   MessageSquareText,
   Bot,
   Loader2,
+  SkipBack,
+  SkipForward,
 } from "lucide-react";
 import SurahPlayer from "@/components/SurahPlayer";
 import AyahChatSidebar from "@/components/ai/AyahChatSidebar";
@@ -338,13 +340,52 @@ const AyahRow = React.memo(({
       id={`ayah-${ayah.numberInSurah}`}
     >
       {isCurrentlyPlaying && (
-        <div className="absolute sm:top-4 top-2 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full shadow-lg z-10 backdrop-blur-sm">
-          <div className="flex items-end gap-[2px] h-3">
-            <span className="w-[2px] h-full bg-emerald-400 animate-pulse" style={{ animationDelay: '0.1s' }}></span>
-            <span className="w-[2px] h-2/3 bg-emerald-400 animate-pulse" style={{ animationDelay: '0.2s' }}></span>
-            <span className="w-[2px] h-full bg-emerald-400 animate-pulse" style={{ animationDelay: '0.3s' }}></span>
+        <div className="absolute sm:top-4 top-2 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-zinc-900/90 border border-emerald-500/30 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full shadow-2xl z-20 backdrop-blur-md">
+          <div className="flex items-center gap-2 pr-2 border-r border-zinc-800">
+            <div className="flex items-end gap-[2px] h-3">
+              <span className="w-[2px] h-full bg-emerald-400 animate-pulse" style={{ animationDelay: '0.1s' }}></span>
+              <span className="w-[2px] h-2/3 bg-emerald-400 animate-pulse" style={{ animationDelay: '0.2s' }}></span>
+              <span className="w-[2px] h-full bg-emerald-400 animate-pulse" style={{ animationDelay: '0.3s' }}></span>
+            </div>
+            <span className="text-[9px] font-bold text-emerald-400 tracking-[0.15em] uppercase hidden sm:inline">Now Playing</span>
           </div>
-          <span className="text-[9px] font-bold text-emerald-400 tracking-[0.2em] uppercase">Now Playing</span>
+
+          <div className="flex items-center gap-1.5">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                if (ayah.numberInSurah > 1) {
+                  window.dispatchEvent(new CustomEvent('changePlayerAyah', { detail: { ayah: ayah.numberInSurah - 1 } }));
+                }
+              }} 
+              className="p-1 hover:bg-zinc-800 rounded-full text-zinc-300 transition"
+              title="Previous Ayah"
+            >
+              <SkipBack className="size-3.5" />
+            </button>
+
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                window.dispatchEvent(new CustomEvent('pausePlayerAudio'));
+              }} 
+              className="p-1.5 bg-emerald-600 hover:bg-emerald-500 rounded-full text-white shadow-md transition"
+              title="Pause & Return to Default Mode"
+            >
+              <Pause className="size-3.5 fill-current" />
+            </button>
+
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                window.dispatchEvent(new CustomEvent('changePlayerAyah', { detail: { ayah: ayah.numberInSurah + 1 } }));
+              }} 
+              className="p-1 hover:bg-zinc-800 rounded-full text-zinc-300 transition"
+              title="Next Ayah"
+            >
+              <SkipForward className="size-3.5" />
+            </button>
+          </div>
         </div>
       )}
       <div className="h-full flex flex-row sm:order-1 order-2 sm:flex-col gap-3 sm:justify-center items-center transition-all duration-300 relative z-10">
@@ -363,16 +404,6 @@ const AyahRow = React.memo(({
           className="p-2 rounded-full dark:hover:bg-zinc-800 hover:bg-[var(--sephia-500)]/45 transition-colors cursor-pointer inline-flex items-center justify-center"
         >
           <Save className="text-zinc-400" size={18} />
-        </div>
-        <div
-          onClick={handleFetchAudio}
-          className="p-2 rounded-full hover:bg-zinc-800 transition-colors cursor-pointer inline-flex items-center justify-center"
-        >
-          {isCurrentlyPlaying ? (
-            <Pause className="text-zinc-400" size={18} />
-          ) : (
-            <Play className="text-zinc-400" size={18} />
-          )}
         </div>
         <Link
           href={`/tafsir?surah=${surahNumber}&ayah=${ayah.numberInSurah}`}
@@ -553,6 +584,20 @@ export default function SurahReaderClient({
       window.dispatchEvent(new Event("close-left-sidebar"));
     }
   };
+
+  const isPlayingAudio = useAudioStore(s => s.isPlaying);
+
+  // Disable user manual scrolling during recitation
+  useEffect(() => {
+    if (isPlayingAudio) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isPlayingAudio]);
 
   // Auto-scroll listener for audio player
   useEffect(() => {
@@ -797,7 +842,6 @@ export default function SurahReaderClient({
         <div className="flex items-center text-center w-full flex-col mb-8">
           <BismillahIcon className="dark:text-white text-black lg:max-w-96 md:max-w-86 max-w-72" />
         </div>
-
         <Virtuoso
           ref={virtuosoRef}
           useWindowScroll
