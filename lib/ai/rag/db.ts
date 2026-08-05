@@ -4,7 +4,7 @@ import fs from 'fs';
 
 export interface RagParentDocument {
   id: string;
-  workType: 'tafsir' | 'lexicon';
+  workType: 'tafsir' | 'lexicon' | 'textbook';
   authorId: number;
   authorName: string;
   workTitle: string;
@@ -23,7 +23,7 @@ export interface RagChildChunk {
   surahId: number | null;
   ayahId: number | null;
   authorId: number;
-  workType: 'tafsir' | 'lexicon';
+  workType: 'tafsir' | 'lexicon' | 'textbook';
   language: string;
   rootWord: string | null;
   embedding?: number[];
@@ -150,7 +150,7 @@ export function insertChildChunk(chunk: RagChildChunk) {
   ftsStmt.run(
     chunk.id,
     chunk.content,
-    chunk.workType === 'tafsir' ? `Author ${chunk.authorId}` : 'Lexicon',
+    chunk.workType === 'tafsir' ? `Author ${chunk.authorId}` : (chunk.workType === 'lexicon' ? 'Lexicon' : 'Textbook'),
     chunk.rootWord || ''
   );
 }

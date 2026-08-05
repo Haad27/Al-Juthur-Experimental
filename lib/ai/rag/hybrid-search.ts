@@ -68,7 +68,9 @@ export async function searchHybrid(
   }
 
   // Enforce strict Mode Author/Dict bounds
-  if (filters.mode && MODE_AUTHORS[filters.mode]) {
+  if (filters.mode === 'dream') {
+    sqlConditions.push(`workType = 'textbook'`);
+  } else if (filters.mode && MODE_AUTHORS[filters.mode]) {
     const allowedIds = MODE_AUTHORS[filters.mode];
     if (filters.mode === 'lexicon') {
       sqlConditions.push(`workType = 'lexicon' AND authorId IN (${allowedIds.join(',')})`);
@@ -164,7 +166,7 @@ export async function searchHybrid(
   let suggestedVerseResults: ScoredParentDocument[] = [];
   console.log('[HYBRID-SEARCH] suggestedVerses received:', filters.suggestedVerses, '| mode:', filters.mode);
   
-  if (filters.suggestedVerses && filters.suggestedVerses.length > 0 && filters.mode && filters.mode !== 'lexicon') {
+  if (filters.suggestedVerses && filters.suggestedVerses.length > 0 && filters.mode && filters.mode !== 'lexicon' && filters.mode !== 'dream') {
     try {
       const devDbPath = path.join(process.cwd(), 'prisma', 'dev.db');
       const devDb = new Database(devDbPath, { readonly: true });
@@ -224,7 +226,7 @@ export async function searchHybrid(
 
 
   // Direct structural fallback: If local vector/BM25 matches are empty OR if we have explicit Surah coordinate (e.g. Surah 1) to guarantee exact verse boundaries
-  if ((allParentIds.size === 0 || typeof filters.surahId === 'number') && filters.mode && filters.mode !== 'lexicon') {
+  if ((allParentIds.size === 0 || typeof filters.surahId === 'number') && filters.mode && filters.mode !== 'lexicon' && filters.mode !== 'dream') {
     // Check if we have exact surahId and/or ayahId
     if (typeof filters.surahId === 'number') {
       try {

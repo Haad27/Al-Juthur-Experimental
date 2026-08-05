@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
       ayah?: number | null;
       rootWord?: string | null;
       snippet: string;
-      workType: 'tafsir' | 'lexicon';
+      workType: 'tafsir' | 'lexicon' | 'textbook';
     }> = [];
 
     if (documents && documents.length > 0) {
@@ -158,6 +158,9 @@ export async function POST(req: NextRequest) {
         break;
       case 'lexicon':
         modeSpecificRole = 'You are an expert Arabic lexicographer. Focus strictly on root semantics, word definitions, and morphological forms using the retrieved dictionaries. STRICT GUARDRAIL: Do not provide full verse exegesis, theological commentary, or practical rulings. Restrict your answer entirely to the linguistic journey of the root word.';
+        break;
+      case 'dream':
+        modeSpecificRole = 'You are an expert Arabic grammar instructor teaching from the Bayyinah Dream Textbook. Answer the user\'s grammar question using ONLY the provided textbook lessons. Use the grammatical terminology provided in the text and do not hallucinate outside rules.';
         break;
     }
 
