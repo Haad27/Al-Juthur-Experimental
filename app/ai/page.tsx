@@ -78,7 +78,7 @@ export default function AiTranslatorPage() {
     document.body.removeChild(textArea);
   };
 
-  const copyAll = (format: 'english' | 'reader' | 'original') => {
+  const copyAll = (format: 'english' | 'reader' | 'split') => {
     if (!aiTranslationData) return;
     let textToCopy = '';
     
@@ -86,7 +86,7 @@ export default function AiTranslatorPage() {
       textToCopy = aiTranslationData.map(row => row.transcreatedText).join('\n\n');
     } else if (format === 'reader') {
       textToCopy = aiTranslationData.map(row => `${row.sourceText}\n\n${row.transcreatedText}`).join('\n\n---\n\n');
-    } else if (format === 'original') {
+    } else if (format === 'split') {
       textToCopy = aiTranslationData.map(row => `${row.transcreatedText}\n\n${row.sourceText}`).join('\n\n---\n\n');
     }
 
@@ -206,7 +206,7 @@ export default function AiTranslatorPage() {
         )}
 
         {/* Loading Animation */}
-        {aiIsTranslating && (
+        {aiIsTranslating && (!aiTranslationData || aiTranslationData.length === 0) && (
           <div className="flex flex-col items-center justify-center py-16 gap-6 animate-pulse">
             <div className="relative w-20 h-20 flex items-center justify-center">
               <div className="absolute inset-0 border-4 border-emerald-500/20 rounded-full animate-ping"></div>
@@ -215,7 +215,7 @@ export default function AiTranslatorPage() {
             </div>
             <div className="flex flex-col items-center gap-2">
               <p className="text-sm text-neutral-500 max-w-md text-center">
-                It may take a few seconds to achieve an accurate, word-for-word scholarly translation. Feel free to explore other features in the app in the meantime—we will notify you the moment it is done!
+                Translating classical text...
               </p>
             </div>
           </div>
@@ -246,7 +246,15 @@ export default function AiTranslatorPage() {
         {aiTranslationData && aiTranslationData.length > 0 && (
           <div className="mt-4 flex flex-col gap-4 animate-fadeIn">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-neutral-800 pb-3 gap-4">
-              <h2 className="text-lg font-bold text-white">Translation Result</h2>
+              <h2 className="text-lg font-bold text-white flex items-center">
+                Translation Result
+                {aiIsTranslating && (
+                  <span className="flex h-3 w-3 relative ml-3" title="Streaming...">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                  </span>
+                )}
+              </h2>
               
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                 {/* Global Copy Actions */}
@@ -270,12 +278,12 @@ export default function AiTranslatorPage() {
                       <span>Reader</span>
                     </button>
                     <button
-                      onClick={() => copyAll('original')}
+                      onClick={() => copyAll('split')}
                       className="group flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-300 hover:bg-emerald-500/20 hover:text-emerald-300 hover:shadow-[0_0_15px_rgba(16,185,129,0.15)] text-slate-300"
-                      title="Copy Original Mode Format"
+                      title="Copy Split Mode Format"
                     >
-                      {copiedIndex === 'all-original' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors" />}
-                      <span>Original</span>
+                      {copiedIndex === 'all-split' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors" />}
+                      <span>Split</span>
                     </button>
                   </div>
                 </div>

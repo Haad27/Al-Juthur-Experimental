@@ -105,6 +105,45 @@ export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
   const [aiIsTranslating, setAiIsTranslating] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
 
+function parseMarkdownTable(text: string): Array<{ transcreatedText: string, sourceText: string }> {
+  const lines = text.split('\n');
+  const rows: Array<{ transcreatedText: string, sourceText: string }> = [];
+  const seenRows = new Set<string>();
+  
+  for (const line of lines) {
+    let trimmed = line.trim();
+    if (!trimmed.includes('|')) continue;
+    
+    if (trimmed.startsWith('|')) trimmed = trimmed.substring(1);
+    if (trimmed.endsWith('|')) trimmed = trimmed.substring(0, trimmed.length - 1);
+    
+    const columns = trimmed.split('|').map(p => p.trim());
+    if (columns.length >= 2) {
+      const transcreated = columns[0];
+      const source = columns[1];
+      
+      if (
+        transcreated.toLowerCase() === 'transcreated text' ||
+        source.toLowerCase() === 'source text' ||
+        transcreated.includes('---') ||
+        source.includes('---')
+      ) continue;
+      
+      if (!transcreated && !source) continue;
+      
+      const rowKey = `${transcreated.trim()}|||${source.trim()}`;
+      if (seenRows.has(rowKey)) continue;
+      seenRows.add(rowKey);
+      
+      rows.push({
+        transcreatedText: transcreated,
+        sourceText: source
+      });
+    }
+  }
+  return rows;
+}
+
   const triggerAiTranslation = async (textToTranslate: string) => {
     if (!textToTranslate.trim()) return;
     
@@ -122,13 +161,65 @@ export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
         body: JSON.stringify({ text: textToTranslate }),
       });
 
-      const data = await response.json();
-      
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Translation failed');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `API Error ${response.status}`);
       }
 
-      setAiTranslationData(data.data);
+      if (response.headers.get('content-type')?.includes('application/json')) {
+        const data = await response.json();
+        if (!data.success) throw new Error(data.error);
+        setAiTranslationData(data.data);
+        toast.success("AI Translation complete!");
+        setAiIsTranslating(false);
+        return;
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("No readable stream available.");
+      
+      const decoder = new TextDecoder("utf-8");
+      let fullText = "";
+      let lastParseTime = 0;
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+        
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            const dataStr = line.replace("data: ", "").trim();
+            if (!dataStr) continue;
+            try {
+              const data = JSON.parse(dataStr);
+              if (data.text) {
+                fullText += data.text;
+                
+                const now = Date.now();
+                if (now - lastParseTime > 200) {
+                   const parsed = parseMarkdownTable(fullText);
+                   if (parsed.length > 0) {
+                     setAiTranslationData(parsed);
+                   }
+                   lastParseTime = now;
+                }
+              }
+            } catch (e) {
+              // Ignore incomplete JSON chunks
+            }
+          }
+        }
+      }
+      
+      const finalParsed = parseMarkdownTable(fullText);
+      if (finalParsed.length > 0) {
+        setAiTranslationData(finalParsed);
+      } else {
+        setAiTranslationData([{ sourceText: textToTranslate, transcreatedText: fullText }]);
+      }
       toast.success("AI Translation complete!");
     } catch (err: any) {
       setAiError(err.message);
