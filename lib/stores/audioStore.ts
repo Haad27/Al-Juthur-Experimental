@@ -11,6 +11,7 @@ interface AudioState {
   playAyah: (surahNumber: number, ayahNumber: number, audioUrl: string) => void;
   pause: () => void;
   setAudioElement: (element: HTMLAudioElement | null) => void;
+  setCurrentSurah: (surah: number | null) => void;
   setCurrentAyah: (ayah: number | null) => void;
   setCurrentWord: (word: number | null) => void;
   setIsPlaying: (isPlaying: boolean) => void;
@@ -79,6 +80,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
   },
 
   setAudioElement: (element) => set({ audioElement: element }),
+  setCurrentSurah: (surah) => set({ currentSurah: surah }),
   setCurrentAyah: (ayah) => set({ currentAyah: ayah }),
   setCurrentWord: (word) => set({ currentWord: word }),
   setIsPlaying: (isPlaying) => set({ isPlaying }),

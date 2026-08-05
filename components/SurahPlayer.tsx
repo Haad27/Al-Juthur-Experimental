@@ -179,6 +179,7 @@ export default function SurahPlayer({
     // Update global state
     const ayahNum = parseInt(currentItem.verse_key.split(":")[1]);
     audioStore.setCurrentAyah(ayahNum);
+    audioStore.setCurrentSurah(surahNumber);
     
     // Play automatically if playing is true (e.g. moving to next ayah)
     if (playing) {
@@ -206,6 +207,7 @@ export default function SurahPlayer({
       if (audioQueue[currentAyahIndex]) {
         const ayahNum = parseInt(audioQueue[currentAyahIndex].verse_key.split(":")[1]);
         audioStore.setCurrentAyah(ayahNum);
+        audioStore.setCurrentSurah(surahNumber);
         window.dispatchEvent(new CustomEvent('scrollToAyah', { detail: { index: ayahNum - 1 } }));
       }
     } else {
