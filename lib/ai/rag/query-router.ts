@@ -1,7 +1,7 @@
 import { MODE_AUTHORS } from '../../../scripts/seed_rag_modes';
 import { SURAHS_DATA } from '../../surahsData';
 
-export type RagMode = 'default' | 'classical' | 'grammar' | 'modern' | 'philosophical' | 'lexicon' | 'dream';
+export type RagMode = 'default' | 'classical' | 'grammar' | 'modern' | 'philosophical' | 'lexicon';
 
 export interface PreparedQueryInfo {
   isScopeValid: boolean;
@@ -194,7 +194,6 @@ CRITICAL INSTRUCTIONS:
 1. **Arabic Translation for Vector Search**: You must extract the core concepts from the user's English query and translate them into classical Arabic keywords ("expandedQueryAr"). This is critical because our databases are primarily in Arabic. The translation depth depends on the mode (e.g., Classical and Lexicon require heavy, precise Arabic root extraction).
 2. **Aqeedah & Fiqh Guardrail**: If the ACTIVE MODE is "grammar" or "lexicon", strictly refuse theological (Aqeedah), sectarian, or Fiqh questions. Set isScopeValid to false. If the mode is "default" or "philosophical", these are allowed.
 3. **Verse Suggestion**: If the user's query is thematic (no explicit Surah:Ayah reference), identify up to 5 highly relevant Quranic verses that directly address the topic. These should be specific ayah references the user is likely asking about. If an explicit verse is given (e.g. 2:255), set suggestedVerses to an empty array. Only suggest verses when the query is thematic/topical. CRITICAL: Only suggest verses you are HIGHLY confident about. Each verse must exist in the Quran. If unsure, suggest fewer rather than risk invalid references.
-4. **Dream Mode**: If the ACTIVE MODE is "dream", strictly extract Arabic grammar concepts, terminology, and roots. Do NOT suggest verses (set suggestedVerses to empty array) as this mode searches a grammar textbook, not the Quran.
 
 OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
 {

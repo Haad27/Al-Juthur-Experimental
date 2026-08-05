@@ -59,22 +59,19 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Perform Hybrid Search (BM25 + Vector + Mode & exact Surah filtering)
-    let documents: ScoredParentDocument[] = [];
-    if (mode !== 'dream') {
-      documents = await searchHybrid(
-        message,
-        {
-          mode,
-          surahId: preparedQuery.targetSurahAyah?.surah,
-          ayahId: preparedQuery.targetSurahAyah?.ayah,
-          keywords: preparedQuery.keywords,
-          expandedQueryAr: preparedQuery.expandedQueryAr,
-          rootWord: preparedQuery.rootWords?.[0],
-          suggestedVerses: preparedQuery.suggestedVerses
-        },
-        8 // Top 8 relevant rule blocks
-      );
-    }
+    let documents = await searchHybrid(
+      message,
+      {
+        mode,
+        surahId: preparedQuery.targetSurahAyah?.surah,
+        ayahId: preparedQuery.targetSurahAyah?.ayah,
+        keywords: preparedQuery.keywords,
+        expandedQueryAr: preparedQuery.expandedQueryAr,
+        rootWord: preparedQuery.rootWords?.[0],
+        suggestedVerses: preparedQuery.suggestedVerses
+      },
+      8 // Top 8 relevant rule blocks
+    );
 
     console.log('[RAG-ROUTE] Hybrid Search returned', documents.length, 'docs:', documents.map(d => ({
       id: d.id,
@@ -97,24 +94,7 @@ export async function POST(req: NextRequest) {
       workType: 'tafsir' | 'lexicon' | 'textbook';
     }> = [];
 
-    if (mode === 'dream') {
-      const fs = require('fs');
-      const path = require('path');
-      const cheatSheetPath = path.join(process.cwd(), 'database', 'dream', 'dream_cheat_sheet.md');
-      
-      if (fs.existsSync(cheatSheetPath)) {
-        contextText = "\n\n### Bayyinah Dream Grammar Rules:\n" + fs.readFileSync(cheatSheetPath, 'utf8');
-        retrievedSources.push({
-          id: 'dream-cheat-sheet',
-          book: 'Bayyinah Dream Grammar Cheat Sheet',
-          authorName: 'Bayyinah Curriculum',
-          snippet: 'Direct reference to the comprehensive Arabic grammar rules and templates.',
-          workType: 'textbook'
-        });
-      } else {
-        contextText = 'Dream Cheat Sheet is currently being compiled. Please try again later.';
-      }
-    } else if (documents && documents.length > 0) {
+    if (documents && documents.length > 0) {
       contextText = "\n\n### Retrieved Authentic Classical Passages for Mode [" + mode.toUpperCase() + "]:\n" +
         documents.map((doc: ScoredParentDocument, idx: number) => {
           const ref = doc.surahId && doc.ayahId
@@ -179,9 +159,7 @@ export async function POST(req: NextRequest) {
       case 'lexicon':
         modeSpecificRole = 'You are an expert Arabic lexicographer. Focus strictly on root semantics, word definitions, and morphological forms using the retrieved dictionaries. STRICT GUARDRAIL: Do not provide full verse exegesis, theological commentary, or practical rulings. Restrict your answer entirely to the linguistic journey of the root word.';
         break;
-      case 'dream':
-        modeSpecificRole = 'You are an expert Arabic grammar instructor teaching from the Bayyinah Dream Textbook. Answer the user\'s grammar question using ONLY the provided textbook lessons. Use the grammatical terminology provided in the text and do not hallucinate outside rules.';
-        break;
+
     }
 
     const systemPrompt = `You are Sheikh Juthur, an expert, compassionate Islamic scholar and teacher (Murabbi). You treat the user as your dedicated student seeking sacred knowledge. 
