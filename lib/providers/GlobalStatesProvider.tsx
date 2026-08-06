@@ -76,15 +76,11 @@ export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
       const savedFontSize = localStorage.getItem("quran_fontSize");
       if (savedFontSize) {
         _setFontSize(parseInt(savedFontSize, 10));
-      } else if (window.innerWidth < 768) {
-        _setFontSize(1);
       }
 
       const savedWbwFontSize = localStorage.getItem("quran_wbwFontSize");
       if (savedWbwFontSize) {
         _setWbwFontSize(parseInt(savedWbwFontSize, 10));
-      } else if (window.innerWidth < 768) {
-        _setWbwFontSize(1);
       }
     }
   }, []);
