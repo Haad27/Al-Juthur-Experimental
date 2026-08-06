@@ -537,7 +537,7 @@ const AyahRow = React.memo(({
                 }}
                 className="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-900/60 hover:bg-emerald-950/40 border border-emerald-500/35 hover:border-emerald-400/80 opacity-75 hover:opacity-100 transition-all cursor-pointer shadow-sm"
               >
-                <Bot size={14} className="text-emerald-400 group-hover:text-emerald-300 transition-colors" />
+                <Bot size={14} className="text-emerald-400 group-hover:text-emerald-300 transition-colors animate-bounce" />
                 <span className="text-[11px] font-semibold tracking-wide text-emerald-300 group-hover:text-white transition-colors">
                   Ask Tafsir Scholar
                 </span>
