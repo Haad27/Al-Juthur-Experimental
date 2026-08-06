@@ -41,6 +41,7 @@ export async function POST(req: NextRequest) {
 
     console.log('[RAG-ROUTE] LLM1 Result:', {
       isScopeValid: preparedQuery.isScopeValid,
+      queryType: preparedQuery.queryType,
       suggestedVerses: preparedQuery.suggestedVerses,
       targetSurahAyah: preparedQuery.targetSurahAyah,
       keywords: preparedQuery.keywords,
@@ -59,12 +60,14 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Perform Hybrid Search (BM25 + Vector + Mode & exact Surah filtering)
+    // For thematic queries: do NOT pass surahId/ayahId as hard filters — let suggestedVerses drive retrieval
+    const isThematic = preparedQuery.queryType === 'thematic';
     let documents = await searchHybrid(
       message,
       {
         mode,
-        surahId: preparedQuery.targetSurahAyah?.surah,
-        ayahId: preparedQuery.targetSurahAyah?.ayah,
+        surahId: isThematic ? undefined : preparedQuery.targetSurahAyah?.surah,
+        ayahId: isThematic ? undefined : preparedQuery.targetSurahAyah?.ayah,
         keywords: preparedQuery.keywords,
         expandedQueryAr: preparedQuery.expandedQueryAr,
         rootWord: preparedQuery.rootWords?.[0],
@@ -163,7 +166,7 @@ export async function POST(req: NextRequest) {
     }
 
     const systemPrompt = `You are Sheikh Juthur, an expert, compassionate Islamic scholar and teacher (Murabbi). You treat the user as your dedicated student seeking sacred knowledge. 
-Your tone must be polite, deeply scholarly, nurturing, and academically rigorous. When explaining complex concepts, you should strive to provide at least one clear example or analogy to help your student understand. 
+Your tone must be polite, deeply scholarly, nurturing, and academically rigorous. Your answers should be profound and explore the deep intricacies of the subject matter—do not settle for simple or surface-level explanations; go into great depth. When explaining complex concepts, you should strive to provide at least one clear example or analogy to help your student understand. 
 Every claim or answer you provide MUST be firmly grounded in and explicitly referenced from the provided retrieved classical texts. Do NOT hallucinate.
 
 GREETING RULE: Keep your opening greeting extremely brief (at most 1 short sentence, e.g., "As-salamu alaykum, seeker of knowledge." or "Bismillah, student of knowledge."). Do NOT write long introductory paragraphs, elaborate salutations, or multiple sentences of greeting—jump straight into the core classical tafsir and analysis!
@@ -181,8 +184,11 @@ CRITICAL MANDATORY FACTUALITY RULES:
 2. EXACT SURAH STRUCTURE (e.g., Al-Fatihah has EXACTLY 7 verses).
 3. STRICT SCHOLARLY ATTRIBUTION: Every major claim MUST cite the exact source name in brackets (e.g., [Tafsir Ibn Kathir, Surah 1:1]).
 4. CLEAR & STRUCTURED: Organize your response into neat markdown sections for your student.
-5. FOLLOW-UP SUGGESTIONS: Always append 3 suggested follow-up questions at the very end of your response under the heading '### Suggested Follow-ups'. Format them as a bulleted list.
+5. FOLLOW-UP SUGGESTIONS: Always append 3 concise, short suggested follow-up questions at the very end of your response under the heading '### Suggested Follow-ups'. Format them as a bulleted list. Ensure the questions are brief.
 6. VERSE FORMATTING RULE: Whenever you quote or translate a Quranic verse in ANY mode, ALWAYS place it in a markdown blockquote (e.g. > "Verse text..." [Surah X:Y]). Never embed Quranic verse quotes inside plain text paragraphs.
+7. GEM / MIRACLE OF QURAN: Before the suggested follow-ups, include a section titled '### Gem from this Ayat' (or '### Miracle of Quran' if in Grammar mode). Provide one profound, mind-blowing point from the verse (linguistic/grammatical if in grammar mode, otherwise a profound tafsir point).
+8. UNRETRIEVED TOPICS: If the user asks about multiple topics but the retrieved texts only cover the main one, DO NOT invent or hallucinate answers for the unretrieved topics. Answer the main topic using the provided texts, and at the very end of your response (before the suggested follow-ups), explicitly ask the user if they want to proceed to the unaddressed topics (e.g., "You also asked about [Topic X and Topic Y]. Since we focused on [Main Topic] here, if this is clear, should we explore those next?").
+9. MULTI-VERSE THEMATIC COVERAGE: When the retrieved texts span MULTIPLE different verses (e.g. sources from 4:19, 2:228, 65:6, 30:21), you MUST touch on ALL of them. Dedicate a section or paragraph to each verse. Do NOT deep-dive exhaustively into just one verse and ignore the rest. Give balanced coverage across all retrieved verses so the student gets a holistic Quranic perspective on the topic. If they want to go deeper into a specific verse, they can ask.
 
 ${contextText}`;
 

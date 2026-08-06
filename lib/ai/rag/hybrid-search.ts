@@ -177,12 +177,13 @@ export async function searchHybrid(
       const numVerses = filters.suggestedVerses.length;
       let verseResults: any[] = [];
       
+      // Distribute authors evenly across verses for breadth
+      // e.g. 6 authors across 3 verses = 2 per verse; 6 authors across 2 verses = 3 per verse
+      const maxAuthorsPerVerse = Math.max(1, Math.ceil(allowedAuthorIds.length / Math.max(1, numVerses)));
+      
       for (let i = 0; i < numVerses; i++) {
         const verse = filters.suggestedVerses[i];
-        let authorLimit = allowedAuthorIds.length;
-        if (i > 0) {
-          authorLimit = 1; // 2nd, 3rd verse only gets 1 author to prevent context flooding
-        }
+        const authorLimit = Math.min(maxAuthorsPerVerse, allowedAuthorIds.length);
         
         const querySql = `
           SELECT t.id, t.authorId, t.surahId, a.numberInSurah as ayahNo, t.text, au.name as authorName
@@ -194,7 +195,7 @@ export async function searchHybrid(
         `;
         
         const rows = devDb.prepare(querySql).all(verse.surah, verse.ayah) as any[];
-        console.log(`[HYBRID-SEARCH] Verse ${verse.surah}:${verse.ayah} → ${rows.length} tafsir entries found`);
+        console.log(`[HYBRID-SEARCH] Verse ${verse.surah}:${verse.ayah} → ${rows.length} tafsir entries (${authorLimit} authors allowed)`);
         verseResults.push(...rows);
       }
       

@@ -3,6 +3,8 @@ import { SURAHS_DATA } from '../../surahsData';
 
 export type RagMode = 'default' | 'classical' | 'grammar' | 'modern' | 'philosophical' | 'lexicon';
 
+export type QueryType = 'specific' | 'thematic';
+
 export interface PreparedQueryInfo {
   isScopeValid: boolean;
   warningMessage?: string;
@@ -12,6 +14,7 @@ export interface PreparedQueryInfo {
   rootWords: string[];
   targetSurahAyah?: { surah?: number; ayah?: number };
   suggestedVerses?: { surah: number; ayah: number }[];
+  queryType: QueryType;
   mode: RagMode;
 }
 
@@ -161,6 +164,7 @@ export async function prepareRagQuery(userMessage: string, mode: RagMode = 'defa
         keywords: baseKeywords,
         rootWords: Array.from(new Set(baseRoots)),
         targetSurahAyah: parsedRef,
+        queryType: parsedRef?.ayah ? 'specific' : 'thematic',
         mode
       };
     }
@@ -177,6 +181,7 @@ export async function prepareRagQuery(userMessage: string, mode: RagMode = 'defa
         keywords: baseKeywords,
         rootWords: Array.from(new Set(baseRoots)),
         targetSurahAyah: parsedRef,
+        queryType: parsedRef?.ayah ? 'specific' : 'thematic',
         mode
       };
     }
@@ -193,15 +198,19 @@ ACTIVE MODE: "${mode}"
 CRITICAL INSTRUCTIONS:
 1. **Arabic Translation for Vector Search**: You must extract the core concepts from the user's English query and translate them into classical Arabic keywords ("expandedQueryAr"). This is critical because our databases are primarily in Arabic. The translation depth depends on the mode (e.g., Classical and Lexicon require heavy, precise Arabic root extraction).
 2. **Aqeedah & Fiqh Guardrail**: If the ACTIVE MODE is "grammar" or "lexicon", strictly refuse theological (Aqeedah), sectarian, or Fiqh questions. Set isScopeValid to false. If the mode is "default" or "philosophical", these are allowed.
-3. **Verse Suggestion**: If the user's query is thematic (no explicit Surah:Ayah reference), identify up to 5 highly relevant Quranic verses that directly address the topic. These should be specific ayah references the user is likely asking about. If an explicit verse is given (e.g. 2:255), set suggestedVerses to an empty array. Only suggest verses when the query is thematic/topical. CRITICAL: Only suggest verses you are HIGHLY confident about. Each verse must exist in the Quran. If unsure, suggest fewer rather than risk invalid references.
+3. **Query Type Classification**:
+   - "specific": The user explicitly mentions a Surah:Ayah reference (e.g. "explain 2:255", "what does Surah Al-Baqarah verse 255 mean"). Set targetSurah/targetAyah and leave suggestedVerses empty.
+   - "thematic": The user asks about a broad topic/concept WITHOUT referencing a specific verse (e.g. "what does the Quran say about patience", "Quranic view on taking care of wife"). Set targetSurah and targetAyah to null and populate suggestedVerses.
+4. **Verse Suggestion (THEMATIC ONLY)**: For thematic queries, identify the Quranic verses that DIRECTLY and GENUINELY address the topic. Suggest ONLY verses you are HIGHLY confident about — do NOT pad or repeat verses to fill a quota. If only 2 relevant verses exist, suggest 2. If 6 exist, suggest 6. Maximum is 6. Each verse must actually exist in the Quran. If unsure about a verse, do NOT include it.
 
 OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
 {
   "isScopeValid": true or false,
   "warningMessage": "Only if isScopeValid is false, state why clearly and suggest switching to Default Mode.",
-  "targetSurah": null or exact Surah number (1 to 114) if the query mentions a specific Surah (e.g. Al-Fatihah is 1),
-  "targetAyah": null or exact Ayah number if mentioned,
-  "expandedQueryAr": "Exact classical Arabic keywords, vocabulary, and synonyms corresponding to the query for BM25 matching. (Leave this EMPTY if you successfully identify a specific targetSurah and targetAyah, to save processing time)",
+  "queryType": "specific" or "thematic",
+  "targetSurah": null or exact Surah number (1 to 114) — ONLY for specific queries,
+  "targetAyah": null or exact Ayah number — ONLY for specific queries,
+  "expandedQueryAr": "Exact classical Arabic keywords, vocabulary, and synonyms corresponding to the query for BM25 matching.",
   "expandedQueryEn": "Expanded English terminology and synonyms.",
   "keywords": ["keyword1", "keyword2", "keyword3"],
   "rootWords": ["3-letter or 4-letter Arabic root if applicable, e.g. صبر, رحم, علم"],
@@ -231,6 +240,7 @@ OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
                   properties: {
                     isScopeValid: { type: 'BOOLEAN' },
                     warningMessage: { type: 'STRING' },
+                    queryType: { type: 'STRING' },
                     targetSurah: { type: 'INTEGER' },
                     targetAyah: { type: 'INTEGER' },
                     expandedQueryAr: { type: 'STRING' },
@@ -248,7 +258,7 @@ OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
                       }
                     }
                   },
-                  required: ['isScopeValid', 'expandedQueryAr', 'expandedQueryEn', 'keywords', 'rootWords', 'suggestedVerses']
+                  required: ['isScopeValid', 'queryType', 'expandedQueryAr', 'expandedQueryEn', 'keywords', 'rootWords', 'suggestedVerses']
                 },
                 maxOutputTokens: 500
               }
@@ -281,6 +291,7 @@ OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
           keywords: parsed.keywords || baseKeywords,
           rootWords: parsed.rootWords || baseRoots,
           targetSurahAyah: parsedRef,
+          queryType: parsedRef?.ayah ? 'specific' : 'thematic',
           mode
         };
       }
@@ -333,7 +344,17 @@ OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
         );
       }
       
-      console.log('[QUERY-ROUTER] Query:', cleanMessage, '| Suggested Verses:', parsed.suggestedVerses, '| Validated:', validSuggestedVerses);
+      // Determine query type: LLM classification with deterministic fallback
+      const llmQueryType = parsed.queryType === 'specific' || parsed.queryType === 'thematic'
+        ? parsed.queryType
+        : (parsedRef?.ayah ? 'specific' : 'thematic');
+      
+      console.log('[QUERY-ROUTER] Query:', cleanMessage, '| Type:', llmQueryType, '| Suggested Verses:', parsed.suggestedVerses, '| Validated:', validSuggestedVerses);
+
+      // For thematic queries: do NOT lock surahId/ayahId — let suggestedVerses drive retrieval
+      const resolvedTarget = llmQueryType === 'thematic'
+        ? undefined
+        : (surahNum ? { surah: surahNum, ayah: ayahNum } : parsedRef);
 
       return {
         isScopeValid: true,
@@ -341,8 +362,9 @@ OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
         expandedQueryEn: parsed.expandedQueryEn || cleanMessage,
         keywords: combinedKeywords,
         rootWords: combinedRoots,
-        targetSurahAyah: surahNum ? { surah: surahNum, ayah: ayahNum } : parsedRef,
+        targetSurahAyah: resolvedTarget,
         suggestedVerses: validSuggestedVerses,
+        queryType: llmQueryType,
         mode
       };
     }
@@ -358,6 +380,7 @@ OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
     rootWords: Array.from(new Set(baseRoots)),
     targetSurahAyah: parsedRef,
     suggestedVerses: [],
+    queryType: parsedRef?.ayah ? 'specific' : 'thematic',
     mode
   };
 }
