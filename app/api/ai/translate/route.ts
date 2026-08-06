@@ -279,20 +279,35 @@ export async function POST(req: NextRequest) {
             const mode = chunk.length <= 2000 ? 'translate_short' : 'translate_long';
             
             const chunkEstimatedTokens = estimateTokens(userPrompt) + estimateTokens(TRANSLATION_PROMPT);
+            let chunkWasTruncated = false;
             
             try {
               const execution = await executeWithFallbackStream(mode, TRANSLATION_PROMPT, userPrompt, ip, chunkEstimatedTokens);
               const reader = execution.stream.getReader();
+              const decoder = new TextDecoder("utf-8");
               
               while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
+                
+                const textChunk = decoder.decode(value, { stream: true });
+                if (textChunk.includes('"finishReason":"MAX_TOKENS"')) {
+                  chunkWasTruncated = true;
+                }
+                
                 controller.enqueue(value);
               }
               chunksProcessed++;
+              
+              if (chunkWasTruncated) {
+                const remainingText = chunks.slice(chunksProcessed).join('\n\n');
+                controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ finishReason: "MAX_TOKENS", untranslatedText: remainingText || chunk })}\n\n`));
+                break;
+              }
             } catch (err: any) {
               console.warn(`All translation fallback models failed for chunk ${chunksProcessed}: ${err.message}`);
-              // We could enqueue an error event here, but we will just silently skip or break
+              const remainingText = chunks.slice(chunksProcessed).join('\n\n');
+              controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ finishReason: "MAX_TOKENS", untranslatedText: remainingText })}\n\n`));
               break;
             }
           }

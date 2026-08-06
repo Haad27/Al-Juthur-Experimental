@@ -2,21 +2,22 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Languages, Loader2, ArrowRightLeft, ShieldAlert, Copy, Check, LayoutGrid, Columns, BookOpen, Sparkles } from 'lucide-react';
+import { Languages, Loader2, ArrowRightLeft, ShieldAlert, Copy, Check, LayoutGrid, Columns, BookOpen, Sparkles, Trash, ScrollText, Library, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
-import LogoIcon from '@/components/svg/icons/LogoIcon';
 import { toast } from 'sonner';
 import { useGlobalState } from '@/lib/providers/GlobalStatesProvider';
+import ReactMarkdown from 'react-markdown';
+import LogoIcon from '@/components/svg/icons/LogoIcon';
 
 export default function AiTranslatorPage() {
   const searchParams = useSearchParams();
-  const initialText = searchParams.get('text') || '';
   
   const {
     aiInputText,
     setAiInputText,
     aiTranslationData,
     aiIsTranslating,
+    aiUntranslatedText,
     aiError,
     triggerAiTranslation,
     clearAiTranslation,
@@ -28,8 +29,20 @@ export default function AiTranslatorPage() {
   const [tokenLimit, setTokenLimit] = useState<number>(250000);
 
   useEffect(() => {
+    const textToTranslate = searchParams.get('text');
+    if (textToTranslate) {
+      setAiInputText(textToTranslate);
+    }
+    const sessionText = sessionStorage.getItem('ai_translator_input');
+    if (sessionText) {
+      setAiInputText(sessionText);
+      sessionStorage.removeItem('ai_translator_input');
+    }
+  }, [searchParams, setAiInputText]);
+
+  useEffect(() => {
     // Fetch remaining tokens on mount
-    fetch('/api/ai/translate')
+    fetch('/api/ai/translate/quota')
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -38,15 +51,7 @@ export default function AiTranslatorPage() {
         }
       })
       .catch(console.error);
-
-    const sessionText = sessionStorage.getItem('ai_translator_input');
-    if (sessionText) {
-      triggerAiTranslation(sessionText);
-      sessionStorage.removeItem('ai_translator_input');
-    } else if (initialText && initialText !== aiInputText) {
-      triggerAiTranslation(initialText);
-    }
-  }, [initialText]);
+  }, []);
 
   const copySegment = (text: string, index: string) => {
     // Fallback for mobile and http contexts
@@ -101,7 +106,9 @@ export default function AiTranslatorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100 flex flex-col pb-10">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pb-10 relative selection:bg-emerald-500/30">
+      {/* Subtle ambient light background */}
+      <div className="absolute top-0 inset-x-0 h-[500px] bg-gradient-to-b from-emerald-900/10 to-transparent pointer-events-none" />
       {/* Top Navigation Bar */}
       <div className="sticky top-0 z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-4 md:px-8 py-3">
         <div className="max-w-[1700px] mx-auto relative flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -134,69 +141,105 @@ export default function AiTranslatorPage() {
         </div>
       </div>
 
-      <main className="flex-1 flex flex-col p-6 max-w-5xl mx-auto w-full gap-6">
+      <main className="flex-1 flex flex-col p-[clamp(0.5rem,2vh,1.5rem)] max-w-5xl mx-auto w-full gap-[clamp(0.5rem,2vh,1.5rem)]">
         
-        {/* Header section */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-          <div className="text-center space-y-4 mb-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold tracking-wide uppercase">
-              <Sparkles className="w-3.5 h-3.5" />
-              Smart Translation Engine
+        {/* The Input Portal */}
+        <div className={`flex flex-col items-center w-full animate-fadeIn max-w-4xl mx-auto transition-all duration-700 ${(aiIsTranslating || (aiTranslationData && aiTranslationData.length > 0)) ? "mt-4 mb-4" : "justify-center min-h-[70vh]"}`}>
+            {/* Header section */}
+            <div className="text-center space-y-2 mb-6 w-full">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-semibold tracking-widest uppercase shadow-[0_0_10px_rgba(16,185,129,0.1)]">
+                <Sparkles className="w-3 h-3" />
+                AI Translation
+              </div>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-white drop-shadow-sm">
+                Classical Arabic <span className="text-emerald-400">AI Translator</span>
+              </h1>
+              <p className="max-w-xl mx-auto text-zinc-500 text-xs sm:text-sm mt-1 sm:mt-2">
+                Paste classical Arabic Tafsir, Lexicon passages, or ancient Islamic texts. Watch the AI transcreate them into English.
+              </p>
+              
+              {/* Token limit */}
+              {remainingTokens !== null && (
+                <div className="flex items-center justify-center pt-2">
+                  <div className="flex items-center gap-1.5 bg-zinc-900/30 px-3 py-1 rounded-full border border-zinc-800/50 text-emerald-500/80 text-[10px] sm:text-xs font-medium">
+                    <Sparkles className="w-3 h-3" />
+                    <span>
+                      <strong className="text-zinc-300">{remainingTokens.toLocaleString()}</strong> / {tokenLimit.toLocaleString()} tokens
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
-            <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-white">
-              Classical Arabic <span className="text-emerald-400">AI Translator</span>
-            </h1>
-            <p className="max-w-2xl mx-auto text-slate-400 text-base sm:text-lg">
-              Paste classical Arabic Tafsir, Lexicon passages, or ancient Islamic texts to translate them instantly into clear, highly accurate English.
-            </p>
-          </div>
-        </div>
-        
-        {/* Token limit */}
-        {remainingTokens !== null && (
-          <div className="max-w-2xl mx-auto w-full flex items-center justify-center -mt-2 mb-2">
-            <div className="flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20 text-emerald-400 text-xs font-semibold shadow-sm">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>
-                <strong>{remainingTokens.toLocaleString()}</strong> / {tokenLimit.toLocaleString()} Daily Tokens Remaining
-              </span>
-            </div>
-          </div>
-        )}
 
-        <div className="w-full flex flex-col gap-4">
-          <div className="flex justify-between items-end">
-             <label className="text-sm font-semibold text-neutral-300">Input Source Text (Arabic)</label>
-             <div className="flex items-center gap-2 text-xs text-amber-500/80 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
-               <ShieldAlert className="w-3.5 h-3.5" />
-               Translation Only
-             </div>
+            <div className="w-full flex flex-col gap-4 relative group">
+              {/* Decorative glows behind input */}
+              <div className={`absolute -inset-1 bg-gradient-to-r from-emerald-500/40 via-teal-500/30 to-emerald-500/40 rounded-[2.2rem] transition-all duration-700 ${aiIsTranslating ? "blur-2xl opacity-90 animate-pulse" : "blur-xl group-hover:blur-2xl opacity-75 sm:opacity-40 group-hover:opacity-80"}`} />
+              
+              <div className="relative flex flex-col bg-zinc-950/90 backdrop-blur-2xl border-2 border-emerald-500/60 sm:border-zinc-800/80 group-hover:border-emerald-500/60 rounded-3xl p-[min(0.5rem,1vh)] transition-all duration-500 shadow-[0_0_30px_rgba(16,185,129,0.25)] sm:shadow-2xl">
+                <div className="flex justify-between items-center px-6 pt-[min(1rem,2vh)] pb-[min(0.5rem,1vh)] border-b border-zinc-800/50">
+                  <label className="text-xs font-bold text-zinc-500 tracking-widest uppercase">Source Text</label>
+                  <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-emerald-400/80 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                    <ShieldAlert className="w-3.5 h-3.5" />
+                    Secure
+                  </div>
+                </div>
+                <textarea
+                  className="w-full h-[25vh] min-h-[100px] max-h-[300px] bg-transparent p-[min(1.5rem,3vh)] text-white placeholder-zinc-700 focus:outline-none resize-none font-serif text-base sm:text-[clamp(1.25rem,3vh,1.875rem)] leading-loose"
+                  dir="auto"
+                  placeholder="Paste classical Arabic text here..."
+                  value={aiInputText}
+                  onChange={(e) => setAiInputText(e.target.value)}
+                />
+                <div className="flex justify-between items-center px-4 pb-[min(1rem,2vh)] pt-[min(0.5rem,1vh)]">
+                  <button
+                    onClick={() => clearAiTranslation()}
+                    disabled={!aiInputText.trim()}
+                    className="group flex items-center justify-center gap-2 px-5 py-[min(0.625rem,1.5vh)] bg-transparent hover:bg-zinc-900/50 disabled:opacity-50 disabled:hover:bg-transparent text-zinc-500 hover:text-zinc-300 font-medium rounded-xl transition-all duration-300 cursor-pointer"
+                  >
+                    <Trash className="w-4 h-4" />
+                    Clear
+                  </button>
+                  <button
+                    onClick={() => {
+                      triggerAiTranslation(aiInputText);
+                      setTimeout(() => {
+                        document.getElementById('ai-results-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }, 100);
+                    }}
+                    disabled={!aiInputText.trim()}
+                    className="group relative overflow-hidden flex items-center justify-center gap-3 px-8 py-[min(1rem,2vh)] bg-gradient-to-r from-emerald-600 to-teal-500 disabled:from-zinc-900 disabled:to-zinc-900 disabled:text-zinc-600 disabled:border-zinc-800 disabled:border text-white font-bold rounded-2xl transition-all duration-300 shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_40px_rgba(16,185,129,0.5)] cursor-pointer disabled:shadow-none transform hover:-translate-y-1 active:translate-y-0 disabled:group-hover:text-white"
+                  >
+                    <div className="absolute inset-0 bg-emerald-500/30 backdrop-blur-sm translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out" />
+                    <Sparkles className="w-[min(1.25rem,2.5vh)] h-[min(1.25rem,2.5vh)] relative z-10" />
+                    <span className="relative z-10 text-[clamp(1rem,2vh,1.125rem)]">Translate Text</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            {(!aiIsTranslating && (!aiTranslationData || aiTranslationData.length === 0)) && (
+              <div className="flex flex-row gap-2 sm:gap-6 mt-[min(2rem,4vh)] w-full justify-center px-2 sm:px-0">
+                <Link href="/tafsir" className="animate-bounce group relative flex flex-1 sm:flex-none items-center justify-center gap-1.5 sm:gap-3 px-2 sm:px-8 py-[min(0.75rem,2vh)] bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 hover:text-emerald-200 font-semibold rounded-xl sm:rounded-2xl transition-all duration-300 border border-emerald-500/30 hover:border-emerald-400/50 shadow-[0_0_15px_rgba(16,185,129,0.15)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] active:translate-y-0 overflow-hidden backdrop-blur-sm text-center">
+                  <ScrollText className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 group-hover:text-emerald-300 transition-colors duration-300 relative z-10 shrink-0" />
+                  <span className="text-[10px] sm:text-[clamp(0.875rem,2vh,1rem)] tracking-wide relative z-10 leading-tight">Get Arabic<br className="block sm:hidden" /> from Tafsir</span>
+                </Link>
+                <Link href="/lexicon" className="animate-bounce [animation-delay:150ms] group relative flex flex-1 sm:flex-none items-center justify-center gap-1.5 sm:gap-3 px-2 sm:px-8 py-[min(0.75rem,2vh)] bg-teal-950/40 hover:bg-teal-900/60 text-teal-300 hover:text-teal-200 font-semibold rounded-xl sm:rounded-2xl transition-all duration-300 border border-teal-500/30 hover:border-teal-400/50 shadow-[0_0_15px_rgba(20,184,166,0.15)] hover:shadow-[0_0_25px_rgba(20,184,166,0.3)] active:translate-y-0 overflow-hidden backdrop-blur-sm text-center">
+                  <Library className="w-4 h-4 sm:w-5 sm:h-5 text-teal-400 group-hover:text-teal-300 transition-colors duration-300 relative z-10 shrink-0" />
+                  <span className="text-[10px] sm:text-[clamp(0.875rem,2vh,1rem)] tracking-wide relative z-10 leading-tight">Get Arabic<br className="block sm:hidden" /> from Lexicon</span>
+                </Link>
+              </div>
+            )}
+            {/* Token Budget Display (Positioned below Translate button and above Results) */}
+            {remainingTokens !== null && (
+              <div className="flex justify-center items-center mt-6">
+                <div className="flex items-center gap-2 bg-emerald-950/40 px-5 py-2 rounded-2xl border border-emerald-500/30 text-emerald-300 text-xs sm:text-sm font-semibold shadow-[0_0_15px_rgba(16,185,129,0.15)] backdrop-blur-sm">
+                  <Sparkles className="w-4 h-4 text-emerald-400" />
+                  <span>Tokens Remaining: <strong className="text-emerald-200">{remainingTokens.toLocaleString()}</strong> / {tokenLimit.toLocaleString()}</span>
+                </div>
+              </div>
+            )}
           </div>
-          <textarea
-            className="w-full h-40 bg-slate-900/80 border border-slate-700/80 rounded-2xl p-6 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-xl transition-all resize-none font-serif text-lg leading-loose"
-            dir="auto"
-            placeholder="Paste classical Arabic Tafsir, Lexicon text, or Hadith here..."
-            value={aiInputText}
-            onChange={(e) => setAiInputText(e.target.value)}
-          />
-          <div className="flex justify-end items-center gap-3 w-full">
-            <button
-              onClick={() => clearAiTranslation()}
-              disabled={aiIsTranslating || (!aiInputText.trim() && !aiTranslationData)}
-              className="flex items-center gap-2 px-6 py-3 bg-neutral-800 hover:bg-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:border-neutral-800 text-neutral-300 font-bold rounded-xl transition cursor-pointer border border-neutral-700"
-            >
-              Clear
-            </button>
-            <button
-              onClick={() => triggerAiTranslation(aiInputText)}
-              disabled={aiIsTranslating || !aiInputText.trim()}
-              className="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-neutral-800 disabled:text-neutral-500 text-white font-bold rounded-xl transition shadow-lg shadow-emerald-950/20 cursor-pointer"
-            >
-              {aiIsTranslating ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowRightLeft className="w-5 h-5" />}
-              {aiIsTranslating ? 'Translating securely...' : 'Translate to English'}
-            </button>
-          </div>
-        </div>
 
         {/* Error State */}
         {aiError && (
@@ -205,109 +248,92 @@ export default function AiTranslatorPage() {
           </div>
         )}
 
-        {/* Loading Animation */}
-        {aiIsTranslating && (!aiTranslationData || aiTranslationData.length === 0) && (
-          <div className="flex flex-col items-center justify-center py-16 gap-6 animate-pulse">
-            <div className="relative w-20 h-20 flex items-center justify-center">
-              <div className="absolute inset-0 border-4 border-emerald-500/20 rounded-full animate-ping"></div>
-              <div className="absolute inset-2 border-4 border-emerald-400/40 rounded-full animate-spin"></div>
-              <Sparkles className="w-8 h-8 text-emerald-400" />
-            </div>
-            <div className="flex flex-col items-center gap-2">
-              <p className="text-sm text-neutral-500 max-w-md text-center">
-                Translating classical text...
-              </p>
-            </div>
-          </div>
-        )}
+        {/* The Zenith Results */}
+        {((aiTranslationData && aiTranslationData.length > 0) || aiIsTranslating) && (
+          <div id="ai-results-container" className="mt-6 flex flex-col gap-6 animate-fadeIn pb-24">
+            {/* Initial Stream Loading State */}
+            {aiIsTranslating && (!aiTranslationData || aiTranslationData.length === 0) && (
+              <div className="flex flex-col items-center justify-center p-12 bg-zinc-900/40 border border-zinc-800/80 rounded-3xl backdrop-blur-xl animate-pulse space-y-4 shadow-2xl">
+                <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
+                <p className="text-sm font-semibold text-emerald-300">Translating classical text with Islamic scholarship accuracy...</p>
+              </div>
+            )}
 
-        {/* Empty State CTA */}
-        {!aiTranslationData && !aiIsTranslating && !aiError && (
-          <div className="flex flex-col items-center justify-center py-16 px-4 text-center mt-4 bg-slate-900/30 rounded-2xl border border-slate-700/50 backdrop-blur-sm shadow-xl">
-            <BookOpen className="w-12 h-12 text-emerald-500/60 mb-5" />
-            <h3 className="text-2xl font-bold text-white mb-3 tracking-tight">Need Arabic text to translate?</h3>
-            <p className="text-slate-400 mb-8 max-w-md text-base">
-              You can easily copy classical texts directly from our Lexicon or Tafsir sections to translate them instantly.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
-              <Link href="/tafsir" className="flex items-center justify-center gap-2 px-6 py-3.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-semibold rounded-xl transition-all border border-emerald-500/20 hover:border-emerald-500/40">
-                <BookOpen className="w-4 h-4" />
-                Go to Classical Tafsir
-              </Link>
-              <Link href="/lexicon" className="flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl transition-all border border-slate-600 hover:border-slate-500">
-                <Languages className="w-4 h-4 text-emerald-400" />
-                Go to Classic Lexicon
-              </Link>
-            </div>
-          </div>
-        )}
+            {/* Action Bar (Sticky Top - Compact & Sleek on Mobile & Desktop) */}
+            <div className="sticky top-14 sm:top-20 z-30 flex flex-col sm:flex-row sm:items-center justify-between bg-zinc-950/95 sm:bg-zinc-950/80 backdrop-blur-xl border border-zinc-800/80 rounded-2xl p-2.5 sm:p-3 shadow-2xl gap-2 sm:gap-4">
+              <div className="flex items-center justify-between w-full sm:w-auto gap-2">
+                <h2 className="text-xs sm:text-xl font-bold text-white flex items-center gap-1.5 sm:gap-2">
+                  <Sparkles className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-emerald-400 shrink-0" />
+                  <span>Translation Result</span>
+                  {aiIsTranslating && (
+                    <span className="flex h-2 w-2 relative ml-0.5" title="Streaming...">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                  )}
+                </h2>
 
-        {/* Output Section */}
-        {aiTranslationData && aiTranslationData.length > 0 && (
-          <div className="mt-4 flex flex-col gap-4 animate-fadeIn">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-neutral-800 pb-3 gap-4">
-              <h2 className="text-lg font-bold text-white flex items-center">
-                Translation Result
-                {aiIsTranslating && (
-                  <span className="flex h-3 w-3 relative ml-3" title="Streaming...">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-                  </span>
+                {/* Token Limit Badge inside Sticky Header for Mobile */}
+                {remainingTokens !== null && (
+                  <div className="flex items-center gap-1 bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-500/30 text-emerald-300 text-[10px] sm:text-xs font-semibold shadow-sm backdrop-blur-sm">
+                    <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-400 shrink-0" />
+                    <span><strong className="text-emerald-200">{remainingTokens.toLocaleString()}</strong> tokens</span>
+                  </div>
                 )}
-              </h2>
+              </div>
               
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+              <div className="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-4 w-full sm:w-auto pt-1 sm:pt-0 border-t sm:border-t-0 border-zinc-800/50">
                 {/* Global Copy Actions */}
-                <div className="flex items-center p-1.5 rounded-xl bg-slate-900/60 border border-slate-700/50 shadow-inner backdrop-blur-md">
-                  <span className="text-[10px] font-bold text-slate-400 px-3 uppercase tracking-widest hidden sm:block">Copy</span>
-                  <div className="flex items-center gap-1">
+                <div className="flex items-center p-0.5 sm:p-1.5 rounded-xl sm:rounded-2xl bg-zinc-900/60 border border-zinc-800/80 shadow-inner backdrop-blur-md">
+                  <span className="text-[10px] font-bold text-zinc-500 px-2 uppercase tracking-widest hidden md:block">Copy</span>
+                  <div className="flex items-center gap-0.5 sm:gap-1">
                     <button
                       onClick={() => copyAll('english')}
-                      className="group flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-300 hover:bg-emerald-500/20 hover:text-emerald-300 hover:shadow-[0_0_15px_rgba(16,185,129,0.15)] text-slate-300"
+                      className="group flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-semibold transition-all duration-300 hover:bg-emerald-500/20 hover:text-emerald-300 text-zinc-400"
                       title="Copy English Only"
                     >
-                      {copiedIndex === 'all-english' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors" />}
+                      {copiedIndex === 'all-english' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-zinc-500 group-hover:text-emerald-400 transition-colors" />}
                       <span>English</span>
                     </button>
                     <button
                       onClick={() => copyAll('reader')}
-                      className="group flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-300 hover:bg-emerald-500/20 hover:text-emerald-300 hover:shadow-[0_0_15px_rgba(16,185,129,0.15)] text-slate-300"
+                      className="group flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-semibold transition-all duration-300 hover:bg-emerald-500/20 hover:text-emerald-300 text-zinc-400"
                       title="Copy Reader Mode Format"
                     >
-                      {copiedIndex === 'all-reader' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors" />}
+                      {copiedIndex === 'all-reader' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-zinc-500 group-hover:text-emerald-400 transition-colors" />}
                       <span>Reader</span>
                     </button>
                     <button
                       onClick={() => copyAll('split')}
-                      className="group flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-300 hover:bg-emerald-500/20 hover:text-emerald-300 hover:shadow-[0_0_15px_rgba(16,185,129,0.15)] text-slate-300"
+                      className="group flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-semibold transition-all duration-300 hover:bg-emerald-500/20 hover:text-emerald-300 text-zinc-400"
                       title="Copy Split Mode Format"
                     >
-                      {copiedIndex === 'all-split' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors" />}
+                      {copiedIndex === 'all-split' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-zinc-500 group-hover:text-emerald-400 transition-colors" />}
                       <span>Split</span>
                     </button>
                   </div>
                 </div>
 
                 {/* Layout Toggles */}
-                <div className="flex items-center p-1.5 rounded-xl bg-slate-900/60 border border-slate-700/50 shadow-inner backdrop-blur-md">
+                <div className="flex items-center p-0.5 sm:p-1.5 rounded-xl sm:rounded-2xl bg-zinc-900/60 border border-zinc-800/80 shadow-inner backdrop-blur-md">
                   <button
                     onClick={() => setViewMode('cards')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-300 cursor-pointer ${
-                      viewMode === 'cards' ? 'bg-emerald-500/20 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                    className={`flex items-center gap-1 sm:gap-2 px-2.5 py-1 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-semibold transition-all duration-300 cursor-pointer ${
+                      viewMode === 'cards' ? 'bg-emerald-500/20 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
                     }`}
                     title="Card view"
                   >
-                    <LayoutGrid className="w-4 h-4" />
+                    <LayoutGrid className="w-3 h-3 sm:w-4 sm:h-4" />
                     <span>Reader</span>
                   </button>
                   <button
                     onClick={() => setViewMode('table')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-300 cursor-pointer ${
-                      viewMode === 'table' ? 'bg-emerald-500/20 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                    className={`flex items-center gap-1 sm:gap-2 px-2.5 py-1 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-semibold transition-all duration-300 cursor-pointer ${
+                      viewMode === 'table' ? 'bg-emerald-500/20 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
                     }`}
                     title="Table view"
                   >
-                    <Columns className="w-4 h-4" />
+                    <Columns className="w-3 h-3 sm:w-4 sm:h-4" />
                     <span>Classic</span>
                   </button>
                 </div>
@@ -316,51 +342,94 @@ export default function AiTranslatorPage() {
 
             {/* Rendering: Reader Mode (Cards) */}
             {viewMode === 'cards' ? (
-              <div className="flex flex-col gap-8 pb-10">
-                {aiTranslationData.map((row, idx) => (
-                  <div key={idx} className="relative overflow-hidden bg-slate-900/40 border border-slate-700/50 rounded-3xl p-6 md:p-10 hover:border-emerald-500/30 transition-all duration-500 hover:shadow-[0_0_40px_rgba(16,185,129,0.06)] space-y-8 shadow-2xl backdrop-blur-xl group animate-fadeIn">
+              <div className="flex flex-col gap-8">
+                {(aiTranslationData || []).map((row, idx) => (
+                  <div key={idx} className="relative overflow-hidden bg-zinc-900/40 border border-zinc-800/80 rounded-3xl p-6 md:p-10 hover:border-emerald-500/40 transition-all duration-500 hover:shadow-[0_0_40px_rgba(16,185,129,0.08)] space-y-8 shadow-2xl backdrop-blur-xl group animate-fadeIn">
                     <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                     {/* Arabic Box */}
-                    <div className="relative border-r-4 border-emerald-500/50 pr-6 md:pr-8 text-right" dir="rtl">
-                      <p className="font-serif text-2xl md:text-3xl leading-relaxed text-emerald-50 tracking-wide">
-                        {row.sourceText}
-                      </p>
+                    <div className="relative border-r-4 border-emerald-400 sm:border-emerald-500/50 pr-6 md:pr-8 text-right group/arabic" dir="rtl">
+                      <div className="absolute inset-0 bg-emerald-500/20 sm:bg-emerald-500/10 blur-2xl sm:blur-3xl opacity-100 sm:opacity-0 group-hover/arabic:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                      <div className="font-mushaf-indopak-16 text-3xl md:text-4xl leading-relaxed text-emerald-50 tracking-wide drop-shadow-[0_0_15px_rgba(16,185,129,0.3)] relative z-10 [&>p]:mb-4 [&>h1]:text-4xl [&>h1]:font-bold [&>h2]:text-3xl [&>h2]:font-bold [&>h3]:text-2xl [&>h3]:font-bold">
+                        <ReactMarkdown>{row.sourceText}</ReactMarkdown>
+                      </div>
                     </div>
                     {/* Divider */}
-                    <div className="relative h-px bg-gradient-to-r from-transparent via-slate-600/50 to-transparent w-full" />
+                    <div className="relative h-px bg-gradient-to-r from-transparent via-zinc-700/50 to-transparent w-full" />
                     {/* English Box */}
-                    <div className="relative pl-2 md:pl-4">
-                      <p className="text-slate-300 leading-loose text-base md:text-lg font-sans">
-                        {row.transcreatedText}
-                      </p>
+                    <div className="relative pl-2 md:pl-4 group/english">
+                      <div className="absolute inset-0 bg-emerald-500/5 blur-2xl opacity-0 group-hover/english:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                      <div className="text-zinc-300 leading-loose text-base md:text-lg font-sans drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] relative z-10 [&>p]:mb-4 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold">
+                        <ReactMarkdown>{row.transcreatedText}</ReactMarkdown>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
               /* Rendering: Classic Split (Table) */
-              <div className="w-full overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-900/40 backdrop-blur-xl shadow-2xl mb-10">
+              <div className="w-full overflow-hidden rounded-3xl border border-zinc-800/80 bg-zinc-900/40 backdrop-blur-xl shadow-2xl">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-slate-800/80 border-b border-slate-700/50">
-                      <th className="p-6 font-bold text-xs text-slate-300 w-1/2 border-r border-slate-700/50 uppercase tracking-widest">English Translation</th>
+                    <tr className="bg-zinc-900/80 border-b border-zinc-800/80">
+                      <th className="p-6 font-bold text-xs text-zinc-400 w-1/2 border-r border-zinc-800/80 uppercase tracking-widest">English Translation</th>
                       <th className="p-6 font-bold text-xs text-emerald-400 w-1/2 text-right uppercase tracking-widest">Original Arabic</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-700/50">
-                    {aiTranslationData.map((row, idx) => (
-                      <tr key={idx} className="group hover:bg-slate-800/30 transition-colors duration-300">
-                        <td className="p-6 md:p-8 align-top text-base leading-relaxed text-slate-300 border-r border-slate-700/50 relative">
+                  <tbody className="divide-y divide-zinc-800/80">
+                    {(aiTranslationData || []).map((row, idx) => (
+                      <tr key={idx} className="group hover:bg-zinc-800/40 transition-colors duration-300">
+                        <td className="p-6 md:p-8 align-top text-base leading-relaxed text-zinc-300 border-r border-zinc-800/80 relative group/td-en">
+                          <div className="absolute inset-0 bg-emerald-500/5 blur-2xl opacity-0 group-hover/td-en:opacity-100 transition-opacity duration-500 pointer-events-none" />
                           <div className="absolute inset-y-0 left-0 w-1 bg-emerald-500/0 group-hover:bg-emerald-500/40 transition-colors duration-300" />
-                          {row.transcreatedText}
+                          <div className="relative z-10 drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] [&>p]:mb-4 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold">
+                            <ReactMarkdown>{row.transcreatedText}</ReactMarkdown>
+                          </div>
                         </td>
-                        <td className="p-6 md:p-8 align-top font-serif text-xl md:text-2xl leading-loose text-emerald-50 text-right" dir="rtl">
-                          {row.sourceText}
+                        <td className="p-6 md:p-8 align-top text-right relative group/td-ar" dir="rtl">
+                          <div className="absolute inset-0 bg-emerald-500/10 blur-3xl opacity-0 group-hover/td-ar:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                          <div className="relative z-10 drop-shadow-[0_0_15px_rgba(16,185,129,0.3)] font-mushaf-indopak-16 text-2xl md:text-3xl leading-loose text-emerald-50 [&>p]:mb-4 [&>h1]:text-3xl [&>h1]:font-bold [&>h2]:text-2xl [&>h2]:font-bold [&>h3]:text-xl [&>h3]:font-bold">
+                            <ReactMarkdown>{row.sourceText}</ReactMarkdown>
+                          </div>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+
+            {/* Truncation Action CTA Card */}
+            {aiUntranslatedText && (
+              <div className="flex flex-col items-center gap-4 p-6 md:p-8 bg-emerald-950/40 border-2 border-emerald-500/50 rounded-3xl backdrop-blur-xl shadow-[0_0_30px_rgba(16,185,129,0.2)] animate-fadeIn text-center mt-4">
+                <div className="flex items-center gap-2 text-emerald-400 font-bold text-base md:text-lg">
+                  <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
+                  <span>Partial Translation Complete</span>
+                </div>
+                <p className="text-xs md:text-sm text-zinc-300 max-w-xl leading-relaxed">
+                  Your input text was long, so we translated the first section. Click below to continue seamlessly from where it left off!
+                </p>
+                <div className="flex flex-col sm:flex-row items-center gap-3 w-full justify-center pt-2">
+                  <button
+                    onClick={() => {
+                      triggerAiTranslation(aiUntranslatedText, true);
+                    }}
+                    disabled={aiIsTranslating}
+                    className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 disabled:opacity-50 text-white font-bold text-xs sm:text-sm rounded-2xl shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all cursor-pointer w-full sm:w-auto"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span>Continue Translating the Rest</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(aiUntranslatedText);
+                      toast.success("Remaining untranslated portion copied to clipboard!");
+                    }}
+                    className="flex items-center justify-center gap-2 px-5 py-3 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 font-semibold text-xs sm:text-sm rounded-2xl border border-zinc-800 transition-all cursor-pointer w-full sm:w-auto"
+                  >
+                    <Copy className="w-4 h-4" />
+                    <span>Copy Remaining Text</span>
+                  </button>
+                </div>
               </div>
             )}
             

@@ -1,6 +1,6 @@
 "use client";
 // lib/GlobalStateContext.tsx
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useEffect, useContext } from "react";
 import { toast } from "sonner";
 
 // Define the shape of the global state
@@ -31,8 +31,10 @@ interface GlobalState {
   setAiInputText: React.Dispatch<React.SetStateAction<string>>;
   aiTranslationData: any[] | null;
   aiIsTranslating: boolean;
+  aiUntranslatedText: string | null;
+  setAiUntranslatedText: React.Dispatch<React.SetStateAction<string | null>>;
   aiError: string | null;
-  triggerAiTranslation: (text: string) => Promise<void>;
+  triggerAiTranslation: (text: string, append?: boolean) => Promise<void>;
   clearAiTranslation: () => void;
 }
 
@@ -50,8 +52,42 @@ export const useGlobalState = (): GlobalState => {
 export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
   children,
 }) => {
-  const [fontSize, setFontSize] = useState(3);
-  const [wbwFontSize, setWbwFontSize] = useState(3);
+  const [fontSize, _setFontSize] = useState(3);
+  const [wbwFontSize, _setWbwFontSize] = useState(3);
+
+  const setFontSize: React.Dispatch<React.SetStateAction<number>> = (value) => {
+    _setFontSize((prev) => {
+      const nextValue = typeof value === 'function' ? value(prev) : value;
+      if (typeof window !== "undefined") localStorage.setItem("quran_fontSize", nextValue.toString());
+      return nextValue;
+    });
+  };
+
+  const setWbwFontSize: React.Dispatch<React.SetStateAction<number>> = (value) => {
+    _setWbwFontSize((prev) => {
+      const nextValue = typeof value === 'function' ? value(prev) : value;
+      if (typeof window !== "undefined") localStorage.setItem("quran_wbwFontSize", nextValue.toString());
+      return nextValue;
+    });
+  };
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedFontSize = localStorage.getItem("quran_fontSize");
+      if (savedFontSize) {
+        _setFontSize(parseInt(savedFontSize, 10));
+      } else if (window.innerWidth < 768) {
+        _setFontSize(1);
+      }
+
+      const savedWbwFontSize = localStorage.getItem("quran_wbwFontSize");
+      if (savedWbwFontSize) {
+        _setWbwFontSize(parseInt(savedWbwFontSize, 10));
+      } else if (window.innerWidth < 768) {
+        _setWbwFontSize(1);
+      }
+    }
+  }, []);
   const [mistakeDetection, setMistakeDetection] = useState(false);
   const [immersiveMode, setImmersiveMode] = useState(false);
   const [showTranslation, setShowTranslation] = useState(true);
@@ -106,6 +142,7 @@ export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
   const [aiInputText, setAiInputText] = useState("");
   const [aiTranslationData, setAiTranslationData] = useState<any[] | null>(null);
   const [aiIsTranslating, setAiIsTranslating] = useState(false);
+  const [aiUntranslatedText, setAiUntranslatedText] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
 
 function parseMarkdownTable(text: string): Array<{ transcreatedText: string, sourceText: string }> {
@@ -115,44 +152,60 @@ function parseMarkdownTable(text: string): Array<{ transcreatedText: string, sou
   
   for (const line of lines) {
     let trimmed = line.trim();
-    if (!trimmed.includes('|')) continue;
+    if (!trimmed.startsWith('|') && !trimmed.includes('|')) continue;
     
     if (trimmed.startsWith('|')) trimmed = trimmed.substring(1);
     if (trimmed.endsWith('|')) trimmed = trimmed.substring(0, trimmed.length - 1);
     
     const columns = trimmed.split('|').map(p => p.trim());
-    if (columns.length >= 2) {
-      const transcreated = columns[0];
-      const source = columns[1];
+    if (columns.length >= 1) {
+      const transcreated = columns[0] || '';
+      const source = columns[1] || '';
       
+      const cleanTrans = transcreated.toLowerCase().replace(/[\*\s\.\?]/g, '');
+      const cleanSource = source.toLowerCase().replace(/[\*\s\.\?]/g, '');
+
       if (
-        transcreated.toLowerCase() === 'transcreated text' ||
-        source.toLowerCase() === 'source text' ||
+        cleanTrans === 'transcreatedtext' ||
+        cleanSource === 'sourcetext' ||
+        cleanSource === 'sourcetextyes' ||
+        cleanTrans === 'readytogenerate' ||
+        cleanSource === 'transcreatedtext' ||
         transcreated.includes('---') ||
         source.includes('---')
-      ) continue;
+      ) {
+        continue;
+      }
       
       if (!transcreated && !source) continue;
       
-      const rowKey = `${transcreated.trim()}|||${source.trim()}`;
+      const cleanedTransText = transcreated.replace(/^(?:\*\*)?(?:Row|Paragraph|Segment|Section)\s*\d+[:\-\.]?\s*(?:\*\*)?\s*/i, '').trim();
+      const cleanedSourceText = source.replace(/^(?:\*\*)?(?:Row|Paragraph|Segment|Section)\s*\d+[:\-\.]?\s*(?:\*\*)?\s*/i, '').trim();
+      
+      const rowKey = `${cleanedTransText}|||${cleanedSourceText}`;
       if (seenRows.has(rowKey)) continue;
       seenRows.add(rowKey);
       
       rows.push({
-        transcreatedText: transcreated,
-        sourceText: source
+        transcreatedText: cleanedTransText,
+        sourceText: cleanedSourceText
       });
     }
   }
   return rows;
 }
 
-  const triggerAiTranslation = async (textToTranslate: string) => {
+  const triggerAiTranslation = async (textToTranslate: string, append = false) => {
     if (!textToTranslate.trim()) return;
     
     setAiIsTranslating(true);
     setAiError(null);
-    setAiTranslationData(null);
+    setAiUntranslatedText(null);
+    
+    const existingRows = append ? (aiTranslationData || []) : [];
+    if (!append) {
+      setAiTranslationData(null);
+    }
     setAiInputText(textToTranslate);
 
     try {
@@ -172,7 +225,7 @@ function parseMarkdownTable(text: string): Array<{ transcreatedText: string, sou
       if (response.headers.get('content-type')?.includes('application/json')) {
         const data = await response.json();
         if (!data.success) throw new Error(data.error);
-        setAiTranslationData(data.data);
+        setAiTranslationData(append ? [...existingRows, ...data.data] : data.data);
         toast.success("AI Translation complete!");
         setAiIsTranslating(false);
         return;
@@ -202,6 +255,9 @@ function parseMarkdownTable(text: string): Array<{ transcreatedText: string, sou
               if (data.finishReason === "MAX_TOKENS") {
                 wasTruncated = true;
               }
+              if (data.untranslatedText) {
+                setAiUntranslatedText(data.untranslatedText);
+              }
               if (data.text) {
                 fullText += data.text;
                 
@@ -209,7 +265,7 @@ function parseMarkdownTable(text: string): Array<{ transcreatedText: string, sou
                 if (now - lastParseTime > 200) {
                    const parsed = parseMarkdownTable(fullText);
                    if (parsed.length > 0) {
-                     setAiTranslationData(parsed);
+                     setAiTranslationData(append ? [...existingRows, ...parsed] : parsed);
                    }
                    lastParseTime = now;
                 }
@@ -221,20 +277,22 @@ function parseMarkdownTable(text: string): Array<{ transcreatedText: string, sou
         }
       }
       
-      const finalParsed = parseMarkdownTable(fullText);
-      
       if (wasTruncated) {
-        finalParsed.push({
-          sourceText: "⚠️ **تنبيه:** لقد قمنا بترجمة أقصى ما يمكن. يرجى نسخ الجزء المتبقي والمحاولة مرة أخرى.",
-          transcreatedText: "⚠️ **Notice:** Your text was extremely long, so the system translated as much as it could. Please copy the remaining untranslated portion and submit it again to continue."
-        });
+        const parsedBefore = parseMarkdownTable(fullText);
+        if (parsedBefore.length > 0) {
+          const truncationNotice = "\n\n| ⚠️ **Notice:** Your text was extremely long, so the system translated as much as it could. Please copy the remaining untranslated portion and submit it again to continue. | ⚠️ **تنبيه:** لقد قمنا بترجمة أقصى ما يمكن. يرجى نسخ الجزء المتبقي والمحاولة مرة أخرى. |";
+          fullText += truncationNotice;
+        }
       }
-
-      if (finalParsed.length > 0) {
-        setAiTranslationData(finalParsed);
-      } else {
+      
+      const finalRows = parseMarkdownTable(fullText);
+      if (finalRows.length > 0) {
+        setAiTranslationData(append ? [...existingRows, ...finalRows] : finalRows);
+      } else if (!append) {
+        // Fallback: If AI completely failed to format a table, dump raw text so the user still sees the translation
         setAiTranslationData([{ sourceText: textToTranslate, transcreatedText: fullText }]);
       }
+      
       toast.success("AI Translation complete!");
     } catch (err: any) {
       setAiError(err.message);
@@ -247,6 +305,7 @@ function parseMarkdownTable(text: string): Array<{ transcreatedText: string, sou
   const clearAiTranslation = () => {
     setAiInputText("");
     setAiTranslationData(null);
+    setAiUntranslatedText(null);
     setAiError(null);
     setAiIsTranslating(false);
   };
@@ -277,6 +336,8 @@ function parseMarkdownTable(text: string): Array<{ transcreatedText: string, sou
         setAiInputText,
         aiTranslationData,
         aiIsTranslating,
+        aiUntranslatedText,
+        setAiUntranslatedText,
         aiError,
         triggerAiTranslation,
         clearAiTranslation,
