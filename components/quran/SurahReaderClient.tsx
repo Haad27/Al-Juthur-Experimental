@@ -813,35 +813,35 @@ export default function SurahReaderClient({
 
       <div className="flex flex-col w-full min-h-screen lg:px-24 px-0">
         {/* Explore Container Hero Header */}
-        <div className="relative pt-28 md:pt-24 pb-8 pl-4 pr-1 md:px-8 max-w-7xl mx-auto w-full border-b border-zinc-800/80 mb-8">
+        <div className="relative pt-20 md:pt-24 pb-4 md:pb-8 px-4 md:px-8 max-w-7xl mx-auto w-full border-b border-zinc-800/80 mb-6 md:mb-8">
           <div className="absolute left-10 top-10 size-96 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 relative z-10">
-            <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
+          <div className="flex flex-row items-center justify-between gap-3 relative z-10">
+            <div className="space-y-1 md:space-y-3 min-w-0">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 md:px-3.5 md:py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] md:text-xs font-medium">
                 <span>Surah {surah?.number || surahNumber}</span>
                 <span>•</span>
                 <span>{surah?.revelationType || "Meccan"}</span>
                 <span>•</span>
                 <span>{surah?.numberOfAyahs || 0} Ayahs</span>
               </div>
-              <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white">
+              <h1 className="text-xl sm:text-3xl md:text-5xl font-extrabold tracking-tight text-white truncate">
                 {surah?.englishName}
               </h1>
-              <p className="text-zinc-400 max-w-2xl text-sm md:text-base">
+              <p className="text-zinc-400 max-w-2xl text-xs sm:text-sm md:text-base truncate">
                 {surah?.englishNameTranslation}
               </p>
             </div>
 
-            <div className="text-right">
-              <p className={`font-mushaf-v2 text-5xl md:text-7xl text-amber-100/90 font-normal leading-normal`}>
+            <div className="text-right shrink-0">
+              <p className={`font-mushaf-v2 text-3xl sm:text-5xl md:text-7xl text-amber-100/90 font-normal leading-tight`}>
                 {surah?.name}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center text-center w-full flex-col mb-8">
-          <BismillahIcon className="dark:text-white text-black lg:max-w-96 md:max-w-86 max-w-72" />
+        <div className="flex items-center text-center w-full flex-col mb-6 md:mb-8">
+          <BismillahIcon className="dark:text-white text-black lg:max-w-96 md:max-w-86 max-w-52 sm:max-w-72" />
         </div>
         <Virtuoso
           ref={virtuosoRef}

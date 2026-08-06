@@ -37,18 +37,18 @@ export default function FloatingAskScholarButton({
             onBlur={() => setIsHovered(false)}
             className={cn(
               "relative flex items-center gap-3 rounded-full p-3.5 md:p-3.5",
-              "bg-zinc-900/90 backdrop-blur-md border border-emerald-500/50 hover:border-emerald-400",
-              "opacity-85 hover:opacity-100 shadow-md hover:shadow-emerald-950/40",
-              "transition-all duration-300 ease-out group overflow-hidden"
+              "bg-emerald-500 hover:bg-emerald-400 border border-emerald-400/50 text-white",
+              "shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50",
+              "transition-all duration-300 ease-out group overflow-hidden cursor-pointer"
             )}
           >
             {/* Shimmer effect inside the button */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/0 via-emerald-500/5 to-teal-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
             
             <div className="relative flex items-center justify-center">
-              <Bot className="size-5 text-emerald-400/90 group-hover:text-emerald-300 transition-colors animate-bounce" />
+              <Bot className="size-5 text-white transition-colors animate-bounce" />
               {/* Little sparkles that appear on hover */}
-              <Sparkles className="absolute -top-1 -right-1 size-3 text-teal-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100" />
+              <Sparkles className="absolute -top-1 -right-1 size-3 text-emerald-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100" />
             </div>
 
             {/* Desktop: Animated on hover */}
@@ -61,7 +61,7 @@ export default function FloatingAskScholarButton({
               }}
               className="hidden md:flex overflow-hidden whitespace-nowrap items-center"
             >
-              <span className="text-sm font-semibold tracking-wide text-emerald-100 group-hover:text-white pr-2">
+              <span className="text-sm font-semibold tracking-wide text-white pr-2">
                 {label}
               </span>
             </motion.div>
@@ -69,7 +69,7 @@ export default function FloatingAskScholarButton({
             {/* Mobile: Always visible (unless collapsed), shorter text */}
             {!isCollapsedMobile && (
               <div className="flex md:hidden overflow-hidden whitespace-nowrap items-center ml-1">
-                <span className="text-[13px] font-bold tracking-wide text-emerald-100 pr-1">
+                <span className="text-[13px] font-bold tracking-wide text-white pr-1">
                   {label.replace(" Tafsir ", " ").replace(" Lexicon ", " ")}
                 </span>
                 <div 

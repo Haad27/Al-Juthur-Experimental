@@ -12,7 +12,7 @@ export interface TranslationMeta {
  * Retrieves the translation verses for a given Surah from Quran.com API v4,
  * and falls back to a local Clear Quran (131) translation on failure.
  */
-export async function getQuranComSurahTranslation(surahNumber: number, edition: string | number = "131"): Promise<any[]> {
+export async function getQuranComSurahTranslation(surahNumber: number, edition: string | number = "203"): Promise<any[]> {
   // Map legacy editions to Quran.com Resource IDs
   const legacyMap: Record<string, string> = {
     "en.sahih": "20",
