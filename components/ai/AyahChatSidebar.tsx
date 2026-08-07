@@ -89,8 +89,24 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
 
   useEffect(() => {
     if (isOpen) {
+      const mediaQuery = window.matchMedia("(max-width: 1279px)");
       const originalStyle = window.getComputedStyle(document.body).overflow;
-      document.body.style.overflow = "hidden";
+
+      const updateScrollLock = () => {
+        if (mediaQuery.matches) {
+          document.body.style.overflow = "hidden";
+        } else {
+          document.body.style.overflow = originalStyle === "hidden" ? "unset" : originalStyle;
+        }
+      };
+
+      updateScrollLock();
+
+      if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener("change", updateScrollLock);
+      } else {
+        mediaQuery.addListener(updateScrollLock);
+      }
 
       fetch('/api/ai/rag')
         .then(res => {
@@ -106,6 +122,11 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
         .catch(console.error);
 
       return () => {
+        if (mediaQuery.removeEventListener) {
+          mediaQuery.removeEventListener("change", updateScrollLock);
+        } else {
+          mediaQuery.removeListener(updateScrollLock);
+        }
         document.body.style.overflow = originalStyle;
       };
     }
@@ -260,6 +281,15 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
     }
   };
 
+  const handleInputFocus = () => {
+    if (window.scrollY !== 0) {
+      window.scrollTo(0, 0);
+    }
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 150);
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -281,8 +311,8 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className={cn(
               "fixed z-[101] xl:z-50 bg-zinc-950/95 backdrop-blur-2xl flex flex-col items-start shadow-2xl",
-              "top-0 right-0 h-[var(--visual-vh,100dvh)] w-full sm:w-96 xl:w-[450px]", // Desktop right sidebar — uses visual viewport height
-              "max-xl:bottom-0 max-xl:top-auto max-xl:h-[min(85dvh,var(--visual-vh,85dvh))] max-xl:rounded-t-3xl max-xl:border-t max-xl:border-emerald-500/30 max-xl:shadow-[0_-20px_50px_-10px_rgba(16,185,129,0.15)]", // Mobile bottom sheet — shrinks with keyboard
+              "top-0 right-0 h-screen w-full sm:w-96 xl:w-[450px]", // Desktop right sidebar
+              "max-xl:bottom-0 max-xl:top-auto max-xl:h-[85dvh] max-xl:rounded-t-3xl max-xl:border-t max-xl:border-emerald-500/30 max-xl:shadow-[0_-20px_50px_-10px_rgba(16,185,129,0.15)]", // Mobile bottom sheet
               "xl:border-l border-emerald-500/20 xl:shadow-[-20px_0_50px_-10px_rgba(16,185,129,0.15)]" // Desktop side glow
             )}
           >
@@ -499,12 +529,14 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
 
             {/* Input Area */}
             <div 
-              className="p-3 sm:p-4 bg-zinc-950 border-t border-zinc-800/80 mb-[env(safe-area-inset-bottom)] w-full shrink-0"
+              className="p-3 sm:p-4 bg-zinc-950 border-t border-zinc-800/80 mb-[env(safe-area-inset-bottom)] w-full shrink-0 transition-transform duration-100 ease-out"
+              style={{ transform: `translateY(calc(-1 * var(--kb-offset, 0px)))` }}
             >
               <div className="relative flex items-center">
                 <textarea 
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
+                  onFocus={handleInputFocus}
                   onKeyDown={handleKeyDown}
                   placeholder={`Ask in ${currentModeInfo.shortName}...`}
                   className="w-full bg-zinc-900/90 border border-zinc-800 rounded-2xl py-3 pl-3.5 pr-12 text-[16px] sm:text-[14px] text-zinc-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-colors resize-none min-h-[48px] max-h-[120px] custom-scrollbar"

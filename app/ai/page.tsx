@@ -121,7 +121,7 @@ export default function AiTranslatorPage() {
       {/* Subtle ambient light background */}
       <div className="absolute top-0 inset-x-0 h-[500px] bg-gradient-to-b from-emerald-900/10 to-transparent pointer-events-none" />
       {/* Top Navigation Bar */}
-      <div className="relative z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-4 md:px-8 py-3">
+      <div className="sticky top-0 z-40 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/80 px-4 md:px-8 py-3 shadow-md">
         <div className="max-w-[1700px] mx-auto relative flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Logo and App Name */}
           <div className="flex items-center gap-4">

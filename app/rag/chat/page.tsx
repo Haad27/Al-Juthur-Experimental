@@ -155,8 +155,9 @@ function RagChatContent() {
     return () => observer.disconnect();
   }, []);
 
-  // If mode changes via URL, reset conversation greeting
+  // If mode changes via URL, reset conversation greeting & scroll position to top
   useEffect(() => {
+    hasUserInteracted.current = false;
     const info = RAG_MODES.find((m) => m.id === activeModeId) || RAG_MODES[0];
     setMessages([
       {
@@ -164,6 +165,9 @@ function RagChatContent() {
         content: `As-salamu alaykum! I am **Sheikh Juthur**. Switched to **${info.name}**.\n\nSearching strictly within:\n${info.sources.map(s => `- *${s}*`).join("\n")}\n\nHow can I help you?`
       }
     ]);
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
   }, [activeModeId]);
 
   const handleSend = async () => {
@@ -280,15 +284,24 @@ function RagChatContent() {
     }
   };
 
+  const handleInputFocus = () => {
+    if (window.scrollY !== 0) {
+      window.scrollTo(0, 0);
+    }
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 150);
+  };
+
   const handleSwitchMode = (modeId: string) => {
     setIsModeSwitcherOpen(false);
     router.push(`/rag/chat?mode=${modeId}`);
   };
 
   return (
-    <div className={`h-[var(--visual-vh,100dvh)] flex flex-col bg-zinc-950 text-white overflow-hidden ${inter.className}`}>
+    <div className={`fixed inset-0 w-full h-[var(--visual-vh,100dvh)] flex flex-col bg-zinc-950 text-white overflow-hidden ${inter.className}`}>
       {/* Top Navigation */}
-      <nav className="shrink-0 z-40 bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800/80 px-3 sm:px-4 md:px-8 py-2.5 sm:py-3.5">
+      <nav className="shrink-0 z-40 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/80 px-3 sm:px-4 md:px-8 py-2.5 sm:py-3.5 shadow-md">
         <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-2 sm:gap-4">
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Link
@@ -552,6 +565,7 @@ function RagChatContent() {
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onFocus={handleInputFocus}
             onKeyDown={handleKeyDown}
             placeholder={`Ask in ${currentModeInfo.shortName}...`}
             className="w-full bg-zinc-900/90 border border-zinc-800 rounded-2xl pl-3.5 pr-12 py-3 sm:pl-4 sm:pr-14 sm:py-3.5 text-base sm:text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 resize-none min-h-[50px] sm:min-h-[56px] max-h-[140px] custom-scrollbar shadow-inner"
