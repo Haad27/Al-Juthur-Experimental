@@ -116,6 +116,7 @@ function RagChatContent() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isScrolledUp, setIsScrolledUp] = useState(false);
+  const hasUserInteracted = useRef(false);
 
   const handleScroll = () => {
     if (scrollContainerRef.current) {
@@ -132,8 +133,27 @@ function RagChatContent() {
   };
 
   useEffect(() => {
-    scrollToBottom();
+    if (hasUserInteracted.current) {
+      scrollToBottom();
+    }
   }, [messages, isLoading]);
+
+  // Auto-scroll to bottom when container resizes (e.g., keyboard opens)
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    let prevHeight = container.clientHeight;
+    const observer = new ResizeObserver((entries) => {
+      const newHeight = entries[0]?.contentRect?.height;
+      if (newHeight && newHeight < prevHeight && hasUserInteracted.current) {
+        // Container shrank (keyboard opened) — scroll to keep content visible
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }
+      if (newHeight) prevHeight = newHeight;
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   // If mode changes via URL, reset conversation greeting
   useEffect(() => {
@@ -155,6 +175,7 @@ function RagChatContent() {
     setInput("");
     setIsLoading(true);
     setIsScrolledUp(false); // Force scroll to bottom on new message
+    hasUserInteracted.current = true;
 
     try {
       const res = await fetch("/api/ai/rag", {

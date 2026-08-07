@@ -270,7 +270,7 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 z-[100] xl:hidden backdrop-blur-sm"
+            className="fixed inset-0 bg-black/85 z-[100] xl:hidden backdrop-blur-md"
           />
           
           {/* Sidebar / Bottom Sheet */}
