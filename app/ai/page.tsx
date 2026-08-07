@@ -110,7 +110,7 @@ export default function AiTranslatorPage() {
       {/* Subtle ambient light background */}
       <div className="absolute top-0 inset-x-0 h-[500px] bg-gradient-to-b from-emerald-900/10 to-transparent pointer-events-none" />
       {/* Top Navigation Bar */}
-      <div className="sticky top-0 z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-4 md:px-8 py-3">
+      <div className="relative z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-4 md:px-8 py-3">
         <div className="max-w-[1700px] mx-auto relative flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Logo and App Name */}
           <div className="flex items-center gap-4">
@@ -253,16 +253,26 @@ export default function AiTranslatorPage() {
           <div id="ai-results-container" className="mt-6 flex flex-col gap-6 animate-fadeIn pb-24">
             {/* Initial Stream Loading State */}
             {aiIsTranslating && (!aiTranslationData || aiTranslationData.length === 0) && (
-              <div className="flex flex-col items-center justify-center p-12 bg-zinc-900/40 border border-zinc-800/80 rounded-3xl backdrop-blur-xl animate-pulse space-y-4 shadow-2xl">
+              <div className="flex flex-col items-center justify-center p-8 sm:p-12 bg-zinc-900/40 border border-zinc-800/80 rounded-3xl backdrop-blur-xl animate-pulse space-y-4 shadow-2xl text-center max-w-2xl mx-auto">
                 <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
-                <p className="text-sm font-semibold text-emerald-300">Translating classical text with Islamic scholarship accuracy...</p>
+                <p className="text-sm font-semibold text-emerald-300">
+                  Translating classical text with Islamic scholarship accuracy...
+                </p>
+                <div className="bg-emerald-950/60 border border-emerald-500/30 rounded-2xl px-5 py-3 text-xs text-zinc-300 space-y-1.5 backdrop-blur-md shadow-inner">
+                  <p className="font-medium text-emerald-200 flex items-center justify-center gap-1.5">
+                    <span>⏳</span> It may take a few minutes to translate accurately.
+                  </p>
+                  <p className="text-zinc-400">
+                    You may explore the app while it translates — we will remind you when it&apos;s done!
+                  </p>
+                </div>
               </div>
             )}
 
-            {/* Action Bar (Sticky Top - Compact & Sleek on Mobile & Desktop) */}
-            <div className="sticky top-14 sm:top-20 z-30 flex flex-col sm:flex-row sm:items-center justify-between bg-zinc-950/95 sm:bg-zinc-950/80 backdrop-blur-xl border border-zinc-800/80 rounded-2xl p-2.5 sm:p-3 shadow-2xl gap-2 sm:gap-4">
+            {/* Action Bar (Sticky Top - Snaps cleanly to top on Laptop & Mobile) */}
+            <div className="sticky top-2 sm:top-3 z-30 flex flex-col sm:flex-row sm:items-center justify-between bg-zinc-950/95 sm:bg-zinc-950/80 backdrop-blur-xl border border-zinc-800/80 rounded-2xl p-2.5 sm:p-3 shadow-2xl gap-2 sm:gap-4">
               <div className="flex items-center justify-between w-full sm:w-auto gap-2">
-                <h2 className="text-xs sm:text-xl font-bold text-white flex items-center gap-1.5 sm:gap-2">
+                <h2 className="text-xs sm:text-xl font-bold text-white flex items-center gap-1.5 sm:gap-2 flex-wrap">
                   <Sparkles className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-emerald-400 shrink-0" />
                   <span>Translation Result</span>
                   {aiIsTranslating && (
@@ -271,15 +281,13 @@ export default function AiTranslatorPage() {
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                     </span>
                   )}
+                  {remainingTokens !== null && (
+                    <span className="inline-flex items-center gap-1 bg-emerald-950/70 px-2 py-0.5 rounded-full border border-emerald-500/40 text-emerald-300 text-[10px] sm:text-xs font-semibold shadow-sm backdrop-blur-sm ml-1.5">
+                      <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-400 shrink-0" />
+                      <span><strong className="text-emerald-200">{remainingTokens.toLocaleString()}</strong> tokens left</span>
+                    </span>
+                  )}
                 </h2>
-
-                {/* Token Limit Badge inside Sticky Header for Mobile */}
-                {remainingTokens !== null && (
-                  <div className="flex items-center gap-1 bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-500/30 text-emerald-300 text-[10px] sm:text-xs font-semibold shadow-sm backdrop-blur-sm">
-                    <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-400 shrink-0" />
-                    <span><strong className="text-emerald-200">{remainingTokens.toLocaleString()}</strong> tokens</span>
-                  </div>
-                )}
               </div>
               
               <div className="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-4 w-full sm:w-auto pt-1 sm:pt-0 border-t sm:border-t-0 border-zinc-800/50">
