@@ -236,7 +236,7 @@ const SurahsList = () => {
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-6 scroll-mt-24" id="start_reading">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <h2 className="md:text-4xl text-3xl font-semibold text-white">
               Explore All Surahs
@@ -254,7 +254,6 @@ const SurahsList = () => {
           </div>
           <div
             className={`w-full grid xl:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-6 relative ${inter.className}`}
-            id="start_reading"
           >
             <Sparkle
               className="fill-emerald-500 text-emerald-500 absolute left-56 top-32 animate-pulse rotate-45 -z-1"

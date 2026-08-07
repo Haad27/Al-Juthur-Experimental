@@ -368,8 +368,10 @@ const AyahRow = React.memo(({
   return (
     <div
       className={cn(
-        "transition-all duration-700 relative flex flex-col",
-        isCurrentlyPlaying ? "p-2 sm:p-6 border-[1px] border-zinc-700/60 dark:border-zinc-700/60 bg-zinc-950/80 dark:bg-[#111113] shadow-[0_10px_60px_-15px_rgba(0,0,0,0.8),0_0_20px_rgba(16,185,129,0.1)] ring-1 ring-white/5 scale-[1.03] z-50 rounded-[2rem] mx-2 sm:mx-6 sm:my-8 my-4 max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" : "border-b-[0.1px] border-b-[var(--sephia-500)] dark:border-b-[#262629ff] rounded-none",
+        "transition-all duration-300 relative flex flex-col rounded-2xl my-3 sm:my-5 p-3.5 sm:p-6 md:p-7 shadow-sm w-full min-w-0 overflow-hidden box-border",
+        isCurrentlyPlaying
+          ? "border-2 border-emerald-500 bg-zinc-950/95 dark:bg-zinc-950/95 shadow-[0_10px_60px_-15px_rgba(16,185,129,0.3),0_0_30px_rgba(16,185,129,0.2)] ring-1 ring-emerald-500/20 scale-[1.02] z-50 max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          : "border border-emerald-500/25 hover:border-emerald-500/50 bg-zinc-900/40 dark:bg-zinc-900/40 hover:shadow-[0_0_25px_rgba(16,185,129,0.1)]",
         isOtherPlaying ? "opacity-20 blur-[3px] scale-[0.98] grayscale pointer-events-none" : "opacity-100 blur-none grayscale-0"
       )}
       id={`ayah-${ayah.numberInSurah}`}
@@ -425,11 +427,11 @@ const AyahRow = React.memo(({
         </div>
         </div>
       )}
-      <div className={cn("flex flex-col items-end justify-end sm:flex-row sm:gap-12 gap-4 w-full", !isCurrentlyPlaying && "sm:px-8 pl-4 pr-1 sm:py-12 py-4")}>
+      <div className="flex flex-col items-end justify-end sm:flex-row sm:gap-12 gap-4 w-full py-1">
       <div className="h-full flex flex-row sm:order-1 order-2 sm:flex-col gap-3 sm:justify-center items-center transition-all duration-300 relative z-10 shrink-0">
-        <p className="text-lg font-light text-zinc-400 ">
+        <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs font-bold text-emerald-400">
           {surahNumber}:{ayah.numberInSurah}
-        </p>
+        </span>
         <div className="p-2 rounded-full hover:bg-zinc-800 transition-colors cursor-pointer inline-flex items-center justify-center">
           <Copy
             className="text-zinc-400"
@@ -813,7 +815,7 @@ export default function SurahReaderClient({
           ALL_TRANSLATION_OPTIONS={ALL_TRANSLATION_OPTIONS} 
         />
 
-      <div className="flex flex-col w-full min-h-[100dvh] lg:px-24 px-0">
+      <div className="flex flex-col w-full min-h-[100dvh] px-3 sm:px-6 md:px-12 lg:px-24">
         {/* Explore Container Hero Header */}
         <div className="relative pt-28 sm:pt-28 md:pt-20 pb-2 md:pb-4 px-4 md:px-8 max-w-7xl mx-auto w-full border-b border-zinc-800/80 mb-4 md:mb-6">
           <div className="absolute left-10 top-10 size-96 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
@@ -937,11 +939,13 @@ export default function SurahReaderClient({
       </section>
 
       <AyahChatSidebar
-        surahNumber={aiChatContext?.surah || 0}
-        ayahNumber={aiChatContext?.ayah || 0}
+        surahNumber={aiChatContext?.surah || surahNumber}
+        ayahNumber={aiChatContext?.ayah || 1}
         isOpen={!!aiChatContext}
         onClose={() => setAiChatContext(null)}
+        initialModeId="default"
       />
+
     </div>
   );
 }
