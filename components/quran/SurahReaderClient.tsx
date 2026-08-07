@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import SurahPlayer from "@/components/SurahPlayer";
 import AyahChatSidebar from "@/components/ai/AyahChatSidebar";
+import FloatingAskScholarButton from "@/components/ai/FloatingAskScholarButton";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 import { amiri } from "@/app/fonts";
 import useScrollDirection from "@/hooks/useScrollDirection";
@@ -773,7 +774,7 @@ export default function SurahReaderClient({
   }, [surahNumber]);
 
   return (
-    <div className="flex w-full min-h-[100dvh] relative">
+    <div className="flex w-full min-h-[100dvh] relative dark:bg-zinc-900 bg-[var(--sephia-primary)]">
       {/* Loading Overlay */}
       <AnimatePresence>
         {isNavigatingAyah && (
@@ -805,7 +806,7 @@ export default function SurahReaderClient({
       </AnimatePresence>
 
       <section className={cn(
-        "flex items-center flex-col dark:bg-zinc-900 bg-[var(--sephia-primary)] dark:text-white text-black relative pb-10 md:pb-4 transition-all duration-300",
+        "flex items-center flex-col dark:bg-zinc-900 bg-[var(--sephia-primary)] dark:text-white text-black relative pb-6 md:pb-6 transition-all duration-300",
         aiChatContext ? "w-full xl:w-[calc(100%-450px)]" : "w-full flex-1"
       )}>
         <DesktopSurahHeader 
@@ -821,7 +822,7 @@ export default function SurahReaderClient({
           <div className="absolute left-10 top-10 size-96 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
           <div className="flex flex-row items-center justify-between gap-3 relative z-10">
             <div className="space-y-1 md:space-y-3 min-w-0">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 md:px-3.5 md:py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] md:text-xs font-medium">
+              <div className="inline-flex items-center gap-1 md:gap-1.5 px-2.5 py-0.5 md:px-3.5 md:py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] sm:text-[11px] md:text-xs font-medium whitespace-nowrap shrink-0 max-w-full overflow-hidden">
                 <span>Surah {surah?.number || surahNumber}</span>
                 <span>•</span>
                 <span>{surah?.revelationType || "Meccan"}</span>
@@ -914,8 +915,8 @@ export default function SurahReaderClient({
         />
       </div>
 
-      <div className="mb-6 w-full flex justify-center items-center">
-        <div className="flex gap-4 w-full max-w-md px-2 justify-center mt-4">
+      <div className="mb-2 w-full flex justify-center items-center">
+        <div className="flex gap-4 w-full max-w-md px-2 justify-center mt-8 sm:mt-10 pt-2">
           <NavigatorButton
             direction="Previous"
             surahNumber={surahNumber > 1 ? surahNumber - 1 : 1}
