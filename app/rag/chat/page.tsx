@@ -138,23 +138,6 @@ function RagChatContent() {
     }
   }, [messages, isLoading]);
 
-  // Auto-scroll to bottom when container resizes (e.g., keyboard opens)
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-    let prevHeight = container.clientHeight;
-    const observer = new ResizeObserver((entries) => {
-      const newHeight = entries[0]?.contentRect?.height;
-      if (newHeight && newHeight < prevHeight && hasUserInteracted.current) {
-        // Container shrank (keyboard opened) — scroll to keep content visible
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      }
-      if (newHeight) prevHeight = newHeight;
-    });
-    observer.observe(container);
-    return () => observer.disconnect();
-  }, []);
-
   // If mode changes via URL, reset conversation greeting & scroll position to top
   useEffect(() => {
     hasUserInteracted.current = false;
@@ -282,15 +265,6 @@ function RagChatContent() {
       e.preventDefault();
       handleSend();
     }
-  };
-
-  const handleInputFocus = () => {
-    if (window.scrollY !== 0) {
-      window.scrollTo(0, 0);
-    }
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 150);
   };
 
   const handleSwitchMode = (modeId: string) => {
@@ -565,7 +539,6 @@ function RagChatContent() {
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onFocus={handleInputFocus}
             onKeyDown={handleKeyDown}
             placeholder={`Ask in ${currentModeInfo.shortName}...`}
             className="w-full bg-zinc-900/90 border border-zinc-800 rounded-2xl pl-3.5 pr-12 py-3 sm:pl-4 sm:pr-14 sm:py-3.5 text-base sm:text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 resize-none min-h-[50px] sm:min-h-[56px] max-h-[140px] custom-scrollbar shadow-inner"

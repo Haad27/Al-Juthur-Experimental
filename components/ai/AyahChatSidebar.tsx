@@ -281,15 +281,6 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
     }
   };
 
-  const handleInputFocus = () => {
-    if (window.scrollY !== 0) {
-      window.scrollTo(0, 0);
-    }
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 150);
-  };
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -311,8 +302,8 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className={cn(
               "fixed z-[101] xl:z-50 bg-zinc-950/95 backdrop-blur-2xl flex flex-col items-start shadow-2xl",
-              "top-0 right-0 h-screen w-full sm:w-96 xl:w-[450px]", // Desktop right sidebar
-              "max-xl:bottom-0 max-xl:top-auto max-xl:h-[85dvh] max-xl:rounded-t-3xl max-xl:border-t max-xl:border-emerald-500/30 max-xl:shadow-[0_-20px_50px_-10px_rgba(16,185,129,0.15)]", // Mobile bottom sheet
+              "top-0 right-0 h-[var(--visual-vh,100dvh)] w-full sm:w-96 xl:w-[450px]", // Desktop right sidebar
+              "max-xl:bottom-0 max-xl:top-auto max-xl:h-[var(--mobile-sheet-h,85dvh)] max-xl:rounded-t-3xl max-xl:border-t max-xl:border-emerald-500/30 max-xl:shadow-[0_-20px_50px_-10px_rgba(16,185,129,0.15)]", // Mobile bottom sheet
               "xl:border-l border-emerald-500/20 xl:shadow-[-20px_0_50px_-10px_rgba(16,185,129,0.15)]" // Desktop side glow
             )}
           >
@@ -332,7 +323,7 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                 <div className="flex flex-col min-w-0">
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold text-emerald-400 leading-tight">
-                      {rootWord ? "Lexicon Scholar AI" : "Tafsir Scholar AI"}
+                      {rootWord ? "Lexicon Scholar AI" : surahNumber > 0 ? "Quran & Tafsir Scholar AI" : "Tafsir Scholar AI"}
                     </h3>
                     {remainingTokens !== null && (
                       <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-mono text-emerald-400 shrink-0">
@@ -529,14 +520,12 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
 
             {/* Input Area */}
             <div 
-              className="p-3 sm:p-4 bg-zinc-950 border-t border-zinc-800/80 mb-[env(safe-area-inset-bottom)] w-full shrink-0 transition-transform duration-100 ease-out"
-              style={{ transform: `translateY(calc(-1 * var(--kb-offset, 0px)))` }}
+              className="p-3 sm:p-4 bg-zinc-950 border-t border-zinc-800/80 mb-[env(safe-area-inset-bottom)] w-full shrink-0"
             >
               <div className="relative flex items-center">
                 <textarea 
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  onFocus={handleInputFocus}
                   onKeyDown={handleKeyDown}
                   placeholder={`Ask in ${currentModeInfo.shortName}...`}
                   className="w-full bg-zinc-900/90 border border-zinc-800 rounded-2xl py-3 pl-3.5 pr-12 text-[16px] sm:text-[14px] text-zinc-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-colors resize-none min-h-[48px] max-h-[120px] custom-scrollbar"

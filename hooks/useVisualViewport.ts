@@ -22,6 +22,9 @@ export function useVisualViewportOffset() {
       const vh = vv.height;
       document.documentElement.style.setProperty('--visual-vh', `${vh}px`);
 
+      // Mobile bottom sheet: 85% of visual viewport height so it shrinks above keyboard
+      document.documentElement.style.setProperty('--mobile-sheet-h', `${vh * 0.85}px`);
+
       // Also compute keyboard offset for backward compat
       const offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
       document.documentElement.style.setProperty('--kb-offset', `${offset}px`);
@@ -35,6 +38,7 @@ export function useVisualViewportOffset() {
       vv.removeEventListener('resize', update);
       vv.removeEventListener('scroll', update);
       document.documentElement.style.removeProperty('--visual-vh');
+      document.documentElement.style.removeProperty('--mobile-sheet-h');
       document.documentElement.style.removeProperty('--kb-offset');
     };
   }, []);
