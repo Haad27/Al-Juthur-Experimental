@@ -48,8 +48,8 @@ const MobileSheet = ({
       {surahNumber ? (
         <div
           className={cn(
-            "fixed w-full lg:hidden flex flex-col gap-2 transition-all duration-300 p-2 pl-4 pr-2 bg-zinc-950/90 backdrop-blur-xl border-b border-zinc-800/80 min-h-16 z-[99999]",
-            show ? "top-0" : "-top-24"
+            "fixed top-0 left-0 right-0 w-full lg:hidden flex flex-col gap-2 transition-transform duration-300 ease-out p-2 pl-4 pr-2 dark:bg-zinc-950/90 bg-white/90 backdrop-blur-xl border-b dark:border-zinc-800/60 border-black/10 shadow-md min-h-16 z-[99999]",
+            show ? "translate-y-0" : "-translate-y-full"
           )}
         >
           <div className="flex items-center justify-between w-full">
@@ -119,8 +119,8 @@ const MobileSheet = ({
       ) : (
         <SheetTrigger
           className={cn(
-            "fixed w-full lg:hidden flex justify-between items-center transition-all duration-300 p-2 px-4 backdrop-blur-md border-b dark:border-[#262629ff] border-black min-h-16 z-99999",
-            show ? "top-0" : "-top-16"
+            "fixed top-0 left-0 right-0 w-full lg:hidden flex justify-between items-center transition-transform duration-300 ease-out p-2 px-4 dark:bg-zinc-950/90 bg-white/90 backdrop-blur-xl border-b dark:border-zinc-800/60 border-black/10 shadow-md min-h-16 z-[99999]",
+            show ? "translate-y-0" : "-translate-y-full"
           )}
           id="mobile-menu-trigger"
         >
@@ -247,7 +247,7 @@ const MobileSheet = ({
                     </div>
 
                     <div className="flex flex-col items-end shrink-0 ml-2">
-                      <span className="font-arabic text-base text-emerald-400/90 group-hover:text-emerald-300 transition-colors">
+                      <span className="font-sans font-medium text-base text-emerald-400/90 group-hover:text-emerald-300 transition-colors">
                         {surah.name}
                       </span>
                       {surah.numberOfAyahs && (

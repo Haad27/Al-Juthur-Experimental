@@ -1,30 +1,41 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 const useScrollDirection = () => {
   const [show, setShow] = useState(true);
+  const lastScrollY = useRef(0);
+  const accumulativeDelta = useRef(0);
 
   useEffect(() => {
-    let previousScrollY = window.scrollY;
-    let ticking = false;
+    lastScrollY.current = typeof window !== "undefined" ? window.scrollY : 0;
 
     const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const currentScrollY = window.scrollY;
-          const diff = currentScrollY - previousScrollY;
+      const currentScrollY = window.scrollY;
+      
+      // Always show near the top of the page (and ignore iOS overscroll < 0)
+      if (currentScrollY <= 60) {
+        setShow(true);
+        accumulativeDelta.current = 0;
+        lastScrollY.current = currentScrollY;
+        return;
+      }
 
-          // Only toggle if scrolled more than 10px to prevent jitter on laptop trackpads and wheels
-          if (Math.abs(diff) > 10) {
-            if (diff > 0 && currentScrollY > 100) {
-              setShow(false);
-            } else if (diff < 0) {
-              setShow(true);
-            }
-            previousScrollY = currentScrollY;
-          }
-          ticking = false;
-        });
-        ticking = true;
+      const delta = currentScrollY - lastScrollY.current;
+      lastScrollY.current = currentScrollY;
+
+      // Reset accumulator if scroll direction flips
+      if ((delta > 0 && accumulativeDelta.current < 0) || (delta < 0 && accumulativeDelta.current > 0)) {
+        accumulativeDelta.current = delta;
+      } else {
+        accumulativeDelta.current += delta;
+      }
+
+      // Require sustained 25px scrolling in either direction to trigger state change
+      if (accumulativeDelta.current > 25) {
+        setShow(false);
+        accumulativeDelta.current = 0;
+      } else if (accumulativeDelta.current < -25) {
+        setShow(true);
+        accumulativeDelta.current = 0;
       }
     };
 
