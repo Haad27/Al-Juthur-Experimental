@@ -1,5 +1,4 @@
 import "./globals.css";
-import Head from "next/head";
 import { Toaster } from "@/components/ui/sonner";
 import { GlobalStateProvider } from "@/lib/providers/GlobalStatesProvider";
 import { inter } from "./fonts";
@@ -16,6 +15,16 @@ export const metadata = {
     apple: "/assets/favicon/apple-touch-icon.png",
   },
 };
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  interactiveWidget: "resizes-content" as const,
+};
+
 /* This file is used to define the web app manifest for the Al-Juthur PWA.  */
 /* It includes metadata such as the app name, description, start URL, display mode, background color, theme color, and icons. */
 export default function RootLayout({
@@ -26,10 +35,7 @@ export default function RootLayout({
   return (
     <GlobalStateProvider>
       <html lang="en" className="dark" suppressHydrationWarning>
-        <Head>
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-        </Head>
-        <body className={`${inter.className} bg-zinc-950 scroll-smooth md:pb-0 pb-28`} suppressHydrationWarning>
+        <body className={`${inter.className} bg-zinc-950 scroll-smooth`} suppressHydrationWarning>
           <NextTopLoader 
             color="#10b981" 
             showSpinner={true} 

@@ -273,7 +273,7 @@ function RagChatContent() {
   };
 
   return (
-    <div className={`fixed inset-0 w-full h-[var(--visual-vh,100dvh)] flex flex-col bg-zinc-950 text-white overflow-hidden ${inter.className}`}>
+    <div className={`flex h-dvh max-h-dvh w-full flex-col overflow-hidden bg-zinc-950 text-white ${inter.className}`}>
       {/* Top Navigation */}
       <nav className="shrink-0 z-40 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/80 px-3 sm:px-4 md:px-8 py-2.5 sm:py-3.5 shadow-md">
         <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-2 sm:gap-4">
@@ -352,11 +352,11 @@ function RagChatContent() {
         </div>
       )}
 
-      {/* Chat Area */}
+      {/* Chat Area — ONLY thing that scrolls, min-h-0 prevents flex expansion */}
       <main 
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-8 custom-scrollbar"
+        className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 md:p-8 custom-scrollbar overscroll-contain"
       >
         <div className="max-w-[900px] mx-auto space-y-4 sm:space-y-6 pb-4">
           {messages.map((msg, idx) => (
@@ -531,17 +531,15 @@ function RagChatContent() {
         </div>
       </main>
 
-      {/* Fixed Bottom Input Area */}
-      <div 
-        className="shrink-0 bg-zinc-950 border-t border-zinc-800/80 p-3 sm:p-4 pb-[env(safe-area-inset-bottom,0px)]"
-      >
+      {/* Input Bar — normal flex child at bottom, resizes natively with keyboard */}
+      <div className="shrink-0 bg-zinc-950 border-t border-zinc-800/80 p-3 sm:p-4 pb-[max(env(safe-area-inset-bottom,0px),8px)]">
         <div className="max-w-[900px] mx-auto relative">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={`Ask in ${currentModeInfo.shortName}...`}
-            className="w-full bg-zinc-900/90 border border-zinc-800 rounded-2xl pl-3.5 pr-12 py-3 sm:pl-4 sm:pr-14 sm:py-3.5 text-base sm:text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 resize-none min-h-[50px] sm:min-h-[56px] max-h-[140px] custom-scrollbar shadow-inner"
+            className="w-full bg-zinc-900/90 border border-zinc-800 rounded-2xl pl-3.5 pr-12 py-3 sm:pl-4 sm:pr-14 sm:py-3.5 text-[16px] sm:text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 resize-none min-h-[50px] sm:min-h-[56px] max-h-[140px] custom-scrollbar shadow-inner"
             rows={1}
           />
           <button
@@ -565,7 +563,7 @@ function RagChatContent() {
 export default function RagChatPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-zinc-400">
+      <div className="h-dvh bg-zinc-950 flex items-center justify-center text-zinc-400">
         <Loader2 className="size-6 animate-spin text-emerald-500" />
       </div>
     }>
