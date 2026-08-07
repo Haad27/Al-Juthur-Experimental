@@ -26,7 +26,7 @@ export default function AiTranslatorPage() {
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('table');
   const [copiedIndex, setCopiedIndex] = useState<string | null>(null);
   const [remainingTokens, setRemainingTokens] = useState<number | null>(null);
-  const [tokenLimit, setTokenLimit] = useState<number>(2000000);
+  const [tokenLimit, setTokenLimit] = useState<number>(250000);
 
   useEffect(() => {
     const textToTranslate = searchParams.get('text');
