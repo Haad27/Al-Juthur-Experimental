@@ -15,14 +15,14 @@ type GLTFResult = GLTF & {
   };
 };
 
-type ModelProps = {} & JSX.IntrinsicElements["group"];
+type ModelProps = {} & React.JSX.IntrinsicElements["group"];
 
 export function Model({ ...props }: ModelProps) {
   const group = useRef<Object3D>(null);
 
   const { nodes, materials, animations } = useGLTF(
     "glb/basic_mesh.glb"
-  ) as GLTFResult;
+  ) as unknown as GLTFResult;
 
   const { actions } = useAnimations(animations, group);
 

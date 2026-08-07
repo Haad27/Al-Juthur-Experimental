@@ -10,6 +10,7 @@ import remarkGfm from "remark-gfm";
 import { amiri } from "@/app/fonts";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useVisualViewportOffset } from "@/hooks/useVisualViewport";
 
 interface SourceItem {
   id: string;
@@ -75,6 +76,7 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedModeId, setSelectedModeId] = useState(initialModeId || "default");
+  useVisualViewportOffset();
   
   const [remainingTokens, setRemainingTokens] = useState<number | null>(null);
   const [tokenLimit, setTokenLimit] = useState<number>(250000);
@@ -83,23 +85,35 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  const prevContextRef = useRef<{ surah?: number, ayah?: number, rootWord?: string, mode?: string } | null>(null);
+
   useEffect(() => {
     if (isOpen) {
+      const originalStyle = window.getComputedStyle(document.body).overflow;
+      document.body.style.overflow = "hidden";
+
       fetch('/api/ai/rag')
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) return null;
+          return res.json();
+        })
         .then(data => {
-          if (data.success) {
+          if (data?.success) {
             setRemainingTokens(data.remaining);
             if (data.limit) setTokenLimit(data.limit);
           }
         })
         .catch(console.error);
+
+      return () => {
+        document.body.style.overflow = originalStyle;
+      };
     }
   }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {
-      if (initialModeId && selectedModeId !== initialModeId) {
+      if (initialModeId && selectedModeId !== initialModeId && prevContextRef.current?.mode !== initialModeId) {
         setSelectedModeId(initialModeId);
       }
       
@@ -107,14 +121,28 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
         ? `I see you are exploring the root word **${rootWord}**. How can I help you?`
         : `I see you are reading **Surah ${surahNumber}, Ayah ${ayahNumber}**. How can I help you?`;
 
-      setMessages([
-        { 
-          role: "assistant", 
-          content: `As-salamu alaykum! I am **Sheikh Juthur**. Switched to **${currentModeInfo.name}**.\n\nSearching strictly within:\n${currentModeInfo.sources.map(s => `- *${s}*`).join("\n")}\n\n${contextStr}` 
-        }
-      ]);
+      const isSameContext = prevContextRef.current?.surah === surahNumber && 
+                            prevContextRef.current?.ayah === ayahNumber && 
+                            prevContextRef.current?.rootWord === rootWord;
+
+      if (!isSameContext) {
+        setMessages([
+          { 
+            role: "assistant", 
+            content: `As-salamu alaykum! I am **Sheikh Juthur**. Switched to **${currentModeInfo.name}**.\n\nSearching strictly within:\n${currentModeInfo.sources.map(s => `- *${s}*`).join("\n")}\n\n${contextStr}` 
+          }
+        ]);
+        prevContextRef.current = { surah: surahNumber, ayah: ayahNumber, rootWord: rootWord, mode: initialModeId };
+      } else if (messages.length === 0) {
+        setMessages([
+          { 
+            role: "assistant", 
+            content: `As-salamu alaykum! I am **Sheikh Juthur**. Switched to **${currentModeInfo.name}**.\n\nSearching strictly within:\n${currentModeInfo.sources.map(s => `- *${s}*`).join("\n")}\n\n${contextStr}` 
+          }
+        ]);
+      }
     }
-  }, [isOpen, surahNumber, ayahNumber, selectedModeId, initialModeId, rootWord]);
+  }, [isOpen, surahNumber, ayahNumber, selectedModeId, initialModeId, rootWord, currentModeInfo]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -252,20 +280,30 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
             exit={{ x: "100%", y: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className={cn(
-              "fixed z-[101] xl:z-50 bg-zinc-950/95 xl:bg-zinc-900/95 backdrop-blur-md border-l border-emerald-500/20 shadow-2xl flex flex-col items-start",
-              "top-0 right-0 h-screen w-full sm:w-96 xl:w-[450px]", // Desktop right sidebar
-              "max-xl:bottom-0 max-xl:top-auto max-xl:h-[85vh] max-xl:rounded-t-3xl max-xl:border-t" // Mobile bottom sheet
+              "fixed z-[101] xl:z-50 bg-zinc-950/95 backdrop-blur-2xl flex flex-col items-start shadow-2xl",
+              "top-0 right-0 h-[var(--visual-vh,100dvh)] w-full sm:w-96 xl:w-[450px]", // Desktop right sidebar — uses visual viewport height
+              "max-xl:bottom-0 max-xl:top-auto max-xl:h-[min(85dvh,var(--visual-vh,85dvh))] max-xl:rounded-t-3xl max-xl:border-t max-xl:border-emerald-500/30 max-xl:shadow-[0_-20px_50px_-10px_rgba(16,185,129,0.15)]", // Mobile bottom sheet — shrinks with keyboard
+              "xl:border-l border-emerald-500/20 xl:shadow-[-20px_0_50px_-10px_rgba(16,185,129,0.15)]" // Desktop side glow
             )}
           >
+            {/* Decorative edge line for desktop */}
+            <div className="hidden xl:block absolute left-0 top-0 bottom-0 w-[2px] bg-gradient-to-b from-transparent via-emerald-500/40 to-transparent shadow-[0_0_10px_rgba(16,185,129,0.5)] z-50 pointer-events-none" />
+
+            {/* Decorative top edge line for mobile */}
+            <div className="xl:hidden absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent shadow-[0_0_15px_rgba(16,185,129,0.5)] z-50 pointer-events-none" />
+
             {/* Header */}
-            <div className="flex items-center justify-between p-3 sm:p-4 border-b border-emerald-500/20 bg-zinc-900/80 rounded-t-3xl xl:rounded-none w-full shadow-sm relative">
-              <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-emerald-500/20 bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 rounded-t-3xl xl:rounded-none w-full shadow-lg relative overflow-hidden shrink-0">
+              <div className="absolute inset-0 bg-emerald-500/5 blur-3xl pointer-events-none" />
+              <div className="flex items-center gap-3 min-w-0 flex-1 relative z-10">
                 <div className="p-2 bg-emerald-500/10 rounded-full border border-emerald-500/20 shrink-0">
                   <Bot size={20} className="text-emerald-400" />
                 </div>
                 <div className="flex flex-col min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-emerald-400 leading-tight">Tafsir Scholar AI</h3>
+                    <h3 className="font-semibold text-emerald-400 leading-tight">
+                      {rootWord ? "Lexicon Scholar AI" : "Tafsir Scholar AI"}
+                    </h3>
                     {remainingTokens !== null && (
                       <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-mono text-emerald-400 shrink-0">
                         <Sparkles className="size-2.5" />
@@ -460,14 +498,16 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
             </div>
 
             {/* Input Area */}
-            <div className="p-3 sm:p-4 bg-zinc-950 border-t border-zinc-800/80 mb-[env(safe-area-inset-bottom)] w-full shrink-0">
+            <div 
+              className="p-3 sm:p-4 bg-zinc-950 border-t border-zinc-800/80 mb-[env(safe-area-inset-bottom)] w-full shrink-0"
+            >
               <div className="relative flex items-center">
                 <textarea 
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder={`Ask in ${currentModeInfo.shortName}...`}
-                  className="w-full bg-zinc-900/90 border border-zinc-800 rounded-2xl py-3 pl-3.5 pr-12 text-[15px] sm:text-[14px] text-zinc-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-colors resize-none min-h-[48px] max-h-[120px] custom-scrollbar"
+                  className="w-full bg-zinc-900/90 border border-zinc-800 rounded-2xl py-3 pl-3.5 pr-12 text-[16px] sm:text-[14px] text-zinc-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-colors resize-none min-h-[48px] max-h-[120px] custom-scrollbar"
                   rows={1}
                 />
                 <button 

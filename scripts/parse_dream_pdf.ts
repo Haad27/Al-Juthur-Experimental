@@ -55,7 +55,7 @@ async function processPdf() {
         file: tempPath,
         mimeType: 'application/pdf',
         displayName: `Dream Textbook Pages ${i + 1}-${end}`
-      });
+      } as any);
       console.log(`Uploaded file: ${uploadResult.name}`);
     } catch (e: any) {
       console.error(`Upload failed: ${e.message}`);

@@ -1,7 +1,7 @@
 import { MODE_AUTHORS } from '../../../scripts/seed_rag_modes';
 import { SURAHS_DATA } from '../../surahsData';
 
-export type RagMode = 'default' | 'classical' | 'grammar' | 'modern' | 'philosophical' | 'lexicon';
+export type RagMode = 'default' | 'classical' | 'grammar' | 'modern' | 'philosophical' | 'lexicon' | 'dream';
 
 export type QueryType = 'specific' | 'thematic';
 

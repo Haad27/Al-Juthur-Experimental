@@ -40,18 +40,30 @@ export default function AiTranslatorPage() {
     }
   }, [searchParams, setAiInputText]);
 
-  useEffect(() => {
-    // Fetch remaining tokens on mount
-    fetch('/api/ai/translate/quota')
+  const fetchQuota = () => {
+    fetch('/api/ai/translate')
       .then(res => res.json())
       .then(data => {
-        if (data.success) {
+        if (data.success && typeof data.remaining === 'number') {
           setRemainingTokens(data.remaining);
           if (data.limit) setTokenLimit(data.limit);
         }
       })
-      .catch(console.error);
+      .catch((err) => {
+        console.error("Quota fetch error:", err);
+        setRemainingTokens(prev => prev ?? 250000);
+      });
+  };
+
+  useEffect(() => {
+    fetchQuota();
   }, []);
+
+  useEffect(() => {
+    if (!aiIsTranslating && aiTranslationData && aiTranslationData.length > 0) {
+      fetchQuota();
+    }
+  }, [aiIsTranslating, aiTranslationData]);
 
   const copySegment = (text: string, index: string) => {
     // Fallback for mobile and http contexts
@@ -281,12 +293,10 @@ export default function AiTranslatorPage() {
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                     </span>
                   )}
-                  {remainingTokens !== null && (
-                    <span className="inline-flex items-center gap-1 bg-emerald-950/70 px-2 py-0.5 rounded-full border border-emerald-500/40 text-emerald-300 text-[10px] sm:text-xs font-semibold shadow-sm backdrop-blur-sm ml-1.5">
-                      <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-400 shrink-0" />
-                      <span><strong className="text-emerald-200">{remainingTokens.toLocaleString()}</strong> tokens left</span>
-                    </span>
-                  )}
+                  <span className="inline-flex items-center gap-1 bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-500/40 text-emerald-300 text-[10px] sm:text-xs font-semibold shadow-sm backdrop-blur-sm ml-1.5">
+                    <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-400 shrink-0" />
+                    <span><strong className="text-emerald-200">{(remainingTokens ?? 250000).toLocaleString()}</strong> tokens left</span>
+                  </span>
                 </h2>
               </div>
               

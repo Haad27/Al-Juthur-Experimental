@@ -12,7 +12,7 @@ export function splitIntoChildChunks(
     surahId: number | null;
     ayahId: number | null;
     authorId: number;
-    workType: 'tafsir' | 'lexicon';
+    workType: 'tafsir' | 'lexicon' | 'textbook';
     language: string;
     rootWord: string | null;
   },

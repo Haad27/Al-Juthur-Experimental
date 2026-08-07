@@ -23,6 +23,7 @@ import { inter, amiri } from "@/app/fonts";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useVisualViewportOffset } from '@/hooks/useVisualViewport';
 import { RAG_MODES, RagModeInfo } from "@/lib/ai/rag/modes-config";
 
 interface SourceItem {
@@ -94,13 +95,17 @@ function RagChatContent() {
   const [remainingTokens, setRemainingTokens] = useState<number | null>(null);
   const [tokenLimit, setTokenLimit] = useState<number>(250000);
   const [isModeSwitcherOpen, setIsModeSwitcherOpen] = useState(false);
+  useVisualViewportOffset();
 
   useEffect(() => {
     // Fetch remaining tokens on mount
     fetch('/api/ai/rag')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) return null;
+        return res.json();
+      })
       .then(data => {
-        if (data.success) {
+        if (data?.success) {
           setRemainingTokens(data.remaining);
           if (data.limit) setTokenLimit(data.limit);
         }
@@ -260,7 +265,7 @@ function RagChatContent() {
   };
 
   return (
-    <div className={`h-[100dvh] flex flex-col bg-zinc-950 text-white overflow-hidden ${inter.className}`}>
+    <div className={`h-[var(--visual-vh,100dvh)] flex flex-col bg-zinc-950 text-white overflow-hidden ${inter.className}`}>
       {/* Top Navigation */}
       <nav className="shrink-0 z-40 bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800/80 px-3 sm:px-4 md:px-8 py-2.5 sm:py-3.5">
         <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-2 sm:gap-4">
@@ -406,7 +411,7 @@ function RagChatContent() {
                           return (
                             <div className={containerClasses}>
                               <div className="quran-bar absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
-                              <p className={`m-0 ${amiri.className} text-lg md:text-xl text-emerald-200 leading-loose text-right dir-rtl`}>
+                              <p className={`m-0 font-arabic text-lg md:text-xl text-emerald-200 leading-loose text-right dir-rtl`}>
                                 {children}
                               </p>
                             </div>
@@ -519,7 +524,9 @@ function RagChatContent() {
       </main>
 
       {/* Fixed Bottom Input Area */}
-      <div className="shrink-0 bg-zinc-950 border-t border-zinc-800/80 p-3 sm:p-4 pb-[env(safe-area-inset-bottom,0px)]">
+      <div 
+        className="shrink-0 bg-zinc-950 border-t border-zinc-800/80 p-3 sm:p-4 pb-[env(safe-area-inset-bottom,0px)]"
+      >
         <div className="max-w-[900px] mx-auto relative">
           <textarea
             value={input}
