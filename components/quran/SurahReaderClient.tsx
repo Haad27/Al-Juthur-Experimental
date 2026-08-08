@@ -180,17 +180,13 @@ const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRAN
             : "w-[calc(100%-350px)]"
       )}
     >
-      <div className="flex items-center gap-3 min-w-0">
-        <p className="font-mushaf-v2 dark:text-white text-black text-2xl leading-tight shrink-0">
-          {surah?.name}
-        </p>
-        <span className="text-zinc-500 dark:text-zinc-600 font-sans text-xs">•</span>
+      <div className="flex items-center gap-2.5 min-w-0">
         <div className="flex items-center gap-1.5 font-sans min-w-0">
           <span className="font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate">
             {surah?.englishName}
           </span>
           {surah?.englishNameTranslation && (
-            <span className="text-xs text-zinc-500 dark:text-zinc-400 truncate max-w-[180px]">
+            <span className="text-xs text-zinc-500 dark:text-zinc-400 truncate max-w-[200px]">
               ({surah?.englishNameTranslation})
             </span>
           )}
@@ -846,56 +842,25 @@ export default function SurahReaderClient({
           ALL_TRANSLATION_OPTIONS={ALL_TRANSLATION_OPTIONS} 
         />
 
-      <div className="flex flex-col w-full min-h-[100dvh] px-2 sm:px-4 md:px-6 lg:px-8">
-        {/* Explore Container Hero Header (Desktop Only) */}
-        <div className="hidden md:block relative pt-14 pb-3 px-8 max-w-[1700px] mx-auto w-full border-b border-zinc-800/80 mb-3">
-          <div className="absolute left-10 top-10 size-72 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
-          <div className="flex flex-row items-center justify-between gap-3 relative z-10">
-            <div className="space-y-1 md:space-y-1.5 min-w-0">
-              <div className="inline-flex items-center gap-1 md:gap-1.5 px-2 py-0.5 md:px-3 md:py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] sm:text-[11px] font-medium whitespace-nowrap shrink-0 max-w-full overflow-hidden">
-                <span>Surah {surah?.number || surahNumber}</span>
-                <span>•</span>
-                <span>{surah?.revelationType || "Meccan"}</span>
-                <span>•</span>
-                <span>{surah?.numberOfAyahs || 0} Ayahs</span>
-              </div>
-              <h1 className="text-lg sm:text-2xl md:text-3xl font-extrabold tracking-tight text-white truncate">
-                {surah?.englishName}
-              </h1>
-              <div className="flex flex-col gap-1 items-start">
-                <p className="text-zinc-400 max-w-2xl text-xs sm:text-sm truncate">
-                  {surah?.englishNameTranslation}
-                </p>
-              </div>
-            </div>
-
-            <div className="text-right shrink-0">
-              <p className={`font-mushaf-v2 text-2xl sm:text-4xl md:text-5xl text-amber-100/90 font-normal leading-tight`}>
-                {surah?.name}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center text-center w-full flex-col pt-16 md:pt-2 mb-2 md:mb-3 relative z-20">
+        <div className="flex items-center text-center w-full flex-col pt-16 md:pt-16 mb-1 md:mb-2 relative z-20">
           <BismillahIcon className="dark:text-white text-black lg:max-w-56 md:max-w-48 max-w-36 sm:max-w-44" />
           
           {surahInfo && (
-            <div className="mt-2.5 flex flex-col items-center w-full max-w-3xl">
+            <div className="mt-1.5 mb-1 flex flex-col items-center w-full max-w-3xl">
               <button
                 onClick={() => setShowSurahContext(!showSurahContext)}
-                className="group relative inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/50 hover:bg-emerald-500/20 hover:border-emerald-400 cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)] transition-all duration-300"
+                className="group relative inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/50 hover:bg-emerald-500/20 hover:border-emerald-400 cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)] transition-all duration-300"
                 title={showSurahContext ? "Hide Context" : "Read Surah Context and Theme"}
               >
                 <div className="absolute inset-0 rounded-full bg-emerald-400/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <Compass size={16} className="text-emerald-400 group-hover:text-emerald-300 transition-colors relative z-10 animate-[spin_4s_linear_infinite]" />
-                <span className="text-[12px] md:text-[13px] font-bold tracking-widest text-emerald-300 group-hover:text-white transition-colors uppercase relative z-10">
+                <Compass size={14} className="text-emerald-400 group-hover:text-emerald-300 transition-colors relative z-10 animate-[spin_4s_linear_infinite]" />
+                <span className="text-[11px] md:text-[12px] font-bold tracking-widest text-emerald-300 group-hover:text-white transition-colors uppercase relative z-10">
                   {showSurahContext ? "Close Context" : "Context & Theme"}
                 </span>
               </button>
 
               {showSurahContext && (
-                <div className="mt-8 p-5 sm:p-6 w-full rounded-2xl bg-zinc-950/95 border border-emerald-500/40 text-sm text-zinc-100 shadow-[0_10px_40px_rgba(16,185,129,0.15)] relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
+                <div className="mt-4 p-5 sm:p-6 w-full rounded-2xl bg-zinc-950/95 border border-emerald-500/40 text-sm text-zinc-100 shadow-[0_10px_40px_rgba(16,185,129,0.15)] relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent"></div>
                   
                   <div className="font-semibold text-emerald-400 uppercase tracking-wider text-[11px] mb-5 border-b border-emerald-500/20 pb-3 flex items-center justify-between">
@@ -909,65 +874,70 @@ export default function SurahReaderClient({
                     </button>
                   </div>
                   
-                  <div 
-                    className="text-zinc-200 leading-relaxed max-w-none text-sm sm:text-base [&>h2]:text-emerald-300 [&>h2]:font-bold [&>h2]:text-lg [&>h2]:mt-6 [&>h2]:mb-3 [&>h2:first-child]:mt-0 [&>h3]:text-emerald-300 [&>h3]:font-bold [&>h3]:text-base [&>h3]:mt-4 [&>h3]:mb-2 [&>p]:mb-4 [&>ol]:list-decimal [&>ol]:ml-5 [&>ol]:mb-4 [&>ul]:list-disc [&>ul]:ml-5 [&>ul]:mb-4 [&>li]:mb-2 [&>a]:text-emerald-400 [&>a:hover]:underline [&>strong]:text-zinc-100"
-                    dangerouslySetInnerHTML={{ __html: surahInfo.text }}
-                  />
+                  <div className="space-y-4 leading-relaxed text-zinc-300">
+                    {surahInfo.bismillah_pre_ayah && (
+                      <p className="text-xs text-emerald-400/90 italic font-mono bg-emerald-500/5 p-2 rounded-lg border border-emerald-500/10">
+                        Note: Bismillah is included as part of this Surah.
+                      </p>
+                    )}
+                    <p className="text-zinc-200 leading-relaxed font-normal">
+                      {surahInfo.heading || surahInfo.text}
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
           )}
         </div>
-        <Virtuoso
-          ref={virtuosoRef}
-          useWindowScroll
-          totalCount={ayahs.length}
-          itemContent={(index) => {
-            const ayah = ayahs[index];
-            return (
-              <AyahRow
-                key={ayah.numberInSurah}
-                ayah={ayah}
-                surahNumber={surahNumber}
-                surahWordsMap={surahWordsMap}
-                fontSize={fontSize}
-                showTranslation={showTranslation}
-                showWbw={showWbw}
-                surahWbwTranslation={surahWbwTranslation}
-                handleCopyAyah={handleCopyAyah}
-                handleSaveAyah={handleSaveAyah}
-                onOpenAiChat={handleOpenAiChat}
-                isUrduTranslation={isUrduTranslation}
-                translationEdition={translationEdition}
-              />
-            );
-          }}
-        />
-      </div>
 
-      <div className="mb-32 md:mb-12 w-full flex justify-center items-center pb-12">
-        <div className="flex gap-4 w-full max-w-md px-2 justify-center mt-8 sm:mt-10 pt-2">
-          <NavigatorButton
-            direction="Previous"
-            surahNumber={surahNumber > 1 ? surahNumber - 1 : 1}
+        <div className="flex flex-col w-full min-h-[100dvh] px-2 sm:px-4 md:px-6 lg:px-8">
+          <Virtuoso
+            ref={virtuosoRef}
+            useWindowScroll
+            totalCount={ayahs.length}
+            itemContent={(index) => {
+              const ayah = ayahs[index];
+              return (
+                <AyahRow
+                  key={ayah.numberInSurah}
+                  ayah={ayah}
+                  surahNumber={surahNumber}
+                  surahWordsMap={surahWordsMap}
+                  fontSize={fontSize}
+                  showTranslation={showTranslation}
+                  showWbw={showWbw}
+                  surahWbwTranslation={surahWbwTranslation}
+                  handleCopyAyah={handleCopyAyah}
+                  handleSaveAyah={handleSaveAyah}
+                  onOpenAiChat={handleOpenAiChat}
+                  isUrduTranslation={isUrduTranslation}
+                  translationEdition={translationEdition}
+                />
+              );
+            }}
           />
-          <NavigatorButton
-            direction="Next"
-            surahNumber={surahNumber < 114 ? surahNumber + 1 : 114}
-          />
+
+          <div className="mb-32 md:mb-12 w-full flex justify-center items-center pb-12">
+            <div className="flex gap-4 w-full max-w-md px-2 justify-center mt-8 sm:mt-10 pt-2">
+              <NavigatorButton
+                direction="Previous"
+                surahNumber={surahNumber > 1 ? surahNumber - 1 : 1}
+              />
+              <NavigatorButton
+                direction="Next"
+                surahNumber={surahNumber < 114 ? surahNumber + 1 : 114}
+              />
+            </div>
+          </div>
         </div>
-      </div>
-      <div className="fixed md:sticky bottom-[calc(5.25rem+env(safe-area-inset-bottom,0px))] md:bottom-0 bg-transparent p-2 md:p-4 w-full flex justify-center items-center z-40 pointer-events-none">
-        <div className="pointer-events-auto">
-          <SurahPlayer
-            surahNumber={surahNumber}
-            ayahText={ayahs.map((a) => a.cleanText)}
-            lastAyahNumber={surah?.numberOfAyahs || 0}
-            router={router}
-            aiChatContext={aiChatContext}
-          />
-        </div>
-      </div>
+
+        <SurahPlayer
+          surahNumber={surahNumber}
+          ayahText={ayahs.map((a) => a.cleanText)}
+          lastAyahNumber={surah?.numberOfAyahs || 0}
+          router={router}
+          aiChatContext={aiChatContext}
+        />
       </section>
 
       <AyahChatSidebar
