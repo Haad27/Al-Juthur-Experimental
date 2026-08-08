@@ -125,7 +125,7 @@ const SurahsList = () => {
         </nav>
       </div>
 
-      <div className="space-y-16 w-full flex-col flex-1 text-white xl:px-20 lg:px-8 px-4">
+      <div className="space-y-16 w-full flex-col flex-1 text-white xl:px-20 lg:px-8 px-4 pb-36 md:pb-16">
         <div className="w-full flex flex-col space-y-16 relative">
           <div className="grid md:grid-cols-2 grid-cols-1 items-center gap-8 pt-2 pb-8 md:py-16 relative">
             {/* 🌟 Left: Text content */}

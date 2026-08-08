@@ -180,15 +180,26 @@ const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRAN
             : "w-[calc(100%-350px)]"
       )}
     >
-      <div className="flex items-center gap-4">
-        <p className={`font-mushaf-v2 dark:text-white text-black text-2xl leading-tight flex items-center gap-3`}>
+      <div className="flex items-center gap-3 min-w-0">
+        <p className="font-mushaf-v2 dark:text-white text-black text-2xl leading-tight shrink-0">
           {surah?.name}
-          {translationEdition && (
-            <span className="text-xs font-medium font-sans px-2.5 py-1 bg-emerald-500/10 rounded-md text-emerald-600 dark:text-emerald-400">
-              {ALL_TRANSLATION_OPTIONS.find((t: any) => t.identifier === translationEdition)?.name || "Translation"}
+        </p>
+        <span className="text-zinc-500 dark:text-zinc-600 font-sans text-xs">•</span>
+        <div className="flex items-center gap-1.5 font-sans min-w-0">
+          <span className="font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate">
+            {surah?.englishName}
+          </span>
+          {surah?.englishNameTranslation && (
+            <span className="text-xs text-zinc-500 dark:text-zinc-400 truncate max-w-[180px]">
+              ({surah?.englishNameTranslation})
             </span>
           )}
-        </p>
+        </div>
+        {surah?.revelationType && (
+          <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-semibold tracking-wider uppercase shrink-0">
+            {surah.revelationType} • {surah?.numberOfAyahs || 0} Ayahs
+          </span>
+        )}
       </div>
       <nav className="hidden lg:flex items-center gap-6 text-zinc-400 text-sm">
         <Link href="/home" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">Home</Link>
@@ -836,44 +847,44 @@ export default function SurahReaderClient({
         />
 
       <div className="flex flex-col w-full min-h-[100dvh] px-2 sm:px-4 md:px-6 lg:px-8">
-        {/* Explore Container Hero Header */}
-        <div className="relative pt-28 sm:pt-28 md:pt-20 pb-2 md:pb-4 px-4 md:px-8 max-w-[1700px] mx-auto w-full border-b border-zinc-800/80 mb-4 md:mb-6">
-          <div className="absolute left-10 top-10 size-96 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
+        {/* Explore Container Hero Header (Desktop Only) */}
+        <div className="hidden md:block relative pt-14 pb-3 px-8 max-w-[1700px] mx-auto w-full border-b border-zinc-800/80 mb-3">
+          <div className="absolute left-10 top-10 size-72 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
           <div className="flex flex-row items-center justify-between gap-3 relative z-10">
-            <div className="space-y-1 md:space-y-3 min-w-0">
-              <div className="inline-flex items-center gap-1 md:gap-1.5 px-2.5 py-0.5 md:px-3.5 md:py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] sm:text-[11px] md:text-xs font-medium whitespace-nowrap shrink-0 max-w-full overflow-hidden">
+            <div className="space-y-1 md:space-y-1.5 min-w-0">
+              <div className="inline-flex items-center gap-1 md:gap-1.5 px-2 py-0.5 md:px-3 md:py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] sm:text-[11px] font-medium whitespace-nowrap shrink-0 max-w-full overflow-hidden">
                 <span>Surah {surah?.number || surahNumber}</span>
                 <span>•</span>
                 <span>{surah?.revelationType || "Meccan"}</span>
                 <span>•</span>
                 <span>{surah?.numberOfAyahs || 0} Ayahs</span>
               </div>
-              <h1 className="text-xl sm:text-3xl md:text-5xl font-extrabold tracking-tight text-white truncate">
+              <h1 className="text-lg sm:text-2xl md:text-3xl font-extrabold tracking-tight text-white truncate">
                 {surah?.englishName}
               </h1>
-              <div className="flex flex-col gap-2 md:gap-3 items-start">
-                <p className="text-zinc-400 max-w-2xl text-xs sm:text-sm md:text-base truncate">
+              <div className="flex flex-col gap-1 items-start">
+                <p className="text-zinc-400 max-w-2xl text-xs sm:text-sm truncate">
                   {surah?.englishNameTranslation}
                 </p>
               </div>
             </div>
 
             <div className="text-right shrink-0">
-              <p className={`font-mushaf-v2 text-3xl sm:text-5xl md:text-7xl text-amber-100/90 font-normal leading-tight`}>
+              <p className={`font-mushaf-v2 text-2xl sm:text-4xl md:text-5xl text-amber-100/90 font-normal leading-tight`}>
                 {surah?.name}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center text-center w-full flex-col mb-4 md:mb-6 relative z-20">
-          <BismillahIcon className="dark:text-white text-black lg:max-w-72 md:max-w-64 max-w-40 sm:max-w-56" />
+        <div className="flex items-center text-center w-full flex-col pt-16 md:pt-2 mb-2 md:mb-3 relative z-20">
+          <BismillahIcon className="dark:text-white text-black lg:max-w-56 md:max-w-48 max-w-36 sm:max-w-44" />
           
           {surahInfo && (
-            <div className="mt-4 flex flex-col items-center w-full max-w-3xl">
+            <div className="mt-2.5 flex flex-col items-center w-full max-w-3xl">
               <button
                 onClick={() => setShowSurahContext(!showSurahContext)}
-                className="group relative inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/50 hover:bg-emerald-500/20 hover:border-emerald-400 cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)] transition-all duration-300 animate-bounce"
+                className="group relative inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/50 hover:bg-emerald-500/20 hover:border-emerald-400 cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)] transition-all duration-300"
                 title={showSurahContext ? "Hide Context" : "Read Surah Context and Theme"}
               >
                 <div className="absolute inset-0 rounded-full bg-emerald-400/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -953,6 +964,7 @@ export default function SurahReaderClient({
             ayahText={ayahs.map((a) => a.cleanText)}
             lastAyahNumber={surah?.numberOfAyahs || 0}
             router={router}
+            aiChatContext={aiChatContext}
           />
         </div>
       </div>

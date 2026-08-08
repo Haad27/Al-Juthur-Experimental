@@ -532,7 +532,7 @@ function RagChatContent() {
       </main>
 
       {/* Input Bar — normal flex child at bottom, resizes natively with keyboard */}
-      <div className="shrink-0 bg-zinc-950 border-t border-zinc-800/80 p-3 sm:p-4 pb-[max(env(safe-area-inset-bottom,0px),8px)]">
+      <div className="shrink-0 bg-zinc-950 border-t border-zinc-800/80 p-3 sm:p-4 pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] md:pb-4">
         <div className="max-w-[900px] mx-auto relative">
           <textarea
             value={input}

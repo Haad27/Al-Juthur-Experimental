@@ -52,19 +52,36 @@ const MobileSheet = ({
             show ? "translate-y-0" : "-translate-y-full"
           )}
         >
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-2">
-              <span className="text-emerald-400 font-bold text-sm tracking-wide">
-                {SURAHS_DATA.find((s) => s.number === surahNumber)?.englishName}
-              </span>
-            </div>
-            <button 
-              onClick={() => { setActiveTab("settings"); setIsOpen(true); }} 
-              className="p-1.5 rounded-lg bg-zinc-900 border border-emerald-500/60 shadow-[0_0_12px_rgba(16,185,129,0.4)] text-emerald-400 hover:text-emerald-300 hover:shadow-[0_0_16px_rgba(16,185,129,0.6)] transition-all duration-300"
-            >
-              <SlidersHorizontal className="size-4" />
-            </button>
-          </div>
+          {(() => {
+            const currentSurahObj = SURAHS_DATA.find((s) => s.number === surahNumber);
+            return (
+              <div className="flex items-center justify-between w-full min-w-0 pr-1">
+                <div className="flex items-center gap-1.5 min-w-0 flex-1 mr-2">
+                  <span className="text-emerald-400 font-bold text-sm tracking-wide truncate">
+                    {currentSurahObj?.englishName}
+                  </span>
+                  {currentSurahObj?.englishNameTranslation && (
+                    <span className="text-zinc-400 text-xs truncate max-w-[150px]">
+                      ({currentSurahObj.englishNameTranslation})
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {currentSurahObj?.revelationType && (
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-semibold tracking-wider uppercase">
+                      {currentSurahObj.revelationType}
+                    </span>
+                  )}
+                  <button 
+                    onClick={() => { setActiveTab("settings"); setIsOpen(true); }} 
+                    className="p-1.5 rounded-lg bg-zinc-900 border border-emerald-500/60 shadow-[0_0_12px_rgba(16,185,129,0.4)] text-emerald-400 hover:text-emerald-300 hover:shadow-[0_0_16px_rgba(16,185,129,0.6)] transition-all duration-300"
+                  >
+                    <SlidersHorizontal className="size-4" />
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
           <div className="flex w-full gap-2 items-center">
             <div className="relative flex-1 min-w-0">
               <Select

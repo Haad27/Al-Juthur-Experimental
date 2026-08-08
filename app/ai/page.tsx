@@ -117,7 +117,7 @@ export default function AiTranslatorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pb-10 relative selection:bg-emerald-500/30">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pb-36 md:pb-10 relative selection:bg-emerald-500/30">
       {/* Subtle ambient light background */}
       <div className="absolute top-0 inset-x-0 h-[500px] bg-gradient-to-b from-emerald-900/10 to-transparent pointer-events-none" />
       {/* Top Navigation Bar */}

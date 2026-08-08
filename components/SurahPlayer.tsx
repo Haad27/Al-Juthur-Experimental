@@ -31,7 +31,7 @@ import { toast } from "sonner";
 // Components
 import GettingStartedPopup from "./popups/GettingStartedPopup";
 // Utilities
-import { formatTime, normalizeArabic, unlockAudio } from "@/lib/utils";
+import { formatTime, normalizeArabic, unlockAudio, cn } from "@/lib/utils";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 import { fetchAyahAudio } from "@/api/api";
 import { useAudioStore } from "@/lib/stores/audioStore";
@@ -41,6 +41,7 @@ interface SurahPlayerProps {
   ayahText: string[];
   lastAyahNumber: number;
   router: any;
+  aiChatContext?: any;
 }
 
 const playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
@@ -50,6 +51,7 @@ export default function SurahPlayer({
   ayahText,
   lastAyahNumber,
   router,
+  aiChatContext,
 }: SurahPlayerProps) {
   const { mistakeDetection, selectedReciter, setSelectedReciter } = useGlobalState();
   const audioStore = useAudioStore();
@@ -368,7 +370,10 @@ export default function SurahPlayer({
         <div>
           <button
             onClick={() => setMobileFabOpen(!mobileFabOpen)}
-            className="fixed bottom-[calc(6.75rem+env(safe-area-inset-bottom,0px))] md:bottom-8 right-4 md:right-8 z-50 size-12 md:size-14 rounded-full bg-emerald-600 border border-emerald-400/40 text-white shadow-2xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+            className={cn(
+              "fixed bottom-[calc(6.75rem+env(safe-area-inset-bottom,0px))] md:bottom-8 z-50 size-12 md:size-14 rounded-full bg-emerald-600 border border-emerald-400/40 text-white shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95",
+              aiChatContext ? "right-4 xl:right-[470px]" : "right-4 md:right-8"
+            )}
             title="Audio Recitation Controls"
           >
             {recording ? (
@@ -383,11 +388,19 @@ export default function SurahPlayer({
               initial={{ opacity: 0, y: 15, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 15, scale: 0.95 }}
-              className="fixed bottom-[calc(10.25rem+env(safe-area-inset-bottom,0px))] md:bottom-[5.5rem] right-4 md:right-8 z-50 w-64 bg-zinc-900/95 border border-zinc-800 rounded-2xl p-4 shadow-2xl backdrop-blur-xl space-y-4 text-white"
+              className={cn(
+                "fixed bottom-[calc(10.25rem+env(safe-area-inset-bottom,0px))] md:bottom-[5.5rem] z-50 w-64 md:w-72 bg-zinc-900/95 border border-emerald-500/50 rounded-2xl p-4 shadow-[0_0_35px_rgba(16,185,129,0.35)] backdrop-blur-2xl space-y-4 text-white relative overflow-hidden ring-1 ring-emerald-500/20 transition-all duration-300",
+                aiChatContext ? "right-4 xl:right-[470px]" : "right-4 md:right-8"
+              )}
             >
-              <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Recitation Player</span>
-                <button onClick={() => setMobileFabOpen(false)} className="p-1 hover:bg-zinc-800 rounded-lg text-zinc-400">
+              {/* Cool Glowing Background Flare */}
+              <div className="absolute -top-12 -right-12 size-32 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none" />
+              <div className="flex items-center justify-between border-b border-emerald-500/20 pb-2 relative z-10">
+                <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                  <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+                  Recitation Player
+                </span>
+                <button onClick={() => setMobileFabOpen(false)} className="p-1 hover:bg-zinc-800/80 rounded-lg text-zinc-400 hover:text-white transition">
                   <ChevronDown className="size-4" />
                 </button>
               </div>
