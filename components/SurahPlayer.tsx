@@ -254,6 +254,9 @@ export default function SurahPlayer({
         setStartAyah(targetAyah);
         setPlaying(true);
         audioStore.setIsPlaying(true);
+        if (e.detail?.openFab) {
+          setMobileFabOpen(true);
+        }
       }
     };
 

@@ -475,8 +475,26 @@ const AyahRow = React.memo(({
         <div
           onClick={() => handleSaveAyah(ayah)}
           className="p-2 rounded-full dark:hover:bg-zinc-800 hover:bg-[var(--sephia-500)]/45 transition-colors cursor-pointer inline-flex items-center justify-center"
+          title="Save Ayah"
         >
           <Save className="text-zinc-400" size={18} />
+        </div>
+        <div
+          onClick={() => {
+            if (isCurrentlyPlaying) {
+              window.dispatchEvent(new CustomEvent('pausePlayerAudio'));
+            } else {
+              window.dispatchEvent(new CustomEvent('changePlayerAyah', { detail: { ayah: ayah.numberInSurah, openFab: true } }));
+            }
+          }}
+          className="p-2 rounded-full dark:hover:bg-zinc-800 hover:bg-[var(--sephia-500)]/45 transition-colors cursor-pointer inline-flex items-center justify-center"
+          title={isCurrentlyPlaying ? "Pause Recitation" : `Play Recitation for Ayah ${ayah.numberInSurah}`}
+        >
+          {isCurrentlyPlaying ? (
+            <Pause size={18} className="text-emerald-400" />
+          ) : (
+            <Play size={18} className="text-zinc-400 hover:text-emerald-400" />
+          )}
         </div>
         <Link
           href={`/tafsir?surah=${surahNumber}&ayah=${ayah.numberInSurah}`}
@@ -659,11 +677,12 @@ export default function SurahReaderClient({
   const [showSurahContext, setShowSurahContext] = useState(false);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const router = useRouter();
-  
+  const [visibleAyahNumber, setVisibleAyahNumber] = useState<number>(1);
   const [aiChatContext, setAiChatContext] = useState<{ surah: number; ayah: number } | null>(null);
 
-  const handleOpenAiChat = (surah: number, ayah: number) => {
-    setAiChatContext({ surah, ayah });
+  const handleOpenAiChat = (surah: number, ayah?: number) => {
+    const targetAyah = typeof ayah === "number" && ayah > 0 ? ayah : visibleAyahNumber;
+    setAiChatContext({ surah, ayah: targetAyah });
     if (typeof window !== "undefined") {
       window.dispatchEvent(new Event("close-left-sidebar"));
     }
@@ -902,6 +921,11 @@ export default function SurahReaderClient({
             ref={virtuosoRef}
             useWindowScroll
             totalCount={ayahs.length}
+            rangeChanged={({ startIndex }) => {
+              if (typeof startIndex === "number" && startIndex >= 0) {
+                setVisibleAyahNumber(startIndex + 1);
+              }
+            }}
             itemContent={(index) => {
               const ayah = ayahs[index];
               return (
@@ -951,7 +975,7 @@ export default function SurahReaderClient({
 
       <AyahChatSidebar
         surahNumber={aiChatContext?.surah || surahNumber}
-        ayahNumber={aiChatContext?.ayah || 1}
+        ayahNumber={aiChatContext?.ayah || visibleAyahNumber}
         isOpen={!!aiChatContext}
         onClose={() => setAiChatContext(null)}
         initialModeId="default"
