@@ -93,6 +93,15 @@ export default function TranslationSelector() {
     return groups;
   }, [filteredOptions]);
 
+  const allGroupedByLanguage = useMemo(() => {
+    const map: Record<string, TranslationOption[]> = {};
+    for (const opt of ALL_TRANSLATION_OPTIONS) {
+      if (!map[opt.languageLabel]) map[opt.languageLabel] = [];
+      map[opt.languageLabel].push(opt);
+    }
+    return map;
+  }, []);
+
   const handleSelect = (identifier: string) => {
     setTranslationEdition(identifier);
     setOpen(false);
@@ -100,36 +109,55 @@ export default function TranslationSelector() {
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-100/80 dark:bg-zinc-800/80 hover:bg-zinc-200/80 dark:hover:bg-zinc-700/60 transition-all duration-200 text-left group shadow-xs cursor-pointer"
-        >
-          <div className="flex items-center gap-2 overflow-hidden min-w-0">
-            <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 group-hover:scale-105 transition-transform duration-200 shrink-0">
-              <Languages className="w-4 h-4" />
-            </div>
-            <div className="flex flex-col overflow-hidden min-w-0">
-              <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate">
-                {currentOption.languageLabel} — {currentOption.englishName}
-              </span>
-              <span className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">
-                {currentOption.name} ({currentOption.identifier})
-              </span>
-            </div>
-          </div>
-          <ChevronDown className={cn("w-4 h-4 text-zinc-400 transition-transform duration-200 shrink-0 ml-1", open && "rotate-180")} />
-        </button>
-      </PopoverTrigger>
-
-      <PopoverContent
-        align="start"
-        side="bottom"
-        sideOffset={6}
-        collisionPadding={16}
-        className="w-[var(--radix-popover-trigger-width)] min-w-[280px] max-w-[340px] max-h-[min(360px,var(--radix-popover-content-available-height))] p-3 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl rounded-2xl z-[9999999] text-zinc-900 dark:text-zinc-100 flex flex-col overflow-hidden"
+    <div className="relative w-full">
+      {/* Mobile Native Translation Selector Overlay */}
+      <select
+        value={translationEdition}
+        onChange={(e) => handleSelect(e.target.value)}
+        className="absolute inset-0 w-full h-full opacity-0 sm:hidden cursor-pointer z-20 bg-zinc-900 text-white"
+        aria-label="Select Translation"
       >
+        {Object.entries(allGroupedByLanguage).map(([lang, options]) => (
+          <optgroup key={lang} label={lang} className="bg-zinc-900 text-emerald-400 font-bold">
+            {options.map((opt) => (
+              <option key={opt.identifier} value={opt.identifier} className="bg-zinc-900 text-white py-1">
+                {opt.languageLabel} — {opt.englishName} ({opt.name})
+              </option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
+
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-100/80 dark:bg-zinc-800/80 hover:bg-zinc-200/80 dark:hover:bg-zinc-700/60 transition-all duration-200 text-left group shadow-xs cursor-pointer"
+          >
+            <div className="flex items-center gap-2 overflow-hidden min-w-0">
+              <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 group-hover:scale-105 transition-transform duration-200 shrink-0">
+                <Languages className="w-4 h-4" />
+              </div>
+              <div className="flex flex-col overflow-hidden min-w-0">
+                <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                  {currentOption.languageLabel} — {currentOption.englishName}
+                </span>
+                <span className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">
+                  {currentOption.name} ({currentOption.identifier})
+                </span>
+              </div>
+            </div>
+            <ChevronDown className={cn("w-4 h-4 text-zinc-400 transition-transform duration-200 shrink-0 ml-1", open && "rotate-180")} />
+          </button>
+        </PopoverTrigger>
+
+        <PopoverContent
+          align="start"
+          side="bottom"
+          sideOffset={6}
+          collisionPadding={16}
+          className="w-[var(--radix-popover-trigger-width)] min-w-[280px] max-w-[340px] max-h-[min(360px,var(--radix-popover-content-available-height))] p-3 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl rounded-2xl z-[9999999] text-zinc-900 dark:text-zinc-100 flex flex-col overflow-hidden hidden sm:flex"
+        >
         <div className="flex flex-col space-y-2.5 min-h-0 flex-1 overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between px-0.5 shrink-0">
@@ -220,6 +248,7 @@ export default function TranslationSelector() {
           </div>
         </div>
       </PopoverContent>
-    </Popover>
+      </Popover>
+    </div>
   );
 }

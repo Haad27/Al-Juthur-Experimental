@@ -143,7 +143,7 @@ export default function AiTranslatorPage() {
               Lexicon
             </Link>
             <Link href="/ai" className="cursor-pointer text-white font-medium">
-              AI Translator
+              Translator
             </Link>
             <Link href="/rag" className="cursor-pointer hover:text-gray-300 transition text-zinc-400">
               RAG Bot

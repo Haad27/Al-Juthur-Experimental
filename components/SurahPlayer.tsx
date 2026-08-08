@@ -15,7 +15,8 @@ import {
   Play,
   Mic,
   MicOff,
-  BookOpen
+  BookOpen,
+  X
 } from "lucide-react";
 
 // Package/Library to check similarity between sentences
@@ -366,23 +367,55 @@ export default function SurahPlayer({
         />
       )}
       {/* Floating Action Button (FAB) & Vertical Controls Card (Mobile + Desktop) */}
-      <button
+      <motion.button
         type="button"
         onClick={() => setMobileFabOpen((prev) => !prev)}
+        whileTap={{ scale: 0.85, rotate: mobileFabOpen ? -90 : 90 }}
+        animate={{ rotate: mobileFabOpen ? 90 : 0, scale: mobileFabOpen ? 1.05 : 1 }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
         className={cn(
-          "fixed bottom-[calc(6.75rem+env(safe-area-inset-bottom,0px))] md:bottom-8 z-[9999] size-12 md:size-14 rounded-full bg-emerald-600 border border-emerald-400/40 text-white shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer",
-          aiChatContext ? "right-4 xl:right-[470px]" : "right-4 md:right-8"
+          "fixed bottom-[calc(6.75rem+env(safe-area-inset-bottom,0px))] md:bottom-8 z-[9999] size-12 md:size-14 rounded-full text-white shadow-2xl flex items-center justify-center transition-all duration-300 cursor-pointer select-none border",
+          mobileFabOpen
+            ? "bg-emerald-700 border-emerald-300 shadow-[0_0_25px_rgba(16,185,129,0.6)] ring-4 ring-emerald-500/30"
+            : "bg-emerald-600 border-emerald-400/40 hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(16,185,129,0.35)]",
+          aiChatContext ? "max-lg:hidden right-4 lg:right-[440px] xl:right-[470px]" : "right-4 md:right-8"
         )}
-        title="Audio Recitation Controls"
+        title={mobileFabOpen ? "Close Recitation Controls" : "Audio Recitation Controls"}
       >
-        {playing ? (
-          <Pause className="size-5 md:size-6 text-white" />
-        ) : recording ? (
-          <Mic className="size-5 md:size-6 text-emerald-300 animate-pulse" />
-        ) : (
-          <Mic className="size-5 md:size-6 text-white" />
-        )}
-      </button>
+        <AnimatePresence mode="wait" initial={false}>
+          {mobileFabOpen ? (
+            <motion.div
+              key="close"
+              initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
+              animate={{ rotate: 0, opacity: 1, scale: 1 }}
+              exit={{ rotate: 90, opacity: 0, scale: 0.5 }}
+              transition={{ duration: 0.18 }}
+            >
+              <X className="size-5 md:size-6 text-white stroke-[2.5]" />
+            </motion.div>
+          ) : playing ? (
+            <motion.div
+              key="pause"
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.5 }}
+              transition={{ duration: 0.18 }}
+            >
+              <Pause className="size-5 md:size-6 text-white" />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="mic"
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.5 }}
+              transition={{ duration: 0.18 }}
+            >
+              <Mic className={`size-5 md:size-6 ${recording ? "text-emerald-300 animate-pulse" : "text-white"}`} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.button>
 
       {mobileFabOpen && (
         <motion.div
@@ -391,7 +424,7 @@ export default function SurahPlayer({
           exit={{ opacity: 0, y: 15, scale: 0.95 }}
           className={cn(
             "fixed bottom-[calc(10.25rem+env(safe-area-inset-bottom,0px))] md:bottom-[5.5rem] z-[9999] w-64 md:w-72 bg-zinc-900/95 border border-emerald-500/50 rounded-2xl p-4 shadow-[0_0_30px_rgba(16,185,129,0.3)] backdrop-blur-2xl space-y-4 text-white transition-all duration-300",
-            aiChatContext ? "right-4 xl:right-[470px]" : "right-4 md:right-8"
+            aiChatContext ? "max-lg:hidden right-4 lg:right-[440px] xl:right-[470px]" : "right-4 md:right-8"
           )}
         >
           <div className="flex items-center justify-between border-b border-zinc-800 pb-2">

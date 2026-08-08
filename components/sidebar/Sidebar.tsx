@@ -82,7 +82,7 @@ const Sidebar = () => {
       <div
         className={cn(
           "min-h-screen lg:block hidden sticky top-0 z-40 border-r dark:border-[#262629ff] border-[var(--sephia-500)] bg-zinc-900 text-white transition-all duration-300 shadow-sm",
-          isCollapsed ? "w-16" : "md:w-[350px]" // fix mobilesheet hiding before MD (yk)
+          isCollapsed ? "w-16" : "md:w-[350px]"
         )}
       >
         {/* Header with collapse button */}

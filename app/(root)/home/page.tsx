@@ -117,7 +117,7 @@ const SurahsList = () => {
             Lexicon
           </Link>
           <Link href="/ai" className="cursor-pointer hover:text-gray-300 transition text-zinc-400">
-            AI Translator
+            Translator
           </Link>
           <Link href="/rag" className="cursor-pointer hover:text-gray-300 transition">
             RAG Bot

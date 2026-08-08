@@ -106,9 +106,9 @@ export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
   const [mushafStyle, setMushafStyleState] = useState(() => {
     if (typeof window !== "undefined") {
       const match = document.cookie.match(/(?:^|; )mushaf=([^;]*)/);
-      return match ? decodeURIComponent(match[1]) : "indopak-15";
+      return match ? decodeURIComponent(match[1]) : "v2";
     }
-    return "indopak-15";
+    return "v2";
   });
 
 

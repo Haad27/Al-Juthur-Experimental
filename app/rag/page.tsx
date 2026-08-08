@@ -47,7 +47,7 @@ export default function RagLandingPage() {
               Lexicon
             </Link>
             <Link href="/ai" className="hover:text-zinc-200 transition">
-              AI Translator
+              Translator
             </Link>
             <Link href="/rag" className="text-white font-bold">
               RAG Bot

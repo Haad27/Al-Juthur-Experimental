@@ -173,8 +173,8 @@ const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRAN
         isSidebarCollapsed ? "left-16" : "left-[350px]",
         aiChatContext
           ? isSidebarCollapsed
-            ? "w-[calc(100%-64px)] xl:w-[calc(100%-64px-450px)]"
-            : "w-[calc(100%-350px)] xl:w-[calc(100%-350px-450px)]"
+            ? "w-[calc(100%-64px)] lg:w-[calc(100%-64px-420px)] xl:w-[calc(100%-64px-450px)]"
+            : "w-[calc(100%-350px)] lg:w-[calc(100%-350px-420px)] xl:w-[calc(100%-350px-450px)]"
           : isSidebarCollapsed
             ? "w-[calc(100%-64px)]"
             : "w-[calc(100%-350px)]"
@@ -201,7 +201,7 @@ const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRAN
         <Link href="/home" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">Home</Link>
         <Link href="/tafsir" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">Tafsir</Link>
         <Link href="/lexicon" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">Lexicon</Link>
-        <Link href="/ai" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">AI Translator</Link>
+        <Link href="/ai" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">Translator</Link>
         <Link href="/rag" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">RAG Bot</Link>
       </nav>
     </div>
