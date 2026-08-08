@@ -858,7 +858,7 @@ export default function SurahReaderClient({
 
       <section className={cn(
         "flex items-center flex-col dark:bg-zinc-900 bg-[var(--sephia-primary)] dark:text-white text-black relative pb-6 md:pb-6 transition-all duration-300",
-        aiChatContext ? "w-full xl:w-[calc(100%-450px)]" : "w-full flex-1"
+        aiChatContext ? "w-full lg:w-[calc(100%-420px)] xl:w-[calc(100%-450px)]" : "w-full flex-1"
       )}>
         <DesktopSurahHeader 
           surah={surah} 

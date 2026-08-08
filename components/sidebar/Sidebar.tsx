@@ -58,8 +58,11 @@ const Sidebar = () => {
     load();
     
     if (typeof window !== "undefined") {
+      const isDesktopScreen = window.innerWidth >= 1280;
+      const initialCollapsed = !isDesktopScreen;
+      setIsCollapsed(initialCollapsed);
       setTimeout(() => {
-        window.dispatchEvent(new CustomEvent("left-sidebar-toggle", { detail: { isCollapsed: true } }));
+        window.dispatchEvent(new CustomEvent("left-sidebar-toggle", { detail: { isCollapsed: initialCollapsed } }));
       }, 0);
     }
 

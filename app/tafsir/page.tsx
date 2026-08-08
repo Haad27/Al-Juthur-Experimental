@@ -13,7 +13,7 @@ import FloatingAskScholarButton from "@/components/ai/FloatingAskScholarButton";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
-import { copyToClipboard } from "@/lib/utils";
+import { copyToClipboard, cn } from "@/lib/utils";
 
 interface Author {
   id: number;
@@ -488,7 +488,7 @@ export default function TafsirPage() {
           </div>
         </div>
         {/* Layout: Sidebar + Main Content + Right Ayah Navigator */}
-        <div className="max-w-[1700px] mx-auto flex min-h-screen">
+        <div className={cn("max-w-[1700px] mx-auto flex min-h-screen transition-all duration-300 w-full", aiChatContext ? "lg:pr-[420px] xl:pr-[450px]" : "")}>
           {/* Left Sidebar: 114 Surahs */}
           <aside className="hidden md:flex flex-col w-64 lg:w-72 shrink-0 border-r border-zinc-800/60 bg-zinc-950/50 sticky top-0 h-screen overflow-y-auto custom-scrollbar">
             <div className="p-4 border-b border-zinc-800/60 sticky top-0 bg-zinc-950/90 z-10 flex flex-col gap-4">

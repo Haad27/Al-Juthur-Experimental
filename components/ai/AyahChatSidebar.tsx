@@ -281,6 +281,26 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
     }
   };
 
+  useEffect(() => {
+    if (isOpen) {
+      const handleResize = () => {
+        if (typeof window !== "undefined" && window.innerWidth < 1024) {
+          document.body.style.overflow = "hidden";
+        } else {
+          document.body.style.overflow = "";
+        }
+      };
+      handleResize();
+      window.addEventListener("resize", handleResize);
+      return () => {
+        document.body.style.overflow = "";
+        window.removeEventListener("resize", handleResize);
+      };
+    } else {
+      document.body.style.overflow = "";
+    }
+  }, [isOpen]);
+
   return (
     <AnimatePresence>
       {isOpen && (
