@@ -215,7 +215,7 @@ function LexiconPageContent() {
     <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-slate-100 pb-24 ${inter.className} transition-all duration-300 ${!!aiChatContext ? 'xl:pr-[450px]' : ''}`}>
       {/* Global Top Navigation Bar (Glassy Backdrop & Shadow) */}
       <div 
-        className={`sticky top-0 z-40 bg-zinc-950/95 backdrop-blur-2xl border-b border-zinc-800/80 px-4 md:px-8 py-3 shadow-md transition-transform duration-300 ${
+        className={`sticky top-0 z-40 bg-zinc-950/50 backdrop-blur-3xl border-b border-zinc-800/80 px-4 md:px-8 py-3 shadow-sm transition-transform duration-300 ${
           topNavVisible ? 'translate-y-0' : '-translate-y-full md:translate-y-0'
         }`}
       >
@@ -570,89 +570,87 @@ function LexiconPageContent() {
             {/* 
               RIGHT COLUMN (Desktop Only - lg:col-span-3): Quranic Forms & PDF Reference Lexicons 
             */}
-            <div className="hidden lg:block lg:col-span-3 sticky top-[73px] self-start">
-              <div className="space-y-6">
-                {/* Quranic Morphological Derivations */}
-                {result.structuredLane && result.structuredLane.morphological_forms.length > 0 && (
-                  <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5 shadow-xl">
-                    <h3 className="text-xs uppercase font-bold text-zinc-400 tracking-wider flex items-center gap-2 mb-3">
-                      <Layers className="size-4 text-emerald-400" />
-                      Quranic Derivations ({result.structuredLane.morphological_forms.length})
-                    </h3>
-                    <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
-                      {result.structuredLane.morphological_forms.map((form, idx) => (
-                        <div
-                          key={idx}
-                          className="p-2.5 rounded-xl bg-zinc-950/60 border border-zinc-800 flex items-center justify-between hover:border-zinc-700 transition-all"
-                        >
-                          <div>
-                            <div className="text-xs font-semibold text-white">{form.form_name}</div>
-                            <div className="text-[10px] text-zinc-400 capitalize">
-                              {form.form_category} • {form.form_pattern}
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-sm font-arabic font-bold text-emerald-300">
-                              {form.example_word}
-                            </div>
-                            <div className="text-[10px] text-zinc-500">
-                              {form.occurrences} {form.occurrences === 1 ? 'verse' : 'verses'}
-                            </div>
+            <div className="hidden lg:block lg:col-span-3 space-y-6">
+              {/* Quranic Morphological Derivations (Non-sticky) */}
+              {result.structuredLane && result.structuredLane.morphological_forms.length > 0 && (
+                <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5 shadow-xl">
+                  <h3 className="text-xs uppercase font-bold text-zinc-400 tracking-wider flex items-center gap-2 mb-3">
+                    <Layers className="size-4 text-emerald-400" />
+                    Quranic Derivations ({result.structuredLane.morphological_forms.length})
+                  </h3>
+                  <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
+                    {result.structuredLane.morphological_forms.map((form, idx) => (
+                      <div
+                        key={idx}
+                        className="p-2.5 rounded-xl bg-zinc-950/60 border border-zinc-800 flex items-center justify-between hover:border-zinc-700 transition-all"
+                      >
+                        <div>
+                          <div className="text-xs font-semibold text-white">{form.form_name}</div>
+                          <div className="text-[10px] text-zinc-400 capitalize">
+                            {form.form_category} • {form.form_pattern}
                           </div>
                         </div>
-                      ))}
-                    </div>
+                        <div className="text-right">
+                          <div className="text-sm font-arabic font-bold text-emerald-300">
+                            {form.example_word}
+                          </div>
+                          <div className="text-[10px] text-zinc-500">
+                            {form.occurrences} {form.occurrences === 1 ? 'verse' : 'verses'}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                )}
+                </div>
+              )}
 
-                {/* PDF Reference Lexicons (Sticky) */}
-                {pdfDictionaries.length > 0 && (
-                  <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5 shadow-xl sticky top-[73px]">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-xs uppercase font-bold text-zinc-400 tracking-wider flex items-center gap-2">
-                        <FileText className="size-4 text-emerald-400" />
-                        PDF Lexicons ({pdfDictionaries.length})
-                      </h3>
-                    </div>
-                    <div className="space-y-2.5">
-                      {pdfDictionaries.map((pdf) => (
-                        <div
-                          key={pdf.id}
-                          className="p-3 rounded-xl bg-zinc-950/60 border border-zinc-800 hover:border-emerald-500/40 transition-all flex flex-col gap-2"
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <div>
-                              <h4 className="text-xs font-bold text-white">{pdf.name}</h4>
-                              <p className="text-[10px] text-zinc-400 mt-0.5">{pdf.author}</p>
-                            </div>
-                            <span
-                              className={`text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
-                                pdf.language === 'English'
-                                  ? 'bg-blue-500/20 text-blue-300'
-                                  : 'bg-emerald-500/20 text-emerald-300'
-                              }`}
-                            >
-                              {pdf.language}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between pt-1 border-t border-zinc-800/80 mt-1">
-                            <span className="text-[10px] text-zinc-500 font-mono">{pdf.sizeMb}</span>
-                            <a
-                              href={`/api/lexicon/pdf?file=${encodeURIComponent(pdf.filePath)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 px-2 py-1 rounded bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[11px] font-medium transition"
-                            >
-                              <span>Open PDF</span>
-                              <ExternalLink className="size-3" />
-                            </a>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+              {/* PDF Reference Lexicons (Sticky & Scrollable) */}
+              {pdfDictionaries.length > 0 && (
+                <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5 shadow-xl sticky top-[73px] max-h-[calc(100vh-100px)] flex flex-col">
+                  <div className="flex items-center justify-between mb-3 shrink-0">
+                    <h3 className="text-xs uppercase font-bold text-zinc-400 tracking-wider flex items-center gap-2">
+                      <FileText className="size-4 text-emerald-400" />
+                      PDF Lexicons ({pdfDictionaries.length})
+                    </h3>
                   </div>
-                )}
-              </div>
+                  <div className="space-y-2.5 overflow-y-auto pr-1 custom-scrollbar">
+                    {pdfDictionaries.map((pdf) => (
+                      <div
+                        key={pdf.id}
+                        className="p-3 rounded-xl bg-zinc-950/60 border border-zinc-800 hover:border-emerald-500/40 transition-all flex flex-col gap-2"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <h4 className="text-xs font-bold text-white">{pdf.name}</h4>
+                            <p className="text-[10px] text-zinc-400 mt-0.5">{pdf.author}</p>
+                          </div>
+                          <span
+                            className={`text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
+                              pdf.language === 'English'
+                                ? 'bg-blue-500/20 text-blue-300'
+                                : 'bg-emerald-500/20 text-emerald-300'
+                            }`}
+                          >
+                            {pdf.language}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between pt-1 border-t border-zinc-800/80 mt-1">
+                          <span className="text-[10px] text-zinc-500 font-mono">{pdf.sizeMb}</span>
+                          <a
+                            href={`/api/lexicon/pdf?file=${encodeURIComponent(pdf.filePath)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[11px] font-medium transition"
+                          >
+                            <span>Open PDF</span>
+                            <ExternalLink className="size-3" />
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
           </div>

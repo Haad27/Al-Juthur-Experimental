@@ -93,7 +93,7 @@ const SurahsList = () => {
         surahs={surahs}
       />
       <div className="h-16 w-full lg:hidden flex"></div>
-      <div className="sticky top-0 z-50 h-20 w-full backdrop-blur-2xl bg-zinc-950/95 border-b border-zinc-800/50 shadow-md hidden lg:flex items-center justify-between xl:px-20 lg:px-8 px-4">
+      <div className="sticky top-0 z-50 h-20 w-full backdrop-blur-3xl bg-zinc-950/50 border-b border-zinc-800/40 shadow-sm hidden lg:flex items-center justify-between xl:px-20 lg:px-8 px-4">
         <div className="flex items-center gap-3 text-white">
           <LogoIcon className="hidden lg:block w-8 h-8 rounded-[20%]" />
           <p className="font-bold text-2xl">Al-Juthur</p>

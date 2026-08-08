@@ -416,7 +416,7 @@ export default function TafsirPage() {
     return (
       <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white ${inter.className} transition-all duration-300 ${!!aiChatContext ? "xl:pr-[450px]" : ""}`}>
         {/* Top Navigation Bar (Mobile Only) */}
-        <div className={`md:hidden sticky top-0 z-40 bg-zinc-950/95 backdrop-blur-2xl border-b border-zinc-800/80 px-3 py-3 transition-all duration-300 ${topNavVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}>
+        <div className={`md:hidden sticky top-0 z-40 bg-zinc-950/60 backdrop-blur-3xl border-b border-zinc-800/80 px-3 py-3 transition-all duration-300 ${topNavVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}>
           <div className="max-w-[1700px] mx-auto">
             {/* Top Row: Back, Title, Immersive Toggle */}
             <div className="flex items-center justify-between gap-2 md:gap-4 w-full">
@@ -740,7 +740,7 @@ export default function TafsirPage() {
     <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white pb-24 ${inter.className}`}>
       
       {/* Top Navigation Bar (Library View) */}
-      <div className="sticky top-0 z-40 bg-zinc-950/95 backdrop-blur-2xl border-b border-zinc-800/80 px-4 md:px-8 py-3 shadow-md">
+      <div className="sticky top-0 z-40 bg-zinc-950/50 backdrop-blur-3xl border-b border-zinc-800/80 px-4 md:px-8 py-3 shadow-sm">
         <div className="max-w-[1700px] mx-auto relative flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Logo and App Name */}
           <div className="flex items-center gap-4">
@@ -858,14 +858,14 @@ export default function TafsirPage() {
         </div>
       </div>
 
-      {/* Grid of Tafsir Containers (Matches Homepage Surah Cards exactly + Methodology Badges) */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
+      {/* Grid of Tafsir Containers (1 col -> 2 -> 3 -> 4 cols on laptop view) */}
+      <div className="max-w-[1700px] mx-auto px-4 md:px-8 py-6">
         {filteredAuthors.length === 0 ? (
           <div className="text-center py-20 bg-zinc-900/30 border border-zinc-800/60 rounded-xl">
             <p className="text-zinc-400 text-sm">No Tafsir books found matching your filter selections.</p>
           </div>
         ) : (
-          <div className="w-full grid xl:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
+          <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
             {filteredAuthors.map(({ author, language }, index) => (
               <div
                 key={`${language.id}-${author.id}`}
