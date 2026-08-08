@@ -559,31 +559,49 @@ export default function TafsirPage() {
           <main className="flex-1 p-4 md:p-8 space-y-8 min-w-0 transition-all duration-300">
 
             {/* Surah Banner Header */}
-            <div className="relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-gradient-to-r from-emerald-950/40 via-zinc-900/60 to-zinc-900/40 p-4 xl:p-8">
+            <div className={cn(
+              "relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-gradient-to-r from-emerald-950/40 via-zinc-900/60 to-zinc-900/40 transition-all duration-300",
+              aiChatContext ? "p-4 sm:p-5" : "p-4 sm:p-6 lg:p-8"
+            )}>
               <div className="absolute -right-10 -bottom-10 size-48 rounded-full bg-emerald-500/10 blur-3xl" />
-              <div className="flex items-start justify-between gap-2 relative z-10 min-w-0">
+              <div className={cn(
+                "relative z-10 min-w-0 transition-all",
+                aiChatContext ? "flex flex-col gap-2" : "flex flex-col xl:flex-row xl:items-center justify-between gap-3 xl:gap-4"
+              )}>
                 <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[9px] xl:text-xs font-medium uppercase tracking-wider text-emerald-400 mb-1">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] sm:text-xs font-medium uppercase tracking-wider text-emerald-400 mb-1">
                     <span>Surah {currentSurahMeta.number}</span>
                     <span>•</span>
                     <span>{currentSurahMeta.revelationType}</span>
                     <span>•</span>
                     <span>{currentSurahMeta.numberOfAyahs} Ayahs</span>
                   </div>
-                  <h2 className="text-sm xl:text-3xl font-extrabold text-white leading-tight break-words">
+                  <h2 className={cn(
+                    "font-extrabold text-white leading-tight transition-all [word-break:break-word]",
+                    aiChatContext ? "text-base sm:text-lg" : "text-lg sm:text-xl lg:text-2xl xl:text-3xl"
+                  )}>
                     {currentSurahMeta.englishName} ({currentSurahMeta.englishNameTranslation})
                   </h2>
                 </div>
-                <div className="text-right shrink-0 max-w-[38%]">
-                  <h3 className={`font-mushaf-uthmani text-xl xl:text-[2.75rem] text-emerald-300 leading-relaxed`}>
+                <div className={cn(
+                  "shrink-0 transition-all",
+                  aiChatContext ? "text-left sm:text-right" : "text-left xl:text-right"
+                )}>
+                  <h3 className={cn(
+                    "font-mushaf-uthmani text-emerald-300 leading-relaxed transition-all",
+                    aiChatContext ? "text-xl sm:text-2xl" : "text-2xl sm:text-3xl xl:text-[2.75rem]"
+                  )}>
                     {currentSurahMeta.name}
                   </h3>
                 </div>
               </div>
 
               {currentSurahMeta.number !== 9 && (
-                <div className="mt-4 pt-4 xl:mt-5 xl:pt-5 border-t border-zinc-800/60 text-center">
-                  <p className={`font-mushaf-uthmani text-[1rem] xl:text-4xl text-amber-100/90 tracking-wide leading-loose`}>
+                <div className="mt-4 pt-4 border-t border-zinc-800/60 text-center">
+                  <p className={cn(
+                    "font-mushaf-uthmani text-amber-100/90 tracking-wide leading-loose transition-all",
+                    aiChatContext ? "text-lg sm:text-xl" : "text-[1.65rem] md:text-4xl"
+                  )}>
                     بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
                   </p>
                 </div>
@@ -616,22 +634,25 @@ export default function TafsirPage() {
                       {/* Top Ayah Header */}
                       <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3 gap-2 min-w-0">
                         <div className="flex items-center gap-1.5 min-w-0 shrink-0">
-                          <span className="shrink-0 h-7 px-1.5 min-w-[1.75rem] rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-[10px] xl:text-xs font-bold text-emerald-400 whitespace-nowrap">
+                          <span className="shrink-0 h-7 px-1.5 min-w-[1.75rem] rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-xs font-bold text-emerald-400 whitespace-nowrap">
                             {activeSurah}:{ayahNumber}
                           </span>
-                          <span className="text-xs xl:text-sm font-semibold text-zinc-300 whitespace-nowrap">Ayah {ayahNumber}</span>
+                          <span className="text-xs sm:text-sm font-semibold text-zinc-300 whitespace-nowrap">Ayah {ayahNumber}</span>
                         </div>
-                        <div className="flex items-center gap-1 shrink-0">
+                        <div className="flex items-center gap-1.5 shrink-0">
                           <button
                             onClick={() => {
                               const cleanText = entry.text.replace(/<[^>]*>?/gm, '');
                               copyToClipboard(cleanText, "Tafsir explanation copied to clipboard!");
                             }}
-                            className="flex items-center gap-1 px-2 py-1.5 xl:px-2.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 transition text-[10px] xl:text-xs font-medium text-zinc-300 whitespace-nowrap"
+                            className={cn(
+                              "flex items-center rounded-lg bg-zinc-800/80 hover:bg-zinc-700 transition font-medium text-zinc-300 whitespace-nowrap gap-2 px-3 py-1.5 text-xs",
+                              aiChatContext && "lg:gap-1 lg:px-2 lg:text-[10px]"
+                            )}
                             title="Copy Tafsir"
                           >
-                            <Copy className="size-3 xl:size-3.5 shrink-0" />
-                            <span className="hidden xl:inline">Copy</span>
+                            <Copy className={cn("shrink-0 size-3.5", aiChatContext && "lg:size-3")} />
+                            <span className={cn(aiChatContext && "lg:hidden")}>Copy</span>
                           </button>
                           {activeLangName !== 'English' && (
                             <button
@@ -640,11 +661,14 @@ export default function TafsirPage() {
                                 sessionStorage.setItem("ai_translator_input", cleanText);
                                 router.push("/ai");
                               }}
-                              className="flex items-center gap-1 px-2 py-1.5 xl:px-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition text-[10px] xl:text-xs font-medium text-emerald-400 whitespace-nowrap"
+                              className={cn(
+                                "flex items-center rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition font-medium text-emerald-400 whitespace-nowrap gap-2 px-3 py-1.5 text-xs",
+                                aiChatContext && "lg:gap-1 lg:px-2 lg:text-[10px]"
+                              )}
                               title="Translate to English"
                             >
-                              <Languages className="size-3 xl:size-3.5 text-emerald-400 shrink-0" />
-                              <span className="hidden xl:inline">Translate to English</span>
+                              <Languages className={cn("text-emerald-400 shrink-0 size-3.5", aiChatContext && "lg:size-3")} />
+                              <span className={cn(aiChatContext && "lg:hidden")}>Translate to English</span>
                             </button>
                           )}
                         </div>
