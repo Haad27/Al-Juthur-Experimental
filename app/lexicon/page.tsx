@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useGlobalState } from '@/lib/providers/GlobalStatesProvider';
+import { copyToClipboard } from '@/lib/utils';
 import LexiconTextRenderer from '@/components/lexicon/LexiconTextRenderer';
 import { amiriquran, inter } from '@/app/fonts';
 import AyahChatSidebar from '@/components/ai/AyahChatSidebar';
@@ -198,8 +199,8 @@ function LexiconPageContent() {
   };
 
   const handleCopyDefinition = (text: string, dictName: string) => {
-    navigator.clipboard.writeText(`[${result?.normalizedRoot} - ${dictName}]\n${text}`);
-    toast.success('Definition copied to clipboard');
+    const clean = text.replace(/<[^>]*>?/gm, '');
+    copyToClipboard(`[${result?.normalizedRoot || activeRoot} - ${dictName}]\n${clean}`, "Definition copied to clipboard!");
   };
 
   const filteredEntries =
@@ -543,15 +544,6 @@ function LexiconPageContent() {
                             <span className="sm:hidden">Translate</span>
                           </button>
                         )}
-                        <button
-                          onClick={() => setAiChatContext({ root: activeRoot })}
-                          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition text-xs font-medium text-emerald-400 group"
-                          title="Ask Lexicon Scholar"
-                        >
-                          <Bot className="size-3.5 text-emerald-400 group-hover:scale-110 transition-transform" />
-                          <span className="hidden sm:inline">Ask Scholar</span>
-                          <span className="sm:hidden">Ask</span>
-                        </button>
                       </div>
                     </div>
 

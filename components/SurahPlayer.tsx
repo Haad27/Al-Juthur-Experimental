@@ -100,6 +100,27 @@ export default function SurahPlayer({
   const [collapsed, setCollapsed] = useState(false);
   const [mobileFabOpen, setMobileFabOpen] = useState(false);
 
+  useEffect(() => {
+    if (recording || playing || audioStore.isPlaying) {
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("close-left-sidebar"));
+        document.body.classList.add("no-scrollbar");
+        document.documentElement.classList.add("no-scrollbar");
+      }
+    } else {
+      if (typeof window !== "undefined") {
+        document.body.classList.remove("no-scrollbar");
+        document.documentElement.classList.remove("no-scrollbar");
+      }
+    }
+    return () => {
+      if (typeof window !== "undefined") {
+        document.body.classList.remove("no-scrollbar");
+        document.documentElement.classList.remove("no-scrollbar");
+      }
+    };
+  }, [recording, playing, audioStore.isPlaying]);
+
   // Keep ref in sync for SR
   useEffect(() => {
     currentAyahRef.current = currentAyah;
@@ -423,7 +444,7 @@ export default function SurahPlayer({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 15, scale: 0.95 }}
           className={cn(
-            "fixed bottom-[calc(10.25rem+env(safe-area-inset-bottom,0px))] md:bottom-[5.5rem] z-[9999] w-64 md:w-72 bg-zinc-900/95 border border-emerald-500/50 rounded-2xl p-4 shadow-[0_0_30px_rgba(16,185,129,0.3)] backdrop-blur-2xl space-y-4 text-white transition-all duration-300",
+            "fixed bottom-[calc(10.25rem+env(safe-area-inset-bottom,0px))] md:bottom-[5.5rem] z-[9999] w-64 md:w-72 bg-zinc-900/95 border border-emerald-500/50 rounded-2xl p-4 shadow-[0_0_30px_rgba(16,185,129,0.3)] backdrop-blur-2xl space-y-4 text-white transition-all duration-300 max-h-[85vh] overflow-y-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
             aiChatContext ? "max-lg:hidden right-4 lg:right-[440px] xl:right-[470px]" : "right-4 md:right-8"
           )}
         >

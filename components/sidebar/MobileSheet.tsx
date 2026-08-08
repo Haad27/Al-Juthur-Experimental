@@ -27,6 +27,7 @@ import useScrollDirection from "@/hooks/useScrollDirection";
 import { motion } from "framer-motion";
 import { Search, SlidersHorizontal, ChevronRight } from "lucide-react";
 import { SURAHS_DATA } from "@/lib/surahsData";
+import { useAudioStore } from "@/lib/stores/audioStore";
 
 const MobileSheet = ({
   isOpen,
@@ -39,6 +40,18 @@ const MobileSheet = ({
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("search");
   const show = useScrollDirection();
+  const isPlayingAudio = useAudioStore((s) => s.isPlaying);
+  const [isAudioActive, setIsAudioActive] = useState(false);
+
+  useEffect(() => {
+    const checkAudio = () => {
+      const isBodyNoScroll = typeof document !== "undefined" && document.body.classList.contains("no-scrollbar");
+      setIsAudioActive(isPlayingAudio || isBodyNoScroll);
+    };
+    checkAudio();
+    const interval = setInterval(checkAudio, 300);
+    return () => clearInterval(interval);
+  }, [isPlayingAudio]);
 
   const filteredSurahs = surahs?.filter((surah: Surah) =>
     surah.englishName.toLowerCase().includes(searchQuery.toLowerCase())
@@ -49,7 +62,7 @@ const MobileSheet = ({
         <div
           className={cn(
             "fixed top-0 left-0 right-0 w-full lg:hidden flex flex-col gap-2 transition-transform duration-300 ease-out p-2 pl-4 pr-2 dark:bg-zinc-950/60 bg-zinc-950/60 backdrop-blur-3xl border-b dark:border-zinc-800/60 border-black/10 shadow-md min-h-16 z-[99999]",
-            show ? "translate-y-0" : "-translate-y-full"
+            (show && !isAudioActive) ? "translate-y-0" : "-translate-y-full"
           )}
         >
           {(() => {

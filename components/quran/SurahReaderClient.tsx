@@ -11,7 +11,7 @@ import NavigatorButton from "@/components/NavigatorButton";
 import { InteractiveAyahWords } from "@/components/quran/InteractiveAyahWords";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { useAudioStore } from "@/lib/stores/audioStore";
-import { cn, convertNumberToArabicNumeral } from "@/lib/utils";
+import { cn, convertNumberToArabicNumeral, copyToClipboard } from "@/lib/utils";
 import BismillahIcon from "@/components/svg/icons/BismillahIcon";
 import LogoIcon from "@/components/svg/icons/LogoIcon";
 import {
@@ -75,6 +75,7 @@ interface AyahRowProps {
   onOpenAiChat: (surahNumber: number, ayahNumber: number) => void;
   isUrduTranslation: boolean;
   translationEdition: string;
+  isSidebarOpen?: boolean;
 }
 
 function cleanUrduFootnoteText(html: string) {
@@ -88,55 +89,43 @@ function cleanUrduFootnoteText(html: string) {
     html = html.substring(match.index);
   } else {
     // fallback if no tags
-    const fallbackMarker = html.indexOf("تفسیر:");
-    const fallbackMarkerEn = html.indexOf("Tafsir:");
-    if (fallbackMarker > 10) {
-      html = html.substring(fallbackMarker);
-    } else if (fallbackMarkerEn > 10) {
-      html = html.substring(fallbackMarkerEn);
+    const fallbackTafsirRegex = /تفسیر:/i;
+    const fbMatch = html.match(fallbackTafsirRegex);
+    if (fbMatch && fbMatch.index !== undefined) {
+      html = html.substring(fbMatch.index);
     }
   }
 
-  return html
-    .replace(/<b class=['"]?text-emerald-400[^>]*>(.*?)<\/b>/gi, '<span class="text-zinc-300 font-semibold block mb-2">$1</span>')
-    .replace(/<b class=['"]?text-amber-400[^>]*>(.*?)<\/b>/gi, '<span class="text-zinc-300 font-semibold block mt-3 mb-1">$1</span>')
-    .replace(/<span class=['"]?text-emerald-400[^>]*>(.*?)<\/span>/gi, '<span class="text-zinc-300 font-semibold block mb-2">$1</span>')
-    .replace(/class=['"]text-emerald-400['"]/g, 'class="text-zinc-300"')
-    .replace(/class=['"]text-emerald-500['"]/g, 'class="text-zinc-400"');
+  // Sanitize and keep formatting HTML tags
+  let clean = html;
+  // Remove script/style tags
+  clean = clean.replace(/<script\b[^<]*>(?:[\s\S]*?)<\/script>/gi, '');
+  clean = clean.replace(/<style\b[^<]*>(?:[\s\S]*?)<\/style>/gi, '');
+
+  return clean;
 }
 
-function processTranslation(rawText: string) {
-  if (!rawText) return { mainText: "", footnotes: [] as string[] };
+function processTranslation(rawTranslation: string) {
+  if (!rawTranslation) return { mainText: "", footnotes: [] };
 
-  let clean = rawText.trim();
   const footnotes: string[] = [];
 
-  // Extract footnote patterns like: [1] ... or (1) ... or \n[1] ...
-  const fnRegex = /(?:^|\n|\s)(\[\d+\]|\(\d+\)|\d+\.)\s*([^\n\[\]]+)/g;
-  let fnMatch;
-  while ((fnMatch = fnRegex.exec(clean)) !== null) {
-    if (fnMatch[0]) {
-      footnotes.push(fnMatch[0].trim());
+  // Extract inline footnotes: <sup footnote-id="...">...</sup>
+  let clean = rawTranslation.replace(
+    /<sup\s+footnote-id="([^"]+)">([\s\S]*?)<\/sup>/gi,
+    (_match, _id, content) => {
+      const footnoteText = content.replace(/<[^>]*>?/gm, '').trim();
+      if (footnoteText) {
+        footnotes.push(footnoteText);
+      }
+      return ` <span class="text-emerald-400 font-semibold cursor-pointer text-xs">(${footnotes.length})</span>`;
     }
-  }
+  );
 
-  // Remove trailing footnotes from main text if match was found
-  if (footnotes.length > 0) {
-    const firstFnMarkerIndex = clean.search(/(?:\n|\s+)(\[\d+\]|\(\d+\)|\d+\.)\s*/);
-    if (firstFnMarkerIndex > 0) {
-      clean = clean.substring(0, firstFnMarkerIndex).trim();
-    }
-  }
-
-  // Extract embedded double-bracket footnotes like: [[ This is a footnote ]]
-  const doubleBracketRegex = /\[\[(.*?)\]\]/g;
-  let dbMatch;
-  while ((dbMatch = doubleBracketRegex.exec(clean)) !== null) {
-    if (dbMatch[1]) {
-      footnotes.push(dbMatch[1].trim());
-    }
-  }
-  // Remove the double-bracket footnotes from the main text
+  // Remove any remaining HTML tags except <b>, <i>, <span>, strong, <em>, <br>
+  clean = clean.replace(/<(?!\/?(b|i|span|strong|em|br)\b)[^>]+>/gi, '');
+  
+  // Clean up any remaining double brackets like [[1]] or [[2]]
   clean = clean.replace(/\[\[.*?\]\]/g, '').replace(/\s{2,}/g, ' ').trim();
 
   // Deduplicate identical sentences (e.g. duplicate sentences appended by mistake)
@@ -154,6 +143,18 @@ function processTranslation(rawText: string) {
 const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRANSLATION_OPTIONS }: any) => {
   const show = useScrollDirection();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+  const isPlayingAudio = useAudioStore((s) => s.isPlaying);
+  const [isAudioActive, setIsAudioActive] = useState(false);
+
+  useEffect(() => {
+    const checkAudio = () => {
+      const isBodyNoScroll = typeof document !== "undefined" && document.body.classList.contains("no-scrollbar");
+      setIsAudioActive(isPlayingAudio || isBodyNoScroll);
+    };
+    checkAudio();
+    const interval = setInterval(checkAudio, 300);
+    return () => clearInterval(interval);
+  }, [isPlayingAudio]);
 
   useEffect(() => {
     const handleToggle = (e: any) => {
@@ -165,19 +166,20 @@ const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRAN
     return () => window.removeEventListener("left-sidebar-toggle", handleToggle);
   }, []);
 
+  const offsetLeftClass = isAudioActive ? "left-0" : (isSidebarCollapsed ? "left-16" : "left-[350px]");
+  const widthClass = isAudioActive
+    ? (aiChatContext ? "w-full lg:w-[calc(100%-420px)] xl:w-[calc(100%-450px)]" : "w-full")
+    : (aiChatContext
+        ? (isSidebarCollapsed ? "w-[calc(100%-64px)] lg:w-[calc(100%-64px-420px)] xl:w-[calc(100%-64px-450px)]" : "w-[calc(100%-350px)] lg:w-[calc(100%-350px-420px)] xl:w-[calc(100%-350px-450px)]")
+        : (isSidebarCollapsed ? "w-[calc(100%-64px)]" : "w-[calc(100%-350px)]"));
+
   return (
     <div
       className={cn(
         "hidden md:flex fixed top-0 items-center justify-between md:min-h-14 px-6 py-3 backdrop-blur-3xl dark:bg-zinc-900/60 bg-white/80 border-b dark:border-zinc-800/60 border-black/10 shadow-md transition-all duration-300 ease-out z-50",
         show ? "translate-y-0" : "-translate-y-full",
-        isSidebarCollapsed ? "left-16" : "left-[350px]",
-        aiChatContext
-          ? isSidebarCollapsed
-            ? "w-[calc(100%-64px)] lg:w-[calc(100%-64px-420px)] xl:w-[calc(100%-64px-450px)]"
-            : "w-[calc(100%-350px)] lg:w-[calc(100%-350px-420px)] xl:w-[calc(100%-350px-450px)]"
-          : isSidebarCollapsed
-            ? "w-[calc(100%-64px)]"
-            : "w-[calc(100%-350px)]"
+        offsetLeftClass,
+        widthClass
       )}
     >
       <div className="flex items-center gap-2.5 min-w-0">
@@ -221,6 +223,7 @@ const AyahRow = React.memo(({
   onOpenAiChat,
   isUrduTranslation,
   translationEdition,
+  isSidebarOpen,
 }: AyahRowProps) => {
   const isCurrentlyPlaying = useAudioStore(s => s.isPlaying && s.currentAyah === ayah.numberInSurah && s.currentSurah === surahNumber);
   const isPlaying = useAudioStore(s => s.isPlaying);
@@ -395,11 +398,14 @@ const AyahRow = React.memo(({
   return (
     <div
       className={cn(
-        "transition-all duration-300 relative flex flex-col rounded-2xl my-3 sm:my-5 p-3.5 sm:p-6 md:p-7 shadow-sm w-full min-w-0 overflow-hidden box-border",
+        "transition-all duration-300 relative flex flex-col rounded-2xl shadow-sm w-full min-w-0 overflow-hidden box-border",
+        isSidebarOpen
+          ? "my-1.5 sm:my-2 md:my-2 p-3 sm:p-4 md:p-4 lg:p-4"
+          : "my-3 sm:my-5 p-3.5 sm:p-6 md:p-7",
         isCurrentlyPlaying
-          ? "border-2 border-emerald-500 bg-zinc-950/95 dark:bg-zinc-950/95 shadow-[0_10px_60px_-15px_rgba(16,185,129,0.3),0_0_30px_rgba(16,185,129,0.2)] ring-1 ring-emerald-500/20 scale-[1.02] z-50 max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          ? "border border-emerald-500/50 bg-zinc-950/90 dark:bg-zinc-950/90 shadow-[0_4px_25px_rgba(16,185,129,0.12)] scale-[1.005] z-50 max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
           : "border border-emerald-500/25 hover:border-emerald-500/50 bg-zinc-900/40 dark:bg-zinc-900/40 hover:shadow-[0_0_25px_rgba(16,185,129,0.1)]",
-        isOtherPlaying ? "opacity-20 blur-[3px] scale-[0.98] grayscale pointer-events-none" : "opacity-100 blur-none grayscale-0"
+        isOtherPlaying ? "opacity-35 blur-[1px] scale-[0.995] pointer-events-none" : "opacity-100 blur-none scale-100"
       )}
       id={`ayah-${ayah.numberInSurah}`}
     >
@@ -454,8 +460,8 @@ const AyahRow = React.memo(({
         </div>
         </div>
       )}
-      <div className="flex flex-col items-end justify-end sm:flex-row sm:gap-12 gap-4 w-full py-1">
-      <div className="h-full flex flex-row sm:order-1 order-2 sm:flex-col gap-3 sm:justify-center items-center transition-all duration-300 relative z-10 shrink-0">
+      <div className={cn("flex flex-col items-end justify-end sm:flex-row w-full py-0", isSidebarOpen ? "sm:gap-6 gap-3" : "sm:gap-12 gap-4")}>
+      <div className="h-full flex flex-row sm:order-1 order-2 sm:flex-col gap-2 sm:justify-center items-center transition-all duration-300 relative z-10 shrink-0">
         <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs font-bold text-emerald-400">
           {surahNumber}:{ayah.numberInSurah}
         </span>
@@ -492,7 +498,13 @@ const AyahRow = React.memo(({
         <p
           lang="ar"
           id={`atext-${ayah.numberInSurah}`}
-          className={`${mushafFontClass} tracking-wide leading-loose font-light sm:pr-8 md:pr-16 lg:pr-26 md:pb-8`}
+          className={cn(
+            mushafFontClass,
+            "tracking-wide font-light",
+            isSidebarOpen 
+              ? "leading-relaxed sm:pr-4 md:pr-6 lg:pr-8 md:pb-1" 
+              : "leading-loose sm:pr-8 md:pr-16 lg:pr-26 md:pb-8"
+          )}
           style={{ fontSize: getArabicFontSize(fontSize) }}
         >
           <span className="inline-flex items-center justify-center size-6 rounded-full text-xl mr-4">
@@ -509,7 +521,13 @@ const AyahRow = React.memo(({
         </p>
 
         {showTranslation && (
-          <div className={cn("pt-4 text-left w-full", isUrduTranslation ? "w-full sm:pr-8 md:pr-16 lg:pr-26" : "md:ml-8 lg:w-2/3 md:w-4/6")}>
+          <div className={cn(
+            "text-left w-full",
+            isSidebarOpen ? "pt-2 md:pt-2" : "pt-4",
+            isUrduTranslation 
+              ? (isSidebarOpen ? "w-full sm:pr-4 md:pr-6" : "w-full sm:pr-8 md:pr-16 lg:pr-26")
+              : (isSidebarOpen ? "w-full md:pr-4 lg:pr-8" : "md:ml-8 lg:w-2/3 md:w-4/6")
+          )}>
             <div>
               <span
                 className="text-white md:leading-[1.5] leading-[1.8] translation-content"
@@ -749,23 +767,11 @@ export default function SurahReaderClient({
   }, [ayahParam, ayahs]);
 
   const handleCopyAyah = React.useCallback(({ numberInSurah, text, translation }: AyahProps) => {
-    navigator.clipboard.writeText(
-      `${text} ${translation} [${surahNumber}:${numberInSurah}]`
+    copyToClipboard(
+      `${text}\n\n"${translation}"\n\n— Surah ${surah?.englishName || surahNumber} (${surahNumber}:${numberInSurah})`,
+      "Copied verse to clipboard!"
     );
-    toast(
-      <div className="flex items-center gap-3">
-        <Check size={22} />
-        <div>
-          <p className="font-semibold">Copied Verse to Clipboard</p>
-        </div>
-      </div>,
-      {
-        className:
-          "bg-[var(--sephia-200)] dark:bg-[#27272A] text-black dark:text-white",
-        duration: 3000,
-      }
-    );
-  }, [surahNumber]);
+  }, [surah, surahNumber]);
 
   const handleSaveAyah = React.useCallback((ayah: AyahProps) => {
     const saved = JSON.parse(localStorage.getItem("saved-ayahs") || "[]");
@@ -913,6 +919,7 @@ export default function SurahReaderClient({
                   onOpenAiChat={handleOpenAiChat}
                   isUrduTranslation={isUrduTranslation}
                   translationEdition={translationEdition}
+                  isSidebarOpen={!!aiChatContext}
                 />
               );
             }}

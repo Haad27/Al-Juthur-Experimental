@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 import { motion } from "framer-motion";
 import { BookOpen, SlidersHorizontal, Search } from "lucide-react";
+import { useAudioStore } from "@/lib/stores/audioStore";
 
 type TabKey = "surah" | "settings";
 const tabs: { key: TabKey; label: string; icon: React.ReactNode }[] = [
@@ -33,6 +34,19 @@ const Sidebar = () => {
   // Open/Closed States:
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
+
+  const isPlayingAudio = useAudioStore((s) => s.isPlaying);
+  const [isAudioActive, setIsAudioActive] = useState(false);
+
+  useEffect(() => {
+    const checkAudio = () => {
+      const isBodyNoScroll = typeof document !== "undefined" && document.body.classList.contains("no-scrollbar");
+      setIsAudioActive(isPlayingAudio || isBodyNoScroll);
+    };
+    checkAudio();
+    const interval = setInterval(checkAudio, 300);
+    return () => clearInterval(interval);
+  }, [isPlayingAudio]);
 
   // USESTATES END
 
@@ -82,7 +96,9 @@ const Sidebar = () => {
       <div
         className={cn(
           "min-h-screen lg:block hidden sticky top-0 z-40 border-r dark:border-[#262629ff] border-[var(--sephia-500)] bg-zinc-900 text-white transition-all duration-300 shadow-sm",
-          isCollapsed ? "w-16" : "md:w-[350px]"
+          isAudioActive 
+            ? "w-0 opacity-0 overflow-hidden border-none pointer-events-none" 
+            : isCollapsed ? "w-16" : "md:w-[350px]"
         )}
       >
         {/* Header with collapse button */}

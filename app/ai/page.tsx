@@ -6,6 +6,7 @@ import { Languages, Loader2, ArrowRightLeft, ShieldAlert, Copy, Check, LayoutGri
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { useGlobalState } from '@/lib/providers/GlobalStatesProvider';
+import { copyToClipboard } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import LogoIcon from '@/components/svg/icons/LogoIcon';
 
@@ -29,16 +30,22 @@ export default function AiTranslatorPage() {
   const [tokenLimit, setTokenLimit] = useState<number>(250000);
 
   useEffect(() => {
-    const textToTranslate = searchParams.get('text');
-    if (textToTranslate) {
-      setAiInputText(textToTranslate);
-    }
-    const sessionText = sessionStorage.getItem('ai_translator_input');
-    if (sessionText) {
-      setAiInputText(sessionText);
+    const inputParam = searchParams.get('input');
+    const sessionInput = typeof window !== 'undefined' ? sessionStorage.getItem('ai_translator_input') : null;
+    
+    if (sessionInput) {
+      setAiInputText(sessionInput);
       sessionStorage.removeItem('ai_translator_input');
+    } else if (inputParam) {
+      setAiInputText(inputParam);
     }
   }, [searchParams, setAiInputText]);
+
+  useEffect(() => {
+    if (aiInputText.trim() && !aiIsTranslating && !aiTranslationData && !aiUntranslatedText && !aiError) {
+      triggerAiTranslation();
+    }
+  }, [aiInputText, aiIsTranslating, aiTranslationData, aiUntranslatedText, aiError, triggerAiTranslation]);
 
   const fetchQuota = () => {
     fetch('/api/ai/translate')
@@ -65,33 +72,9 @@ export default function AiTranslatorPage() {
   }, [aiIsTranslating, aiTranslationData]);
 
   const copySegment = (text: string, index: string) => {
-    // Fallback for mobile and http contexts
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
-    } else {
-      fallbackCopy(text);
-    }
+    copyToClipboard(text, "Translation segment copied!");
     setCopiedIndex(index);
-    toast("Copied translation segment!");
     setTimeout(() => setCopiedIndex(null), 2000);
-  };
-
-  const fallbackCopy = (text: string) => {
-    const textArea = document.createElement("textarea");
-    textArea.value = text;
-    // Avoid scrolling to bottom
-    textArea.style.top = "0";
-    textArea.style.left = "0";
-    textArea.style.position = "fixed";
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-    try {
-      document.execCommand('copy');
-    } catch (err) {
-      console.error('Fallback: Oops, unable to copy', err);
-    }
-    document.body.removeChild(textArea);
   };
 
   const copyAll = (format: 'english' | 'reader' | 'split') => {
@@ -106,11 +89,7 @@ export default function AiTranslatorPage() {
       textToCopy = aiTranslationData.map(row => `${row.transcreatedText}\n\n${row.sourceText}`).join('\n\n---\n\n');
     }
 
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(textToCopy).catch(() => fallbackCopy(textToCopy));
-    } else {
-      fallbackCopy(textToCopy);
-    }
+    copyToClipboard(textToCopy, `Copied all translations in ${format} format!`);
     setCopiedIndex(`all-${format}`);
     toast(`Copied all translations in ${format} format!`);
     setTimeout(() => setCopiedIndex(null), 2000);

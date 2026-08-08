@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, Bot, User, Loader2, BookOpen, Layers, ShieldAlert, Sparkles, AlertTriangle, CheckCircle2, ChevronDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { X, Send, Bot, User, Loader2, BookOpen, Layers, ShieldAlert, Sparkles, AlertTriangle, CheckCircle2, ChevronDown, Copy } from "lucide-react";
+import { cn, copyToClipboard } from "@/lib/utils";
 import { RAG_MODES, RagModeInfo } from "@/lib/ai/rag/modes-config";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -395,13 +395,22 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
 
                   {/* Message Content */}
                   <div className={cn(
-                    "max-w-[88%] sm:max-w-[85%] rounded-2xl p-3 sm:p-4 text-xs sm:text-sm leading-relaxed shadow-sm",
+                    "max-w-[88%] sm:max-w-[85%] rounded-2xl p-3 sm:p-4 text-xs sm:text-sm leading-relaxed shadow-sm relative group",
                     msg.role === "user" 
                       ? "bg-zinc-800/90 border border-zinc-700/60 rounded-tr-sm text-zinc-200" 
                       : msg.isScopeInvalid
                       ? "bg-amber-950/30 border border-amber-500/40 rounded-tl-sm text-amber-100"
                       : "bg-zinc-900/90 border border-zinc-800 rounded-tl-sm text-zinc-200"
                   )}>
+                    {msg.role === "assistant" && (
+                      <button
+                        onClick={() => copyToClipboard(msg.content, "Response copied to clipboard!")}
+                        className="absolute top-2 right-2 p-1.5 rounded-lg text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800/80 transition opacity-0 group-hover:opacity-100 focus:opacity-100 cursor-pointer"
+                        title="Copy response"
+                      >
+                        <Copy className="size-3.5" />
+                      </button>
+                    )}
                     {msg.isScopeInvalid && (
                       <div className="flex items-center gap-1.5 pb-2 mb-2 border-b border-amber-500/30 text-[11px] font-bold text-amber-300 uppercase tracking-wider">
                         <ShieldAlert className="size-3.5" />

@@ -36,10 +36,9 @@ export default function FloatingAskScholarButton({
             onFocus={() => setIsHovered(true)}
             onBlur={() => setIsHovered(false)}
             className={cn(
-              "relative flex items-center gap-3 rounded-full p-3.5 md:p-3.5",
-              "bg-zinc-900/90 backdrop-blur-md border border-emerald-500/50 hover:border-emerald-400 text-emerald-400 font-medium",
-              "shadow-lg shadow-emerald-950/40 hover:shadow-emerald-900/50 opacity-90 hover:opacity-100",
-              "transition-all duration-300 ease-out group overflow-hidden cursor-pointer"
+              "relative flex items-center gap-3 rounded-full p-3.5 md:p-3.5 text-emerald-400 font-medium border border-emerald-500/70 hover:border-emerald-400 opacity-95 hover:opacity-100 transition-all duration-300 ease-out group overflow-hidden cursor-pointer",
+              "max-md:bg-transparent max-md:shadow-none max-md:backdrop-blur-none",
+              "md:bg-zinc-900/90 md:backdrop-blur-md md:shadow-lg md:shadow-emerald-950/40 md:hover:shadow-emerald-900/50"
             )}
           >
             {/* Shimmer effect inside the button */}

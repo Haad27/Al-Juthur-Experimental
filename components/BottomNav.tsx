@@ -7,9 +7,23 @@ import { Home, BookOpen, ScrollText, Library, Languages, Bot } from "lucide-reac
 import { motion } from "framer-motion";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 
+import { useAudioStore } from "@/lib/stores/audioStore";
+
 const BottomNav = () => {
   const pathname = usePathname();
   const { immersiveMode, setImmersiveMode } = useGlobalState();
+  const isPlayingAudio = useAudioStore((s) => s.isPlaying);
+  const [isAudioActive, setIsAudioActive] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkAudio = () => {
+      const isBodyNoScroll = typeof document !== "undefined" && document.body.classList.contains("no-scrollbar");
+      setIsAudioActive(isPlayingAudio || isBodyNoScroll);
+    };
+    checkAudio();
+    const interval = setInterval(checkAudio, 300);
+    return () => clearInterval(interval);
+  }, [isPlayingAudio]);
 
   React.useEffect(() => {
     setImmersiveMode(false);
@@ -45,7 +59,7 @@ const BottomNav = () => {
     },
   ];
 
-  if (pathname === "/") return null;
+  if (pathname === "/" || isAudioActive) return null;
 
   return (
     <div className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-md z-50 md:hidden">

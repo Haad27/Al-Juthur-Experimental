@@ -13,6 +13,7 @@ import FloatingAskScholarButton from "@/components/ai/FloatingAskScholarButton";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
+import { copyToClipboard } from "@/lib/utils";
 
 interface Author {
   id: number;
@@ -624,8 +625,7 @@ export default function TafsirPage() {
                           <button
                             onClick={() => {
                               const cleanText = entry.text.replace(/<[^>]*>?/gm, '');
-                              navigator.clipboard.writeText(cleanText);
-                              toast("Copied Tafsir explanation to clipboard!", { className: "bg-zinc-800 text-white border-zinc-700" });
+                              copyToClipboard(cleanText, "Tafsir explanation copied to clipboard!");
                             }}
                             className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 transition text-xs font-medium text-zinc-300"
                             title="Copy Tafsir"
@@ -648,15 +648,6 @@ export default function TafsirPage() {
                               <span className="sm:hidden">Translate</span>
                             </button>
                           )}
-                          <button
-                            onClick={() => setAiChatContext({ surah: activeSurah, ayah: ayahNumber })}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition text-xs font-medium text-emerald-400 group"
-                            title="Ask Scholar"
-                          >
-                            <Bot className="size-3.5 text-emerald-400 group-hover:scale-110 transition-transform" />
-                            <span className="hidden sm:inline">Ask Scholar</span>
-                            <span className="sm:hidden">Ask</span>
-                          </button>
                         </div>
                       </div>
 
@@ -696,7 +687,7 @@ export default function TafsirPage() {
           </main>
 
           {/* Right Sidebar: Compact Ayah Jump Index */}
-          <aside className="hidden xl:flex flex-col w-20 border-l border-zinc-800/60 bg-zinc-950/50 sticky top-[73px] h-[calc(100vh-73px)] overflow-y-auto no-scrollbar py-6">
+          <aside className="hidden xl:flex flex-col w-20 border-l border-zinc-800/60 bg-zinc-950/50 sticky top-0 h-screen overflow-y-auto no-scrollbar py-6">
             <div className="text-[9px] uppercase font-bold text-zinc-500 tracking-widest text-center mb-6">Ayahs</div>
             <div className="flex flex-col items-center gap-2">
               {Array.from({ length: currentSurahMeta.numberOfAyahs }, (_, i) => i + 1).map((num) => {
