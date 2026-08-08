@@ -153,7 +153,7 @@ function processTranslation(rawText: string) {
 
 const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRANSLATION_OPTIONS }: any) => {
   const show = useScrollDirection();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
   useEffect(() => {
     const handleToggle = (e: any) => {
@@ -168,7 +168,7 @@ const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRAN
   return (
     <div
       className={cn(
-        "hidden md:flex fixed top-0 items-center justify-between md:min-h-14 px-6 py-3 backdrop-blur-xl dark:bg-zinc-950/80 bg-white/80 border-b dark:border-zinc-800/60 border-black/10 shadow-md transition-all duration-300 ease-out z-50",
+        "hidden md:flex fixed top-0 items-center justify-between md:min-h-14 px-6 py-3 backdrop-blur-3xl dark:bg-zinc-900/60 bg-white/80 border-b dark:border-zinc-800/60 border-black/10 shadow-md transition-all duration-300 ease-out z-50",
         show ? "translate-y-0" : "-translate-y-full",
         isSidebarCollapsed ? "left-16" : "left-[350px]",
         aiChatContext

@@ -31,7 +31,7 @@ const Sidebar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<TabKey>("surah");
   // Open/Closed States:
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
 
   // USESTATES END
@@ -43,6 +43,10 @@ const Sidebar = () => {
     };
     load();
     
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("left-sidebar-toggle", { detail: { isCollapsed: true } }));
+    }
+
     const handleCloseLeftSidebar = () => {
       setIsCollapsed(true);
       if (typeof window !== "undefined") {

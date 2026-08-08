@@ -215,8 +215,8 @@ function LexiconPageContent() {
     <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-slate-100 pb-24 ${inter.className} transition-all duration-300 ${!!aiChatContext ? 'xl:pr-[450px]' : ''}`}>
       {/* Global Top Navigation Bar (Glassy Backdrop & Shadow) */}
       <div 
-        className={`sticky top-0 z-40 bg-zinc-950/50 backdrop-blur-3xl border-b border-zinc-800/80 px-4 md:px-8 py-3 shadow-sm transition-transform duration-300 ${
-          topNavVisible ? 'translate-y-0' : '-translate-y-full md:translate-y-0'
+        className={`sticky top-0 z-40 bg-zinc-950/50 backdrop-blur-3xl border-b border-zinc-800/80 px-4 md:px-8 py-3 shadow-sm transition-all duration-300 ${
+          topNavVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
         }`}
       >
         <div className="max-w-[1700px] mx-auto relative flex flex-col md:flex-row md:items-center justify-between gap-3">

@@ -874,31 +874,31 @@ export default function TafsirPage() {
                   setActiveLangName(language.name);
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
-                className="relative overflow-hidden border border-emerald-500/50 hover:border-emerald-500 bg-zinc-900/40 group cursor-pointer rounded-xl h-full backdrop-blur-md px-5 py-4 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10 flex flex-col justify-between"
+                className="relative overflow-hidden border border-emerald-500/50 hover:border-emerald-500 bg-zinc-900/40 group cursor-pointer rounded-xl h-[112px] backdrop-blur-md px-4 py-3 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10 flex flex-col justify-between"
               >
                 {/* Giant Faded Watermark Number */}
-                <div className="absolute -right-2 -bottom-4 text-[80px] font-black text-emerald-500/30 group-hover:text-emerald-500 transition-colors duration-500 pointer-events-none select-none leading-none">
+                <div className="absolute -right-2 -bottom-4 text-[75px] font-black text-emerald-500/30 group-hover:text-emerald-500 transition-colors duration-500 pointer-events-none select-none leading-none">
                   {index + 1}
                 </div>
 
-                <div className="relative z-10 flex items-start justify-between gap-4">
-                  <div className="flex flex-col space-y-1">
-                    <p className="font-semibold text-white group-hover:text-emerald-400 transition-colors leading-snug">
+                <div className="relative z-10 flex items-start justify-between gap-3 min-w-0">
+                  <div className="flex flex-col space-y-0.5 min-w-0 flex-1">
+                    <p className="font-semibold text-white group-hover:text-emerald-400 transition-colors text-sm sm:text-base truncate leading-tight">
                       {author.name}
                     </p>
                     {author.authorName && (
-                      <p className="text-[11px] text-emerald-400/90 font-medium flex items-center gap-1">
+                      <p className="text-[11px] text-emerald-400/90 font-medium flex items-center gap-1 min-w-0">
                         <User className="size-3 text-emerald-400/70 shrink-0" />
-                        <span className="text-zinc-400">Author:</span>
-                        <span className="truncate max-w-[200px]" title={author.authorName}>{author.authorName}</span>
+                        <span className="text-zinc-400 shrink-0">Author:</span>
+                        <span className="truncate" title={author.authorName}>{author.authorName}</span>
                       </p>
                     )}
-                    <div className="flex items-center gap-2 text-xs text-zinc-400 pt-0.5">
-                      <span className="text-zinc-300 font-medium">{language.name}</span>
+                    <div className="flex items-center gap-1.5 text-[11px] text-zinc-400 pt-0.5 truncate">
+                      <span className="text-zinc-300 font-medium shrink-0">{language.name}</span>
                       {author.era && (
                         <>
-                          <span>•</span>
-                          <span className="text-zinc-400 text-[11px] truncate max-w-[170px]" title={author.era}>
+                          <span className="shrink-0">•</span>
+                          <span className="text-zinc-400 truncate" title={author.era}>
                             {author.era.replace(" & Contemporary", "")}
                           </span>
                         </>
@@ -908,21 +908,26 @@ export default function TafsirPage() {
 
                   {/* Quran Logo Icon on right */}
                   <div className="text-right shrink-0">
-                    <LogoIcon className="size-6 text-emerald-400 group-hover:scale-110 transition-transform" />
+                    <LogoIcon className="size-5 text-emerald-400 group-hover:scale-110 transition-transform" />
                   </div>
                 </div>
 
                 {/* Methodology Badges */}
                 {author.tags && author.tags.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-1.5 mt-3 pt-3 border-t border-zinc-800/60">
-                    {author.tags.map((tag) => (
+                  <div className="relative z-10 flex items-center gap-1.5 pt-1 border-t border-zinc-800/60 overflow-hidden">
+                    {author.tags.slice(0, 1).map((tag) => (
                       <span
                         key={tag.id}
-                        className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border ${getTagColorClass(tag.color)}`}
+                        className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border truncate max-w-[170px] ${getTagColorClass(tag.color)}`}
                       >
                         {tag.name}
                       </span>
                     ))}
+                    {author.tags.length > 1 && (
+                      <span className="text-[9px] text-zinc-500 font-mono shrink-0">
+                        +{author.tags.length - 1}
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
