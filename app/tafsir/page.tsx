@@ -415,7 +415,7 @@ export default function TafsirPage() {
 
     // ── STANDARD MODE ──────────────────────────────────────────
     return (
-      <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white ${inter.className} transition-all duration-300 ${!!aiChatContext ? "xl:pr-[450px]" : ""}`}>
+      <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white ${inter.className} transition-all duration-300`}>
         {/* Top Navigation Bar (Mobile Only) */}
         <div className={`md:hidden sticky top-0 z-40 bg-zinc-950/60 backdrop-blur-3xl border-b border-zinc-800/80 px-3 py-3 transition-all duration-300 ${topNavVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}>
           <div className="max-w-[1700px] mx-auto">
@@ -687,7 +687,7 @@ export default function TafsirPage() {
           </main>
 
           {/* Right Sidebar: Compact Ayah Jump Index */}
-          <aside className="hidden md:flex flex-col w-16 lg:w-20 shrink-0 border-l border-zinc-800/60 bg-zinc-950/50 sticky top-0 h-screen overflow-y-auto no-scrollbar py-6">
+          <aside className={cn("flex-col w-16 lg:w-20 shrink-0 border-l border-zinc-800/60 bg-zinc-950/50 sticky top-0 h-screen overflow-y-auto no-scrollbar py-6", aiChatContext ? "hidden xl:flex" : "hidden md:flex")}>
             <div className="text-[9px] uppercase font-bold text-zinc-500 tracking-widest text-center mb-6">Ayahs</div>
             <div className="flex flex-col items-center gap-2">
               {Array.from({ length: currentSurahMeta.numberOfAyahs }, (_, i) => i + 1).map((num) => {
