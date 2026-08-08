@@ -56,13 +56,20 @@ const MobileSheet = ({
             const currentSurahObj = SURAHS_DATA.find((s) => s.number === surahNumber);
             return (
               <div className="flex items-center justify-between w-full min-w-0 pr-1">
-                <div className="flex items-center gap-1.5 min-w-0 flex-1 mr-2">
-                  <span className="text-emerald-400 font-bold text-sm tracking-wide truncate">
-                    {currentSurahObj?.englishName}
-                  </span>
+                <div className="flex flex-col min-w-0 flex-1 mr-2 justify-center">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="text-emerald-400 font-extrabold text-base sm:text-lg tracking-tight truncate drop-shadow-[0_0_8px_rgba(16,185,129,0.25)]">
+                      {currentSurahObj?.englishName}
+                    </span>
+                    {currentSurahObj?.englishNameTranslation && (
+                      <span className="text-zinc-400 text-[11px] font-medium truncate max-w-[140px] hidden sm:inline">
+                        ({currentSurahObj.englishNameTranslation})
+                      </span>
+                    )}
+                  </div>
                   {currentSurahObj?.englishNameTranslation && (
-                    <span className="text-zinc-400 text-xs truncate max-w-[150px]">
-                      ({currentSurahObj.englishNameTranslation})
+                    <span className="text-zinc-400 text-[10px] font-medium truncate sm:hidden">
+                      {currentSurahObj.englishNameTranslation}
                     </span>
                   )}
                 </div>

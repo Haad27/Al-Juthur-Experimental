@@ -182,18 +182,18 @@ const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRAN
     >
       <div className="flex items-center gap-2.5 min-w-0">
         <div className="flex items-center gap-1.5 font-sans min-w-0">
-          <span className="font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate">
+          <span className="text-emerald-400 font-extrabold text-base md:text-lg tracking-tight truncate drop-shadow-[0_0_8px_rgba(16,185,129,0.25)]">
             {surah?.englishName}
           </span>
           {surah?.englishNameTranslation && (
-            <span className="text-xs text-zinc-500 dark:text-zinc-400 truncate max-w-[200px]">
+            <span className="text-zinc-400 text-xs truncate max-w-[200px]">
               ({surah?.englishNameTranslation})
             </span>
           )}
         </div>
         {surah?.revelationType && (
-          <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-semibold tracking-wider uppercase shrink-0">
-            {surah.revelationType} • {surah?.numberOfAyahs || 0} Ayahs
+          <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-semibold tracking-wider uppercase shrink-0">
+            {surah.revelationType}
           </span>
         )}
       </div>
@@ -876,13 +876,14 @@ export default function SurahReaderClient({
                   
                   <div className="space-y-4 leading-relaxed text-zinc-300">
                     {surahInfo.bismillah_pre_ayah && (
-                      <p className="text-xs text-emerald-400/90 italic font-mono bg-emerald-500/5 p-2 rounded-lg border border-emerald-500/10">
+                      <p className="text-xs text-emerald-400/90 italic font-mono bg-emerald-500/5 p-2 rounded-lg border border-emerald-500/10 mb-3">
                         Note: Bismillah is included as part of this Surah.
                       </p>
                     )}
-                    <p className="text-zinc-200 leading-relaxed font-normal">
-                      {surahInfo.heading || surahInfo.text}
-                    </p>
+                    <div 
+                      className="text-zinc-200 leading-relaxed max-w-none text-xs sm:text-sm [&>h2]:text-emerald-400 [&>h2]:font-bold [&>h2]:text-sm sm:[&>h2]:text-base [&>h2]:mt-4 [&>h2]:mb-1.5 [&>h2:first-child]:mt-0 [&>h3]:text-emerald-300 [&>h3]:font-bold [&>h3]:text-xs sm:[&>h3]:text-sm [&>h3]:mt-3 [&>h3]:mb-1 [&>p]:mb-2.5 [&>ol]:list-decimal [&>ol]:ml-5 [&>ol]:mb-2.5 [&>ul]:list-disc [&>ul]:ml-5 [&>ul]:mb-2.5 [&>li]:mb-1 [&>a]:text-emerald-400 [&>a:hover]:underline [&>strong]:text-zinc-100"
+                      dangerouslySetInnerHTML={{ __html: surahInfo.heading || surahInfo.text }}
+                    />
                   </div>
                 </div>
               )}
@@ -931,14 +932,15 @@ export default function SurahReaderClient({
           </div>
         </div>
 
-        <SurahPlayer
-          surahNumber={surahNumber}
-          ayahText={ayahs.map((a) => a.cleanText)}
-          lastAyahNumber={surah?.numberOfAyahs || 0}
-          router={router}
-          aiChatContext={aiChatContext}
-        />
       </section>
+
+      <SurahPlayer
+        surahNumber={surahNumber}
+        ayahText={ayahs.map((a) => a.cleanText)}
+        lastAyahNumber={surah?.numberOfAyahs || 0}
+        router={router}
+        aiChatContext={aiChatContext}
+      />
 
       <AyahChatSidebar
         surahNumber={aiChatContext?.surah || surahNumber}

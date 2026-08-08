@@ -44,7 +44,9 @@ const Sidebar = () => {
     load();
     
     if (typeof window !== "undefined") {
-      window.dispatchEvent(new CustomEvent("left-sidebar-toggle", { detail: { isCollapsed: true } }));
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent("left-sidebar-toggle", { detail: { isCollapsed: true } }));
+      }, 0);
     }
 
     const handleCloseLeftSidebar = () => {
