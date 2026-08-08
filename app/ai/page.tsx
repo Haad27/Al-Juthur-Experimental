@@ -43,7 +43,7 @@ export default function AiTranslatorPage() {
 
   useEffect(() => {
     if (aiInputText.trim() && !aiIsTranslating && !aiTranslationData && !aiUntranslatedText && !aiError) {
-      triggerAiTranslation();
+      triggerAiTranslation(aiInputText);
     }
   }, [aiInputText, aiIsTranslating, aiTranslationData, aiUntranslatedText, aiError, triggerAiTranslation]);
 

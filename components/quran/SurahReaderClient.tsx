@@ -403,7 +403,7 @@ const AyahRow = React.memo(({
           ? "my-1.5 sm:my-2 md:my-2 p-3 sm:p-4 md:p-4 lg:p-4"
           : "my-3 sm:my-5 p-3.5 sm:p-6 md:p-7",
         isCurrentlyPlaying
-          ? "border border-emerald-500/50 bg-zinc-950/90 dark:bg-zinc-950/90 shadow-[0_4px_25px_rgba(16,185,129,0.12)] scale-[1.005] z-50 max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          ? "border border-emerald-500/60 bg-zinc-900/60 dark:bg-zinc-900/60 backdrop-blur-md shadow-[0_4px_25px_rgba(16,185,129,0.15)] scale-[1.005] z-50 max-h-[80vh] overflow-y-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-transparent"
           : "border border-emerald-500/25 hover:border-emerald-500/50 bg-zinc-900/40 dark:bg-zinc-900/40 hover:shadow-[0_0_25px_rgba(16,185,129,0.1)]",
         isOtherPlaying ? "opacity-35 blur-[1px] scale-[0.995] pointer-events-none" : "opacity-100 blur-none scale-100"
       )}

@@ -490,7 +490,7 @@ export default function TafsirPage() {
         {/* Layout: Sidebar + Main Content + Right Ayah Navigator */}
         <div className="max-w-[1700px] mx-auto flex min-h-screen">
           {/* Left Sidebar: 114 Surahs */}
-          <aside className="hidden md:flex flex-col w-72 border-r border-zinc-800/60 bg-zinc-950/50 sticky top-0 h-screen overflow-y-auto custom-scrollbar">
+          <aside className="hidden md:flex flex-col w-64 lg:w-72 shrink-0 border-r border-zinc-800/60 bg-zinc-950/50 sticky top-0 h-screen overflow-y-auto custom-scrollbar">
             <div className="p-4 border-b border-zinc-800/60 sticky top-0 bg-zinc-950/90 z-10 flex flex-col gap-4">
               {/* Tafsir Header Info */}
               <div className="flex items-start gap-3">
@@ -687,7 +687,7 @@ export default function TafsirPage() {
           </main>
 
           {/* Right Sidebar: Compact Ayah Jump Index */}
-          <aside className="hidden xl:flex flex-col w-20 border-l border-zinc-800/60 bg-zinc-950/50 sticky top-0 h-screen overflow-y-auto no-scrollbar py-6">
+          <aside className="hidden md:flex flex-col w-16 lg:w-20 shrink-0 border-l border-zinc-800/60 bg-zinc-950/50 sticky top-0 h-screen overflow-y-auto no-scrollbar py-6">
             <div className="text-[9px] uppercase font-bold text-zinc-500 tracking-widest text-center mb-6">Ayahs</div>
             <div className="flex flex-col items-center gap-2">
               {Array.from({ length: currentSurahMeta.numberOfAyahs }, (_, i) => i + 1).map((num) => {
@@ -696,7 +696,7 @@ export default function TafsirPage() {
                     key={num}
                     id={`ayah-tracker-${num}`}
                     onClick={() => scrollToAyah(num)}
-                    className="size-9 rounded-full flex items-center justify-center text-[11px] font-semibold transition-all shrink-0 text-zinc-500 hover:bg-emerald-500 hover:text-zinc-950 hover:font-bold hover:shadow-md hover:shadow-emerald-500/20 border border-transparent"
+                    className="size-8 lg:size-9 rounded-full flex items-center justify-center text-[10px] lg:text-[11px] font-semibold transition-all shrink-0 text-zinc-500 hover:bg-emerald-500 hover:text-zinc-950 hover:font-bold hover:shadow-md hover:shadow-emerald-500/20 border border-transparent"
                     title={`Jump to Ayah ${num}`}
                   >
                     {num}
