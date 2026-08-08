@@ -26,7 +26,7 @@ export default function RagLandingPage() {
   return (
     <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-slate-100 flex flex-col pb-16 ${inter.className}`}>
       {/* Global Top Navigation Bar */}
-      <div className="sticky top-0 z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-4 md:px-8 py-3">
+      <div className="sticky top-0 z-40 bg-zinc-950/95 backdrop-blur-2xl border-b border-zinc-800/80 px-4 md:px-8 py-3 shadow-md">
         <div className="max-w-[1700px] mx-auto relative flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 sm:gap-3">
             <Link href="/home" className="flex items-center gap-2 shrink-0">

@@ -416,7 +416,7 @@ export default function TafsirPage() {
     return (
       <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white ${inter.className} transition-all duration-300 ${!!aiChatContext ? "xl:pr-[450px]" : ""}`}>
         {/* Top Navigation Bar (Mobile Only) */}
-        <div className={`md:hidden sticky top-0 z-40 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/80 px-3 py-3 transition-all duration-300 ${topNavVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}>
+        <div className={`md:hidden sticky top-0 z-40 bg-zinc-950/95 backdrop-blur-2xl border-b border-zinc-800/80 px-3 py-3 transition-all duration-300 ${topNavVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}>
           <div className="max-w-[1700px] mx-auto">
             {/* Top Row: Back, Title, Immersive Toggle */}
             <div className="flex items-center justify-between gap-2 md:gap-4 w-full">
@@ -740,7 +740,7 @@ export default function TafsirPage() {
     <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white pb-24 ${inter.className}`}>
       
       {/* Top Navigation Bar (Library View) */}
-      <div className="sticky top-0 z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-4 md:px-8 py-3">
+      <div className="sticky top-0 z-40 bg-zinc-950/95 backdrop-blur-2xl border-b border-zinc-800/80 px-4 md:px-8 py-3 shadow-md">
         <div className="max-w-[1700px] mx-auto relative flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Logo and App Name */}
           <div className="flex items-center gap-4">

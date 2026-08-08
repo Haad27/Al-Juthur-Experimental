@@ -934,7 +934,7 @@ export default function SurahReaderClient({
         />
       </div>
 
-      <div className="mb-2 w-full flex justify-center items-center">
+      <div className="mb-32 md:mb-12 w-full flex justify-center items-center pb-12">
         <div className="flex gap-4 w-full max-w-md px-2 justify-center mt-8 sm:mt-10 pt-2">
           <NavigatorButton
             direction="Previous"

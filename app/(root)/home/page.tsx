@@ -93,7 +93,7 @@ const SurahsList = () => {
         surahs={surahs}
       />
       <div className="h-16 w-full lg:hidden flex"></div>
-      <div className="sticky top-0 z-50 h-20 w-full backdrop-blur-xl bg-zinc-950/80 border-b border-zinc-800/40 shadow-sm hidden lg:flex items-center justify-between xl:px-32 lg:px-16 px-4">
+      <div className="sticky top-0 z-50 h-20 w-full backdrop-blur-2xl bg-zinc-950/95 border-b border-zinc-800/50 shadow-md hidden lg:flex items-center justify-between xl:px-20 lg:px-8 px-4">
         <div className="flex items-center gap-3 text-white">
           <LogoIcon className="hidden lg:block w-8 h-8 rounded-[20%]" />
           <p className="font-bold text-2xl">Al-Juthur</p>
@@ -125,7 +125,7 @@ const SurahsList = () => {
         </nav>
       </div>
 
-      <div className="space-y-16 w-full flex-col flex-1 text-white xl:px-32 lg:px-16 px-4">
+      <div className="space-y-16 w-full flex-col flex-1 text-white xl:px-20 lg:px-8 px-4">
         <div className="w-full flex flex-col space-y-16 relative">
           <div className="grid md:grid-cols-2 grid-cols-1 items-center gap-8 pt-2 pb-8 md:py-16 relative">
             {/* 🌟 Left: Text content */}
@@ -163,7 +163,14 @@ const SurahsList = () => {
               <h1 className="md:text-6xl text-4xl font-semibold text-white group">
                 Dive{" "}
                 <span className="text-emerald-500 group-hover:brightness-125 transition-all duration-300">
-                  <Link href="#start_reading">Deeper</Link>
+                  <button
+                    onClick={() => {
+                      document.getElementById("start_reading")?.scrollIntoView({ behavior: "smooth" });
+                    }}
+                    className="cursor-pointer hover:underline"
+                  >
+                    Deeper
+                  </button>
                 </span>{" "}
                 into <br /> the profound <br /> meanings
                 <span className="text-sm text-zinc-400 block mt-2"> - [38:29]</span>
@@ -174,11 +181,14 @@ const SurahsList = () => {
               </p>
 
               <div className="flex gap-4">
-                <a href="#start_reading">
-                  <Button className="bg-emerald-500 text-white hover:bg-emerald-600 transition cursor-pointer">
-                    Start Exploring
-                  </Button>
-                </a>
+                <Button
+                  onClick={() => {
+                    document.getElementById("start_reading")?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="bg-emerald-500 text-white hover:bg-emerald-600 transition cursor-pointer"
+                >
+                  Start Exploring
+                </Button>
               </div>
             </div>
 
@@ -253,7 +263,7 @@ const SurahsList = () => {
             </div>
           </div>
           <div
-            className={`w-full grid xl:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-6 relative ${inter.className}`}
+            className={`w-full grid lg:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-4 lg:gap-5 relative ${inter.className}`}
           >
             <Sparkle
               className="fill-emerald-500 text-emerald-500 absolute left-56 top-32 animate-pulse rotate-45 -z-1"
