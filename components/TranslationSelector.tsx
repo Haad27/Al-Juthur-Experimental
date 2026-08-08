@@ -125,10 +125,10 @@ export default function TranslationSelector() {
 
       <PopoverContent
         align="start"
-        side="top"
+        side="bottom"
         sideOffset={6}
         collisionPadding={16}
-        className="w-[var(--radix-popover-trigger-width)] min-w-[280px] max-w-[340px] max-h-[min(360px,var(--radix-popover-content-available-height))] p-3 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl rounded-2xl z-50 text-zinc-900 dark:text-zinc-100 flex flex-col overflow-hidden"
+        className="w-[var(--radix-popover-trigger-width)] min-w-[280px] max-w-[340px] max-h-[min(360px,var(--radix-popover-content-available-height))] p-3 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl rounded-2xl z-[9999999] text-zinc-900 dark:text-zinc-100 flex flex-col overflow-hidden"
       >
         <div className="flex flex-col space-y-2.5 min-h-0 flex-1 overflow-hidden">
           {/* Header */}

@@ -306,9 +306,16 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
             className={cn(
               "fixed z-[101] xl:z-50 bg-zinc-950 flex flex-col items-start shadow-2xl overflow-visible transition-all duration-300 ease-out",
               "top-0 right-0 h-dvh max-h-dvh w-full sm:w-96 xl:w-[450px]", // Desktop right sidebar
-              "max-xl:bottom-0 max-xl:top-auto max-xl:h-[85dvh] max-xl:rounded-t-3xl max-xl:border-t max-xl:border-emerald-500/30 max-xl:shadow-[0_-20px_50px_-10px_rgba(16,185,129,0.15)]", // Mobile bottom sheet container vibe
+              // FIX: removed static max-xl:h-[85dvh] — height is now driven by inline style below
+              "max-xl:bottom-0 max-xl:top-auto max-xl:rounded-t-3xl max-xl:border-t max-xl:border-emerald-500/30 max-xl:shadow-[0_-20px_50px_-10px_rgba(16,185,129,0.15)]",
               "xl:border-l border-emerald-500/20 xl:shadow-[-20px_0_50px_-10px_rgba(16,185,129,0.15)]"
             )}
+            style={{
+              // FIX: use the live --visual-vh variable so the sheet shrinks when keyboard opens
+              height: "min(85dvh, var(--visual-vh, 85dvh))",
+              // FIX: lift sheet above keyboard using --kb-offset instead of staying static
+              transform: `translateY(calc(-1 * var(--kb-offset, 0px)))`,
+            }}
           >
             {/* Decorative edge line for desktop */}
             <div className="hidden xl:block absolute left-0 top-0 bottom-0 w-[2px] bg-gradient-to-b from-transparent via-emerald-500/40 to-transparent shadow-[0_0_10px_rgba(16,185,129,0.5)] z-50 pointer-events-none" />
@@ -526,9 +533,9 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
               <div ref={messagesEndRef} className="h-2" />
             </div>
 
-            {/* Input Area — with 100vh bg-zinc-950 pseudo extension below to cover any keyboard/autofill gap */}
+            {/* Input Area — FIX: removed after:h-[100vh] gap hack, no longer needed with --kb-offset lift */}
             <div 
-              className="relative z-10 shrink-0 bg-zinc-950 border-t border-zinc-800/80 p-3 sm:p-4 pb-[max(env(safe-area-inset-bottom,0px),8px)] w-full after:content-[''] after:absolute after:top-full after:left-0 after:right-0 after:h-[100vh] after:bg-zinc-950 pointer-events-auto"
+              className="relative z-10 shrink-0 bg-zinc-950 border-t border-zinc-800/80 p-3 sm:p-4 pb-[max(env(safe-area-inset-bottom,0px),8px)] w-full"
             >
               <div className="relative flex items-center">
                 <textarea 

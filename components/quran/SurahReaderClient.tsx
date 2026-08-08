@@ -835,9 +835,9 @@ export default function SurahReaderClient({
           ALL_TRANSLATION_OPTIONS={ALL_TRANSLATION_OPTIONS} 
         />
 
-      <div className="flex flex-col w-full min-h-[100dvh] px-3 sm:px-6 md:px-12 lg:px-24">
+      <div className="flex flex-col w-full min-h-[100dvh] px-2 sm:px-4 md:px-6 lg:px-8">
         {/* Explore Container Hero Header */}
-        <div className="relative pt-28 sm:pt-28 md:pt-20 pb-2 md:pb-4 px-4 md:px-8 max-w-7xl mx-auto w-full border-b border-zinc-800/80 mb-4 md:mb-6">
+        <div className="relative pt-28 sm:pt-28 md:pt-20 pb-2 md:pb-4 px-4 md:px-8 max-w-[1700px] mx-auto w-full border-b border-zinc-800/80 mb-4 md:mb-6">
           <div className="absolute left-10 top-10 size-96 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
           <div className="flex flex-row items-center justify-between gap-3 relative z-10">
             <div className="space-y-1 md:space-y-3 min-w-0">

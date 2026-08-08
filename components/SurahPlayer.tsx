@@ -378,113 +378,113 @@ export default function SurahPlayer({
             )}
           </button>
 
-        {mobileFabOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 15, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 15, scale: 0.95 }}
-            className="fixed bottom-[calc(10.25rem+env(safe-area-inset-bottom,0px))] md:bottom-[5.5rem] right-4 md:right-8 z-50 w-64 bg-zinc-900/95 border border-zinc-800 rounded-2xl p-4 shadow-2xl backdrop-blur-xl space-y-4 text-white"
-          >
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Recitation Player</span>
-              <button onClick={() => setMobileFabOpen(false)} className="p-1 hover:bg-zinc-800 rounded-lg text-zinc-400">
-                <ChevronDown className="size-4" />
-              </button>
-            </div>
-
-            {/* Start Ayah Selector Mobile */}
-            <div className="flex items-center justify-between bg-zinc-950/60 rounded-xl px-3 py-2">
-               <span className="text-xs text-zinc-400">Start Ayah:</span>
-               <select 
-                 className="bg-transparent text-white text-xs outline-none cursor-pointer"
-                 value={startAyah}
-                 onChange={(e) => {
-                   const val = Number(e.target.value);
-                   setStartAyah(val);
-                   setCurrentAyahIndex(val - 1);
-                   setPlaying(false);
-                   window.dispatchEvent(new CustomEvent('scrollToAyah', { detail: { index: val - 1 } }));
-                 }}
-               >
-                 {Array.from({ length: lastAyahNumber }, (_, i) => i + 1).map(num => (
-                   <option key={num} value={num} className="bg-zinc-800">{num}</option>
-                 ))}
-               </select>
-            </div>
-
-            {/* Playback Controls */}
-            <div className="flex items-center justify-center gap-4 py-1">
-              <button onClick={() => skip(-10)} className="p-2 bg-zinc-800/80 hover:bg-zinc-800 rounded-full text-white">
-                <SkipBackIcon className="size-4" />
-              </button>
-              <button onClick={handlePlayPause} className="p-3 bg-emerald-600 hover:bg-emerald-500 rounded-full text-white shadow-lg">
-                {playing ? <Pause className="size-5" /> : <Play className="size-5" />}
-              </button>
-              <button onClick={() => skip(10)} className="p-2 bg-zinc-800/80 hover:bg-zinc-800 rounded-full text-white">
-                <SkipForwardIcon className="size-4" />
-              </button>
-            </div>
-
-            {/* Time / Progress */}
-            <div className="text-center font-mono text-xs text-zinc-400">
-              {formatTime(currentTime)} / {formatTime(duration)}
-            </div>
-
-            {/* Speed Selector */}
-            <div className="flex items-center justify-center gap-1 bg-zinc-950/60 p-1 rounded-xl">
-              {playbackRates.slice(2, 6).map((rate) => (
-                <button
-                  key={rate}
-                  onClick={() => setPlaybackRate(rate)}
-                  className={`flex-1 py-1 rounded-lg text-xs font-semibold transition ${
-                    playbackRate === rate ? "bg-emerald-600 text-white" : "text-zinc-400 hover:text-white"
-                  }`}
-                >
-                  {rate}×
-                </button>
-              ))}
-            </div>
-
-            {/* Reciter Selector */}
-            <div className="flex flex-col gap-1 mt-2">
-               <span className="text-xs text-zinc-400">Reciter:</span>
-               <select 
-                 className="bg-zinc-950/60 border border-zinc-800 rounded-lg px-2 py-1.5 text-xs text-white outline-none cursor-pointer w-full"
-                 value={selectedReciter || 7}
-                 onChange={(e) => {
-                   setSelectedReciter(Number(e.target.value));
-                   setPlaying(false);
-                 }}
-               >
-                 {reciters.map(r => (
-                   <option key={r.id} value={r.id} className="bg-zinc-800">
-                     {r.reciter_name} {r.style ? `(${r.style})` : ''}
-                   </option>
-                 ))}
-               </select>
-            </div>
-
-            {/* Recite Mic Toggle */}
-            <button
-              onClick={() => {
-                if (localStorage.getItem("hasSeenReciteGuide") === "true") {
-                  unlockAudio();
-                  requestMic();
-                } else {
-                  setShowReciteGuide(true);
-                }
-              }}
-              className={`w-full py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-2 border transition ${
-                recording
-                  ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
-                  : "bg-zinc-800/60 border-zinc-700/60 text-zinc-300 hover:bg-zinc-800"
-              }`}
+          {mobileFabOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 15, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 15, scale: 0.95 }}
+              className="fixed bottom-[calc(10.25rem+env(safe-area-inset-bottom,0px))] md:bottom-[5.5rem] right-4 md:right-8 z-50 w-64 bg-zinc-900/95 border border-zinc-800 rounded-2xl p-4 shadow-2xl backdrop-blur-xl space-y-4 text-white"
             >
-              <Mic className="size-4 text-emerald-400" />
-              <span>{recording ? "Recording Active..." : "Voice Recite Assistant"}</span>
-            </button>
-          </motion.div>
-        )}
+              <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Recitation Player</span>
+                <button onClick={() => setMobileFabOpen(false)} className="p-1 hover:bg-zinc-800 rounded-lg text-zinc-400">
+                  <ChevronDown className="size-4" />
+                </button>
+              </div>
+
+              {/* Start Ayah Selector Mobile */}
+              <div className="flex items-center justify-between bg-zinc-950/60 rounded-xl px-3 py-2">
+                 <span className="text-xs text-zinc-400">Start Ayah:</span>
+                 <select 
+                   className="bg-transparent text-white text-xs outline-none cursor-pointer"
+                   value={startAyah}
+                   onChange={(e) => {
+                     const val = Number(e.target.value);
+                     setStartAyah(val);
+                     setCurrentAyahIndex(val - 1);
+                     setPlaying(false);
+                     window.dispatchEvent(new CustomEvent('scrollToAyah', { detail: { index: val - 1 } }));
+                   }}
+                 >
+                   {Array.from({ length: lastAyahNumber }, (_, i) => i + 1).map(num => (
+                     <option key={num} value={num} className="bg-zinc-800">{num}</option>
+                   ))}
+                 </select>
+              </div>
+
+              {/* Playback Controls */}
+              <div className="flex items-center justify-center gap-4 py-1">
+                <button onClick={() => skip(-10)} className="p-2 bg-zinc-800/80 hover:bg-zinc-800 rounded-full text-white">
+                  <SkipBackIcon className="size-4" />
+                </button>
+                <button onClick={handlePlayPause} className="p-3 bg-emerald-600 hover:bg-emerald-500 rounded-full text-white shadow-lg">
+                  {playing ? <Pause className="size-5" /> : <Play className="size-5" />}
+                </button>
+                <button onClick={() => skip(10)} className="p-2 bg-zinc-800/80 hover:bg-zinc-800 rounded-full text-white">
+                  <SkipForwardIcon className="size-4" />
+                </button>
+              </div>
+
+              {/* Time / Progress */}
+              <div className="text-center font-mono text-xs text-zinc-400">
+                {formatTime(currentTime)} / {formatTime(duration)}
+              </div>
+
+              {/* Speed Selector */}
+              <div className="flex items-center justify-center gap-1 bg-zinc-950/60 p-1 rounded-xl">
+                {playbackRates.slice(2, 6).map((rate) => (
+                  <button
+                    key={rate}
+                    onClick={() => setPlaybackRate(rate)}
+                    className={`flex-1 py-1 rounded-lg text-xs font-semibold transition ${
+                      playbackRate === rate ? "bg-emerald-600 text-white" : "text-zinc-400 hover:text-white"
+                    }`}
+                  >
+                    {rate}×
+                  </button>
+                ))}
+              </div>
+
+              {/* Reciter Selector */}
+              <div className="flex flex-col gap-1 mt-2">
+                 <span className="text-xs text-zinc-400">Reciter:</span>
+                 <select 
+                   className="bg-zinc-950/60 border border-zinc-800 rounded-lg px-2 py-1.5 text-xs text-white outline-none cursor-pointer w-full"
+                   value={selectedReciter || 7}
+                   onChange={(e) => {
+                     setSelectedReciter(Number(e.target.value));
+                     setPlaying(false);
+                   }}
+                 >
+                   {reciters.map(r => (
+                     <option key={r.id} value={r.id} className="bg-zinc-800">
+                       {r.reciter_name} {r.style ? `(${r.style})` : ''}
+                     </option>
+                   ))}
+                 </select>
+              </div>
+
+              {/* Recite Mic Toggle */}
+              <button
+                onClick={() => {
+                  if (localStorage.getItem("hasSeenReciteGuide") === "true") {
+                    unlockAudio();
+                    requestMic();
+                  } else {
+                    setShowReciteGuide(true);
+                  }
+                }}
+                className={`w-full py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-2 border transition ${
+                  recording
+                    ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
+                    : "bg-zinc-800/60 border-zinc-700/60 text-zinc-300 hover:bg-zinc-800"
+                }`}
+              >
+                <Mic className="size-4 text-emerald-400" />
+                <span>{recording ? "Recording Active..." : "Voice Recite Assistant"}</span>
+              </button>
+            </motion.div>
+          )}
         </div>
       )}
 
