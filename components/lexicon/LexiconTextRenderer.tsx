@@ -40,7 +40,7 @@ export default function LexiconTextRenderer({ text }: LexiconTextRendererProps) 
           return (
             <p
               key={idx}
-              className="font-mushaf-uthmani text-2xl md:text-3xl text-stone-200 leading-loose md:leading-[2.5] text-right my-2"
+              className="font-arabic text-2xl md:text-3xl text-stone-200 leading-loose md:leading-[2.5] text-right my-2"
               dir="rtl"
               dangerouslySetInnerHTML={{ __html: displayLine }}
             />
@@ -50,7 +50,7 @@ export default function LexiconTextRenderer({ text }: LexiconTextRendererProps) 
         // For lines that are mostly English but contain Arabic words, style the Arabic words
         let styledLine = line.replace(
           /([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+(?:\s+[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+)*)/g,
-          `<span class="font-mushaf-uthmani text-xl md:text-2xl text-emerald-200/90 leading-normal inline-block mx-1" dir="rtl">$&</span>`
+          `<span class="font-arabic text-xl md:text-2xl text-emerald-200/90 leading-normal inline-block mx-1" dir="rtl">$&</span>`
         );
 
         // Fix Uthmani sifr mark dotted circle bug within mixed text lines

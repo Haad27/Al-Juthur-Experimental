@@ -45,12 +45,23 @@ const Sidebar = () => {
     
     const handleCloseLeftSidebar = () => {
       setIsCollapsed(true);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("left-sidebar-toggle", { detail: { isCollapsed: true } }));
+      }
     };
     window.addEventListener("close-left-sidebar", handleCloseLeftSidebar);
     return () => window.removeEventListener("close-left-sidebar", handleCloseLeftSidebar);
   }, []);
 
-  const toggleSidebar = () => setIsCollapsed((c) => !c);
+  const toggleSidebar = () => {
+    setIsCollapsed((c) => {
+      const next = !c;
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("left-sidebar-toggle", { detail: { isCollapsed: next } }));
+      }
+      return next;
+    });
+  };
   const filteredSurahs = surahs.filter((surah) =>
     surah.englishName.toLowerCase().includes(searchQuery.toLowerCase())
   );

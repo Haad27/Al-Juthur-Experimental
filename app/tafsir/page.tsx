@@ -633,19 +633,21 @@ export default function TafsirPage() {
                             <Copy className="size-3.5" />
                             <span>Copy</span>
                           </button>
-                          <button
-                            onClick={() => {
-                              const cleanText = entry.text.replace(/<[^>]*>?/gm, '');
-                              sessionStorage.setItem("ai_translator_input", cleanText);
-                              router.push("/ai");
-                            }}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition text-xs font-medium text-emerald-400"
-                            title="Translate to English"
-                          >
-                            <Languages className="size-3.5 text-emerald-400" />
-                            <span className="hidden sm:inline">Translate to English</span>
-                            <span className="sm:hidden">Translate</span>
-                          </button>
+                          {activeLangName !== 'English' && (
+                            <button
+                              onClick={() => {
+                                const cleanText = entry.text.replace(/<[^>]*>?/gm, '');
+                                sessionStorage.setItem("ai_translator_input", cleanText);
+                                router.push("/ai");
+                              }}
+                              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition text-xs font-medium text-emerald-400"
+                              title="Translate to English"
+                            >
+                              <Languages className="size-3.5 text-emerald-400" />
+                              <span className="hidden sm:inline">Translate to English</span>
+                              <span className="sm:hidden">Translate</span>
+                            </button>
+                          )}
                           <button
                             onClick={() => setAiChatContext({ surah: activeSurah, ayah: ayahNumber })}
                             className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition text-xs font-medium text-emerald-400 group"

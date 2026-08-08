@@ -63,6 +63,19 @@ export default async function SurahPage({
   const cookieStore = await cookies();
 
   const surahNumber = Number(resolvedParams.surah);
+  
+  // Load Surah Context metadata
+  let surahInfo = null;
+  try {
+    const surahInfoPath = path.join(process.cwd(), "database", "surah-meta", "surah-info-en.json");
+    if (fs.existsSync(surahInfoPath)) {
+      const allSurahInfo = JSON.parse(fs.readFileSync(surahInfoPath, "utf-8"));
+      surahInfo = allSurahInfo[surahNumber] || null;
+    }
+  } catch (e) {
+    console.error("Error loading surah info:", e);
+  }
+
   const ayahParam = typeof resolvedSearchParams.ayah === "string" ? resolvedSearchParams.ayah : null;
   const juzParam = typeof resolvedSearchParams.juz === "string" ? resolvedSearchParams.juz : null;
   
@@ -164,6 +177,7 @@ export default async function SurahPage({
       ayahParam={ayahParam}
       juzParam={juzParam}
       surahWbwTranslation={surahWbwTranslation}
+      surahInfo={surahInfo}
     />
   );
 }

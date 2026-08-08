@@ -332,9 +332,9 @@ html, body {
 }
 
 
-/* Arabic text styling */
-.arabic-text {
-  font-family: var(--font-arabic), sans-serif;
+/* Arabic text styling - Defaults to 15-liner Indo-Pak font across app */
+.font-arabic, .arabic-text {
+  font-family: 'IndoPakNastaleeq', 'NotoNaskhArabic', 'Amiri', serif !important;
 }
 
 

@@ -212,26 +212,32 @@ function LexiconPageContent() {
   // STANDARD LEXICON MODE (PINNED GLOSSY TOP BAR + 3-COLUMN DESKTOP)
   // ==========================================
   return (
-    <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-slate-100 pb-24 ${inter.className}`}>
-      {/* Global Top Navigation Bar (Transparent Glassy Backdrop on Mobile & Desktop) */}
+    <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-slate-100 pb-24 ${inter.className} transition-all duration-300 ${!!aiChatContext ? 'xl:pr-[450px]' : ''}`}>
+      {/* Global Top Navigation Bar (Glassy Backdrop & Shadow) */}
       <div 
-        className={`sticky top-0 z-40 bg-zinc-950/40 border-b border-zinc-800/80 px-4 md:px-8 py-3 transition-transform duration-300 ${
+        className={`sticky top-0 z-40 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/80 px-4 md:px-8 py-3 shadow-md transition-transform duration-300 ${
           topNavVisible ? 'translate-y-0' : '-translate-y-full md:translate-y-0'
         }`}
       >
         <div className="max-w-[1700px] mx-auto relative flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex items-center justify-between w-full md:w-auto">
-            {/* Left Logo & Badge */}
+            {/* Left Logo */}
             <div className="flex items-center gap-3">
               <Link href="/home" className="flex items-center gap-2">
                 <LogoIcon className="w-8 h-8 rounded-[20%]" />
                 <span className="font-bold text-xl tracking-tight text-white">Al-Juthur</span>
               </Link>
-              <div className="h-4 w-px bg-zinc-800 hidden sm:block mx-1" />
-              <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 hidden sm:inline-block lg:hidden">
-                Lexicon
-              </span>
             </div>
+
+            {/* Mobile Only: Current Selected Word Badge (Top Right) */}
+            {(activeRoot || result?.normalizedRoot) && (
+              <div className="md:hidden flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-950/60 border border-emerald-500/40 shadow-sm shrink-0">
+                <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Root:</span>
+                <span className="text-sm font-bold font-arabic text-white">
+                  {result?.normalizedRoot || activeRoot}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Desktop Navigation Links */}
@@ -252,6 +258,16 @@ function LexiconPageContent() {
               RAG Bot
             </Link>
           </nav>
+
+          {/* Desktop / Laptop Top Right: Active Root Word Badge */}
+          {(activeRoot || result?.normalizedRoot) && (
+            <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-950/60 border border-emerald-500/40 shadow-sm shrink-0 ml-auto lg:ml-0">
+              <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Root:</span>
+              <span className="text-sm font-bold font-arabic text-white">
+                {result?.normalizedRoot || activeRoot}
+              </span>
+            </div>
+          )}
 
           {/* MOBILE ONLY: Pinned Dropdowns for Dictionaries & PDF Lexicons */}
           {result?.entries && result.entries.length > 0 && (
@@ -512,19 +528,21 @@ function LexiconPageContent() {
                           <Copy className="size-3.5" />
                           <span className="hidden sm:inline">Copy</span>
                         </button>
-                        <button
-                          onClick={() => {
-                            const cleanText = entry.definitions.join('\n').replace(/<[^>]*>?/gm, '');
-                            sessionStorage.setItem("ai_translator_input", cleanText);
-                            router.push("/ai");
-                          }}
-                          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition text-xs font-medium text-emerald-400"
-                          title="Translate to English"
-                        >
-                          <Languages className="size-3.5 text-emerald-400" />
-                          <span className="hidden sm:inline">Translate to English</span>
-                          <span className="sm:hidden">Translate</span>
-                        </button>
+                        {!entry.isEnglish && (
+                          <button
+                            onClick={() => {
+                              const cleanText = entry.definitions.join('\n').replace(/<[^>]*>?/gm, '');
+                              sessionStorage.setItem("ai_translator_input", cleanText);
+                              router.push("/ai");
+                            }}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition text-xs font-medium text-emerald-400"
+                            title="Translate to English"
+                          >
+                            <Languages className="size-3.5 text-emerald-400" />
+                            <span className="hidden sm:inline">Translate to English</span>
+                            <span className="sm:hidden">Translate</span>
+                          </button>
+                        )}
                         <button
                           onClick={() => setAiChatContext({ root: activeRoot })}
                           className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition text-xs font-medium text-emerald-400 group"
@@ -552,8 +570,8 @@ function LexiconPageContent() {
             {/* 
               RIGHT COLUMN (Desktop Only - lg:col-span-3): Quranic Forms & PDF Reference Lexicons 
             */}
-            <div className="hidden lg:block lg:col-span-3">
-              <div className="space-y-6 sticky top-[73px]">
+            <div className="hidden lg:block lg:col-span-3 sticky top-[73px] self-start">
+              <div className="space-y-6">
                 {/* Quranic Morphological Derivations */}
                 {result.structuredLane && result.structuredLane.morphological_forms.length > 0 && (
                   <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5 shadow-xl">
@@ -587,9 +605,9 @@ function LexiconPageContent() {
                   </div>
                 )}
 
-                {/* PDF Reference Lexicons */}
+                {/* PDF Reference Lexicons (Sticky) */}
                 {pdfDictionaries.length > 0 && (
-                  <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5 shadow-xl">
+                  <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5 shadow-xl sticky top-[73px]">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-xs uppercase font-bold text-zinc-400 tracking-wider flex items-center gap-2">
                         <FileText className="size-4 text-emerald-400" />

@@ -285,7 +285,7 @@ export default function AiTranslatorPage() {
                   )}
                   <span className="inline-flex items-center gap-1 bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-500/40 text-emerald-300 text-[10px] sm:text-xs font-semibold shadow-sm backdrop-blur-sm ml-1.5">
                     <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-400 shrink-0" />
-                    <span><strong className="text-emerald-200">{(remainingTokens ?? 2000000).toLocaleString()}</strong> tokens left</span>
+                    <span><strong className="text-emerald-200">{(remainingTokens ?? 250000).toLocaleString()}</strong> tokens left</span>
                   </span>
                 </h2>
               </div>

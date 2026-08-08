@@ -153,12 +153,31 @@ function processTranslation(rawText: string) {
 
 const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRANSLATION_OPTIONS }: any) => {
   const show = useScrollDirection();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  useEffect(() => {
+    const handleToggle = (e: any) => {
+      if (e.detail && typeof e.detail.isCollapsed === "boolean") {
+        setIsSidebarCollapsed(e.detail.isCollapsed);
+      }
+    };
+    window.addEventListener("left-sidebar-toggle", handleToggle);
+    return () => window.removeEventListener("left-sidebar-toggle", handleToggle);
+  }, []);
+
   return (
     <div
       className={cn(
-        "hidden md:flex fixed top-0 left-0 right-0 items-center justify-between md:min-h-14 px-6 py-3 backdrop-blur-xl dark:bg-zinc-950/80 bg-white/80 border-b dark:border-zinc-800/60 border-black/10 shadow-md transition-transform duration-300 ease-out z-50",
+        "hidden md:flex fixed top-0 items-center justify-between md:min-h-14 px-6 py-3 backdrop-blur-xl dark:bg-zinc-950/80 bg-white/80 border-b dark:border-zinc-800/60 border-black/10 shadow-md transition-all duration-300 ease-out z-50",
         show ? "translate-y-0" : "-translate-y-full",
-        aiChatContext ? "w-full xl:w-[calc(100%-450px)]" : "w-[calc(100%-350px)]"
+        isSidebarCollapsed ? "left-16" : "left-[350px]",
+        aiChatContext
+          ? isSidebarCollapsed
+            ? "w-[calc(100%-64px)] xl:w-[calc(100%-64px-450px)]"
+            : "w-[calc(100%-350px)] xl:w-[calc(100%-350px-450px)]"
+          : isSidebarCollapsed
+            ? "w-[calc(100%-64px)]"
+            : "w-[calc(100%-350px)]"
       )}
     >
       <div className="flex items-center gap-4">

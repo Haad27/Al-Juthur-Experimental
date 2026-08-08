@@ -285,26 +285,29 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Mobile Overlay */}
+          {/* Mobile Overlay — solid dark background with green ambient glow */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/85 z-[100] xl:hidden backdrop-blur-md"
-          />
+            className="fixed inset-0 bg-zinc-950 z-[100] xl:hidden overflow-hidden"
+          >
+            {/* Subtle green ambient glow behind container */}
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-96 bg-emerald-500/15 blur-[120px] pointer-events-none" />
+          </motion.div>
           
-          {/* Sidebar / Bottom Sheet */}
+          {/* Sidebar / Bottom Sheet Container */}
           <motion.div
             initial={{ x: "100%", y: 0 }}
             animate={{ x: 0, y: 0 }}
             exit={{ x: "100%", y: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className={cn(
-              "fixed z-[101] xl:z-50 bg-zinc-950/95 backdrop-blur-2xl flex flex-col items-start shadow-2xl",
-              "top-0 right-0 h-[var(--visual-vh,100dvh)] w-full sm:w-96 xl:w-[450px]", // Desktop right sidebar
-              "max-xl:bottom-0 max-xl:top-auto max-xl:h-[var(--mobile-sheet-h,85dvh)] max-xl:rounded-t-3xl max-xl:border-t max-xl:border-emerald-500/30 max-xl:shadow-[0_-20px_50px_-10px_rgba(16,185,129,0.15)]", // Mobile bottom sheet
-              "xl:border-l border-emerald-500/20 xl:shadow-[-20px_0_50px_-10px_rgba(16,185,129,0.15)]" // Desktop side glow
+              "fixed z-[101] xl:z-50 bg-zinc-950 flex flex-col items-start shadow-2xl overflow-visible transition-all duration-300 ease-out",
+              "top-0 right-0 h-dvh max-h-dvh w-full sm:w-96 xl:w-[450px]", // Desktop right sidebar
+              "max-xl:bottom-0 max-xl:top-auto max-xl:h-[85dvh] max-xl:rounded-t-3xl max-xl:border-t max-xl:border-emerald-500/30 max-xl:shadow-[0_-20px_50px_-10px_rgba(16,185,129,0.15)]", // Mobile bottom sheet container vibe
+              "xl:border-l border-emerald-500/20 xl:shadow-[-20px_0_50px_-10px_rgba(16,185,129,0.15)]"
             )}
           >
             {/* Decorative edge line for desktop */}
@@ -368,7 +371,7 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
             {/* Chat Area */}
             <div 
               ref={scrollContainerRef}
-              className="flex-1 overflow-y-auto w-full p-3 sm:p-4 space-y-4 sm:space-y-6 custom-scrollbar"
+              className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y w-full p-3 sm:p-4 space-y-4 sm:space-y-6 custom-scrollbar"
             >
               {messages.map((msg, idx) => (
                 <div 
@@ -378,36 +381,41 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                     msg.role === "user" ? "ml-auto flex-row-reverse" : "mr-auto"
                   )}
                 >
+                  {/* Avatar */}
                   <div className={cn(
-                    "size-7 sm:size-8 rounded-full flex items-center justify-center shrink-0 shadow-sm mt-0.5",
+                    "size-7 sm:size-8 rounded-full flex items-center justify-center shrink-0 border shadow-sm",
                     msg.role === "user" 
-                      ? "bg-zinc-800 border border-zinc-700 text-zinc-300" 
+                      ? "bg-zinc-800 border-zinc-700 text-zinc-300" 
                       : msg.isScopeInvalid
-                      ? "bg-amber-500/20 border border-amber-500/40 text-amber-400"
-                      : "bg-emerald-500/20 border border-emerald-500/40 text-emerald-400"
+                      ? "bg-amber-500/20 border-amber-500/40 text-amber-400"
+                      : "bg-emerald-500/20 border-emerald-500/40 text-emerald-400"
                   )}>
                     {msg.role === "user" ? <User size={14} /> : msg.isScopeInvalid ? <ShieldAlert size={14} /> : <Bot size={14} />}
                   </div>
 
+                  {/* Message Content */}
                   <div className={cn(
-                    "max-w-[88%] sm:max-w-[90%] rounded-2xl px-3 py-2.5 sm:px-4 sm:py-3 shadow-sm text-sm",
+                    "max-w-[88%] sm:max-w-[85%] rounded-2xl p-3 sm:p-4 text-xs sm:text-sm leading-relaxed shadow-sm",
                     msg.role === "user" 
                       ? "bg-zinc-800/90 border border-zinc-700/60 rounded-tr-sm text-zinc-200" 
                       : msg.isScopeInvalid
                       ? "bg-amber-950/30 border border-amber-500/40 rounded-tl-sm text-amber-100"
-                      : "bg-zinc-900/80 border border-zinc-800/90 rounded-tl-sm text-zinc-200"
+                      : "bg-zinc-900/90 border border-zinc-800 rounded-tl-sm text-zinc-200"
                   )}>
                     {msg.isScopeInvalid && (
-                      <div className="flex items-center gap-2 pb-2 mb-2 border-b border-amber-500/30 text-[10px] font-bold text-amber-300 uppercase tracking-wider">
-                        <ShieldAlert className="size-3" />
-                        <span>Scope Guardrail Triggered</span>
+                      <div className="flex items-center gap-1.5 pb-2 mb-2 border-b border-amber-500/30 text-[11px] font-bold text-amber-300 uppercase tracking-wider">
+                        <ShieldAlert className="size-3.5" />
+                        <span>Scope Guardrail</span>
                       </div>
                     )}
-                    
-                    <div className="prose prose-invert prose-emerald max-w-none text-[13px] sm:text-sm leading-relaxed prose-p:leading-relaxed prose-headings:mt-3 prose-headings:mb-2 prose-h1:text-base prose-h2:text-[15px] prose-p:mb-2 prose-blockquote:my-2 prose-li:mb-0.5">
+
+                    <div className="prose prose-invert prose-emerald max-w-none text-xs sm:text-sm">
                       <ReactMarkdown 
                         remarkPlugins={[remarkGfm]}
                         components={{
+                          h1: ({node, ...props}) => <h1 className="text-base font-bold text-zinc-100 mt-3 mb-2 border-b border-zinc-800 pb-1" {...props} />,
+                          h2: ({node, ...props}) => <h2 className="text-sm font-bold text-zinc-100 mt-2 mb-1" {...props} />,
+                          h3: ({node, ...props}) => <h3 className="text-xs font-semibold text-zinc-200 mt-2 mb-1" {...props} />,
                           strong: ({node, ...props}) => <strong className="font-semibold text-zinc-100" {...props} />,
                           p: ({node, children, ...props}) => {
                             const textStr = React.Children.toArray(children).join('');
@@ -420,7 +428,7 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                               return (
                                 <div className={containerClasses}>
                                   <div className="quran-bar absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
-                                  <p className={`m-0 ${amiri.className} text-base md:text-lg text-emerald-200 leading-loose text-right dir-rtl`}>
+                                  <p className={`m-0 font-arabic text-base md:text-lg text-emerald-200 leading-loose text-right dir-rtl`}>
                                     {children}
                                   </p>
                                 </div>
@@ -518,9 +526,9 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
               <div ref={messagesEndRef} className="h-2" />
             </div>
 
-            {/* Input Area */}
+            {/* Input Area — with 100vh bg-zinc-950 pseudo extension below to cover any keyboard/autofill gap */}
             <div 
-              className="p-3 sm:p-4 bg-zinc-950 border-t border-zinc-800/80 mb-[env(safe-area-inset-bottom)] w-full shrink-0"
+              className="relative z-10 shrink-0 bg-zinc-950 border-t border-zinc-800/80 p-3 sm:p-4 pb-[max(env(safe-area-inset-bottom,0px),8px)] w-full after:content-[''] after:absolute after:top-full after:left-0 after:right-0 after:h-[100vh] after:bg-zinc-950 pointer-events-auto"
             >
               <div className="relative flex items-center">
                 <textarea 

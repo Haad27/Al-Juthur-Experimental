@@ -37,8 +37,8 @@ export default function FloatingAskScholarButton({
             onBlur={() => setIsHovered(false)}
             className={cn(
               "relative flex items-center gap-3 rounded-full p-3.5 md:p-3.5",
-              "bg-emerald-500 hover:bg-emerald-400 border border-emerald-400/50 text-white",
-              "shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50",
+              "bg-zinc-900/90 backdrop-blur-md border border-emerald-500/50 hover:border-emerald-400 text-emerald-400 font-medium",
+              "shadow-lg shadow-emerald-950/40 hover:shadow-emerald-900/50 opacity-90 hover:opacity-100",
               "transition-all duration-300 ease-out group overflow-hidden cursor-pointer"
             )}
           >

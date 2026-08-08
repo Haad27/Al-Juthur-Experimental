@@ -2,7 +2,7 @@ import prisma from '@/lib/prisma'; // Assuming there is a prisma client export
 import { TokenUsage, estimateTokens } from './token-budget';
 
 // Daily user limit
-export const DAILY_TOKEN_LIMIT_PER_IP = 2000000;
+export const DAILY_TOKEN_LIMIT_PER_IP = 250000;
 
 export async function checkUserQuota(identifier: string, estimatedTokens: number): Promise<{ allowed: boolean, remaining: number }> {
   const now = new Date();
