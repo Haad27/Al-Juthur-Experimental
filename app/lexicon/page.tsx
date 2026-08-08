@@ -598,7 +598,7 @@ function LexiconPageContent() {
 
               {/* PDF Reference Lexicons (Sticky & Scrollable) */}
               {pdfDictionaries.length > 0 && (
-                <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5 shadow-xl sticky top-[73px] max-h-[calc(100vh-100px)] flex flex-col">
+                <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5 shadow-xl sticky top-[73px] max-h-[calc(100vh-140px)] flex flex-col mb-16">
                   <div className="flex items-center justify-between mb-3 shrink-0">
                     <h3 className="text-xs uppercase font-bold text-zinc-400 tracking-wider flex items-center gap-2">
                       <FileText className="size-4 text-emerald-400" />

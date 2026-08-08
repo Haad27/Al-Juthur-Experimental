@@ -142,7 +142,12 @@ function processTranslation(rawTranslation: string) {
 
 const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRANSLATION_OPTIONS }: any) => {
   const show = useScrollDirection();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth < 1280;
+    }
+    return true;
+  });
   const isPlayingAudio = useAudioStore((s) => s.isPlaying);
   const [isAudioActive, setIsAudioActive] = useState(false);
 
