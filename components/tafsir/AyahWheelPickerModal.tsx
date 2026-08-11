@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { X, BookOpen, MapPin, Sparkles } from "lucide-react";
+import { X, BookOpen, MapPin, Sparkles, Compass } from "lucide-react";
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
 import { amiriquran } from "@/app/fonts";
 import { cn } from "@/lib/utils";
@@ -15,7 +15,7 @@ interface AyahWheelPickerModalProps {
   onSelectPassage: (surahNumber: number, ayahNumber: number) => void;
 }
 
-const ITEM_HEIGHT = 44;
+const ITEM_HEIGHT = 48;
 
 interface WheelColumnProps<T> {
   items: T[];
@@ -71,12 +71,12 @@ function WheelColumn<T>({
 
   return (
     <div
-      className="relative h-[220px] w-full overflow-hidden select-none touch-pan-y"
+      className="relative h-[250px] w-full overflow-hidden select-none touch-pan-y"
       aria-label={ariaLabel}
     >
       {/* Top and Bottom Fading Gradient Overlays */}
-      <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-zinc-950 via-zinc-950/80 to-transparent z-10 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-transparent z-10 pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-zinc-950 via-zinc-950/85 to-transparent z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-zinc-950 via-zinc-950/85 to-transparent z-10 pointer-events-none" />
 
       {/* Scrollable Container */}
       <div
@@ -84,22 +84,21 @@ function WheelColumn<T>({
         onScroll={handleScroll}
         onMouseUp={handleScrollEnd}
         onTouchEnd={handleScrollEnd}
-        className="h-full overflow-y-auto no-scrollbar py-[88px] snap-y snap-mandatory"
+        className="h-full overflow-y-auto no-scrollbar py-[101px] snap-y snap-mandatory"
         style={{ scrollSnapType: "y mandatory" }}
       >
         {items.map((item, index) => {
           const distance = Math.abs(index - selectedIndex);
           const isSelected = index === selectedIndex;
 
-          // Prevent overlapping: clean scale and opacity transitions without wild 3D rotations
-          const scale = isSelected ? 1.04 : Math.max(0.82, 1 - distance * 0.1);
-          const opacity = isSelected ? 1 : Math.max(0.2, 1 - distance * 0.35);
+          const scale = isSelected ? 1.06 : Math.max(0.8, 1 - distance * 0.1);
+          const opacity = isSelected ? 1 : Math.max(0.18, 1 - distance * 0.38);
 
           return (
             <div
               key={index}
               onClick={() => onSelect(index)}
-              className="h-[44px] flex items-center justify-center snap-center cursor-pointer transition-all duration-150 overflow-hidden px-2"
+              className="h-[48px] flex items-center justify-center snap-center cursor-pointer transition-all duration-150 overflow-hidden px-2"
               style={{
                 transform: `scale(${scale})`,
                 opacity: opacity,
@@ -159,24 +158,31 @@ export default function AyahWheelPickerModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-in fade-in duration-200">
-      {/* Modal Container Card - Al-Juthur Signature Dark Glass */}
-      <div className="relative w-full max-w-md bg-zinc-950/95 border border-emerald-500/30 rounded-3xl p-6 sm:p-7 shadow-2xl shadow-emerald-950/50 overflow-hidden flex flex-col gap-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
+      {/* Modal Container Card - Al-Juthur Glowing Emerald Glass */}
+      <div className="relative w-full max-w-lg bg-zinc-950/95 border border-emerald-500/40 rounded-3xl p-6 sm:p-7 shadow-[0_0_50px_rgba(16,185,129,0.25)] shadow-emerald-950/60 overflow-hidden flex flex-col gap-5">
         
-        {/* Ambient Emerald Background Glows */}
-        <div className="absolute -top-20 -left-20 size-56 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-20 -right-20 size-56 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+        {/* Ambient Neon Background Glows */}
+        <div className="absolute -top-24 -left-24 size-72 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 size-72 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Modal Top Bar */}
-        <div className="relative z-10 flex items-center justify-between">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[11px] font-mono tracking-wider font-semibold">
-            <BookOpen className="size-3.5" />
-            <span>AL-QUR&apos;AN</span>
+        {/* Modal Top Bar: Badge, Tafsir Name, Close X */}
+        <div className="relative z-10 flex items-center justify-between gap-2">
+          <div className="flex flex-col min-w-0">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-mono tracking-wider font-semibold w-fit">
+              <BookOpen className="size-3.5 text-emerald-400" />
+              <span>AL-QUR&apos;AN</span>
+            </div>
+            {tafsirName && (
+              <p className="text-xs text-zinc-400 font-medium mt-1.5 truncate max-w-xs sm:max-w-sm">
+                Target Tafsir: <span className="text-emerald-300 font-bold">{tafsirName}</span>
+              </p>
+            )}
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-emerald-500/40 hover:bg-zinc-800 transition cursor-pointer"
+            className="p-2 rounded-full bg-zinc-900/90 border border-zinc-800 text-zinc-400 hover:text-white hover:border-emerald-500/50 hover:bg-zinc-800 transition cursor-pointer shrink-0"
             aria-label="Close dialog"
           >
             <X className="size-4" />
@@ -184,8 +190,8 @@ export default function AyahWheelPickerModal({
         </div>
 
         {/* Dynamic Surah Display Banner */}
-        <div className="relative z-10 flex flex-col items-center justify-center py-2 px-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 space-y-1 text-center">
-          <h3 className={`${amiriquran.className} text-3xl sm:text-4xl text-emerald-400 font-normal leading-relaxed text-center`}>
+        <div className="relative z-10 flex flex-col items-center justify-center py-2.5 px-4 rounded-2xl bg-zinc-900/70 border border-zinc-800/90 space-y-1 text-center shadow-inner">
+          <h3 className={`${amiriquran.className} text-3xl sm:text-4xl text-emerald-300 font-normal leading-relaxed text-center drop-shadow-[0_0_12px_rgba(16,185,129,0.3)]`}>
             {activeSurahMeta.name}
           </h3>
           <p className="text-sm font-bold text-zinc-100">
@@ -198,13 +204,13 @@ export default function AyahWheelPickerModal({
           </p>
         </div>
 
-        {/* Dual Wheel Picker Container */}
-        <div className="relative z-10 grid grid-cols-5 gap-2 bg-zinc-900/30 border border-zinc-800/60 rounded-2xl p-3">
+        {/* Focused & Glowing Dual Wheel Picker Container */}
+        <div className="relative z-10 grid grid-cols-5 gap-3 bg-zinc-900/40 border border-emerald-500/30 rounded-2xl p-4 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
           
-          {/* Highlight Frame Across Selected Row */}
-          <div className="absolute top-1/2 left-3 right-3 -translate-y-1/2 h-[44px] border border-emerald-500/50 bg-emerald-500/10 rounded-xl pointer-events-none shadow-[0_0_20px_rgba(16,185,129,0.15)] z-20" />
+          {/* Highlight Frame Across Selected Row with Glowing Neon Border */}
+          <div className="absolute top-1/2 left-4 right-4 -translate-y-1/2 h-[48px] border-2 border-emerald-400/80 bg-emerald-500/15 rounded-2xl pointer-events-none shadow-[0_0_25px_rgba(16,185,129,0.35)] drop-shadow-[0_0_10px_rgba(16,185,129,0.4)] z-20" />
 
-          {/* Surah Wheel Column (3 Cols) */}
+          {/* Surah Wheel Column (3 Cols) - Center Aligned */}
           <div className="col-span-3 flex flex-col">
             <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-500 text-center mb-1">
               SURAH
@@ -217,16 +223,16 @@ export default function AyahWheelPickerModal({
               renderItem={(surah, isSelected) => (
                 <div
                   className={cn(
-                    "flex items-center gap-2 px-2 py-1 rounded-lg w-full text-left transition-colors min-w-0",
-                    isSelected ? "text-white font-bold" : "text-zinc-400 font-medium"
+                    "flex items-center justify-center gap-2 px-2 py-1 rounded-lg w-full text-center transition-colors min-w-0",
+                    isSelected ? "text-white font-bold drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" : "text-zinc-400 font-medium"
                   )}
                 >
                   <span
                     className={cn(
-                      "text-xs font-mono font-bold px-2 py-0.5 rounded transition-colors shrink-0",
+                      "text-xs font-mono font-bold px-2 py-0.5 rounded-md transition-colors shrink-0",
                       isSelected
-                        ? "bg-emerald-500/20 border border-emerald-500/40 text-emerald-300"
-                        : "text-zinc-500"
+                        ? "bg-emerald-500/25 border border-emerald-400/50 text-emerald-300"
+                        : "text-zinc-500 bg-zinc-800/40"
                     )}
                   >
                     {surah.number}
@@ -239,7 +245,7 @@ export default function AyahWheelPickerModal({
             />
           </div>
 
-          {/* Verse Wheel Column (2 Cols) */}
+          {/* Verse Wheel Column (2 Cols) - Center Aligned */}
           <div className="col-span-2 flex flex-col">
             <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-500 text-center mb-1">
               VERSE
@@ -252,8 +258,8 @@ export default function AyahWheelPickerModal({
               renderItem={(ayahNum, isSelected) => (
                 <div
                   className={cn(
-                    "text-center text-sm transition-colors w-full",
-                    isSelected ? "text-emerald-300 font-extrabold text-base" : "text-zinc-500 font-medium"
+                    "text-center text-sm transition-colors w-full flex items-center justify-center",
+                    isSelected ? "text-emerald-300 font-extrabold text-base drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" : "text-zinc-500 font-medium"
                   )}
                 >
                   {ayahNum}
@@ -269,14 +275,14 @@ export default function AyahWheelPickerModal({
             <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-zinc-500">
               REFERENCE
             </span>
-            <span className="text-xl sm:text-2xl font-extrabold font-mono text-emerald-400 tracking-tight">
+            <span className="text-xl sm:text-2xl font-extrabold font-mono text-emerald-400 tracking-tight drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]">
               {activeSurahMeta.number}:{selectedAyah}
             </span>
           </div>
 
           <button
             onClick={handleOpenVerse}
-            className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-sm px-6 py-2.5 rounded-full shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:scale-105 active:scale-95 transition-all shrink-0 cursor-pointer"
+            className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-sm px-6 py-2.5 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] hover:scale-105 active:scale-95 transition-all shrink-0 cursor-pointer"
           >
             <Sparkles className="size-4" />
             <span>Open verse</span>

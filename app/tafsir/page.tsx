@@ -377,24 +377,38 @@ export default function TafsirPage() {
     return () => clearTimeout(t);
   }, [urlAyah, tafsirEntries, activeAuthor]);
 
-  // Auto scroll to target ayah set by Ayah Wheel Picker
+  // Auto scroll to target ayah set by Ayah Picker
   useEffect(() => {
     if (targetAyahToScroll && tafsirEntries.length > 0 && !loadingEntries) {
-      const num = targetAyahToScroll;
+      const targetAyah = targetAyahToScroll;
       setTargetAyahToScroll(null);
-      const t = setTimeout(() => {
-        if (num > visibleCount) {
-          setVisibleCount(num + 10);
-        }
-        setTimeout(() => {
-          setCurrentAyahIndex(num - 1);
-          const el = document.getElementById(`ayah-${num}`);
-          if (el) {
-            el.scrollIntoView({ behavior: "smooth", block: "start" });
+      
+      // Ensure visible count includes target ayah
+      if (targetAyah > visibleCount) {
+        setVisibleCount(targetAyah + 10);
+      }
+
+      // Retry polling until element exists in DOM and scroll to it
+      let attempts = 0;
+      const interval = setInterval(() => {
+        attempts++;
+        const el = document.getElementById(`ayah-${targetAyah}`);
+        if (el) {
+          clearInterval(interval);
+          setCurrentAyahIndex(targetAyah - 1);
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+          
+          // Also scroll the right sidebar tracker into view
+          const trackerEl = document.getElementById(`ayah-tracker-${targetAyah}`);
+          if (trackerEl) {
+            trackerEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
           }
-        }, 100);
-      }, 300);
-      return () => clearTimeout(t);
+        } else if (attempts > 30) {
+          clearInterval(interval);
+        }
+      }, 40);
+
+      return () => clearInterval(interval);
     }
   }, [targetAyahToScroll, tafsirEntries, loadingEntries, visibleCount]);
 
@@ -402,13 +416,22 @@ export default function TafsirPage() {
     if (num > visibleCount) {
       setVisibleCount(num + 10);
     }
-    setTimeout(() => {
-      setCurrentAyahIndex(num - 1);
+    let attempts = 0;
+    const interval = setInterval(() => {
+      attempts++;
       const el = document.getElementById(`ayah-${num}`);
       if (el) {
+        clearInterval(interval);
+        setCurrentAyahIndex(num - 1);
         el.scrollIntoView({ behavior: "smooth", block: "start" });
+        const trackerEl = document.getElementById(`ayah-tracker-${num}`);
+        if (trackerEl) {
+          trackerEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+      } else if (attempts > 20) {
+        clearInterval(interval);
       }
-    }, 50);
+    }, 40);
   };
 
   const navigateAyah = useCallback((delta: number) => {
@@ -769,12 +792,18 @@ export default function TafsirPage() {
             <div className="text-[9px] uppercase font-bold text-zinc-500 tracking-widest text-center mb-6">Ayahs</div>
             <div className="flex flex-col items-center gap-2">
               {Array.from({ length: currentSurahMeta.numberOfAyahs }, (_, i) => i + 1).map((num) => {
+                const isCurrent = num === currentAyahIndex + 1;
                 return (
                   <button
                     key={num}
                     id={`ayah-tracker-${num}`}
                     onClick={() => scrollToAyah(num)}
-                    className="size-8 lg:size-9 rounded-full flex items-center justify-center text-[10px] lg:text-[11px] font-semibold transition-all shrink-0 text-zinc-500 hover:bg-emerald-500 hover:text-zinc-950 hover:font-bold hover:shadow-md hover:shadow-emerald-500/20 border border-transparent"
+                    className={cn(
+                      "size-8 lg:size-9 rounded-full flex items-center justify-center text-[10px] lg:text-[11px] font-semibold transition-all shrink-0 border border-transparent cursor-pointer",
+                      isCurrent
+                        ? "bg-emerald-500 text-zinc-950 font-bold shadow-lg shadow-emerald-500/30 scale-110"
+                        : "text-zinc-500 hover:bg-emerald-500/20 hover:text-emerald-400"
+                    )}
                     title={`Jump to Ayah ${num}`}
                   >
                     {num}
