@@ -158,7 +158,7 @@ export default function AyahWheelPickerModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
       {/* Modal Container Card - Al-Juthur Glowing Emerald Glass */}
       <div className="relative w-full max-w-lg bg-zinc-950/95 border border-emerald-500/40 rounded-3xl p-6 sm:p-7 shadow-[0_0_50px_rgba(16,185,129,0.25)] shadow-emerald-950/60 overflow-hidden flex flex-col gap-5">
         
@@ -204,6 +204,16 @@ export default function AyahWheelPickerModal({
           </p>
         </div>
 
+        {/* Column Headers */}
+        <div className="flex w-full justify-between px-4 pb-1">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-500 w-1/2 text-center">
+            SURAH
+          </span>
+          <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-500 w-1/2 text-center">
+            VERSE
+          </span>
+        </div>
+
         {/* 50/50 Equal Dual Wheel Picker Container (Perfectly Centered Headers & Selection Items) */}
         <div className="relative z-10 grid grid-cols-2 gap-4 bg-zinc-900/40 border border-emerald-500/30 rounded-2xl p-4 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
           
@@ -212,9 +222,6 @@ export default function AyahWheelPickerModal({
 
           {/* Surah Wheel Column (50% Width) - Perfectly Centered */}
           <div className="col-span-1 flex flex-col items-center min-w-0">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-500 text-center mb-1">
-              SURAH
-            </span>
             <WheelColumn
               items={SURAHS_DATA}
               selectedIndex={selectedSurahIndex}
@@ -223,22 +230,15 @@ export default function AyahWheelPickerModal({
               renderItem={(surah, isSelected) => (
                 <div
                   className={cn(
-                    "flex items-center justify-start gap-3 px-2 py-1 rounded-lg w-full text-left transition-colors min-w-0 max-w-[160px] mx-auto",
-                    isSelected ? "text-white font-bold drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" : "text-zinc-400 font-medium"
+                    "flex flex-col justify-center gap-0.5 px-3 py-1 rounded-lg w-full text-center transition-colors min-w-0 max-w-[200px] mx-auto",
+                    isSelected ? "text-white drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" : "text-zinc-400"
                   )}
                 >
-                  <span
-                    className={cn(
-                      "text-xs font-mono font-bold px-2 py-0.5 rounded-md transition-colors shrink-0 text-center w-8",
-                      isSelected
-                        ? "bg-emerald-500/25 border border-emerald-400/50 text-emerald-300"
-                        : "text-zinc-500 bg-zinc-800/40"
-                    )}
-                  >
-                    {surah.number}
-                  </span>
-                  <span className="text-sm truncate leading-tight flex-1">
+                  <span className={cn("text-sm truncate leading-tight", isSelected ? "font-bold" : "font-medium")}>
                     {surah.englishName}
+                  </span>
+                  <span className="text-[10px] text-zinc-500 font-mono font-semibold uppercase tracking-widest">
+                    Surah {surah.number}
                   </span>
                 </div>
               )}
@@ -247,9 +247,6 @@ export default function AyahWheelPickerModal({
 
           {/* Verse Wheel Column (50% Width) - Perfectly Centered */}
           <div className="col-span-1 flex flex-col items-center min-w-0">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-500 text-center mb-1">
-              VERSE
-            </span>
             <WheelColumn
               items={ayahItems}
               selectedIndex={selectedAyah - 1}
@@ -258,11 +255,13 @@ export default function AyahWheelPickerModal({
               renderItem={(ayahNum, isSelected) => (
                 <div
                   className={cn(
-                    "text-center text-sm transition-colors w-full flex items-center justify-center mx-auto",
-                    isSelected ? "text-emerald-300 font-extrabold text-base drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" : "text-zinc-500 font-medium"
+                    "flex flex-col justify-center gap-0.5 px-3 py-1 rounded-lg w-full text-center transition-colors min-w-0 max-w-[200px] mx-auto",
+                    isSelected ? "text-emerald-300 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" : "text-zinc-500"
                   )}
                 >
-                  {ayahNum}
+                  <span className={cn("text-base truncate leading-tight font-mono", isSelected ? "font-extrabold" : "font-medium")}>
+                    {ayahNum}
+                  </span>
                 </div>
               )}
             />

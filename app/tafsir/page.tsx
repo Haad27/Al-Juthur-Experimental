@@ -656,11 +656,11 @@ export default function TafsirPage() {
             )}>
               <div className="absolute -right-10 -bottom-10 size-48 rounded-full bg-emerald-500/10 blur-3xl" />
               <div className={cn(
-                "relative z-10 min-w-0 transition-all",
-                aiChatContext ? "flex flex-col gap-2" : "flex flex-col xl:flex-row xl:items-center justify-between gap-3 xl:gap-4"
+                "relative z-10 min-w-0 transition-all flex flex-col items-center justify-center text-center gap-2",
+                aiChatContext ? "gap-2" : "gap-3"
               )}>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] sm:text-xs font-medium uppercase tracking-wider text-emerald-400 mb-1">
+                <div className="min-w-0 flex-1 flex flex-col items-center">
+                  <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[10px] sm:text-xs font-medium uppercase tracking-wider text-emerald-400 mb-1">
                     <span>Surah {currentSurahMeta.number}</span>
                     <span>•</span>
                     <span>{currentSurahMeta.revelationType}</span>
@@ -668,18 +668,15 @@ export default function TafsirPage() {
                     <span>{currentSurahMeta.numberOfAyahs} Ayahs</span>
                   </div>
                   <h2 className={cn(
-                    "font-extrabold text-white leading-tight transition-all [word-break:break-word]",
+                    "font-extrabold text-white leading-tight transition-all [word-break:break-word] text-center",
                     aiChatContext ? "text-base sm:text-lg" : "text-lg sm:text-xl lg:text-2xl xl:text-3xl"
                   )}>
                     {currentSurahMeta.englishName} ({currentSurahMeta.englishNameTranslation})
                   </h2>
                 </div>
-                <div className={cn(
-                  "shrink-0 transition-all",
-                  aiChatContext ? "text-left sm:text-right" : "text-left xl:text-right"
-                )}>
+                <div className="shrink-0 transition-all mt-1">
                   <h3 className={cn(
-                    "font-mushaf-uthmani text-emerald-300 leading-relaxed transition-all",
+                    "font-mushaf-uthmani text-emerald-300 leading-relaxed transition-all text-center",
                     aiChatContext ? "text-xl sm:text-2xl" : "text-2xl sm:text-3xl xl:text-[2.75rem]"
                   )}>
                     {currentSurahMeta.name}
@@ -690,7 +687,7 @@ export default function TafsirPage() {
               {currentSurahMeta.number !== 9 && (
                 <div className="mt-4 pt-4 border-t border-zinc-800/60 text-center">
                   <p className={cn(
-                    "font-mushaf-uthmani text-amber-100/90 tracking-wide leading-loose transition-all",
+                    "font-mushaf-indopak-16 text-amber-100/90 tracking-wide leading-loose transition-all",
                     aiChatContext ? "text-lg sm:text-xl" : "text-[1.65rem] md:text-4xl"
                   )}>
                     بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
@@ -753,12 +750,12 @@ export default function TafsirPage() {
                                 router.push("/ai");
                               }}
                               className={cn(
-                                "flex items-center rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition font-medium text-emerald-400 whitespace-nowrap gap-2 px-3 py-1.5 text-xs",
+                                "flex items-center rounded-lg bg-emerald-500/20 border border-emerald-400/50 hover:bg-emerald-500/30 transition-all duration-300 font-medium text-emerald-300 whitespace-nowrap gap-2 px-3 py-1.5 text-xs shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)]",
                                 aiChatContext && "lg:gap-1 lg:px-2 lg:text-[10px]"
                               )}
                               title="Translate to English"
                             >
-                              <Languages className={cn("text-emerald-400 shrink-0 size-3.5", aiChatContext && "lg:size-3")} />
+                              <Languages className={cn("text-emerald-300 shrink-0 size-3.5", aiChatContext && "lg:size-3")} />
                               <span className={cn(aiChatContext && "lg:hidden")}>Translate to English</span>
                             </button>
                           )}
@@ -768,7 +765,7 @@ export default function TafsirPage() {
                       {/* Arabic Verse */}
                       {arabicText && (
                         <div className="py-2">
-                          <p className={`font-mushaf-uthmani text-[1.65rem] md:text-4xl text-right leading-loose text-amber-100 font-normal`} dir="rtl" style={{ lineHeight: '2.4' }}>
+                          <p className={`font-mushaf-indopak-16 text-[1.65rem] md:text-4xl text-right leading-loose text-amber-100 font-normal`} dir="rtl" style={{ lineHeight: '2.4' }}>
                             {arabicText}
                           </p>
                         </div>
