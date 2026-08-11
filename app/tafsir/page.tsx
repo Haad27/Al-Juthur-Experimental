@@ -196,7 +196,7 @@ export default function TafsirPage() {
   const [wheelModalOpen, setWheelModalOpen] = useState<boolean>(false);
   const [selectedAuthorForWheel, setSelectedAuthorForWheel] = useState<Author | null>(null);
   const [selectedLangForWheel, setSelectedLangForWheel] = useState<string>("");
-  const [targetAyahToScroll, setTargetAyahToScroll] = useState<number | null>(null);
+  const [targetAyahToScroll, setTargetAyahToScroll] = useState<{ surah: number; ayah: number } | null>(null);
 
   // URL param target
   const urlAyah = searchParams?.get("ayah");
@@ -379,13 +379,24 @@ export default function TafsirPage() {
 
   // Auto scroll to target ayah set by Ayah Picker
   useEffect(() => {
-    if (targetAyahToScroll && tafsirEntries.length > 0 && !loadingEntries) {
-      const targetAyah = targetAyahToScroll;
-      setTargetAyahToScroll(null);
+    if (
+      targetAyahToScroll &&
+      targetAyahToScroll.surah === activeSurah &&
+      tafsirEntries.length > 0 &&
+      !loadingEntries
+    ) {
+      // Check if entries loaded match current activeSurah
+      const firstEntrySurah = tafsirEntries[0]?.surahId || tafsirEntries[0]?.ayah?.surahId;
+      if (firstEntrySurah && firstEntrySurah !== activeSurah) {
+        return;
+      }
+
+      const targetAyah = targetAyahToScroll.ayah;
       
       // Ensure visible count includes target ayah
       if (targetAyah > visibleCount) {
         setVisibleCount(targetAyah + 10);
+        return; // Return so we wait for the next render with updated visibleCount
       }
 
       // Retry polling until element exists in DOM and scroll to it
@@ -403,14 +414,16 @@ export default function TafsirPage() {
           if (trackerEl) {
             trackerEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
           }
+          setTargetAyahToScroll(null);
         } else if (attempts > 30) {
           clearInterval(interval);
+          setTargetAyahToScroll(null);
         }
-      }, 40);
+      }, 50);
 
       return () => clearInterval(interval);
     }
-  }, [targetAyahToScroll, tafsirEntries, loadingEntries, visibleCount]);
+  }, [targetAyahToScroll, activeSurah, tafsirEntries, loadingEntries, visibleCount]);
 
   const scrollToAyah = (num: number) => {
     if (num > visibleCount) {
@@ -841,8 +854,7 @@ export default function TafsirPage() {
               setSelectedAuthorForWheel(null);
             }
             setActiveSurah(surahNum);
-            setTargetAyahToScroll(ayahNum);
-            window.scrollTo({ top: 0, behavior: "smooth" });
+            setTargetAyahToScroll({ surah: surahNum, ayah: ayahNum });
           }}
         />
       </div>
@@ -1066,8 +1078,7 @@ export default function TafsirPage() {
             setSelectedAuthorForWheel(null);
           }
           setActiveSurah(surahNum);
-          setTargetAyahToScroll(ayahNum);
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          setTargetAyahToScroll({ surah: surahNum, ayah: ayahNum });
         }}
       />
     </div>

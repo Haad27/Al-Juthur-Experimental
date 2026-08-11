@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import SurahPlayer from "@/components/SurahPlayer";
 import AyahChatSidebar from "@/components/ai/AyahChatSidebar";
+import TafsirWheelPickerModal from "@/components/quran/TafsirWheelPickerModal";
 import FloatingAskScholarButton from "@/components/ai/FloatingAskScholarButton";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 import { amiri } from "@/app/fonts";
@@ -107,6 +108,7 @@ interface AyahRowProps {
   handleCopyAyah: (ayah: AyahProps) => void;
   handleSaveAyah: (ayah: AyahProps) => void;
   onOpenAiChat: (surahNumber: number, ayahNumber: number) => void;
+  onOpenTafsirPicker: (surahNumber: number, ayahNumber: number) => void;
   isUrduTranslation: boolean;
   translationEdition: string;
   isSidebarOpen?: boolean;
@@ -260,6 +262,7 @@ const AyahRow = React.memo(({
   handleCopyAyah,
   handleSaveAyah,
   onOpenAiChat,
+  onOpenTafsirPicker,
   isUrduTranslation,
   translationEdition,
   isSidebarOpen,
@@ -535,13 +538,13 @@ const AyahRow = React.memo(({
             <Play size={18} className="text-zinc-400 hover:text-emerald-400" />
           )}
         </div>
-        <Link
-          href={`/tafsir?surah=${surahNumber}&ayah=${ayah.numberInSurah}`}
+        <button
+          onClick={() => onOpenTafsirPicker(surahNumber, ayah.numberInSurah)}
           className="p-2 rounded-full hover:bg-zinc-800 transition-colors cursor-pointer inline-flex items-center justify-center"
           title="Read Tafsir"
         >
           <ScrollText className="text-emerald-500 hover:text-emerald-400" size={18} />
-        </Link>
+        </button>
         <Link
           href={`/lexicon?surah=${surahNumber}&ayah=${ayah.numberInSurah}`}
           className="p-2 rounded-full hover:bg-zinc-800 transition-colors cursor-pointer inline-flex items-center justify-center"
@@ -721,6 +724,7 @@ export default function SurahReaderClient({
   const router = useRouter();
   const [visibleAyahNumber, setVisibleAyahNumber] = useState<number>(1);
   const [aiChatContext, setAiChatContext] = useState<{ surah: number; ayah: number } | null>(null);
+  const [tafsirWheelContext, setTafsirWheelContext] = useState<{ surah: number; ayah: number } | null>(null);
 
   // ─── Paginated loading state ─────────────────────────────────────────────────
   // Keyed by 0-based index. Starts pre-populated with the server-rendered first page.
@@ -790,6 +794,10 @@ export default function SurahReaderClient({
       window.dispatchEvent(new Event("close-left-sidebar"));
     }
   };
+
+  const handleOpenTafsirPicker = useCallback((surah: number, ayah: number) => {
+    setTafsirWheelContext({ surah, ayah });
+  }, []);
 
   const isPlayingAudio = useAudioStore(s => s.isPlaying);
 
@@ -1070,6 +1078,7 @@ export default function SurahReaderClient({
                   handleCopyAyah={handleCopyAyah}
                   handleSaveAyah={handleSaveAyah}
                   onOpenAiChat={handleOpenAiChat}
+                  onOpenTafsirPicker={handleOpenTafsirPicker}
                   isUrduTranslation={isUrduTranslation}
                   translationEdition={translationEdition}
                   isSidebarOpen={!!aiChatContext}
@@ -1108,6 +1117,18 @@ export default function SurahReaderClient({
         isOpen={!!aiChatContext}
         onClose={() => setAiChatContext(null)}
         initialModeId="default"
+      />
+
+      <TafsirWheelPickerModal
+        isOpen={!!tafsirWheelContext}
+        onClose={() => setTafsirWheelContext(null)}
+        surahNumber={tafsirWheelContext?.surah || surahNumber}
+        ayahNumber={tafsirWheelContext?.ayah || 1}
+        onSelectTafsir={(authorId) => {
+          if (tafsirWheelContext) {
+            router.push(`/tafsir?surah=${tafsirWheelContext.surah}&ayah=${tafsirWheelContext.ayah}&author=${authorId}`);
+          }
+        }}
       />
 
     </div>

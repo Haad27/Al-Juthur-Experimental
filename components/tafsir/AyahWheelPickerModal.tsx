@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { X, BookOpen, MapPin, Sparkles, Compass } from "lucide-react";
+import { X, BookOpen, MapPin, Sparkles } from "lucide-react";
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
 import { amiriquran } from "@/app/fonts";
 import { cn } from "@/lib/utils";
@@ -204,14 +204,14 @@ export default function AyahWheelPickerModal({
           </p>
         </div>
 
-        {/* Focused & Glowing Dual Wheel Picker Container */}
-        <div className="relative z-10 grid grid-cols-5 gap-3 bg-zinc-900/40 border border-emerald-500/30 rounded-2xl p-4 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
+        {/* 50/50 Equal Dual Wheel Picker Container (Perfectly Centered Headers & Selection Items) */}
+        <div className="relative z-10 grid grid-cols-2 gap-4 bg-zinc-900/40 border border-emerald-500/30 rounded-2xl p-4 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
           
           {/* Highlight Frame Across Selected Row with Glowing Neon Border */}
           <div className="absolute top-1/2 left-4 right-4 -translate-y-1/2 h-[48px] border-2 border-emerald-400/80 bg-emerald-500/15 rounded-2xl pointer-events-none shadow-[0_0_25px_rgba(16,185,129,0.35)] drop-shadow-[0_0_10px_rgba(16,185,129,0.4)] z-20" />
 
-          {/* Surah Wheel Column (3 Cols) - Center Aligned */}
-          <div className="col-span-3 flex flex-col">
+          {/* Surah Wheel Column (50% Width) - Perfectly Centered */}
+          <div className="col-span-1 flex flex-col items-center min-w-0">
             <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-500 text-center mb-1">
               SURAH
             </span>
@@ -223,13 +223,13 @@ export default function AyahWheelPickerModal({
               renderItem={(surah, isSelected) => (
                 <div
                   className={cn(
-                    "flex items-center justify-center gap-2 px-2 py-1 rounded-lg w-full text-center transition-colors min-w-0",
+                    "flex items-center justify-start gap-3 px-2 py-1 rounded-lg w-full text-left transition-colors min-w-0 max-w-[160px] mx-auto",
                     isSelected ? "text-white font-bold drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" : "text-zinc-400 font-medium"
                   )}
                 >
                   <span
                     className={cn(
-                      "text-xs font-mono font-bold px-2 py-0.5 rounded-md transition-colors shrink-0",
+                      "text-xs font-mono font-bold px-2 py-0.5 rounded-md transition-colors shrink-0 text-center w-8",
                       isSelected
                         ? "bg-emerald-500/25 border border-emerald-400/50 text-emerald-300"
                         : "text-zinc-500 bg-zinc-800/40"
@@ -237,7 +237,7 @@ export default function AyahWheelPickerModal({
                   >
                     {surah.number}
                   </span>
-                  <span className="text-sm truncate leading-tight">
+                  <span className="text-sm truncate leading-tight flex-1">
                     {surah.englishName}
                   </span>
                 </div>
@@ -245,8 +245,8 @@ export default function AyahWheelPickerModal({
             />
           </div>
 
-          {/* Verse Wheel Column (2 Cols) - Center Aligned */}
-          <div className="col-span-2 flex flex-col">
+          {/* Verse Wheel Column (50% Width) - Perfectly Centered */}
+          <div className="col-span-1 flex flex-col items-center min-w-0">
             <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-500 text-center mb-1">
               VERSE
             </span>
@@ -258,7 +258,7 @@ export default function AyahWheelPickerModal({
               renderItem={(ayahNum, isSelected) => (
                 <div
                   className={cn(
-                    "text-center text-sm transition-colors w-full flex items-center justify-center",
+                    "text-center text-sm transition-colors w-full flex items-center justify-center mx-auto",
                     isSelected ? "text-emerald-300 font-extrabold text-base drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" : "text-zinc-500 font-medium"
                   )}
                 >
