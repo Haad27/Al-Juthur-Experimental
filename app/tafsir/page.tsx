@@ -478,17 +478,17 @@ export default function TafsirPage() {
                 </div>
               </div>
 
-              {/* Right Side: Ayah Wheel Button */}
+              {/* Right Side: Ayah Picker Button */}
               <button
                 onClick={() => {
                   setSelectedAuthorForWheel(activeAuthor);
                   setSelectedLangForWheel(activeLangName);
                   setWheelModalOpen(true);
                 }}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-400/10 border border-amber-400/30 hover:bg-amber-400/20 text-xs font-semibold text-amber-300 transition-all shrink-0"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-xs font-semibold text-emerald-400 transition-all shrink-0 cursor-pointer"
               >
                 <Compass className="size-3.5" />
-                <span>Ayah Wheel</span>
+                <span>Ayah Picker</span>
               </button>
             </div>
 
@@ -570,11 +570,11 @@ export default function TafsirPage() {
                     setSelectedLangForWheel(activeLangName);
                     setWheelModalOpen(true);
                   }}
-                  className="flex items-center gap-1 px-2 py-1 rounded bg-amber-400/10 border border-amber-400/30 hover:bg-amber-400/20 text-[10px] font-bold text-amber-300 transition-all cursor-pointer"
-                  title="Open Ayah Wheel Picker"
+                  className="flex items-center gap-1 px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-[10px] font-bold text-emerald-400 transition-all cursor-pointer"
+                  title="Open Ayah Picker"
                 >
                   <Compass className="size-3" />
-                  <span>Ayah Wheel</span>
+                  <span>Ayah Picker</span>
                 </button>
               </div>
             </div>
