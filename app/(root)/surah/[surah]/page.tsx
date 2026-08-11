@@ -7,6 +7,7 @@ import { getQuranComSurahTranslation } from "@/lib/translations";
 import { cookies } from "next/headers";
 import fs from "fs";
 import path from "path";
+import { stripBismillahPrefix } from "@/lib/utils";
 
 const removeDiacritics = (text: string) => {
   return text.replace(/[\u064B-\u065F\u0670]/g, ""); // removes harakat + dagger alif
@@ -134,15 +135,7 @@ export default async function SurahPage({
 
   // 5. Merge the local Arabic with the pure English translation
   const combinedAyahs = localAyahs.map((localAyah) => {
-    let rawText = localAyah.text;
-    if (localAyah.numberInSurah === 1 && surahNumber !== 1 && surahNumber !== 9) {
-      rawText = rawText
-        .replace(/^[\uFEFF]?بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ\s*/, "")
-        .replace(/^[\uFEFF]?بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ\s*/, "")
-        .replace(/^[\uFEFF]?بِسْمِ اللهِ الرَّحْمَـٰنِ الرَّحِيمِ\s*/, "")
-        .replace(/^[\uFEFF]?بِسْمِ اللهِ الرَّحْمَنِ الرَّحِيمِ\s*/, "")
-        .trim();
-    }
+    const rawText = stripBismillahPrefix(localAyah.text, surahNumber, localAyah.numberInSurah);
     return {
       number: localAyah.id,
       numberInSurah: localAyah.numberInSurah,
@@ -169,10 +162,21 @@ export default async function SurahPage({
     }
   }
 
+  // 7. Paginated loading: only send first PAGE_SIZE ayahs to the client.
+  //    The client fetches subsequent pages on demand via /api/ayahs.
+  //    We also send all Arabic texts (lightweight strings) so the client can
+  //    compute accurate skeleton heights for every unloaded ayah.
+  const PAGE_SIZE = 20;
+  const initialAyahs = combinedAyahs.slice(0, PAGE_SIZE);
+  const allArabicTexts = localAyahs.map((a) => stripBismillahPrefix(a.text, surahNumber, a.numberInSurah));
+
   return (
     <SurahReaderClient
       surah={surahMetadata}
-      ayahs={combinedAyahs}
+      initialAyahs={initialAyahs}
+      totalAyahs={localAyahs.length}
+      allArabicTexts={allArabicTexts}
+      initialEdition={editionParam}
       surahWordsMap={surahWordsMap}
       ayahParam={ayahParam}
       juzParam={juzParam}

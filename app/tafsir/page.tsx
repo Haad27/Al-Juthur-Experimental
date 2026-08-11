@@ -2,13 +2,14 @@
 
 import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot } from "lucide-react";
+import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass } from "lucide-react";
 import LogoIcon from "@/components/svg/icons/LogoIcon";
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
 import TafsirTextRenderer from "@/components/tafsir/TafsirTextRenderer";
 import { amiriquran, inter } from "@/app/fonts";
 import AyahChatSidebar from "@/components/ai/AyahChatSidebar";
 import FloatingAskScholarButton from "@/components/ai/FloatingAskScholarButton";
+import AyahWheelPickerModal from "@/components/tafsir/AyahWheelPickerModal";
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -191,6 +192,12 @@ export default function TafsirPage() {
 
   const [aiChatContext, setAiChatContext] = useState<{ surah: number; ayah: number } | null>(null);
 
+  // Ayah Wheel Picker Modal State
+  const [wheelModalOpen, setWheelModalOpen] = useState<boolean>(false);
+  const [selectedAuthorForWheel, setSelectedAuthorForWheel] = useState<Author | null>(null);
+  const [selectedLangForWheel, setSelectedLangForWheel] = useState<string>("");
+  const [targetAyahToScroll, setTargetAyahToScroll] = useState<number | null>(null);
+
   // URL param target
   const urlAyah = searchParams?.get("ayah");
   const urlSurah = searchParams?.get("surah");
@@ -368,7 +375,28 @@ export default function TafsirPage() {
       }
     }, 400);
     return () => clearTimeout(t);
-  }, [urlAyah, tafsirEntries, activeAuthor]); // Removed visibleCount to prevent infinite loops on mount
+  }, [urlAyah, tafsirEntries, activeAuthor]);
+
+  // Auto scroll to target ayah set by Ayah Wheel Picker
+  useEffect(() => {
+    if (targetAyahToScroll && tafsirEntries.length > 0 && !loadingEntries) {
+      const num = targetAyahToScroll;
+      setTargetAyahToScroll(null);
+      const t = setTimeout(() => {
+        if (num > visibleCount) {
+          setVisibleCount(num + 10);
+        }
+        setTimeout(() => {
+          setCurrentAyahIndex(num - 1);
+          const el = document.getElementById(`ayah-${num}`);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }, 100);
+      }, 300);
+      return () => clearTimeout(t);
+    }
+  }, [targetAyahToScroll, tafsirEntries, loadingEntries, visibleCount]);
 
   const scrollToAyah = (num: number) => {
     if (num > visibleCount) {
@@ -449,6 +477,19 @@ export default function TafsirPage() {
                   )}
                 </div>
               </div>
+
+              {/* Right Side: Ayah Wheel Button */}
+              <button
+                onClick={() => {
+                  setSelectedAuthorForWheel(activeAuthor);
+                  setSelectedLangForWheel(activeLangName);
+                  setWheelModalOpen(true);
+                }}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-400/10 border border-amber-400/30 hover:bg-amber-400/20 text-xs font-semibold text-amber-300 transition-all shrink-0"
+              >
+                <Compass className="size-3.5" />
+                <span>Ayah Wheel</span>
+              </button>
             </div>
 
             {/* Bottom Row (Mobile Only): Surah & Ayah Dropdowns */}
@@ -519,9 +560,23 @@ export default function TafsirPage() {
               </div>
 
               {/* Sidebar Header */}
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 pt-2 border-t border-zinc-800/50">
-                Surahs (1 - 114)
-              </h2>
+              <div className="flex items-center justify-between pt-2 border-t border-zinc-800/50">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                  Surahs (1 - 114)
+                </h2>
+                <button
+                  onClick={() => {
+                    setSelectedAuthorForWheel(activeAuthor);
+                    setSelectedLangForWheel(activeLangName);
+                    setWheelModalOpen(true);
+                  }}
+                  className="flex items-center gap-1 px-2 py-1 rounded bg-amber-400/10 border border-amber-400/30 hover:bg-amber-400/20 text-[10px] font-bold text-amber-300 transition-all cursor-pointer"
+                  title="Open Ayah Wheel Picker"
+                >
+                  <Compass className="size-3" />
+                  <span>Ayah Wheel</span>
+                </button>
+              </div>
             </div>
             <div className="p-2 space-y-1">
               {SURAHS_DATA.map((surah) => {
@@ -743,6 +798,24 @@ export default function TafsirPage() {
           label="Ask Tafsir Scholar"
           isVisible={!aiChatContext}
         />
+
+        <AyahWheelPickerModal
+          isOpen={wheelModalOpen}
+          onClose={() => setWheelModalOpen(false)}
+          tafsirName={selectedAuthorForWheel ? selectedAuthorForWheel.name : activeAuthor ? activeAuthor.name : undefined}
+          initialSurah={activeSurah}
+          initialAyah={currentAyahIndex + 1}
+          onSelectPassage={(surahNum, ayahNum) => {
+            if (selectedAuthorForWheel) {
+              setActiveAuthor(selectedAuthorForWheel);
+              setActiveLangName(selectedLangForWheel);
+              setSelectedAuthorForWheel(null);
+            }
+            setActiveSurah(surahNum);
+            setTargetAyahToScroll(ayahNum);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+        />
       </div>
     );
   }
@@ -884,9 +957,9 @@ export default function TafsirPage() {
               <div
                 key={`${language.id}-${author.id}`}
                 onClick={() => {
-                  setActiveAuthor(author);
-                  setActiveLangName(language.name);
-                  window.scrollTo({ top: 0, behavior: "smooth" });
+                  setSelectedAuthorForWheel(author);
+                  setSelectedLangForWheel(language.name);
+                  setWheelModalOpen(true);
                 }}
                 className="relative overflow-hidden border border-emerald-500/50 hover:border-emerald-500 bg-zinc-900/40 group cursor-pointer rounded-xl h-[112px] backdrop-blur-md px-4 py-3 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10 flex flex-col justify-between"
               >
@@ -949,6 +1022,25 @@ export default function TafsirPage() {
           </div>
         )}
       </div>
+
+      {/* Ayah Wheel Picker Modal */}
+      <AyahWheelPickerModal
+        isOpen={wheelModalOpen}
+        onClose={() => setWheelModalOpen(false)}
+        tafsirName={selectedAuthorForWheel ? selectedAuthorForWheel.name : undefined}
+        initialSurah={activeSurah}
+        initialAyah={currentAyahIndex + 1}
+        onSelectPassage={(surahNum, ayahNum) => {
+          if (selectedAuthorForWheel) {
+            setActiveAuthor(selectedAuthorForWheel);
+            setActiveLangName(selectedLangForWheel);
+            setSelectedAuthorForWheel(null);
+          }
+          setActiveSurah(surahNum);
+          setTargetAyahToScroll(ayahNum);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+      />
     </div>
   );
 }

@@ -58,6 +58,20 @@ export const formatTime = (sec: number) => {
   return `${m}:${s}`;
 };
 
+export function stripBismillahPrefix(text: string, surahNumber: number, ayahNumber: number): string {
+  if (ayahNumber !== 1 || surahNumber === 1 || surahNumber === 9) return text;
+  const stripHarakat = (str: string) =>
+    str.replace(/[\u064B-\u065F\u0670\uFEFF]/g, "").replace(/\u0671/g, "\u0627");
+  const words = text.trim().split(/\s+/);
+  if (words.length >= 4) {
+    const first4Normalized = stripHarakat(words.slice(0, 4).join(" "));
+    if (first4Normalized === "بسم الله الرحمن الرحيم") {
+      return words.slice(4).join(" ");
+    }
+  }
+  return text;
+}
+
 export function normalizeArabic(text: string) {
   return text
     .replace(/[\u064B-\u0652\u0670\u06D6-\u06ED]/g, "") // remove tashkeel

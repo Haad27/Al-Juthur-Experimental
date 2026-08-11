@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { fetchAyahAudio } from "@/api/api";
@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import NavigatorButton from "@/components/NavigatorButton";
 import { InteractiveAyahWords } from "@/components/quran/InteractiveAyahWords";
+import AyahSkeleton from "@/components/quran/AyahSkeleton";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { useAudioStore } from "@/lib/stores/audioStore";
 import { cn, convertNumberToArabicNumeral, copyToClipboard } from "@/lib/utils";
@@ -52,9 +53,42 @@ interface AyahProps {
   footnoteIds?: string[];
 }
 
+// How many ayahs to load per page from /api/ayahs
+const PAGE_SIZE = 20;
+
+/**
+ * Estimates the rendered height of an ayah based on its Arabic word count.
+ * This is used for the skeleton placeholder so Virtuoso already knows the
+ * approximate height — preventing the scroll-position correction jump when
+ * real content mounts and replaces the skeleton.
+ */
+function estimateAyahHeight(
+  arabicText: string,
+  showTranslation: boolean,
+  isSidebarOpen: boolean
+): number {
+  const wordCount = Math.max(1, arabicText.trim().split(/\s+/).filter(Boolean).length);
+  // Arabic script: ~5 words visible per line at default font size
+  const arabicLines = Math.ceil(wordCount / 5);
+  const arabicHeight = arabicLines * 58 + 36;
+  // Translation: ~10 words per line, 28px each
+  const translationHeight = showTranslation
+    ? Math.ceil(wordCount / 10) * 28 + 60
+    : 0;
+  const actionsHeight = isSidebarOpen ? 60 : 80;
+  return Math.max(190, arabicHeight + translationHeight + actionsHeight);
+}
+
 interface SurahReaderClientProps {
   surah: any;
-  ayahs: AyahProps[];
+  /** Only the first PAGE_SIZE ayahs — loaded server-side for fast initial paint */
+  initialAyahs: AyahProps[];
+  /** Total number of ayahs in this surah — used for Virtuoso totalCount */
+  totalAyahs: number;
+  /** All Arabic text strings for every ayah — lightweight, used for skeleton height estimation */
+  allArabicTexts: string[];
+  /** The translation edition that was used server-side for initialAyahs */
+  initialEdition: string;
   surahWordsMap: Record<number, any[]>;
   juzParam: string | null;
   ayahParam: string | null;
@@ -671,7 +705,10 @@ const AyahRow = React.memo(({
 
 export default function SurahReaderClient({
   surah,
-  ayahs,
+  initialAyahs,
+  totalAyahs,
+  allArabicTexts,
+  initialEdition,
   surahWordsMap,
   juzParam,
   ayahParam,
@@ -684,6 +721,67 @@ export default function SurahReaderClient({
   const router = useRouter();
   const [visibleAyahNumber, setVisibleAyahNumber] = useState<number>(1);
   const [aiChatContext, setAiChatContext] = useState<{ surah: number; ayah: number } | null>(null);
+
+  // ─── Paginated loading state ─────────────────────────────────────────────────
+  // Keyed by 0-based index. Starts pre-populated with the server-rendered first page.
+  const [loadedAyahs, setLoadedAyahs] = useState<Record<number, AyahProps>>(() => {
+    const map: Record<number, AyahProps> = {};
+    initialAyahs.forEach((a, i) => { map[i] = a; });
+    return map;
+  });
+
+  // Which page numbers are already loaded / currently in-flight (avoid duplicate fetches)
+  const loadedPagesRef = useRef<Set<number>>(new Set([0]));
+  const loadingPagesRef = useRef<Set<number>>(new Set());
+
+  const surahNumber = surah?.number || 1;
+
+  const fetchPage = useCallback(async (page: number, edition: string) => {
+    if (loadedPagesRef.current.has(page) || loadingPagesRef.current.has(page)) return;
+    loadingPagesRef.current.add(page);
+    const start = page * PAGE_SIZE + 1; // 1-based
+    try {
+      const res = await fetch(
+        `/api/ayahs?surah=${surahNumber}&start=${start}&count=${PAGE_SIZE}&edition=${encodeURIComponent(edition)}`
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data: { ayahs: AyahProps[] } = await res.json();
+      setLoadedAyahs(prev => {
+        const next = { ...prev };
+        data.ayahs.forEach((ayah, i) => { next[start - 1 + i] = ayah; });
+        return next;
+      });
+      loadedPagesRef.current.add(page);
+    } catch (e) {
+      console.error("[SurahReader] Failed to fetch page", page, e);
+    } finally {
+      loadingPagesRef.current.delete(page);
+    }
+  }, [surahNumber]);
+
+  // When the translation edition changes, wipe the loaded ayahs and refetch
+  // from scratch. Skip on first mount (server data already matches initialEdition).
+  const isFirstEditionMount = useRef(true);
+  useEffect(() => {
+    if (isFirstEditionMount.current) {
+      isFirstEditionMount.current = false;
+      return;
+    }
+    // Clear everything
+    loadedPagesRef.current = new Set();
+    loadingPagesRef.current = new Set();
+    setLoadedAyahs({});
+    // rangeChanged will fire and fetch the visible pages automatically
+  }, [translationEdition]);
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  // All clean texts for SurahPlayer (needed for audio segment tracking).
+  // Derived from allArabicTexts so we don’t need all ayahs loaded.
+  const allCleanTexts = useMemo(
+    () => allArabicTexts.map(t => t.replace(/[\u064B-\u065F\u0670]/g, "")),
+    [allArabicTexts]
+  );
+
 
   const handleOpenAiChat = (surah: number, ayah?: number) => {
     const targetAyah = typeof ayah === "number" && ayah > 0 ? ayah : visibleAyahNumber;
@@ -744,8 +842,6 @@ export default function SurahReaderClient({
   const [collapsed, setCollapsed] = useState(true);
   const [isNavigatingAyah, setIsNavigatingAyah] = useState(false);
 
-  const surahNumber = surah?.number || 1;
-  
   const isUrduTranslation = React.useMemo(() => {
     return ALL_TRANSLATION_OPTIONS.find(t => t.identifier === translationEdition)?.languageCode.toLowerCase() === 'urdu';
   }, [translationEdition]);
@@ -762,33 +858,36 @@ export default function SurahReaderClient({
     }
   }, [surah]);
 
-  // Scroll to the selected ayah (if provided via the "ayah" search param)
+  // Scroll to the selected ayah (if provided via the "ayah" search param).
+  // Pre-fetch the page containing the target ayah so it’s ready when we scroll.
   useEffect(() => {
-    if (ayahParam && ayahs.length > 0) {
-      const ayahIndex = ayahs.findIndex(a => a.numberInSurah.toString() === ayahParam);
-      if (ayahIndex !== -1) {
+    if (ayahParam && totalAyahs > 0) {
+      const ayahIndex = Number(ayahParam) - 1; // 0-based
+      if (ayahIndex >= 0 && ayahIndex < totalAyahs) {
         setIsNavigatingAyah(true);
-        
-        setTimeout(() => {
-          virtuosoRef.current?.scrollToIndex({ index: ayahIndex, align: 'center', behavior: 'smooth' });
-          
+        const targetPage = Math.floor(ayahIndex / PAGE_SIZE);
+        // Ensure the target page is fetched
+        fetchPage(targetPage, translationEdition).then(() => {
           setTimeout(() => {
-            const element = document.getElementById(`ayah-${ayahParam}`);
-            if (element) {
-              const c = ["dark:bg-[#1c1c1cff]", "bg-[var(--sephia-300)]"];
-              element.classList.add(...c);
-              setTimeout(() => {
-                element.classList.remove(...c);
-              }, 2000);
-            }
-            setIsNavigatingAyah(false);
-          }, 300);
-        }, 100);
+            virtuosoRef.current?.scrollToIndex({ index: ayahIndex, align: 'center', behavior: 'smooth' });
+            setTimeout(() => {
+              const element = document.getElementById(`ayah-${ayahParam}`);
+              if (element) {
+                const c = ["dark:bg-[#1c1c1cff]", "bg-[var(--sephia-300)]"];
+                element.classList.add(...c);
+                setTimeout(() => element.classList.remove(...c), 2000);
+              }
+              setIsNavigatingAyah(false);
+            }, 300);
+          }, 100);
+        });
       } else {
         toast("Requested ayah was not found");
       }
     }
-  }, [ayahParam, ayahs]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ayahParam, totalAyahs]);
+
 
   const handleCopyAyah = React.useCallback(({ numberInSurah, text, translation }: AyahProps) => {
     copyToClipboard(
@@ -925,17 +1024,42 @@ export default function SurahReaderClient({
           <Virtuoso
             ref={virtuosoRef}
             useWindowScroll
-            totalCount={ayahs.length}
-            rangeChanged={({ startIndex }) => {
+            totalCount={totalAyahs}
+            rangeChanged={({ startIndex, endIndex }) => {
+              // Update the visible ayah tracker
               if (typeof startIndex === "number" && startIndex >= 0) {
                 setVisibleAyahNumber(startIndex + 1);
               }
+              // Pre-fetch pages that overlap with the visible range + a buffer of 15 items
+              const BUFFER = 15;
+              const firstNeeded = Math.max(0, startIndex - BUFFER);
+              const lastNeeded = Math.min(totalAyahs - 1, endIndex + BUFFER);
+              const firstPage = Math.floor(firstNeeded / PAGE_SIZE);
+              const lastPage = Math.floor(lastNeeded / PAGE_SIZE);
+              for (let p = firstPage; p <= lastPage; p++) {
+                fetchPage(p, translationEdition);
+              }
             }}
             itemContent={(index) => {
-              const ayah = ayahs[index];
+              const ayah = loadedAyahs[index];
+              if (!ayah) {
+                // Show a height-matched skeleton so Virtuoso never needs to correct
+                // the scroll position when real content arrives.
+                const estimatedHeight = estimateAyahHeight(
+                  allArabicTexts[index] || "",
+                  showTranslation,
+                  !!aiChatContext
+                );
+                return (
+                  <AyahSkeleton
+                    estimatedHeight={estimatedHeight}
+                    isSidebarOpen={!!aiChatContext}
+                  />
+                );
+              }
               return (
                 <AyahRow
-                  key={ayah.numberInSurah}
+                  key={`${ayah.numberInSurah}-${translationEdition}`}
                   ayah={ayah}
                   surahNumber={surahNumber}
                   surahWordsMap={surahWordsMap}
@@ -972,7 +1096,7 @@ export default function SurahReaderClient({
 
       <SurahPlayer
         surahNumber={surahNumber}
-        ayahText={ayahs.map((a) => a.cleanText)}
+        ayahText={allCleanTexts}
         lastAyahNumber={surah?.numberOfAyahs || 0}
         router={router}
         aiChatContext={aiChatContext}

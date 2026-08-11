@@ -820,4 +820,8 @@ html, body {
   animation: pulse-scale 2s ease-in-out infinite;
 }
 
-
+@keyframes shimmer {
+  100% {
+    transform: translateX(200%);
+  }
+}
