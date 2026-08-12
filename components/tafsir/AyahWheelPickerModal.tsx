@@ -5,7 +5,7 @@ import { X, BookOpen, MapPin, Sparkles, Search, Hash } from "lucide-react";
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
 import { amiriquran } from "@/app/fonts";
 import { cn } from "@/lib/utils";
-import { isFuzzyMatch } from "@/lib/searchUtils";
+import { isFuzzyMatch, findSurahMatchIndex, convertEasternToWesternDigits } from "@/lib/searchUtils";
 
 interface AyahWheelPickerModalProps {
   isOpen: boolean;
@@ -230,6 +230,18 @@ export default function AyahWheelPickerModal({
     }
   }, [selectedSurahIndex, activeSurahMeta.numberOfAyahs, selectedAyah]);
 
+  // Lock body scrolling when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const ayahItems = Array.from(
@@ -243,7 +255,7 @@ export default function AyahWheelPickerModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/90 backdrop-blur-2xl animate-in fade-in duration-200">
       {/* Modal Container Card - Al-Juthur Glowing Emerald Glass */}
       <div className="relative w-full max-w-lg bg-zinc-950/95 border border-emerald-500/40 rounded-3xl p-6 sm:p-7 shadow-[0_0_50px_rgba(16,185,129,0.25)] shadow-emerald-950/60 overflow-hidden flex flex-col gap-4">
         
@@ -288,22 +300,7 @@ export default function AyahWheelPickerModal({
                 setSurahSearchQuery(val);
                 if (!val.trim()) return;
 
-                const trimmed = val.trim();
-                const num = parseInt(trimmed);
-                if (!isNaN(num) && String(num) === trimmed) {
-                  const foundIdx = SURAHS_DATA.findIndex((s) => s.number === num);
-                  if (foundIdx !== -1) {
-                    setSelectedSurahIndex(foundIdx);
-                    return;
-                  }
-                }
-
-                const foundIdx = SURAHS_DATA.findIndex(
-                  (s) =>
-                    isFuzzyMatch(trimmed, s.englishName) ||
-                    isFuzzyMatch(trimmed, s.englishNameTranslation) ||
-                    isFuzzyMatch(trimmed, s.name)
-                );
+                const foundIdx = findSurahMatchIndex(val, SURAHS_DATA);
                 if (foundIdx !== -1) {
                   setSelectedSurahIndex(foundIdx);
                 }
@@ -316,15 +313,15 @@ export default function AyahWheelPickerModal({
           <div className="relative w-32 shrink-0">
             <Hash className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-emerald-400/70 pointer-events-none" />
             <input
-              type="number"
-              min={1}
-              max={activeSurahMeta.numberOfAyahs}
+              type="text"
+              inputMode="numeric"
               placeholder={`Verse (1-${activeSurahMeta.numberOfAyahs})`}
               value={verseInputQuery}
               onChange={(e) => {
                 const val = e.target.value;
                 setVerseInputQuery(val);
-                const num = parseInt(val);
+                const converted = convertEasternToWesternDigits(val.trim());
+                const num = parseInt(converted, 10);
                 if (!isNaN(num) && num >= 1 && num <= activeSurahMeta.numberOfAyahs) {
                   setSelectedAyah(num);
                 }

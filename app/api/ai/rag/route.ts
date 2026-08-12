@@ -4,6 +4,7 @@ import { executeWithFallback, executeWithFallbackStream } from '@/lib/ai/model-r
 import { estimateTokens } from '@/lib/ai/token-budget';
 import { prepareRagQuery, RagMode } from '@/lib/ai/rag/query-router';
 import { searchHybrid, ScoredParentDocument } from '@/lib/ai/rag/hybrid-search';
+import { getLexiconEntriesForRoot } from '@/lib/lexicon/service';
 
 export async function POST(req: NextRequest) {
   try {
@@ -59,22 +60,67 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 2. Perform Hybrid Search (BM25 + Vector + Mode & exact Surah filtering)
-    // For thematic queries: do NOT pass surahId/ayahId as hard filters — let suggestedVerses drive retrieval
-    const isThematic = preparedQuery.queryType === 'thematic';
-    let documents = await searchHybrid(
-      message,
-      {
-        mode,
-        surahId: isThematic ? undefined : preparedQuery.targetSurahAyah?.surah,
-        ayahId: isThematic ? undefined : preparedQuery.targetSurahAyah?.ayah,
-        keywords: preparedQuery.keywords,
-        expandedQueryAr: preparedQuery.expandedQueryAr,
-        rootWord: preparedQuery.rootWords?.[0],
-        suggestedVerses: preparedQuery.suggestedVerses
-      },
-      8 // Top 8 relevant rule blocks
-    );
+    // 2. Perform Retrieval
+    let documents: ScoredParentDocument[] = [];
+    if (mode === 'lexicon') {
+      // Lexicon Dual-Retrieval Strategy
+      // A. Lexicon Dictionary Retrieval for Root
+      if (preparedQuery.rootWords && preparedQuery.rootWords.length > 0) {
+        for (const root of preparedQuery.rootWords) {
+          const lexResult = getLexiconEntriesForRoot(root);
+          for (const entry of lexResult.entries) {
+            const fullContent = entry.definitions.join('\n\n');
+            if (fullContent.trim().length > 0) {
+              documents.push({
+                id: `lexicon-${entry.dictIdent}-${root}`,
+                workType: 'lexicon',
+                authorId: entry.dictId,
+                authorName: entry.dictName,
+                workTitle: entry.dictName,
+                language: entry.isEnglish ? 'en' : 'ar',
+                surahId: null,
+                ayahId: null,
+                rootWord: root,
+                content: fullContent,
+                rrfScore: 1.0,
+                matchedChildSnippets: [fullContent.substring(0, 300)],
+                relevanceExplanation: `Lexicon definition for root [${root}] from ${entry.dictName}`
+              });
+            }
+          }
+        }
+      }
+      
+      // B. Quranic Usage Retrieval for Suggested Verses
+      if (preparedQuery.suggestedVerses && preparedQuery.suggestedVerses.length > 0) {
+         const verseDocs = await searchHybrid(
+           message,
+           {
+             mode: 'default', // trick to fetch tafsir
+             suggestedVerses: preparedQuery.suggestedVerses
+           },
+           4 // pull a few short tafsir snippets for context
+         );
+         // Limit to just 2 tafsir entries to prevent token bloat
+         documents = [...documents, ...verseDocs.slice(0, 2)];
+      }
+    } else {
+      // 2. Perform Hybrid Search (BM25 + Vector + Mode & exact Surah filtering)
+      const isThematic = preparedQuery.queryType === 'thematic';
+      documents = await searchHybrid(
+        message,
+        {
+          mode,
+          surahId: isThematic ? undefined : preparedQuery.targetSurahAyah?.surah,
+          ayahId: isThematic ? undefined : preparedQuery.targetSurahAyah?.ayah,
+          keywords: preparedQuery.keywords,
+          expandedQueryAr: preparedQuery.expandedQueryAr,
+          rootWord: preparedQuery.rootWords?.[0],
+          suggestedVerses: preparedQuery.suggestedVerses
+        },
+        8 // Top 8 relevant rule blocks
+      );
+    }
 
     console.log('[RAG-ROUTE] Hybrid Search returned', documents.length, 'docs:', documents.map(d => ({
       id: d.id,
@@ -160,7 +206,7 @@ export async function POST(req: NextRequest) {
         modeSpecificRole = 'You are a master of scholastic theology (Ilm al-Kalam). Engage with deep rational arguments and logical proofs. Use rigorous, systematic logic to synthesize the answer based ONLY on the provided retrieved context. Maintain strict academic neutrality on sectarian differences.';
         break;
       case 'lexicon':
-        modeSpecificRole = 'You are an expert Arabic lexicographer. Focus strictly on root semantics, word definitions, and morphological forms using the retrieved dictionaries. STRICT GUARDRAIL: Do not provide full verse exegesis, theological commentary, or practical rulings. Restrict your answer entirely to the linguistic journey of the root word.';
+        modeSpecificRole = 'You are an expert Arabic lexicographer and Quranic linguist. Your response must follow a strict structure:\n\n1. Lexical & Root Analysis: (Devote 80% of your response to this). Dive deep into the root semantics, classical meanings, and morphology. You MUST synthesize definitions by actively comparing the provided classical Arabic lexicons (e.g., Lisan al-Arab, Maqayis al-Lughah, Mufradat) alongside English lexicons (Lane\'s).\n\n2. Quranic Application: (Devote 20% of your response to this). Connect the root word\'s classical meaning directly to the Quran. Use the retrieved verses to explain the majestic rhetorical precision of why Allah used this specific root in that context.\n\nSTRICT GUARDRAIL: Do not provide modern fatwas or general theological debates. Keep it strictly linguistic and profoundly Quranic.';
         break;
 
     }

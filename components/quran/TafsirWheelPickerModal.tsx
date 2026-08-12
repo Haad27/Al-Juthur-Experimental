@@ -250,12 +250,17 @@ export default function TafsirWheelPickerModal({
     );
   }, [allAuthors, searchQuery]);
 
-  // Adjust selected index when filtered list changes
+  // Lock body scrolling when modal is open
   useEffect(() => {
-    if (selectedIdx >= filteredAuthors.length) {
-      setSelectedIdx(Math.max(0, filteredAuthors.length - 1));
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
     }
-  }, [filteredAuthors.length, selectedIdx]);
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -269,7 +274,7 @@ export default function TafsirWheelPickerModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/90 backdrop-blur-2xl animate-in fade-in duration-200">
       <div className="relative w-full max-w-lg bg-zinc-950/95 border border-emerald-500/40 rounded-3xl p-6 sm:p-7 shadow-[0_0_50px_rgba(16,185,129,0.25)] shadow-emerald-950/60 overflow-hidden flex flex-col gap-5">
         
         {/* Ambient Neon Background Glows */}

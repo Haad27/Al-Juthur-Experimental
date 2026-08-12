@@ -1,4 +1,22 @@
 /**
+ * Converts Eastern Arabic numerals (٠١٢٣٤٥٦٧٨٩ / ۰۱۲۳۴۵۶۷۸۹) to standard Western digits (0-9).
+ */
+export function convertEasternToWesternDigits(str: string): string {
+  if (!str) return "";
+  return str
+    .replace(/[٠۰]/g, "0")
+    .replace(/[١۱]/g, "1")
+    .replace(/[٢۲]/g, "2")
+    .replace(/[٣۳]/g, "3")
+    .replace(/[٤۴]/g, "4")
+    .replace(/[٥۵]/g, "5")
+    .replace(/[٦۶]/g, "6")
+    .replace(/[٧۷]/g, "7")
+    .replace(/[٨۸]/g, "8")
+    .replace(/[٩۹]/g, "9");
+}
+
+/**
  * Normalizes text for Quran & Tafsir searching by removing diacritics,
  * common prefixes (Al-, An-, As-, Surah, Tafsir, etc.), spaces, hyphens, and punctuation.
  */
@@ -95,4 +113,34 @@ export function isFuzzyMatch(rawQuery: string, rawTarget: string): boolean {
   }
 
   return false;
+}
+
+/**
+ * Finds the index of a Surah by number (Western or Eastern Arabic digits) or fuzzy name match.
+ */
+export function findSurahMatchIndex(
+  rawQuery: string,
+  surahs: { number: number; name: string; englishName: string; englishNameTranslation: string }[]
+): number {
+  if (!rawQuery || !rawQuery.trim()) return -1;
+  const trimmed = rawQuery.trim();
+  const converted = convertEasternToWesternDigits(trimmed);
+
+  // 1. If query is a pure number or contains standalone digits (e.g. "55", "#55", "surah 55", "55.")
+  const numMatch = converted.match(/^\D*(\d{1,3})\D*$/);
+  if (numMatch) {
+    const num = parseInt(numMatch[1], 10);
+    if (num >= 1 && num <= 114) {
+      const idx = surahs.findIndex((s) => s.number === num);
+      if (idx !== -1) return idx;
+    }
+  }
+
+  // 2. Perform fuzzy text match against English name, translation, or Arabic name
+  return surahs.findIndex(
+    (s) =>
+      isFuzzyMatch(trimmed, s.englishName) ||
+      isFuzzyMatch(trimmed, s.englishNameTranslation) ||
+      isFuzzyMatch(trimmed, s.name)
+  );
 }

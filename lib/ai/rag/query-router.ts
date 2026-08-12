@@ -190,14 +190,38 @@ export async function prepareRagQuery(userMessage: string, mode: RagMode = 'defa
   const geminiKey = process.env.GEMINI_API_KEY;
   if (!geminiKey) throw new Error("GEMINI_API_KEY is missing for Query Router.");
 
-  const systemPrompt = `You are the Light Query Preparation & Guardrail Router for a Classical Quranic RAG System.
+  const systemPrompt = mode === 'lexicon' 
+    ? `You are the Lexicon Query Preparation Router for a Classical Quranic RAG System.
+Your task is to analyze the user's prompt and extract the exact Arabic root word, along with exemplary verses.
+
+ACTIVE MODE: "lexicon"
+
+CRITICAL INSTRUCTIONS:
+1. **Root Word Extraction**: You MUST identify the core 3-letter or 4-letter Arabic root word(s) from the user's inquiry (e.g. if user asks about 'taksanunu' or 'earning', identify root 'كسب'; if 'sakana' or 'tranquility', identify root 'سكن'). This is the most important field!
+2. **Verse Suggestion**: Provide 1 to 3 prime examples of verses where this root is beautifully showcased in the Quran. These verses will be used to demonstrate Quranic application of the root.
+3. **Aqeedah & Fiqh Guardrail**: Strictly refuse theological (Aqeedah), sectarian, or Fiqh questions. Set isScopeValid to false.
+
+OUTPUT JSON FORMAT ONLY:
+{
+  "isScopeValid": true or false,
+  "warningMessage": "Only if isScopeValid is false, state why clearly.",
+  "queryType": "thematic",
+  "targetSurah": null,
+  "targetAyah": null,
+  "expandedQueryAr": "Exact classical Arabic keywords",
+  "expandedQueryEn": "Expanded English terminology",
+  "keywords": ["keyword1", "keyword2"],
+  "rootWords": ["3-letter or 4-letter Arabic root if applicable, e.g. صبر, رحم, علم, سكن"],
+  "suggestedVerses": [{"surah": 30, "ayah": 21}]
+}`
+    : `You are the Light Query Preparation & Guardrail Router for a Classical Quranic RAG System.
 Your task is to analyze the user's prompt in the context of the selected mode and return a strict JSON object.
 
 ACTIVE MODE: "${mode}"
 
 CRITICAL INSTRUCTIONS:
 1. **Arabic Translation for Vector Search**: You must extract the core concepts from the user's English query and translate them into classical Arabic keywords ("expandedQueryAr"). This is critical because our databases are primarily in Arabic. The translation depth depends on the mode (e.g., Classical and Lexicon require heavy, precise Arabic root extraction).
-2. **Aqeedah & Fiqh Guardrail**: If the ACTIVE MODE is "grammar" or "lexicon", strictly refuse theological (Aqeedah), sectarian, or Fiqh questions. Set isScopeValid to false. If the mode is "default" or "philosophical", these are allowed.
+2. **Aqeedah & Fiqh Guardrail**: If the ACTIVE MODE is "grammar", strictly refuse theological (Aqeedah), sectarian, or Fiqh questions. Set isScopeValid to false. If the mode is "default" or "philosophical", these are allowed.
 3. **Query Type Classification**:
    - "specific": The user explicitly mentions a Surah:Ayah reference (e.g. "explain 2:255", "what does Surah Al-Baqarah verse 255 mean"). Set targetSurah/targetAyah and leave suggestedVerses empty.
    - "thematic": The user asks about a broad topic/concept WITHOUT referencing a specific verse (e.g. "what does the Quran say about patience", "Quranic view on taking care of wife"). Set targetSurah and targetAyah to null and populate suggestedVerses.
