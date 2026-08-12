@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
       }
     } else {
       // 2. Perform Hybrid Search (BM25 + Vector + Mode & exact Surah filtering)
-      const isThematic = preparedQuery.queryType === 'thematic';
+      const isThematic = preparedQuery.queryType === 'thematic' || preparedQuery.queryType === 'specific_multiple';
       documents = await searchHybrid(
         message,
         {

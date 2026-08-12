@@ -223,9 +223,10 @@ CRITICAL INSTRUCTIONS:
 1. **Arabic Translation for Vector Search**: You must extract the core concepts from the user's English query and translate them into classical Arabic keywords ("expandedQueryAr"). This is critical because our databases are primarily in Arabic. The translation depth depends on the mode (e.g., Classical and Lexicon require heavy, precise Arabic root extraction).
 2. **Aqeedah & Fiqh Guardrail**: If the ACTIVE MODE is "grammar", strictly refuse theological (Aqeedah), sectarian, or Fiqh questions. Set isScopeValid to false. If the mode is "default" or "philosophical", these are allowed.
 3. **Query Type Classification**:
-   - "specific": The user explicitly mentions a Surah:Ayah reference (e.g. "explain 2:255", "what does Surah Al-Baqarah verse 255 mean"). Set targetSurah/targetAyah and leave suggestedVerses empty.
-   - "thematic": The user asks about a broad topic/concept WITHOUT referencing a specific verse (e.g. "what does the Quran say about patience", "Quranic view on taking care of wife"). Set targetSurah and targetAyah to null and populate suggestedVerses.
-4. **Verse Suggestion (THEMATIC ONLY)**: For thematic queries, identify the Quranic verses that DIRECTLY and GENUINELY address the topic. Suggest ONLY verses you are HIGHLY confident about — do NOT pad or repeat verses to fill a quota. If only 2 relevant verses exist, suggest 2. If 6 exist, suggest 6. Maximum is 6. Each verse must actually exist in the Quran. If unsure about a verse, do NOT include it.
+   - "specific": The user explicitly mentions a SINGLE Surah:Ayah reference (e.g. "explain 2:255"). Set targetSurah/targetAyah and leave suggestedVerses empty.
+   - "specific_multiple": The user explicitly mentions MULTIPLE verses (e.g. "explain 3:44 and 5:33"). Set targetSurah and targetAyah to null, and put ALL the explicitly requested verses into the "suggestedVerses" array.
+   - "thematic": The user asks about a broad topic/concept WITHOUT referencing a specific verse (e.g. "what does the Quran say about patience"). Set targetSurah and targetAyah to null and populate suggestedVerses.
+4. **Verse Suggestion (THEMATIC ONLY)**: For thematic queries, identify the Quranic verses that DIRECTLY and GENUINELY address the topic. Suggest ONLY verses you are HIGHLY confident about. Maximum 6 verses.
 
 OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
 {
@@ -369,14 +370,14 @@ OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
       }
       
       // Determine query type: LLM classification with deterministic fallback
-      const llmQueryType = parsed.queryType === 'specific' || parsed.queryType === 'thematic'
+      const llmQueryType = parsed.queryType === 'specific' || parsed.queryType === 'thematic' || parsed.queryType === 'specific_multiple'
         ? parsed.queryType
         : (parsedRef?.ayah ? 'specific' : 'thematic');
       
       console.log('[QUERY-ROUTER] Query:', cleanMessage, '| Type:', llmQueryType, '| Suggested Verses:', parsed.suggestedVerses, '| Validated:', validSuggestedVerses);
 
-      // For thematic queries: do NOT lock surahId/ayahId — let suggestedVerses drive retrieval
-      const resolvedTarget = llmQueryType === 'thematic'
+      // For thematic queries or specific_multiple: do NOT lock surahId/ayahId — let suggestedVerses drive retrieval
+      const resolvedTarget = (llmQueryType === 'thematic' || llmQueryType === 'specific_multiple')
         ? undefined
         : (surahNum ? { surah: surahNum, ayah: ayahNum } : parsedRef);
 
