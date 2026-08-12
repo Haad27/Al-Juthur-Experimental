@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { X, BookOpen, MapPin, Sparkles } from "lucide-react";
+import { X, BookOpen, MapPin, Sparkles, Search, Hash } from "lucide-react";
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
 import { amiriquran } from "@/app/fonts";
 import { cn } from "@/lib/utils";
+import { isFuzzyMatch } from "@/lib/searchUtils";
 
 interface AyahWheelPickerModalProps {
   isOpen: boolean;
@@ -33,22 +34,94 @@ function WheelColumn<T>({
   ariaLabel,
 }: WheelColumnProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const selectedIndexRef = useRef(selectedIndex);
+  const itemsLengthRef = useRef(items.length);
+  const onSelectRef = useRef(onSelect);
+  const lastWheelTimeRef = useRef(0);
+  const wheelAccumulator = useRef(0);
+  const isProgrammaticScrollRef = useRef(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    selectedIndexRef.current = selectedIndex;
+  }, [selectedIndex]);
+
+  useEffect(() => {
+    itemsLengthRef.current = items.length;
+  }, [items.length]);
+
+  useEffect(() => {
+    onSelectRef.current = onSelect;
+  }, [onSelect]);
 
   // Sync scroll position when selectedIndex changes externally or on mount
   useEffect(() => {
     if (containerRef.current) {
       const targetScrollTop = selectedIndex * ITEM_HEIGHT;
       if (Math.abs(containerRef.current.scrollTop - targetScrollTop) > 2) {
+        isProgrammaticScrollRef.current = true;
         containerRef.current.scrollTo({
           top: targetScrollTop,
           behavior: "smooth",
         });
+
+        if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+        scrollTimeoutRef.current = setTimeout(() => {
+          isProgrammaticScrollRef.current = false;
+        }, 400);
       }
     }
   }, [selectedIndex]);
 
+  // Intercept desktop mouse wheel events for exact 1-step scrolling & fast swipe momentum
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleNativeWheel = (e: WheelEvent) => {
+      e.preventDefault();
+
+      const now = Date.now();
+      const dt = now - lastWheelTimeRef.current;
+      lastWheelTimeRef.current = now;
+
+      if (dt > 100) {
+        wheelAccumulator.current = 0;
+      }
+
+      wheelAccumulator.current += e.deltaY;
+      const threshold = 40;
+
+      if (Math.abs(wheelAccumulator.current) >= threshold) {
+        let steps = Math.trunc(wheelAccumulator.current / threshold);
+        
+        if (dt > 30 && Math.abs(steps) > 1) {
+          steps = steps > 0 ? 1 : -1;
+          wheelAccumulator.current = 0;
+        } else {
+          wheelAccumulator.current -= steps * threshold;
+        }
+
+        const nextIndex = Math.max(
+          0,
+          Math.min(itemsLengthRef.current - 1, selectedIndexRef.current + steps)
+        );
+
+        if (nextIndex !== selectedIndexRef.current) {
+          onSelectRef.current(nextIndex);
+        }
+      }
+    };
+
+    container.addEventListener("wheel", handleNativeWheel, { passive: false });
+    return () => {
+      container.removeEventListener("wheel", handleNativeWheel);
+    };
+  }, []);
+
   // Handle scroll events with clamped index calculation
   const handleScroll = useCallback(() => {
+    if (isProgrammaticScrollRef.current) return;
     if (!containerRef.current) return;
     const currentScrollTop = containerRef.current.scrollTop;
     const index = Math.round(currentScrollTop / ITEM_HEIGHT);
@@ -72,20 +145,21 @@ function WheelColumn<T>({
   return (
     <div
       className="relative h-[250px] w-full overflow-hidden select-none touch-pan-y"
+      style={{ touchAction: "pan-y" }}
       aria-label={ariaLabel}
     >
       {/* Top and Bottom Fading Gradient Overlays */}
       <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-zinc-950 via-zinc-950/85 to-transparent z-10 pointer-events-none" />
       <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-zinc-950 via-zinc-950/85 to-transparent z-10 pointer-events-none" />
 
-      {/* Scrollable Container */}
+      {/* Scrollable Container (Enforce vertical-only scroll & touch-action) */}
       <div
         ref={containerRef}
         onScroll={handleScroll}
         onMouseUp={handleScrollEnd}
         onTouchEnd={handleScrollEnd}
-        className="h-full overflow-y-auto no-scrollbar py-[101px] snap-y snap-mandatory"
-        style={{ scrollSnapType: "y mandatory" }}
+        className="h-full overflow-y-auto overflow-x-hidden no-scrollbar py-[101px] snap-y snap-mandatory touch-pan-y"
+        style={{ scrollSnapType: "y mandatory", touchAction: "pan-y", overscrollBehaviorX: "none" }}
       >
         {items.map((item, index) => {
           const distance = Math.abs(index - selectedIndex);
@@ -98,10 +172,11 @@ function WheelColumn<T>({
             <div
               key={index}
               onClick={() => onSelect(index)}
-              className="h-[48px] flex items-center justify-center snap-center cursor-pointer transition-all duration-150 overflow-hidden px-2"
+              className="h-[48px] flex items-center justify-center snap-center cursor-pointer transition-all duration-150 overflow-hidden px-2 touch-pan-y select-none"
               style={{
                 transform: `scale(${scale})`,
                 opacity: opacity,
+                touchAction: "pan-y",
               }}
             >
               {renderItem(item, isSelected)}
@@ -129,14 +204,24 @@ export default function AyahWheelPickerModal({
   const activeSurahMeta = SURAHS_DATA[selectedSurahIndex] || SURAHS_DATA[0];
   const [selectedAyah, setSelectedAyah] = useState<number>(initialAyah);
 
+  const [surahSearchQuery, setSurahSearchQuery] = useState("");
+  const [verseInputQuery, setVerseInputQuery] = useState(String(initialAyah));
+
   // Sync internal state when modal opens or initial props change
   useEffect(() => {
     if (isOpen) {
       const idx = SURAHS_DATA.findIndex((s) => s.number === initialSurah);
       setSelectedSurahIndex(idx >= 0 ? idx : 0);
       setSelectedAyah(initialAyah);
+      setSurahSearchQuery("");
+      setVerseInputQuery(String(initialAyah));
     }
   }, [isOpen, initialSurah, initialAyah]);
+
+  // Sync verse input query whenever selectedAyah updates via wheel
+  useEffect(() => {
+    setVerseInputQuery(String(selectedAyah));
+  }, [selectedAyah]);
 
   // Ensure Ayah is clamped when Surah changes
   useEffect(() => {
@@ -160,7 +245,7 @@ export default function AyahWheelPickerModal({
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
       {/* Modal Container Card - Al-Juthur Glowing Emerald Glass */}
-      <div className="relative w-full max-w-lg bg-zinc-950/95 border border-emerald-500/40 rounded-3xl p-6 sm:p-7 shadow-[0_0_50px_rgba(16,185,129,0.25)] shadow-emerald-950/60 overflow-hidden flex flex-col gap-5">
+      <div className="relative w-full max-w-lg bg-zinc-950/95 border border-emerald-500/40 rounded-3xl p-6 sm:p-7 shadow-[0_0_50px_rgba(16,185,129,0.25)] shadow-emerald-950/60 overflow-hidden flex flex-col gap-4">
         
         {/* Ambient Neon Background Glows */}
         <div className="absolute -top-24 -left-24 size-72 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
@@ -174,7 +259,7 @@ export default function AyahWheelPickerModal({
               <span>AL-QUR&apos;AN</span>
             </div>
             {tafsirName && (
-              <p className="text-xs text-zinc-400 font-medium mt-1.5 truncate max-w-xs sm:max-w-sm">
+              <p className="text-xs text-zinc-400 font-medium mt-1 truncate max-w-xs sm:max-w-sm">
                 Target Tafsir: <span className="text-emerald-300 font-bold">{tafsirName}</span>
               </p>
             )}
@@ -189,16 +274,76 @@ export default function AyahWheelPickerModal({
           </button>
         </div>
 
+        {/* Manual Search & Typing Bar for Surah Name and Verse Number */}
+        <div className="relative z-10 flex items-center gap-2">
+          {/* Surah Search Input */}
+          <div className="relative flex-1 min-w-0">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-emerald-400/70 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search Surah name or #..."
+              value={surahSearchQuery}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSurahSearchQuery(val);
+                if (!val.trim()) return;
+
+                const trimmed = val.trim();
+                const num = parseInt(trimmed);
+                if (!isNaN(num) && String(num) === trimmed) {
+                  const foundIdx = SURAHS_DATA.findIndex((s) => s.number === num);
+                  if (foundIdx !== -1) {
+                    setSelectedSurahIndex(foundIdx);
+                    return;
+                  }
+                }
+
+                const foundIdx = SURAHS_DATA.findIndex(
+                  (s) =>
+                    isFuzzyMatch(trimmed, s.englishName) ||
+                    isFuzzyMatch(trimmed, s.englishNameTranslation) ||
+                    isFuzzyMatch(trimmed, s.name)
+                );
+                if (foundIdx !== -1) {
+                  setSelectedSurahIndex(foundIdx);
+                }
+              }}
+              className="w-full bg-zinc-900/90 border border-emerald-500/30 rounded-xl pl-9 pr-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition shadow-inner"
+            />
+          </div>
+
+          {/* Verse Number Direct Input */}
+          <div className="relative w-32 shrink-0">
+            <Hash className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-emerald-400/70 pointer-events-none" />
+            <input
+              type="number"
+              min={1}
+              max={activeSurahMeta.numberOfAyahs}
+              placeholder={`Verse (1-${activeSurahMeta.numberOfAyahs})`}
+              value={verseInputQuery}
+              onChange={(e) => {
+                const val = e.target.value;
+                setVerseInputQuery(val);
+                const num = parseInt(val);
+                if (!isNaN(num) && num >= 1 && num <= activeSurahMeta.numberOfAyahs) {
+                  setSelectedAyah(num);
+                }
+              }}
+              className="w-full bg-zinc-900/90 border border-emerald-500/30 rounded-xl pl-8 pr-2 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition font-mono font-bold shadow-inner"
+            />
+          </div>
+        </div>
+
         {/* Dynamic Surah Display Banner */}
-        <div className="relative z-10 flex flex-col items-center justify-center py-2.5 px-4 rounded-2xl bg-zinc-900/70 border border-zinc-800/90 space-y-1 text-center shadow-inner">
-          <h3 className={`${amiriquran.className} text-3xl sm:text-4xl text-emerald-300 font-normal leading-relaxed text-center drop-shadow-[0_0_12px_rgba(16,185,129,0.3)]`}>
+        <div className="relative z-10 flex flex-col items-center justify-center py-2 px-4 rounded-2xl bg-zinc-900/70 border border-zinc-800/90 space-y-0.5 text-center shadow-inner">
+          <h3 className={`${amiriquran.className} text-2xl sm:text-3xl text-emerald-300 font-normal leading-relaxed text-center drop-shadow-[0_0_12px_rgba(16,185,129,0.3)]`}>
             {activeSurahMeta.name}
           </h3>
-          <p className="text-sm font-bold text-zinc-100">
+          <p className="text-xs sm:text-sm font-bold text-zinc-100">
             {activeSurahMeta.englishName}{" "}
             <span className="text-zinc-400 font-normal">— {activeSurahMeta.englishNameTranslation}</span>
           </p>
-          <p className="text-xs text-zinc-400 flex items-center justify-center gap-1 pt-0.5">
+          <p className="text-[11px] text-zinc-400 flex items-center justify-center gap-1 pt-0.5">
             <MapPin className="size-3 text-emerald-400" />
             <span>Surah {activeSurahMeta.number} · Ayah {selectedAyah} of {activeSurahMeta.numberOfAyahs}</span>
           </p>

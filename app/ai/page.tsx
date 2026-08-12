@@ -24,7 +24,7 @@ export default function AiTranslatorPage() {
     clearAiTranslation,
   } = useGlobalState();
 
-  const [viewMode, setViewMode] = useState<'cards' | 'table'>('table');
+  const [viewMode, setViewMode] = useState<'cards' | 'table' | 'english'>('table');
   const [copiedIndex, setCopiedIndex] = useState<string | null>(null);
   const [remainingTokens, setRemainingTokens] = useState<number | null>(null);
   const [tokenLimit, setTokenLimit] = useState<number>(250000);
@@ -323,6 +323,16 @@ export default function AiTranslatorPage() {
                     <Columns className="w-3 h-3 sm:w-4 sm:h-4" />
                     <span>Classic</span>
                   </button>
+                  <button
+                    onClick={() => setViewMode('english')}
+                    className={`flex items-center gap-1 sm:gap-2 px-2.5 py-1 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-semibold transition-all duration-300 cursor-pointer ${
+                      viewMode === 'english' ? 'bg-emerald-500/20 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
+                    }`}
+                    title="English only view"
+                  >
+                    <ScrollText className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span>English</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -352,7 +362,7 @@ export default function AiTranslatorPage() {
                   </div>
                 ))}
               </div>
-            ) : (
+            ) : viewMode === 'table' ? (
               /* Rendering: Classic Split (Table) */
               <div className="w-full overflow-hidden rounded-3xl border border-zinc-800/80 bg-zinc-900/40 backdrop-blur-xl shadow-2xl">
                 <table className="w-full text-left border-collapse">
@@ -382,6 +392,21 @@ export default function AiTranslatorPage() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            ) : (
+              /* Rendering: English Only */
+              <div className="flex flex-col gap-6">
+                {(aiTranslationData || []).map((row, idx) => (
+                  <div key={idx} className="relative overflow-hidden bg-zinc-900/40 border border-zinc-800/80 rounded-3xl p-6 md:p-8 hover:border-emerald-500/40 transition-all duration-500 hover:shadow-[0_0_40px_rgba(16,185,129,0.08)] shadow-2xl backdrop-blur-xl group animate-fadeIn">
+                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                    <div className="relative group/english">
+                      <div className="absolute inset-0 bg-emerald-500/5 blur-2xl opacity-0 group-hover/english:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                      <div className="text-zinc-300 leading-loose text-base md:text-lg font-sans drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] relative z-10 [&>p]:mb-4 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold">
+                        <ReactMarkdown>{row.transcreatedText}</ReactMarkdown>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
 

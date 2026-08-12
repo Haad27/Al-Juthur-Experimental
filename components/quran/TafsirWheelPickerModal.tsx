@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { X, Search, Sparkles, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { isFuzzyMatch } from "@/lib/searchUtils";
 
 interface Author {
   id: number;
@@ -45,20 +46,92 @@ function WheelColumn<T>({
   ariaLabel,
 }: WheelColumnProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const selectedIndexRef = useRef(selectedIndex);
+  const itemsLengthRef = useRef(items.length);
+  const onSelectRef = useRef(onSelect);
+  const lastWheelTimeRef = useRef(0);
+  const wheelAccumulator = useRef(0);
+  const isProgrammaticScrollRef = useRef(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    selectedIndexRef.current = selectedIndex;
+  }, [selectedIndex]);
+
+  useEffect(() => {
+    itemsLengthRef.current = items.length;
+  }, [items.length]);
+
+  useEffect(() => {
+    onSelectRef.current = onSelect;
+  }, [onSelect]);
 
   useEffect(() => {
     if (containerRef.current) {
       const targetScrollTop = selectedIndex * ITEM_HEIGHT;
       if (Math.abs(containerRef.current.scrollTop - targetScrollTop) > 2) {
+        isProgrammaticScrollRef.current = true;
         containerRef.current.scrollTo({
           top: targetScrollTop,
           behavior: "smooth",
         });
+
+        if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+        scrollTimeoutRef.current = setTimeout(() => {
+          isProgrammaticScrollRef.current = false;
+        }, 400);
       }
     }
   }, [selectedIndex]);
 
+  // Intercept desktop mouse wheel events for exact 1-step scrolling & fast swipe momentum
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleNativeWheel = (e: WheelEvent) => {
+      e.preventDefault();
+
+      const now = Date.now();
+      const dt = now - lastWheelTimeRef.current;
+      lastWheelTimeRef.current = now;
+
+      if (dt > 100) {
+        wheelAccumulator.current = 0;
+      }
+
+      wheelAccumulator.current += e.deltaY;
+      const threshold = 40;
+
+      if (Math.abs(wheelAccumulator.current) >= threshold) {
+        let steps = Math.trunc(wheelAccumulator.current / threshold);
+        
+        if (dt > 30 && Math.abs(steps) > 1) {
+          steps = steps > 0 ? 1 : -1;
+          wheelAccumulator.current = 0;
+        } else {
+          wheelAccumulator.current -= steps * threshold;
+        }
+
+        const nextIndex = Math.max(
+          0,
+          Math.min(itemsLengthRef.current - 1, selectedIndexRef.current + steps)
+        );
+
+        if (nextIndex !== selectedIndexRef.current) {
+          onSelectRef.current(nextIndex);
+        }
+      }
+    };
+
+    container.addEventListener("wheel", handleNativeWheel, { passive: false });
+    return () => {
+      container.removeEventListener("wheel", handleNativeWheel);
+    };
+  }, []);
+
   const handleScroll = useCallback(() => {
+    if (isProgrammaticScrollRef.current) return;
     if (!containerRef.current) return;
     const currentScrollTop = containerRef.current.scrollTop;
     const index = Math.round(currentScrollTop / ITEM_HEIGHT);
@@ -81,6 +154,7 @@ function WheelColumn<T>({
   return (
     <div
       className="relative h-[250px] w-full overflow-hidden select-none touch-pan-y"
+      style={{ touchAction: "pan-y" }}
       aria-label={ariaLabel}
     >
       <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-zinc-950 via-zinc-950/85 to-transparent z-10 pointer-events-none" />
@@ -91,8 +165,8 @@ function WheelColumn<T>({
         onScroll={handleScroll}
         onMouseUp={handleScrollEnd}
         onTouchEnd={handleScrollEnd}
-        className="h-full overflow-y-auto no-scrollbar py-[101px] snap-y snap-mandatory"
-        style={{ scrollSnapType: "y mandatory" }}
+        className="h-full overflow-y-auto overflow-x-hidden no-scrollbar py-[101px] snap-y snap-mandatory touch-pan-y"
+        style={{ scrollSnapType: "y mandatory", touchAction: "pan-y", overscrollBehaviorX: "none" }}
       >
         {items.map((item, index) => {
           const distance = Math.abs(index - selectedIndex);
@@ -105,10 +179,11 @@ function WheelColumn<T>({
             <div
               key={index}
               onClick={() => onSelect(index)}
-              className="h-[48px] flex items-center justify-center snap-center cursor-pointer transition-all duration-150 overflow-hidden px-2"
+              className="h-[48px] flex items-center justify-center snap-center cursor-pointer transition-all duration-150 overflow-hidden px-2 touch-pan-y select-none"
               style={{
                 transform: `scale(${scale})`,
                 opacity: opacity,
+                touchAction: "pan-y",
               }}
             >
               {renderItem(item, isSelected)}
@@ -166,12 +241,12 @@ export default function TafsirWheelPickerModal({
 
   const filteredAuthors = useMemo(() => {
     if (!searchQuery.trim()) return allAuthors;
-    const query = searchQuery.toLowerCase();
+    const query = searchQuery.trim();
     return allAuthors.filter(
       (a) =>
-        a.author.name.toLowerCase().includes(query) ||
-        (a.author.authorName && a.author.authorName.toLowerCase().includes(query)) ||
-        a.langName.toLowerCase().includes(query)
+        isFuzzyMatch(query, a.author.name) ||
+        (a.author.authorName && isFuzzyMatch(query, a.author.authorName)) ||
+        isFuzzyMatch(query, a.langName)
     );
   }, [allAuthors, searchQuery]);
 

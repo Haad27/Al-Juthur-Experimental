@@ -425,7 +425,7 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                     {msg.role === "assistant" && (
                       <button
                         onClick={() => copyToClipboard(msg.content, "Response copied to clipboard!")}
-                        className="absolute top-2 right-2 p-1.5 rounded-lg text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800/80 transition opacity-0 group-hover:opacity-100 focus:opacity-100 cursor-pointer"
+                        className="absolute top-2 right-2 p-1.5 rounded-lg text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800/80 transition opacity-60 hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 cursor-pointer"
                         title="Copy response"
                       >
                         <Copy className="size-3.5" />
