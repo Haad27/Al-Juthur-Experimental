@@ -43,6 +43,16 @@ export default function AiTranslatorPage() {
     }
   }, [searchParams, triggerAiTranslation]);
 
+  // Auto scroll down to translation results whenever translation starts
+  useEffect(() => {
+    if (aiIsTranslating) {
+      const timer = setTimeout(() => {
+        document.getElementById('ai-results-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [aiIsTranslating]);
+
   const fetchQuota = () => {
     fetch('/api/ai/translate')
       .then(res => res.json())
@@ -187,17 +197,29 @@ export default function AiTranslatorPage() {
                   </button>
                   <button
                     onClick={() => {
+                      if (aiIsTranslating) return;
                       triggerAiTranslation(aiInputText);
-                      setTimeout(() => {
-                        document.getElementById('ai-results-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      }, 100);
                     }}
-                    disabled={!aiInputText.trim()}
-                    className="group relative overflow-hidden flex items-center justify-center gap-3 px-8 py-[min(1rem,2vh)] bg-gradient-to-r from-emerald-600 to-teal-500 disabled:from-zinc-900 disabled:to-zinc-900 disabled:text-zinc-600 disabled:border-zinc-800 disabled:border text-white font-bold rounded-2xl transition-all duration-300 shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_40px_rgba(16,185,129,0.5)] cursor-pointer disabled:shadow-none transform hover:-translate-y-1 active:translate-y-0 disabled:group-hover:text-white"
+                    disabled={aiIsTranslating || !aiInputText.trim()}
+                    className={cn(
+                      "group relative overflow-hidden flex items-center justify-center gap-3 px-8 py-[min(1rem,2vh)] font-bold rounded-2xl transition-all duration-300 transform active:translate-y-0 text-white shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_40px_rgba(16,185,129,0.5)] cursor-pointer hover:-translate-y-1",
+                      aiIsTranslating
+                        ? "bg-zinc-900/90 border border-emerald-500/50 text-emerald-400 opacity-90 cursor-not-allowed shadow-none hover:translate-y-0 hover:shadow-none"
+                        : "bg-gradient-to-r from-emerald-600 to-teal-500 disabled:from-zinc-900 disabled:to-zinc-900 disabled:text-zinc-600 disabled:border-zinc-800 disabled:border disabled:shadow-none disabled:hover:translate-y-0"
+                    )}
                   >
                     <div className="absolute inset-0 bg-emerald-500/30 backdrop-blur-sm translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out" />
-                    <Sparkles className="w-[min(1.25rem,2.5vh)] h-[min(1.25rem,2.5vh)] relative z-10" />
-                    <span className="relative z-10 text-[clamp(1rem,2vh,1.125rem)]">Translate Text</span>
+                    {aiIsTranslating ? (
+                      <>
+                        <Loader2 className="w-[min(1.25rem,2.5vh)] h-[min(1.25rem,2.5vh)] text-emerald-400 animate-spin relative z-10 shrink-0" />
+                        <span className="relative z-10 text-[clamp(1rem,2vh,1.125rem)] text-emerald-300 font-semibold">Translating...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-[min(1.25rem,2.5vh)] h-[min(1.25rem,2.5vh)] relative z-10" />
+                        <span className="relative z-10 text-[clamp(1rem,2vh,1.125rem)]">Translate Text</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
@@ -246,8 +268,8 @@ export default function AiTranslatorPage() {
               </div>
             )}
 
-            {/* Action Bar (Sticky Top - Snaps cleanly right below the top navigation bar) */}
-            <div className="sticky top-[58px] sm:top-[68px] z-30 flex flex-col sm:flex-row sm:items-center justify-between bg-zinc-950/95 sm:bg-zinc-950/80 backdrop-blur-xl border border-zinc-800/80 rounded-2xl p-2.5 sm:p-3 shadow-2xl gap-2.5 sm:gap-4">
+            {/* Action Bar (Sticky Top - Snaps flush directly underneath top navbar) */}
+            <div className="sticky top-[48px] md:top-[49px] z-30 flex flex-col sm:flex-row sm:items-center justify-between bg-zinc-950/95 sm:bg-zinc-950/80 backdrop-blur-xl border border-zinc-800/80 rounded-2xl p-2.5 sm:p-3 shadow-2xl gap-2.5 sm:gap-4">
               <div className="flex items-center justify-between w-full sm:w-auto gap-2">
                 <h2 className="text-xs sm:text-xl font-bold text-white flex items-center gap-1.5 sm:gap-2 flex-wrap">
                   <Sparkles className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-emerald-400 shrink-0" />
