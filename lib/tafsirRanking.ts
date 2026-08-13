@@ -93,3 +93,42 @@ export function getLanguagePriority(langName: string): number {
   if (lower.includes("urdu")) return 3;
   return 4;
 }
+
+/**
+ * Helper to determine scholarly difficulty level of a Tafsir.
+ * Beginner: Concise, modern, easy-to-read classical & contemporary explanations.
+ * Intermediate: Comprehensive analytical and thematic commentaries.
+ * Advanced: Deep linguistic, jurisprudence (fiqh), theological, and extensive classical encyclopedias.
+ */
+export function getTafsirDifficulty(name: string, authorName?: string | null): 'Beginner' | 'Intermediate' | 'Advanced' {
+  const text = `${name || ""} ${authorName || ""}`.toLowerCase();
+
+  // Advanced: Extensive multi-volume classical encyclopedias, jurisprudence, linguistics, theology
+  if (
+    text.includes("tabari") || text.includes("طبري") ||
+    text.includes("qurtubi") || text.includes("قرطبي") ||
+    text.includes("kashshaf") || text.includes("zamakhshari") || text.includes("زمخشري") ||
+    text.includes("razi") || text.includes("رازي") || text.includes("mafatih") ||
+    text.includes("baghawi") || text.includes("بغوي") ||
+    text.includes("ibn abi hatim") || text.includes("ابن أبي حاتم") ||
+    text.includes("shawkani") || text.includes("شوكاني") ||
+    text.includes("alusi") || text.includes("آلوسي") ||
+    text.includes("qushayri") || text.includes("قشيري")
+  ) {
+    return 'Advanced';
+  }
+
+  // Beginner: Concise, modern, accessible
+  if (
+    text.includes("sa'di") || text.includes("sadi") || text.includes("سعدي") ||
+    text.includes("jalalayn") || text.includes("جلالين") ||
+    text.includes("mukhtasar") || text.includes("مختصر") ||
+    text.includes("tazkirul") || text.includes("taqi usmani") || text.includes("عثماني") ||
+    text.includes("ahsanul bayaan")
+  ) {
+    return 'Beginner';
+  }
+
+  // Intermediate: Default for Ibn Kathir, Tafheem, Bayan-ul-Quran, Ma'arif-ul-Quran, Ibn Abbas, etc.
+  return 'Intermediate';
+}

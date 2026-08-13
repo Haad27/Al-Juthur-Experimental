@@ -16,7 +16,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 import { copyToClipboard, cn } from "@/lib/utils";
-import { getTafsirFameRank, getLanguagePriority } from "@/lib/tafsirRanking";
+import { getTafsirFameRank, getLanguagePriority, getTafsirDifficulty } from "@/lib/tafsirRanking";
 
 interface Author {
   id: number;
@@ -1071,63 +1071,62 @@ export default function TafsirPage() {
           </div>
         ) : (
           <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
-            {filteredAuthors.map(({ author, language }, index) => (
-              <div
-                key={`${language.id}-${author.id}`}
-                onClick={() => {
-                  setSelectedAuthorForWheel(author);
-                  setSelectedLangForWheel(language.name);
-                  setWheelModalOpen(true);
-                }}
-                className="relative overflow-hidden border border-emerald-500/50 hover:border-emerald-500 bg-zinc-900/40 group cursor-pointer rounded-xl h-[112px] backdrop-blur-md px-4 py-3 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10 flex flex-col justify-between"
-              >
-                {/* Giant Faded Watermark Number */}
-                <div className="absolute -right-2 -bottom-4 text-[75px] font-black text-emerald-500/30 group-hover:text-emerald-500 transition-colors duration-500 pointer-events-none select-none leading-none">
-                  {index + 1}
-                </div>
+            {filteredAuthors.map(({ author, language }, index) => {
+              const difficultyLevel = author.difficulty || getTafsirDifficulty(author.name, author.authorName);
+              return (
+                <div
+                  key={`${language.id}-${author.id}`}
+                  onClick={() => {
+                    setSelectedAuthorForWheel(author);
+                    setSelectedLangForWheel(language.name);
+                    setWheelModalOpen(true);
+                  }}
+                  className="relative overflow-hidden border border-emerald-500/50 hover:border-emerald-500 bg-zinc-900/40 group cursor-pointer rounded-xl h-[112px] backdrop-blur-md px-4 py-3 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10 flex flex-col justify-between"
+                >
+                  {/* Giant Faded Watermark Number */}
+                  <div className="absolute -right-2 -bottom-4 text-[75px] font-black text-emerald-500/30 group-hover:text-emerald-500 transition-colors duration-500 pointer-events-none select-none leading-none">
+                    {index + 1}
+                  </div>
 
-                <div className="relative z-10 flex items-start justify-between gap-3 min-w-0">
-                  <div className="flex flex-col space-y-0.5 min-w-0 flex-1">
-                    <p className="font-semibold text-white group-hover:text-emerald-400 transition-colors text-sm sm:text-base truncate leading-tight">
-                      {author.name}
-                    </p>
-                    {author.authorName && (
-                      <p className="text-[11px] text-emerald-400/90 font-medium flex items-center gap-1 min-w-0">
-                        <User className="size-3 text-emerald-400/70 shrink-0" />
-                        <span className="text-zinc-400 shrink-0">Author:</span>
-                        <span className="truncate" title={author.authorName}>{author.authorName}</span>
+                  <div className="relative z-10 flex items-start justify-between gap-2 min-w-0">
+                    <div className="flex flex-col space-y-0.5 min-w-0 flex-1">
+                      <p className="font-semibold text-white group-hover:text-emerald-400 transition-colors text-sm sm:text-base truncate leading-tight">
+                        {author.name}
                       </p>
-                    )}
-                    <div className="flex items-center gap-1.5 text-[11px] text-zinc-400 pt-0.5 truncate">
-                      <span className="text-zinc-300 font-medium shrink-0">{language.name}</span>
-                      {author.era && (
-                        <>
-                          <span className="shrink-0">•</span>
-                          <span className="text-zinc-400 truncate" title={author.era}>
-                            {author.era.replace(" & Contemporary", "")}
-                          </span>
-                        </>
+                      {author.authorName && (
+                        <p className="text-[11px] text-emerald-400/90 font-medium flex items-center gap-1 min-w-0">
+                          <User className="size-3 text-emerald-400/70 shrink-0" />
+                          <span className="text-zinc-400 shrink-0">Author:</span>
+                          <span className="truncate" title={author.authorName}>{author.authorName}</span>
+                        </p>
                       )}
-                      {author.difficulty && (
-                        <>
-                          <span className="shrink-0">•</span>
-                          <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
-                            author.difficulty === 'Beginner' ? 'bg-emerald-500/15 text-emerald-400' :
-                            author.difficulty === 'Advanced' ? 'bg-amber-500/15 text-amber-400' :
-                            'bg-blue-500/15 text-blue-400'
-                          }`}>
-                            {author.difficulty}
-                          </span>
-                        </>
+                      <div className="flex items-center gap-1.5 text-[11px] text-zinc-400 pt-0.5 truncate">
+                        <span className="text-zinc-300 font-medium shrink-0">{language.name}</span>
+                        {author.era && (
+                          <>
+                            <span className="shrink-0">•</span>
+                            <span className="text-zinc-400 truncate" title={author.era}>
+                              {author.era.replace(" & Contemporary", "")}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Top Right: Difficulty Badge + Al-Juthur Logo */}
+                    <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
+                      {difficultyLevel && (
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border shadow-sm ${
+                          difficultyLevel === 'Beginner' ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400' :
+                          difficultyLevel === 'Advanced' ? 'bg-amber-500/15 border-amber-500/30 text-amber-400' :
+                          'bg-blue-500/15 border-blue-500/30 text-blue-400'
+                        }`}>
+                          {difficultyLevel}
+                        </span>
                       )}
+                      <LogoIcon className="size-5 text-emerald-400 group-hover:scale-110 transition-transform" />
                     </div>
                   </div>
-
-                  {/* Quran Logo Icon on right */}
-                  <div className="text-right shrink-0">
-                    <LogoIcon className="size-5 text-emerald-400 group-hover:scale-110 transition-transform" />
-                  </div>
-                </div>
 
                 {/* Methodology Badges */}
                 {author.tags && author.tags.length > 0 && (
@@ -1148,7 +1147,8 @@ export default function TafsirPage() {
                   </div>
                 )}
               </div>
-            ))}
+            );
+          })}
           </div>
         )}
       </div>
