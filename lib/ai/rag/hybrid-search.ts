@@ -177,22 +177,37 @@ export async function searchHybrid(
       const numVerses = filters.suggestedVerses.length;
       let verseResults: any[] = [];
       
-      // Fetch all allowed authors for every verse (do not limit per verse)
+      // Calculate how many authors to fetch per verse to keep total tokens reasonable
+      // e.g. 5 authors across 5 verses = 1 per verse
+      // e.g. 5 authors across 2 verses = 3 per verse
+      const authorsPerVerse = Math.max(1, Math.ceil(allowedAuthorIds.length / Math.max(1, numVerses)));
+      
+      let currentAuthorIdx = 0;
       
       for (let i = 0; i < numVerses; i++) {
         const verse = filters.suggestedVerses[i];
+        
+        // Pick the next `authorsPerVerse` authors in a round-robin fashion
+        const selectedAuthorsForThisVerse = [];
+        for (let j = 0; j < authorsPerVerse; j++) {
+          selectedAuthorsForThisVerse.push(allowedAuthorIds[currentAuthorIdx % allowedAuthorIds.length]);
+          currentAuthorIdx++;
+        }
+        
+        // Ensure no duplicate authors for a single verse
+        const uniqueSelectedAuthors = Array.from(new Set(selectedAuthorsForThisVerse));
         
         const querySql = `
           SELECT t.id, t.authorId, t.surahId, a.numberInSurah as ayahNo, t.text, au.name as authorName
           FROM TafsirEntry t
           JOIN Ayah a ON t.ayahId = a.id
           JOIN Author au ON t.authorId = au.id
-          WHERE t.authorId IN (${allowedAuthorIds.join(',')})
+          WHERE t.authorId IN (${uniqueSelectedAuthors.join(',')})
             AND t.surahId = ? AND a.numberInSurah = ?
         `;
         
         const rows = devDb.prepare(querySql).all(verse.surah, verse.ayah) as any[];
-        console.log(`[HYBRID-SEARCH] Verse ${verse.surah}:${verse.ayah} → ${rows.length} tafsir entries (${allowedAuthorIds.length} authors allowed)`);
+        console.log(`[HYBRID-SEARCH] Verse ${verse.surah}:${verse.ayah} → ${rows.length} tafsir entries (${uniqueSelectedAuthors.length} authors allowed: ${uniqueSelectedAuthors.join(',')})`);
         verseResults.push(...rows);
       }
       
