@@ -3,7 +3,7 @@ import { SURAHS_DATA } from '../../surahsData';
 
 export type RagMode = 'default' | 'classical' | 'grammar' | 'modern' | 'philosophical' | 'lexicon' | 'dream';
 
-export type QueryType = 'specific' | 'thematic';
+export type QueryType = 'specific' | 'thematic' | 'specific_multiple';
 
 export interface PreparedQueryInfo {
   isScopeValid: boolean;

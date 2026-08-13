@@ -32,20 +32,16 @@ export default function AiTranslatorPage() {
   useEffect(() => {
     const inputParam = searchParams.get('input');
     const sessionInput = typeof window !== 'undefined' ? sessionStorage.getItem('ai_translator_input') : null;
-    
-    if (sessionInput) {
-      setAiInputText(sessionInput);
-      sessionStorage.removeItem('ai_translator_input');
-    } else if (inputParam) {
-      setAiInputText(inputParam);
-    }
-  }, [searchParams, setAiInputText]);
+    const targetText = sessionInput || inputParam;
 
-  useEffect(() => {
-    if (aiInputText.trim() && !aiIsTranslating && !aiTranslationData && !aiUntranslatedText && !aiError) {
-      triggerAiTranslation(aiInputText);
+    if (sessionInput) {
+      sessionStorage.removeItem('ai_translator_input');
     }
-  }, [aiInputText, aiIsTranslating, aiTranslationData, aiUntranslatedText, aiError, triggerAiTranslation]);
+
+    if (targetText && targetText.trim()) {
+      triggerAiTranslation(targetText);
+    }
+  }, [searchParams, triggerAiTranslation]);
 
   const fetchQuota = () => {
     fetch('/api/ai/translate')
@@ -250,8 +246,8 @@ export default function AiTranslatorPage() {
               </div>
             )}
 
-            {/* Action Bar (Sticky Top - Snaps cleanly to top on Laptop & Mobile) */}
-            <div className="sticky top-2 sm:top-3 z-30 flex flex-col sm:flex-row sm:items-center justify-between bg-zinc-950/95 sm:bg-zinc-950/80 backdrop-blur-xl border border-zinc-800/80 rounded-2xl p-2.5 sm:p-3 shadow-2xl gap-2 sm:gap-4">
+            {/* Action Bar (Sticky Top - Snaps cleanly right below the top navigation bar) */}
+            <div className="sticky top-[58px] sm:top-[68px] z-30 flex flex-col sm:flex-row sm:items-center justify-between bg-zinc-950/95 sm:bg-zinc-950/80 backdrop-blur-xl border border-zinc-800/80 rounded-2xl p-2.5 sm:p-3 shadow-2xl gap-2.5 sm:gap-4">
               <div className="flex items-center justify-between w-full sm:w-auto gap-2">
                 <h2 className="text-xs sm:text-xl font-bold text-white flex items-center gap-1.5 sm:gap-2 flex-wrap">
                   <Sparkles className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-emerald-400 shrink-0" />
@@ -269,68 +265,68 @@ export default function AiTranslatorPage() {
                 </h2>
               </div>
               
-              <div className="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-4 w-full sm:w-auto pt-1 sm:pt-0 border-t sm:border-t-0 border-zinc-800/50">
-                {/* Global Copy Actions */}
-                <div className="flex items-center p-0.5 sm:p-1.5 rounded-xl sm:rounded-2xl bg-zinc-900/60 border border-zinc-800/80 shadow-inner backdrop-blur-md">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between sm:justify-end gap-2 sm:gap-4 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-800/50">
+                {/* Row 1 on Mobile: Global Copy Actions */}
+                <div className="flex items-center justify-between sm:justify-start p-1 sm:p-1.5 rounded-xl sm:rounded-2xl bg-zinc-900/60 border border-zinc-800/80 shadow-inner backdrop-blur-md w-full sm:w-auto">
                   <span className="text-[10px] font-bold text-zinc-500 px-2 uppercase tracking-widest hidden md:block">Copy</span>
-                  <div className="flex items-center gap-0.5 sm:gap-1">
+                  <div className="flex items-center justify-around sm:justify-start w-full sm:w-auto gap-1">
                     <button
                       onClick={() => copyAll('english')}
-                      className="group flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-semibold transition-all duration-300 hover:bg-emerald-500/20 hover:text-emerald-300 text-zinc-400"
+                      className="group flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl text-xs font-semibold transition-all duration-300 hover:bg-emerald-500/20 hover:text-emerald-300 text-zinc-400"
                       title="Copy English Only"
                     >
-                      {copiedIndex === 'all-english' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-zinc-500 group-hover:text-emerald-400 transition-colors" />}
+                      {copiedIndex === 'all-english' ? <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> : <Copy className="w-3.5 h-3.5 text-zinc-500 group-hover:text-emerald-400 transition-colors shrink-0" />}
                       <span>English</span>
                     </button>
                     <button
                       onClick={() => copyAll('reader')}
-                      className="group flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-semibold transition-all duration-300 hover:bg-emerald-500/20 hover:text-emerald-300 text-zinc-400"
+                      className="group flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl text-xs font-semibold transition-all duration-300 hover:bg-emerald-500/20 hover:text-emerald-300 text-zinc-400"
                       title="Copy Reader Mode Format"
                     >
-                      {copiedIndex === 'all-reader' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-zinc-500 group-hover:text-emerald-400 transition-colors" />}
+                      {copiedIndex === 'all-reader' ? <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> : <Copy className="w-3.5 h-3.5 text-zinc-500 group-hover:text-emerald-400 transition-colors shrink-0" />}
                       <span>Reader</span>
                     </button>
                     <button
                       onClick={() => copyAll('split')}
-                      className="group flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-semibold transition-all duration-300 hover:bg-emerald-500/20 hover:text-emerald-300 text-zinc-400"
+                      className="group flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl text-xs font-semibold transition-all duration-300 hover:bg-emerald-500/20 hover:text-emerald-300 text-zinc-400"
                       title="Copy Split Mode Format"
                     >
-                      {copiedIndex === 'all-split' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-zinc-500 group-hover:text-emerald-400 transition-colors" />}
+                      {copiedIndex === 'all-split' ? <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> : <Copy className="w-3.5 h-3.5 text-zinc-500 group-hover:text-emerald-400 transition-colors shrink-0" />}
                       <span>Split</span>
                     </button>
                   </div>
                 </div>
 
-                {/* Layout Toggles */}
-                <div className="flex items-center p-0.5 sm:p-1.5 rounded-xl sm:rounded-2xl bg-zinc-900/60 border border-zinc-800/80 shadow-inner backdrop-blur-md">
+                {/* Row 2 on Mobile: Layout Toggles */}
+                <div className="flex items-center justify-around sm:justify-start p-1 sm:p-1.5 rounded-xl sm:rounded-2xl bg-zinc-900/60 border border-zinc-800/80 shadow-inner backdrop-blur-md w-full sm:w-auto">
                   <button
                     onClick={() => setViewMode('cards')}
-                    className={`flex items-center gap-1 sm:gap-2 px-2.5 py-1 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-semibold transition-all duration-300 cursor-pointer ${
+                    className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs font-semibold transition-all duration-300 cursor-pointer ${
                       viewMode === 'cards' ? 'bg-emerald-500/20 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
                     }`}
                     title="Card view"
                   >
-                    <LayoutGrid className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <LayoutGrid className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
                     <span>Reader</span>
                   </button>
                   <button
                     onClick={() => setViewMode('table')}
-                    className={`flex items-center gap-1 sm:gap-2 px-2.5 py-1 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-semibold transition-all duration-300 cursor-pointer ${
+                    className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs font-semibold transition-all duration-300 cursor-pointer ${
                       viewMode === 'table' ? 'bg-emerald-500/20 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
                     }`}
                     title="Table view"
                   >
-                    <Columns className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <Columns className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
                     <span>Classic</span>
                   </button>
                   <button
                     onClick={() => setViewMode('english')}
-                    className={`flex items-center gap-1 sm:gap-2 px-2.5 py-1 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-semibold transition-all duration-300 cursor-pointer ${
+                    className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[9px] sm:text-xs font-semibold transition-all duration-300 cursor-pointer ${
                       viewMode === 'english' ? 'bg-emerald-500/20 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
                     }`}
                     title="English only view"
                   >
-                    <ScrollText className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <ScrollText className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
                     <span>English</span>
                   </button>
                 </div>

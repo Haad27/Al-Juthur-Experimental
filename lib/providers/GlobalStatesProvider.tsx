@@ -2,6 +2,7 @@
 // lib/GlobalStateContext.tsx
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { toast } from "sonner";
+import { fragmentArabicText } from "../utils";
 
 // Define the shape of the global state
 interface GlobalState {
@@ -141,12 +142,11 @@ export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
   const [aiUntranslatedText, setAiUntranslatedText] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
 
-function parseMarkdownTable(text: string, sourceTextBlocks?: string[]): Array<{ transcreatedText: string, sourceText: string }> {
+function parseMarkdownTable(text: string, originalFragments?: {text: string, delimiter: string}[], isFinal: boolean = false): Array<{ transcreatedText: string, sourceText: string }> {
   const lines = text.split('\n');
-  const rows: Array<{ transcreatedText: string, sourceText: string }> = [];
+  const rows: Array<{ transcreatedText: string, sourceText: string, claimedIndices: number[] }> = [];
   const seenRows = new Set<string>();
   
-  let rowIndex = 0;
   for (const line of lines) {
     let trimmed = line.trim();
     if (!trimmed.startsWith('|') && !trimmed.includes('|')) continue;
@@ -157,52 +157,93 @@ function parseMarkdownTable(text: string, sourceTextBlocks?: string[]): Array<{ 
     const columns = trimmed.split('|').map(p => p.trim());
     if (columns.length >= 1) {
       let transcreated = columns[0] || '';
-      let source = columns[1] || '';
-      
-      // If the second column is just a paragraph number, pull the actual source text from the blocks
-      if (source && sourceTextBlocks && sourceTextBlocks.length > 0) {
-        const pNum = parseInt(source.replace(/\D/g, ''));
-        if (!isNaN(pNum) && pNum > 0 && pNum <= sourceTextBlocks.length) {
-          source = sourceTextBlocks[pNum - 1];
-        } else if (!isNaN(pNum)) {
-          source = sourceTextBlocks[rowIndex] || sourceTextBlocks[0];
-        }
-      } else if (columns.length === 1 && !source && sourceTextBlocks && sourceTextBlocks.length > rowIndex) {
-        source = sourceTextBlocks[rowIndex];
-      }
+      let sourceCol = columns[1] || '';
       
       const cleanTrans = transcreated.toLowerCase().replace(/[\*\s\.\?]/g, '');
-      const cleanSource = source.toLowerCase().replace(/[\*\s\.\?]/g, '');
+      const cleanSource = sourceCol.toLowerCase().replace(/[\*\s\.\?]/g, '');
 
       if (
         cleanTrans === 'transcreatedtext' ||
+        cleanSource === 'sourcefragments' ||
         cleanSource === 'sourcetext' ||
-        cleanSource === 'sourcetextyes' ||
         cleanTrans === 'readytogenerate' ||
-        cleanSource === 'transcreatedtext' ||
         transcreated.includes('---') ||
-        source.includes('---')
+        sourceCol.includes('---')
       ) {
         continue;
       }
       
-      if (!transcreated && !source) continue;
+      if (!transcreated && !sourceCol) continue;
       
       const cleanedTransText = transcreated.replace(/^(?:\*\*)?(?:Row|Paragraph|Segment|Section)\s*\d+[:\-\.]?\s*(?:\*\*)?\s*/i, '').trim();
-      const cleanedSourceText = source.replace(/^(?:\*\*)?(?:Row|Paragraph|Segment|Section)\s*\d+[:\-\.]?\s*(?:\*\*)?\s*/i, '').trim();
       
-      const rowKey = `${cleanedTransText}|||${cleanedSourceText}`;
+      let sourceText = sourceCol;
+      let claimedIndices: number[] = [];
+      
+      if (originalFragments && originalFragments.length > 0) {
+        // Parse comma-separated ranges e.g. "1-3, 5"
+        const parts = sourceCol.split(',');
+        for (const part of parts) {
+          const rangeMatch = part.match(/(\d+)\s*-\s*(\d+)/);
+          if (rangeMatch) {
+            let start = parseInt(rangeMatch[1]);
+            let end = parseInt(rangeMatch[2]);
+            if (start > end) {
+              const temp = start;
+              start = end;
+              end = temp;
+            }
+            for (let i = start; i <= end; i++) claimedIndices.push(i - 1);
+          } else {
+            const numMatch = part.match(/\d+/);
+            if (numMatch) claimedIndices.push(parseInt(numMatch[0]) - 1);
+          }
+        }
+        
+        claimedIndices = [...new Set(claimedIndices)].sort((a, b) => a - b).filter(i => i >= 0 && i < originalFragments.length);
+        
+        if (claimedIndices.length === 0) {
+          // If the AI failed to output a valid number, it's almost certainly hallucinating reasoning or preamble.
+          // We completely ignore this row. The final pass fallback will catch any legitimately missed fragments.
+          continue;
+        }
+        
+        sourceText = claimedIndices.map(i => originalFragments[i].text + originalFragments[i].delimiter).join('').trim();
+      }
+      
+      const rowKey = `${cleanedTransText}|||${claimedIndices.join(',')}`;
       if (seenRows.has(rowKey)) continue;
       seenRows.add(rowKey);
       
       rows.push({
         transcreatedText: cleanedTransText,
-        sourceText: cleanedSourceText
+        sourceText: sourceText,
+        claimedIndices
       });
-      rowIndex++;
     }
   }
-  return rows;
+  
+  if (isFinal && originalFragments && originalFragments.length > 0) {
+    const allClaimed = new Set(rows.flatMap(r => r.claimedIndices));
+    const missingIndices = [];
+    for (let i = 0; i < originalFragments.length; i++) {
+      if (!allClaimed.has(i)) missingIndices.push(i);
+    }
+    
+    if (missingIndices.length > 0) {
+      // Append missing fragments as a fallback row
+      const missingText = missingIndices.map(i => originalFragments[i].text + originalFragments[i].delimiter).join('').trim();
+      if (missingText) {
+         rows.push({
+           transcreatedText: "*(Translation missed by AI)*",
+           sourceText: missingText,
+           claimedIndices: missingIndices
+         });
+      }
+    }
+  }
+  
+  return rows.map(r => ({ transcreatedText: r.transcreatedText, sourceText: r.sourceText }));
 }
 
   const triggerAiTranslation = async (textToTranslate: string, append = false) => {
@@ -249,7 +290,7 @@ function parseMarkdownTable(text: string, sourceTextBlocks?: string[]): Array<{ 
       let lastParseTime = 0;
       let wasTruncated = false;
       
-      const originalParagraphs = textToTranslate.split('\n\n').filter(p => p.trim().length > 0);
+      const originalFragments = fragmentArabicText(textToTranslate);
       
       while (true) {
         const { done, value } = await reader.read();
@@ -275,7 +316,7 @@ function parseMarkdownTable(text: string, sourceTextBlocks?: string[]): Array<{ 
                 
                 const now = Date.now();
                 if (now - lastParseTime > 500) {
-                  const rows = parseMarkdownTable(fullText, originalParagraphs);
+                  const rows = parseMarkdownTable(fullText, originalFragments, false);
                   setAiTranslationData(append ? [...existingRows, ...rows] : rows);
                   lastParseTime = now;
                 }
@@ -287,7 +328,7 @@ function parseMarkdownTable(text: string, sourceTextBlocks?: string[]): Array<{ 
         }
       }
       
-      const finalRows = parseMarkdownTable(fullText, originalParagraphs);
+      const finalRows = parseMarkdownTable(fullText, originalFragments, true);
       
       if (wasTruncated) {
         if (finalRows.length > 0) {

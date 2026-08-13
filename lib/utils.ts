@@ -91,3 +91,38 @@ export const unlockAudio = () => {
   source.connect(ctx.destination);
   source.start(0);
 };
+
+export function fragmentArabicText(text: string): { text: string; delimiter: string }[] {
+  // Split on newline, period, question mark, exclamation mark, semicolon
+  const rawSplit = text.split(/([\n.؟!؛]+)/);
+  const fragments: { text: string; delimiter: string }[] = [];
+  let currentText = '';
+  
+  for (let i = 0; i < rawSplit.length; i += 2) {
+    const chunk = rawSplit[i];
+    const delim = rawSplit[i + 1] || '';
+    
+    currentText += chunk;
+    
+    // Granularity floor: ~30 characters to avoid confetti fragments
+    if (currentText.trim().length >= 30 || i + 2 >= rawSplit.length) {
+      if (currentText.trim().length > 0 || delim.length > 0) {
+        fragments.push({ text: currentText, delimiter: delim });
+      }
+      currentText = '';
+    } else {
+      currentText += delim;
+    }
+  }
+  
+  // Clean up any trailing fragments
+  if (currentText.length > 0) {
+    if (fragments.length > 0) {
+      fragments[fragments.length - 1].delimiter += currentText;
+    } else {
+      fragments.push({ text: currentText, delimiter: '' });
+    }
+  }
+  
+  return fragments;
+}

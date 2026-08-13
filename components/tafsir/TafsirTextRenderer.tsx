@@ -1,19 +1,56 @@
-"use client";
-
-import React from "react";
+import { BookOpen, Info, ArrowRight } from "lucide-react";
 
 interface TafsirTextRendererProps {
   text: string;
   isArabic?: boolean;
   isUrdu?: boolean;
+  onNavigateToAyah?: (ayahNum: number) => void;
 }
 
-export default function TafsirTextRenderer({ text, isArabic, isUrdu }: TafsirTextRendererProps) {
+export default function TafsirTextRenderer({ text, isArabic, isUrdu, onNavigateToAyah }: TafsirTextRendererProps) {
   if (!text) return null;
   const isRtl = isArabic || isUrdu;
 
+  const trimmedText = text.trim();
+
+  // Handle empty or placeholder brackets "{}"
+  if (!trimmedText || trimmedText === "{}" || trimmedText === "[]") {
+    return (
+      <div className="py-3 px-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 text-zinc-400 text-xs sm:text-sm italic flex items-center gap-2.5">
+        <Info className="size-4 text-zinc-500 shrink-0" />
+        <span>No specific commentary entry recorded for this verse.</span>
+      </div>
+    );
+  }
+
+  // Handle cross-reference pointers (e.g. "2:1", "2:10") to previous verses
+  const crossRefMatch = trimmedText.match(/^(\d+):(\d+)$/);
+  if (crossRefMatch) {
+    const targetSurah = parseInt(crossRefMatch[1], 10);
+    const targetAyah = parseInt(crossRefMatch[2], 10);
+    return (
+      <div className="py-3 px-4 rounded-xl bg-zinc-950/80 border border-zinc-800/80 text-zinc-400 text-xs sm:text-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-inner">
+        <div className="flex items-center gap-2.5 italic">
+          <BookOpen className="size-4 text-emerald-500/70 shrink-0 not-italic" />
+          <span>
+            Tafsir for this verse is covered under <strong className="text-zinc-200 not-italic font-semibold">Ayah {targetAyah}</strong>.
+          </span>
+        </div>
+        {onNavigateToAyah && (
+          <button
+            onClick={() => onNavigateToAyah(targetAyah)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/60 text-zinc-300 hover:text-emerald-400 font-medium text-xs transition-all cursor-pointer shrink-0"
+          >
+            <span>Jump to Ayah {targetAyah}</span>
+            <ArrowRight className="size-3.5 text-zinc-400" />
+          </button>
+        )}
+      </div>
+    );
+  }
+
   // 1. First clean outer wrapper divs like <div class=ar lang=ar> or </div>
-  let content = text
+  let content = trimmedText
     .replace(/<div[^>]*>/gi, "")
     .replace(/<\/div>/gi, "")
     .trim();

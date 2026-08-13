@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import Link from "next/link";
+import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass } from "lucide-react";
 import LogoIcon from "@/components/svg/icons/LogoIcon";
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
@@ -182,8 +183,7 @@ export default function TafsirPage() {
   const [activeSurah, setActiveSurah] = useState<number>(1);
   const [tafsirEntries, setTafsirEntries] = useState<TafsirEntry[]>([]);
   const [loadingEntries, setLoadingEntries] = useState<boolean>(false);
-  const [visibleCount, setVisibleCount] = useState<number>(20);
-  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const virtuosoRef = useRef<VirtuosoHandle>(null);
 
   const [topNavVisible, setTopNavVisible] = useState<boolean>(true);
   const [currentAyahIndex, setCurrentAyahIndex] = useState<number>(0);
@@ -273,25 +273,7 @@ export default function TafsirPage() {
       });
   }, [activeAuthor, activeSurah]);
 
-  // Reset visible count when author or surah changes
-  useEffect(() => {
-    setVisibleCount(20);
-  }, [activeAuthor, activeSurah]);
-
-  // Infinite scroll observer to load more entries
-  useEffect(() => {
-    if (!loadMoreRef.current || tafsirEntries.length <= visibleCount) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setVisibleCount((prev) => Math.min(prev + 20, tafsirEntries.length));
-        }
-      },
-      { rootMargin: "600px" }
-    );
-    observer.observe(loadMoreRef.current);
-    return () => observer.disconnect();
-  }, [visibleCount, tafsirEntries.length, activeAuthor]);
+  // We use Virtuoso now for virtualization, no need for manual infinite scroll observer.
 
   // Flatten all authors with their language info
   const allAuthorsWithLang = useMemo(() => {
@@ -362,15 +344,11 @@ export default function TafsirPage() {
     const n = parseInt(urlAyah, 10);
     if (isNaN(n)) return;
     
-    if (n > visibleCount) {
-      setVisibleCount(n + 10);
-    }
-    
     // Small delay to allow render
     const t = setTimeout(() => {
+      virtuosoRef.current?.scrollToIndex({ index: n - 1, align: "start", behavior: "smooth" });
       const el = document.getElementById(`ayah-${n}`);
       if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
         el.classList.add("highlighted");
       }
     }, 400);
@@ -392,76 +370,35 @@ export default function TafsirPage() {
       }
 
       const targetAyah = targetAyahToScroll.ayah;
+      setCurrentAyahIndex(targetAyah - 1);
       
-      // Ensure visible count includes target ayah
-      if (targetAyah > visibleCount) {
-        setVisibleCount(targetAyah + 10);
-        return; // Return so we wait for the next render with updated visibleCount
-      }
-
-      // Retry polling until element exists in DOM and scroll to it
-      let attempts = 0;
-      const interval = setInterval(() => {
-        attempts++;
-        const el = document.getElementById(`ayah-${targetAyah}`);
-        if (el) {
-          clearInterval(interval);
-          setCurrentAyahIndex(targetAyah - 1);
-          el.scrollIntoView({ behavior: "smooth", block: "start" });
-          
-          // Also scroll the right sidebar tracker into view
-          const trackerEl = document.getElementById(`ayah-tracker-${targetAyah}`);
-          if (trackerEl) {
-            trackerEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
-          }
-          setTargetAyahToScroll(null);
-        } else if (attempts > 30) {
-          clearInterval(interval);
-          setTargetAyahToScroll(null);
-        }
-      }, 50);
-
-      return () => clearInterval(interval);
-    }
-  }, [targetAyahToScroll, activeSurah, tafsirEntries, loadingEntries, visibleCount]);
-
-  const scrollToAyah = (num: number) => {
-    if (num > visibleCount) {
-      setVisibleCount(num + 10);
-    }
-    let attempts = 0;
-    const interval = setInterval(() => {
-      attempts++;
-      const el = document.getElementById(`ayah-${num}`);
-      if (el) {
-        clearInterval(interval);
-        setCurrentAyahIndex(num - 1);
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-        const trackerEl = document.getElementById(`ayah-tracker-${num}`);
+      const t = setTimeout(() => {
+        virtuosoRef.current?.scrollToIndex({ index: targetAyah - 1, align: "start", behavior: "smooth" });
+        const trackerEl = document.getElementById(`ayah-tracker-${targetAyah}`);
         if (trackerEl) {
           trackerEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
         }
-      } else if (attempts > 20) {
-        clearInterval(interval);
-      }
-    }, 40);
+        setTargetAyahToScroll(null);
+      }, 100);
+
+      return () => clearTimeout(t);
+    }
+  }, [targetAyahToScroll, activeSurah, tafsirEntries, loadingEntries]);
+
+  const scrollToAyah = (num: number) => {
+    setCurrentAyahIndex(num - 1);
+    virtuosoRef.current?.scrollToIndex({ index: num - 1, align: "start", behavior: "smooth" });
+    const trackerEl = document.getElementById(`ayah-tracker-${num}`);
+    if (trackerEl) {
+      trackerEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
   };
 
   const navigateAyah = useCallback((delta: number) => {
     const nextIdx = Math.max(0, Math.min(tafsirEntries.length - 1, currentAyahIndex + delta));
-    
-    if (nextIdx + 1 > visibleCount) {
-      setVisibleCount(nextIdx + 10);
-    }
-
-    setTimeout(() => {
-      const target = ayahRefs.current[nextIdx];
-      if (target) {
-        target.scrollIntoView({ behavior: "smooth", block: "start" });
-        setCurrentAyahIndex(nextIdx);
-      }
-    }, 50);
-  }, [currentAyahIndex, tafsirEntries.length, visibleCount]);
+    setCurrentAyahIndex(nextIdx);
+    virtuosoRef.current?.scrollToIndex({ index: nextIdx, align: "start", behavior: "smooth" });
+  }, [currentAyahIndex, tafsirEntries.length]);
 
 
   // ==========================================
@@ -707,100 +644,107 @@ export default function TafsirPage() {
                 <p className="text-zinc-400">No Tafsir entries found for this Surah in this collection.</p>
               </div>
             ) : (
-              <div className="space-y-6">
-                {tafsirEntries.slice(0, visibleCount).map((entry, idx) => {
-                  const ayahNumber = entry.ayah?.numberInSurah || idx + 1;
-                  const arabicText = entry.ayah?.text && entry.ayah.text !== "Arabic Text" ? entry.ayah.text : null;
-                  return (
-                    <div
-                      key={entry.id || idx}
-                      id={`ayah-${ayahNumber}`}
-                      data-ayah-idx={idx}
-                      ref={(el) => { ayahRefs.current[idx] = el; }}
-                      className="border border-emerald-500/20 bg-zinc-900/40 rounded-xl p-5 md:p-7 transition-all hover:border-emerald-500/50 space-y-6 scroll-mt-24"
-                    >
-                      {/* Top Ayah Header */}
-                      <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3 gap-2 min-w-0">
-                        <div className="flex items-center gap-1.5 min-w-0 shrink-0">
-                          <span className="shrink-0 h-7 px-1.5 min-w-[1.75rem] rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-xs font-bold text-emerald-400 whitespace-nowrap">
-                            {activeSurah}:{ayahNumber}
-                          </span>
-                          <span className="text-xs sm:text-sm font-semibold text-zinc-300 whitespace-nowrap">Ayah {ayahNumber}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <button
-                            onClick={() => {
-                              const cleanText = entry.text.replace(/<[^>]*>?/gm, '');
-                              copyToClipboard(cleanText, "Tafsir explanation copied to clipboard!");
-                            }}
-                            className={cn(
-                              "flex items-center rounded-lg bg-zinc-800/80 hover:bg-zinc-700 transition font-medium text-zinc-300 whitespace-nowrap gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs",
-                              aiChatContext && "lg:gap-1 lg:px-2 lg:text-[10px]"
-                            )}
-                            title="Copy Tafsir"
-                          >
-                            <Copy className={cn("shrink-0 size-3.5", aiChatContext && "lg:size-3")} />
-                            <span className={cn("hidden sm:inline", aiChatContext && "lg:hidden")}>Copy</span>
-                          </button>
-                          {activeLangName !== 'English' && (
-                            <button
-                              onClick={() => {
-                                const cleanText = entry.text.replace(/<[^>]*>?/gm, '');
-                                sessionStorage.setItem("ai_translator_input", cleanText);
-                                router.push("/ai");
-                              }}
-                              className={cn(
-                                "flex items-center rounded-lg bg-emerald-500/20 border border-emerald-400/50 hover:bg-emerald-500/30 transition-all duration-300 font-medium text-emerald-300 whitespace-nowrap gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)]",
-                                aiChatContext && "lg:gap-1 lg:px-2 lg:text-[10px]"
+              <div className="flex-1 w-full min-h-0">
+                <Virtuoso
+                  ref={virtuosoRef}
+                  useWindowScroll
+                  totalCount={tafsirEntries.length}
+                  itemContent={(idx) => {
+                    const entry = tafsirEntries[idx];
+                    const ayahNumber = entry.ayah?.numberInSurah || idx + 1;
+                    const arabicText = entry.ayah?.text && entry.ayah.text !== "Arabic Text" ? entry.ayah.text : null;
+                    return (
+                      <div className="pb-6">
+                        <div
+                          key={entry.id || idx}
+                          id={`ayah-${ayahNumber}`}
+                          data-ayah-idx={idx}
+                          className="border border-emerald-500/20 bg-zinc-900/40 rounded-xl p-5 md:p-7 transition-all hover:border-emerald-500/50 space-y-6 scroll-mt-24"
+                        >
+                          {/* Top Ayah Header */}
+                          <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3 gap-2 min-w-0">
+                            <div className="flex items-center gap-1.5 min-w-0 shrink-0">
+                              <span className="shrink-0 h-7 px-1.5 min-w-[1.75rem] rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-xs font-bold text-emerald-400 whitespace-nowrap">
+                                {activeSurah}:{ayahNumber}
+                              </span>
+                              <span className="text-xs sm:text-sm font-semibold text-zinc-300 whitespace-nowrap">Ayah {ayahNumber}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <button
+                                onClick={() => {
+                                  const cleanText = entry.text.replace(/<[^>]*>?/gm, '');
+                                  copyToClipboard(cleanText, "Tafsir explanation copied to clipboard!");
+                                }}
+                                className={cn(
+                                  "flex items-center rounded-lg bg-zinc-800/80 hover:bg-zinc-700 transition font-medium text-zinc-300 whitespace-nowrap gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs",
+                                  aiChatContext && "lg:gap-1 lg:px-2 lg:text-[10px]"
+                                )}
+                                title="Copy Tafsir"
+                              >
+                                <Copy className={cn("shrink-0 size-3.5", aiChatContext && "lg:size-3")} />
+                                <span className={cn("hidden sm:inline", aiChatContext && "lg:hidden")}>Copy</span>
+                              </button>
+                              {activeLangName !== 'English' && (
+                                <button
+                                  onClick={() => {
+                                    const cleanText = entry.text.replace(/<[^>]*>?/gm, '');
+                                    sessionStorage.setItem("ai_translator_input", cleanText);
+                                    router.push("/ai");
+                                  }}
+                                  className={cn(
+                                    "flex items-center rounded-lg bg-emerald-500/20 border border-emerald-400/50 hover:bg-emerald-500/30 transition-all duration-300 font-medium text-emerald-300 whitespace-nowrap gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)]",
+                                    aiChatContext && "lg:gap-1 lg:px-2 lg:text-[10px]"
+                                  )}
+                                  title="Translate"
+                                >
+                                  <Languages className={cn("text-emerald-300 shrink-0 size-3.5", aiChatContext && "lg:size-3")} />
+                                  <span className={cn(aiChatContext && "lg:hidden")}>Translate</span>
+                                </button>
                               )}
-                              title="Translate"
-                            >
-                              <Languages className={cn("text-emerald-300 shrink-0 size-3.5", aiChatContext && "lg:size-3")} />
-                              <span className={cn("hidden sm:inline", aiChatContext && "lg:hidden")}>Translate</span>
-                            </button>
+                            </div>
+                          </div>
+
+                          {/* Arabic Verse */}
+                          {arabicText && (
+                            <div className="py-2">
+                              <p className={`font-mushaf-indopak-16 text-[1.65rem] md:text-4xl text-right leading-loose text-amber-100 font-normal`} dir="rtl" style={{ lineHeight: '2.4' }}>
+                                {arabicText}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Tafsir Text */}
+                          <div className="pt-2 border-t border-zinc-800/40">
+                            <TafsirTextRenderer
+                              text={entry.text}
+                              isArabic={isArabicOrUrdu}
+                              isUrdu={isUrduText}
+                              onNavigateToAyah={(num) => scrollToAyah(num)}
+                            />
+                          </div>
+
+                          {/* Explanation (Footnotes) */}
+                          {entry.footnoteIds && entry.footnoteIds.length > 0 && (
+                            <div className="mt-6 pt-4 border-t border-emerald-900/30">
+                              <div className="font-semibold text-emerald-500 uppercase tracking-wider text-[11px] mb-3 font-mono">
+                                Explanation
+                              </div>
+                              <TafsirFootnotesLoader footnoteIds={entry.footnoteIds} isUrdu={isUrduText} />
+                            </div>
                           )}
                         </div>
                       </div>
-
-                      {/* Arabic Verse */}
-                      {arabicText && (
-                        <div className="py-2">
-                          <p className={`font-mushaf-indopak-16 text-[1.65rem] md:text-4xl text-right leading-loose text-amber-100 font-normal`} dir="rtl" style={{ lineHeight: '2.4' }}>
-                            {arabicText}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Tafsir Text */}
-                      <div className="pt-2 border-t border-zinc-800/40">
-                        <TafsirTextRenderer text={entry.text} isArabic={isArabicOrUrdu} isUrdu={isUrduText} />
-                      </div>
-
-                      {/* Explanation (Footnotes) */}
-                      {entry.footnoteIds && entry.footnoteIds.length > 0 && (
-                        <div className="mt-6 pt-4 border-t border-emerald-900/30">
-                          <div className="font-semibold text-emerald-500 uppercase tracking-wider text-[11px] mb-3 font-mono">
-                            Explanation
-                          </div>
-                          <TafsirFootnotesLoader footnoteIds={entry.footnoteIds} isUrdu={isUrduText} />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-                {visibleCount < tafsirEntries.length && (
-                  <div ref={loadMoreRef} className="h-20 w-full flex items-center justify-center">
-                    <div className="size-6 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
-                  </div>
-                )}
+                    );
+                  }}
+                />
               </div>
             )}
           </main>
 
           {/* Right Sidebar: Compact Ayah Jump Index */}
-          <aside className={cn("flex-col w-16 lg:w-20 shrink-0 border-l border-zinc-800/60 bg-zinc-950/50 sticky top-0 h-screen overflow-y-auto no-scrollbar py-6", aiChatContext ? "hidden xl:flex" : "hidden md:flex")}>
+          <aside className={cn("flex-col w-16 lg:w-20 shrink-0 border-l border-zinc-800/60 bg-zinc-950/50 sticky top-0 h-screen overflow-y-auto no-scrollbar py-6 pb-28", aiChatContext ? "hidden xl:flex" : "hidden md:flex")}>
             <div className="text-[9px] uppercase font-bold text-zinc-500 tracking-widest text-center mb-6">Ayahs</div>
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col items-center gap-2 pb-24">
               {Array.from({ length: currentSurahMeta.numberOfAyahs }, (_, i) => i + 1).map((num) => {
                 const isCurrent = num === currentAyahIndex + 1;
                 return (

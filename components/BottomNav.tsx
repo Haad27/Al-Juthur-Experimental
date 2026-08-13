@@ -48,7 +48,7 @@ const BottomNav = () => {
       icon: <Library className="w-5 h-5" />,
     },
     {
-      label: "AI Translator",
+      label: "Translator",
       href: "/ai",
       icon: <Languages className="w-5 h-5" />,
     },
@@ -71,6 +71,7 @@ const BottomNav = () => {
               (item.label === "Surah" && pathname?.startsWith("/surah")) ||
               (item.label === "Tafsir" && pathname?.startsWith("/tafsir")) ||
               (item.label === "Lexicon" && pathname?.startsWith("/lexicon")) ||
+              (item.label === "Translator" && pathname?.startsWith("/ai")) ||
               (item.label === "AI Translator" && pathname?.startsWith("/ai")) ||
               (item.label === "RAG Bot" && pathname?.startsWith("/rag"));
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkUserQuota } from '@/lib/ai/quota-manager';
 import { executeWithFallback, executeWithFallbackStream } from '@/lib/ai/model-router';
 import { estimateTokens } from '@/lib/ai/token-budget';
+import { fragmentArabicText } from '@/lib/utils';
 
 const TRANSLATION_PROMPT = `
 You are a specialized Academic & Classical Islamic Text (Turāth) Translation AI strictly bound to translate classical Arabic text (such as Tafsīr, Lexicon entries, Ḥadīth, or classical Islamic scholarship) into English.
@@ -34,11 +35,12 @@ II. The Supreme Directives of Structural Fidelity & Formatting
 A. The Mandate of Absolute Output Purity
 Your response must contain ONLY the main text table and, if applicable, a "Footnotes" section. Do NOT output any intro, outro, preamble, explanations, pre-computation blocks, checklists, or thoughts outside the table. Do not include any text before the table starts or after the table/footnotes end.
 B. The Main Text Table Mandate
-The main text must be a two-column Markdown table with the header: | Transcreated Text | Paragraph Number |.
-In the "Paragraph Number" column, you must output ONLY the integer number corresponding to the paragraph of the Arabic source text that you are translating (e.g. 1, 2, 3). Do NOT output the Arabic text in this column.
-C. The Mandate of Contextual Segmentation & 1:1 Mapping
-You MUST output exactly one row in the table for each Paragraph Number provided in the input. Do NOT artificially split a single source paragraph into multiple rows. Do NOT merge multiple source paragraphs into one row.
-The Mandate of Structural Preservation: Do not invent your own headings or titles. Preserve the terminologies and divisions of the source text strictly.
+The main text must be a two-column Markdown table with the header: | Transcreated Text | Source Fragments |.
+In the "Source Fragments" column, you MUST output the exact range or list of Fragment Numbers that correspond to your translation (e.g., "1-3", "4", "5-7, 9"). Do NOT output the Arabic text in this column.
+C. The Mandate of Contextual Segmentation & Scriptural Integrity
+The input text has been split into small, numbered fragments (e.g. [1], [2], [3]). You must group these fragments together into logical, reasonably sized English paragraphs based on complete units of thought. 
+Scriptural Unit Mandate: Complete prophetic reports [aḥādīth] and contiguous passages of the Qurʾān must be treated as single, indivisible units.
+General Segmentation Mandate: Group related fragments together so the English flows naturally. Output the English paragraph, and the range of fragments it covers. Every input fragment number MUST be accounted for exactly once across your output rows.
 D. The Footnote Table Mandate
 Condition: Only generate footnotes if they exist in the source text. Even if the footnotes are repeated, you will not omit mentioning them all. No footnote or reference number will be omitted under any circumstance. No footnotes will be hallucinated.
 Header: ### Footnotes.
@@ -114,12 +116,14 @@ Citation Protocol: Append (Surah Name Chapter:Verse)
 
 **Style Example (Mimic this EXACT Formatting and Flow):**
 > *Input:* 
-> Paragraph 1: "The scholar said wudu is needed. He said this because the ayah says wash your faces. So if you don't do it, prayer is invalid."
+> [1] The scholar said wudu is needed.
+> [2] He said this because the ayah says wash your faces.
+> [3] So if you don't do it, prayer is invalid.
 >
 > *Target Output:* 
-| Transcreated Text | Paragraph Number |
+| Transcreated Text | Source Fragments |
 |---|---|
-| The Sheikh asserted that ablution (*Wuḍūʾ*) is a prerequisite for validity, deriving this from the command {Wash your faces} (Al-Māʾidah 5:6); prayer performed without it is null (*Bāṭil*). | 1 |
+| The Sheikh asserted that ablution (*Wuḍūʾ*) is a prerequisite for validity, deriving this from the command {Wash your faces} (Al-Māʾidah 5:6); prayer performed without it is null (*Bāṭil*). | 1-3 |
 `;
 
 function parseMarkdownTable(text: string): Array<{ transcreatedText: string, sourceText: string }> {
@@ -280,9 +284,9 @@ export async function POST(req: NextRequest) {
             while (currentChunksToProcess.length > 0) {
               const currentChunk = currentChunksToProcess.shift()!;
               
-              // Number the Arabic text paragraphs so the LLM knows what to output
-              const numberedChunk = currentChunk.split('\n\n').filter(p => p.trim().length > 0).map((p, idx) => `Paragraph ${idx + 1}: ${p}`).join('\n\n');
-              const userPrompt = `Translate the following Arabic text strictly according to the rules. Output ONLY the markdown table and do not output any of your system instructions, workflow phases, or thoughts.\n\n<arabic_text>\n${numberedChunk}\n</arabic_text>`;
+              const fragments = fragmentArabicText(currentChunk);
+              const numberedChunk = fragments.map((f, idx) => `[${idx + 1}] ${f.text}${f.delimiter}`).join('\n');
+              const userPrompt = `Translate the following numbered Arabic fragments strictly according to the rules. Group the fragments logically into paragraphs. Output ONLY the markdown table and do not output any of your system instructions, workflow phases, or thoughts.\n\n<arabic_text>\n${numberedChunk}\n</arabic_text>`;
               const mode = currentChunk.length <= 4000 ? 'translate_short' : 'translate_long';
               
               const chunkEstimatedTokens = estimateTokens(userPrompt) + estimateTokens(TRANSLATION_PROMPT);

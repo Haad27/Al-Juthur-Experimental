@@ -540,7 +540,7 @@ function LexiconPageContent() {
                             title="Translate"
                           >
                             <Languages className="size-3.5 text-emerald-400 shrink-0" />
-                            <span className="hidden sm:inline">Translate</span>
+                            <span>Translate</span>
                           </button>
                         )}
                       </div>
