@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { X, Search, Sparkles, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isFuzzyMatch } from "@/lib/searchUtils";
+import { getTafsirFameRank, getLanguagePriority } from "@/lib/tafsirRanking";
 
 interface Author {
   id: number;
@@ -236,7 +237,18 @@ export default function TafsirWheelPickerModal({
         list.push({ author, langName: lang.name });
       });
     });
-    return list;
+
+    return list.sort((a, b) => {
+      const langRankA = getLanguagePriority(a.langName);
+      const langRankB = getLanguagePriority(b.langName);
+      if (langRankA !== langRankB) return langRankA - langRankB;
+
+      const fameRankA = getTafsirFameRank(a.author.name, a.author.authorName);
+      const fameRankB = getTafsirFameRank(b.author.name, b.author.authorName);
+      if (fameRankA !== fameRankB) return fameRankA - fameRankB;
+
+      return a.author.name.localeCompare(b.author.name);
+    });
   }, [languages]);
 
   const filteredAuthors = useMemo(() => {

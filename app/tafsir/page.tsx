@@ -16,6 +16,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 import { copyToClipboard, cn } from "@/lib/utils";
+import { getTafsirFameRank, getLanguagePriority } from "@/lib/tafsirRanking";
 
 interface Author {
   id: number;
@@ -23,6 +24,7 @@ interface Author {
   authorName?: string;
   languageId: number;
   era?: string;
+  difficulty?: string;
   tags?: { id: number; name: string; color: string }[];
 }
 
@@ -167,6 +169,7 @@ export default function TafsirPage() {
   const [languages, setLanguages] = useState<Language[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("All");
   const [selectedEra, setSelectedEra] = useState<string>("All Eras");
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>("All Levels");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   const ERAS = useMemo(() => [
@@ -275,7 +278,7 @@ export default function TafsirPage() {
 
   // We use Virtuoso now for virtualization, no need for manual infinite scroll observer.
 
-  // Flatten all authors with their language info
+  // Flatten all authors with their language info: English first -> Arabic -> Urdu -> Others, then by fame rank
   const allAuthorsWithLang = useMemo(() => {
     const list: { author: Author; language: Language }[] = [];
     languages.forEach((lang) => {
@@ -283,10 +286,21 @@ export default function TafsirPage() {
         list.push({ author: auth, language: lang });
       });
     });
-    return list;
+
+    return list.sort((a, b) => {
+      const langRankA = getLanguagePriority(a.language.name);
+      const langRankB = getLanguagePriority(b.language.name);
+      if (langRankA !== langRankB) return langRankA - langRankB;
+
+      const fameRankA = getTafsirFameRank(a.author.name, a.author.authorName);
+      const fameRankB = getTafsirFameRank(b.author.name, b.author.authorName);
+      if (fameRankA !== fameRankB) return fameRankA - fameRankB;
+
+      return a.author.name.localeCompare(b.author.name);
+    });
   }, [languages]);
 
-  // Filter authors based on search query, language, and era selection
+  // Filter authors based on search query, language, era, and difficulty selection
   const filteredAuthors = useMemo(() => {
     return allAuthorsWithLang.filter(({ author, language }) => {
       const matchesLang =
@@ -295,10 +309,13 @@ export default function TafsirPage() {
       const matchesEra =
         selectedEra === "All Eras" ||
         author.era === selectedEra;
+      const matchesDifficulty =
+        selectedDifficulty === "All Levels" ||
+        author.difficulty === selectedDifficulty;
       const matchesSearch = matchesSmartSearch(author, language, searchQuery);
-      return matchesLang && matchesEra && matchesSearch;
+      return matchesLang && matchesEra && matchesDifficulty && matchesSearch;
     });
-  }, [allAuthorsWithLang, selectedLanguage, selectedEra, searchQuery]);
+  }, [allAuthorsWithLang, selectedLanguage, selectedEra, selectedDifficulty, searchQuery]);
 
   const currentSurahMeta = SURAHS_DATA.find((s) => s.number === activeSurah) || SURAHS_DATA[0];
 
@@ -442,6 +459,15 @@ export default function TafsirPage() {
                     <span className="inline-flex text-[9px] px-1.5 py-0.5 rounded-sm bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-semibold uppercase tracking-wider shrink-0 mt-0.5">
                       {activeLangName}
                     </span>
+                    {activeAuthor.difficulty && (
+                      <span className={`inline-flex text-[9px] px-1.5 py-0.5 rounded-sm border font-semibold uppercase tracking-wider shrink-0 mt-0.5 ${
+                        activeAuthor.difficulty === 'Beginner' ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400' :
+                        activeAuthor.difficulty === 'Advanced' ? 'bg-amber-500/15 border-amber-500/30 text-amber-400' :
+                        'bg-blue-500/15 border-blue-500/30 text-blue-400'
+                      }`}>
+                        {activeAuthor.difficulty}
+                      </span>
+                    )}
                   </div>
                   {activeAuthor.authorName && (
                     <p className="hidden md:flex text-[11px] text-zinc-500 truncate">
@@ -523,6 +549,15 @@ export default function TafsirPage() {
                     <span className="inline-flex text-[9px] px-1.5 py-0.5 rounded-sm bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold uppercase tracking-wider shrink-0">
                       {activeLangName}
                     </span>
+                    {activeAuthor.difficulty && (
+                      <span className={`inline-flex text-[9px] px-1.5 py-0.5 rounded-sm border font-semibold uppercase tracking-wider shrink-0 ${
+                        activeAuthor.difficulty === 'Beginner' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
+                        activeAuthor.difficulty === 'Advanced' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
+                        'bg-blue-500/10 border-blue-500/20 text-blue-400'
+                      }`}>
+                        {activeAuthor.difficulty}
+                      </span>
+                    )}
                   </div>
                   {activeAuthor.authorName && (
                     <p className="text-[11px] text-zinc-500 truncate mt-0.5">
@@ -871,59 +906,143 @@ export default function TafsirPage() {
           </div>
         </div>
 
-        {/* Language Filter Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto pt-4 pb-3 no-scrollbar border-b border-zinc-800/60">
-          <span className="text-xs font-semibold text-zinc-400 pr-2 whitespace-nowrap flex items-center gap-1.5">
-            <Languages className="size-3.5 text-emerald-400" /> Language:
-          </span>
-          <button
-            onClick={() => setSelectedLanguage("All")}
-            className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-              selectedLanguage === "All"
-                ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
-                : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
-            }`}
-          >
-            All Languages ({allAuthorsWithLang.length})
-          </button>
-          {languages.map((lang) => (
+        {/* Mobile Filter Bar (Dropdowns) */}
+        <div className="md:hidden flex flex-wrap items-center gap-2 pt-4 pb-4 border-b border-zinc-800/60">
+          <div className="flex flex-1 items-center gap-2 bg-zinc-900/60 hover:bg-zinc-800/80 border border-zinc-800 hover:border-zinc-600 rounded-xl px-3 py-2 transition-colors relative min-w-[140px]">
+            <Languages className="size-3.5 text-emerald-400 shrink-0" />
+            <select
+              value={selectedLanguage}
+              onChange={(e) => setSelectedLanguage(e.target.value)}
+              className="bg-transparent text-xs font-semibold text-zinc-200 focus:outline-none appearance-none pr-6 cursor-pointer w-full z-10"
+            >
+              <option value="All" className="bg-zinc-900 text-zinc-200">All Languages ({allAuthorsWithLang.length})</option>
+              {languages.map((lang) => (
+                <option key={lang.id} value={lang.name} className="bg-zinc-900 text-zinc-200">
+                  {lang.name} ({lang.authors.length})
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-3 text-zinc-500 pointer-events-none" />
+          </div>
+
+          <div className="flex flex-1 items-center gap-2 bg-zinc-900/60 hover:bg-zinc-800/80 border border-zinc-800 hover:border-zinc-600 rounded-xl px-3 py-2 transition-colors relative min-w-[140px]">
+            <BookOpen className="size-3.5 text-emerald-400 shrink-0" />
+            <select
+              value={selectedEra}
+              onChange={(e) => setSelectedEra(e.target.value)}
+              className="bg-transparent text-xs font-semibold text-zinc-200 focus:outline-none appearance-none pr-6 cursor-pointer w-full z-10"
+            >
+              {ERAS.map((eraName) => {
+                const count = eraName === "All Eras" 
+                  ? allAuthorsWithLang.length 
+                  : allAuthorsWithLang.filter(a => a.author.era === eraName).length;
+                return (
+                  <option key={eraName} value={eraName} className="bg-zinc-900 text-zinc-200">
+                    {eraName.replace(" & Contemporary", "")} ({count})
+                  </option>
+                );
+              })}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-3 text-zinc-500 pointer-events-none" />
+          </div>
+
+          <div className="flex flex-1 items-center gap-2 bg-zinc-900/60 hover:bg-zinc-800/80 border border-zinc-800 hover:border-zinc-600 rounded-xl px-3 py-2 transition-colors relative min-w-[140px]">
+            <Sparkles className="size-3.5 text-emerald-400 shrink-0" />
+            <select
+              value={selectedDifficulty}
+              onChange={(e) => setSelectedDifficulty(e.target.value)}
+              className="bg-transparent text-xs font-semibold text-zinc-200 focus:outline-none appearance-none pr-6 cursor-pointer w-full z-10"
+            >
+              <option value="All Levels" className="bg-zinc-900 text-zinc-200">All Levels ({allAuthorsWithLang.length})</option>
+              <option value="Beginner" className="bg-zinc-900 text-zinc-200">Beginner ({allAuthorsWithLang.filter(a => a.author.difficulty === 'Beginner').length})</option>
+              <option value="Intermediate" className="bg-zinc-900 text-zinc-200">Intermediate ({allAuthorsWithLang.filter(a => a.author.difficulty === 'Intermediate').length})</option>
+              <option value="Advanced" className="bg-zinc-900 text-zinc-200">Advanced ({allAuthorsWithLang.filter(a => a.author.difficulty === 'Advanced').length})</option>
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-3 text-zinc-500 pointer-events-none" />
+          </div>
+        </div>
+
+        {/* Laptop Filter Tabs (Pills) */}
+        <div className="hidden md:block">
+          {/* Language Tabs */}
+          <div className="flex items-center gap-2 overflow-x-auto pt-4 pb-3 no-scrollbar border-b border-zinc-800/60">
+            <span className="text-xs font-semibold text-zinc-400 pr-2 whitespace-nowrap flex items-center gap-1.5">
+              <Languages className="size-3.5 text-emerald-400" /> Language:
+            </span>
             <button
-              key={lang.id}
-              onClick={() => setSelectedLanguage(lang.name)}
+              onClick={() => setSelectedLanguage("All")}
               className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                selectedLanguage === lang.name
+                selectedLanguage === "All"
                   ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
                   : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
               }`}
             >
-              {lang.name} ({lang.authors.length})
+              All Languages ({allAuthorsWithLang.length})
             </button>
-          ))}
-        </div>
-
-        {/* Era Filter Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto pt-3 pb-5 no-scrollbar border-b border-zinc-800/80">
-          <span className="text-xs font-semibold text-zinc-400 pr-2 whitespace-nowrap flex items-center gap-1.5">
-            <BookOpen className="size-3.5 text-emerald-400" /> Era:
-          </span>
-          {ERAS.map((eraName) => {
-            const count = eraName === "All Eras" 
-              ? allAuthorsWithLang.length 
-              : allAuthorsWithLang.filter(a => a.author.era === eraName).length;
-            return (
+            {languages.map((lang) => (
               <button
-                key={eraName}
-                onClick={() => setSelectedEra(eraName)}
+                key={lang.id}
+                onClick={() => setSelectedLanguage(lang.name)}
                 className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                  selectedEra === eraName
+                  selectedLanguage === lang.name
                     ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
                     : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
                 }`}
               >
-                {eraName.replace(" & Contemporary", "")} ({count})
+                {lang.name} ({lang.authors.length})
               </button>
-            );
-          })}
+            ))}
+          </div>
+
+          {/* Era Tabs */}
+          <div className="flex items-center gap-2 overflow-x-auto pt-3 pb-3 no-scrollbar border-b border-zinc-800/60">
+            <span className="text-xs font-semibold text-zinc-400 pr-2 whitespace-nowrap flex items-center gap-1.5">
+              <BookOpen className="size-3.5 text-emerald-400" /> Era:
+            </span>
+            {ERAS.map((eraName) => {
+              const count = eraName === "All Eras" 
+                ? allAuthorsWithLang.length 
+                : allAuthorsWithLang.filter(a => a.author.era === eraName).length;
+              return (
+                <button
+                  key={eraName}
+                  onClick={() => setSelectedEra(eraName)}
+                  className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                    selectedEra === eraName
+                      ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
+                      : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+                  }`}
+                >
+                  {eraName.replace(" & Contemporary", "")} ({count})
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Difficulty Tabs */}
+          <div className="flex items-center gap-2 overflow-x-auto pt-3 pb-4 no-scrollbar border-b border-zinc-800/80">
+            <span className="text-xs font-semibold text-zinc-400 pr-2 whitespace-nowrap flex items-center gap-1.5">
+              <Sparkles className="size-3.5 text-emerald-400" /> Difficulty:
+            </span>
+            {["All Levels", "Beginner", "Intermediate", "Advanced"].map((level) => {
+              const count = level === "All Levels" 
+                ? allAuthorsWithLang.length 
+                : allAuthorsWithLang.filter(a => a.author.difficulty === level).length;
+              return (
+                <button
+                  key={level}
+                  onClick={() => setSelectedDifficulty(level)}
+                  className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                    selectedDifficulty === level
+                      ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
+                      : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+                  }`}
+                >
+                  {level} ({count})
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -969,6 +1088,18 @@ export default function TafsirPage() {
                           <span className="shrink-0">•</span>
                           <span className="text-zinc-400 truncate" title={author.era}>
                             {author.era.replace(" & Contemporary", "")}
+                          </span>
+                        </>
+                      )}
+                      {author.difficulty && (
+                        <>
+                          <span className="shrink-0">•</span>
+                          <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+                            author.difficulty === 'Beginner' ? 'bg-emerald-500/15 text-emerald-400' :
+                            author.difficulty === 'Advanced' ? 'bg-amber-500/15 text-amber-400' :
+                            'bg-blue-500/15 text-blue-400'
+                          }`}>
+                            {author.difficulty}
                           </span>
                         </>
                       )}

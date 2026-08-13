@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import Database from 'better-sqlite3';
 import path from 'path';
+import { getTafsirDifficulty } from '@/lib/tafsirDifficulty';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -57,7 +58,8 @@ export async function GET(request: Request) {
           if (!authorsByLang[a.languageId]) authorsByLang[a.languageId] = [];
           authorsByLang[a.languageId].push({
             ...a,
-            tags: tagsMap[a.id] || []
+            tags: tagsMap[a.id] || [],
+            difficulty: getTafsirDifficulty(a.name, a.authorName)
           });
         }
 
