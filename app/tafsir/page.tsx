@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import Link from "next/link";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
-import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass } from "lucide-react";
+import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter } from "lucide-react";
 import LogoIcon from "@/components/svg/icons/LogoIcon";
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
 import TafsirTextRenderer from "@/components/tafsir/TafsirTextRenderer";
@@ -171,6 +171,7 @@ export default function TafsirPage() {
   const [selectedEra, setSelectedEra] = useState<string>("All Eras");
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("All Levels");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
   const ERAS = useMemo(() => [
     "All Eras",
@@ -893,156 +894,172 @@ export default function TafsirPage() {
             </p>
           </div>
 
-          {/* Search Bar */}
-          <div className="relative w-full md:w-80">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-zinc-500" />
-            <input
-              type="text"
-              placeholder="Search by author, tafsir name, language..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-zinc-900/80 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-emerald-500/60 transition-all shadow-sm"
-            />
+          {/* Actions: Search & Filters Dropdown */}
+          <div className="relative flex items-center justify-between md:justify-end gap-2 w-full md:w-auto mt-4 md:mt-0">
+            <div className="relative w-full md:w-80">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-zinc-500" />
+              <input
+                type="text"
+                placeholder="Search by author, tafsir name, language..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-zinc-900/80 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-emerald-500/60 transition-all shadow-sm"
+              />
+            </div>
+            
+            <div className="relative shrink-0">
+              <button
+                onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
+                className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border transition-all ${
+                  isFilterPanelOpen || selectedEra !== "All Eras" || selectedDifficulty !== "All Levels"
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                    : "bg-zinc-900/80 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+                }`}
+              >
+                <Filter className="size-4" />
+                <span className="text-sm font-semibold hidden sm:inline">Refine</span>
+                {(selectedEra !== "All Eras" || selectedDifficulty !== "All Levels") && (
+                  <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                  </span>
+                )}
+              </button>
+              
+              {/* Filter Popover Panel */}
+              {isFilterPanelOpen && (
+                <>
+                  <div className="fixed inset-0 z-40 md:hidden bg-black/40 backdrop-blur-sm" onClick={() => setIsFilterPanelOpen(false)}></div>
+                  <div className="fixed md:absolute right-0 bottom-0 md:bottom-auto md:top-full mt-2 w-full md:w-[400px] bg-zinc-950 md:bg-zinc-900 border-t md:border border-zinc-800/80 shadow-2xl z-50 overflow-hidden rounded-t-2xl md:rounded-2xl p-5 md:p-5 flex flex-col gap-6 max-h-[85vh] overflow-y-auto transform transition-transform">
+                    <div className="flex items-center justify-between md:hidden pb-3 border-b border-zinc-800">
+                      <h3 className="font-bold text-white text-lg">Filters</h3>
+                      <button onClick={() => setIsFilterPanelOpen(false)} className="p-1.5 rounded-full bg-zinc-900 text-zinc-400 hover:text-white transition-colors">
+                        <X className="size-5" />
+                      </button>
+                    </div>
+                    
+                    {/* Era Selection inside Panel */}
+                    <div className="flex flex-col gap-3">
+                      <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5 uppercase tracking-wider">
+                        <BookOpen className="size-3.5 text-emerald-400" /> Era
+                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        {ERAS.map((eraName) => {
+                          const count = eraName === "All Eras" 
+                            ? allAuthorsWithLang.length 
+                            : allAuthorsWithLang.filter(a => a.author.era === eraName).length;
+                          return (
+                            <button
+                              key={eraName}
+                              onClick={() => setSelectedEra(eraName)}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                                selectedEra === eraName
+                                  ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
+                                  : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+                              }`}
+                            >
+                              {eraName.replace(" & Contemporary", "")} <span className="opacity-60 ml-0.5">({count})</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Difficulty Selection inside Panel */}
+                    <div className="flex flex-col gap-3 pb-4 md:pb-0">
+                      <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5 uppercase tracking-wider">
+                        <Sparkles className="size-3.5 text-emerald-400" /> Difficulty
+                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        {["All Levels", "Beginner", "Intermediate", "Advanced"].map((level) => {
+                          const count = level === "All Levels" 
+                            ? allAuthorsWithLang.length 
+                            : allAuthorsWithLang.filter(a => a.author.difficulty === level).length;
+                          return (
+                            <button
+                              key={level}
+                              onClick={() => setSelectedDifficulty(level)}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                                selectedDifficulty === level
+                                  ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
+                                  : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+                              }`}
+                            >
+                              {level} <span className="opacity-60 ml-0.5">({count})</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Mobile Filter Bar (Dropdowns) */}
-        <div className="md:hidden flex flex-wrap items-center gap-2 pt-4 pb-4 border-b border-zinc-800/60">
-          <div className="flex flex-1 items-center gap-2 bg-zinc-900/60 hover:bg-zinc-800/80 border border-zinc-800 hover:border-zinc-600 rounded-xl px-3 py-2 transition-colors relative min-w-[140px]">
-            <Languages className="size-3.5 text-emerald-400 shrink-0" />
-            <select
-              value={selectedLanguage}
-              onChange={(e) => setSelectedLanguage(e.target.value)}
-              className="bg-transparent text-xs font-semibold text-zinc-200 focus:outline-none appearance-none pr-6 cursor-pointer w-full z-10"
+        {/* Active Filter Feedback Chips (Dismissible) */}
+        {(selectedEra !== "All Eras" || selectedDifficulty !== "All Levels") && (
+          <div className="flex flex-wrap items-center gap-2 pt-4 -mb-1">
+            <span className="text-xs font-medium text-zinc-500 mr-1 hidden sm:inline">Active Filters:</span>
+            {selectedEra !== "All Eras" && (
+              <button 
+                onClick={() => setSelectedEra("All Eras")}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-medium text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors group"
+              >
+                {selectedEra.replace(" & Contemporary", "")}
+                <X className="size-3 text-zinc-500 group-hover:text-red-400 transition-colors" />
+              </button>
+            )}
+            {selectedDifficulty !== "All Levels" && (
+              <button 
+                onClick={() => setSelectedDifficulty("All Levels")}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-medium text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors group"
+              >
+                {selectedDifficulty}
+                <X className="size-3 text-zinc-500 group-hover:text-red-400 transition-colors" />
+              </button>
+            )}
+            <button 
+              onClick={() => {
+                setSelectedEra("All Eras");
+                setSelectedDifficulty("All Levels");
+              }}
+              className="text-[10px] text-zinc-500 hover:text-zinc-300 ml-1 underline decoration-zinc-700 underline-offset-2 transition-colors"
             >
-              <option value="All" className="bg-zinc-900 text-zinc-200">All Languages ({allAuthorsWithLang.length})</option>
-              {languages.map((lang) => (
-                <option key={lang.id} value={lang.name} className="bg-zinc-900 text-zinc-200">
-                  {lang.name} ({lang.authors.length})
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-3 text-zinc-500 pointer-events-none" />
+              Clear all
+            </button>
           </div>
+        )}
 
-          <div className="flex flex-1 items-center gap-2 bg-zinc-900/60 hover:bg-zinc-800/80 border border-zinc-800 hover:border-zinc-600 rounded-xl px-3 py-2 transition-colors relative min-w-[140px]">
-            <BookOpen className="size-3.5 text-emerald-400 shrink-0" />
-            <select
-              value={selectedEra}
-              onChange={(e) => setSelectedEra(e.target.value)}
-              className="bg-transparent text-xs font-semibold text-zinc-200 focus:outline-none appearance-none pr-6 cursor-pointer w-full z-10"
-            >
-              {ERAS.map((eraName) => {
-                const count = eraName === "All Eras" 
-                  ? allAuthorsWithLang.length 
-                  : allAuthorsWithLang.filter(a => a.author.era === eraName).length;
-                return (
-                  <option key={eraName} value={eraName} className="bg-zinc-900 text-zinc-200">
-                    {eraName.replace(" & Contemporary", "")} ({count})
-                  </option>
-                );
-              })}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-3 text-zinc-500 pointer-events-none" />
-          </div>
-
-          <div className="flex flex-1 items-center gap-2 bg-zinc-900/60 hover:bg-zinc-800/80 border border-zinc-800 hover:border-zinc-600 rounded-xl px-3 py-2 transition-colors relative min-w-[140px]">
-            <Sparkles className="size-3.5 text-emerald-400 shrink-0" />
-            <select
-              value={selectedDifficulty}
-              onChange={(e) => setSelectedDifficulty(e.target.value)}
-              className="bg-transparent text-xs font-semibold text-zinc-200 focus:outline-none appearance-none pr-6 cursor-pointer w-full z-10"
-            >
-              <option value="All Levels" className="bg-zinc-900 text-zinc-200">All Levels ({allAuthorsWithLang.length})</option>
-              <option value="Beginner" className="bg-zinc-900 text-zinc-200">Beginner ({allAuthorsWithLang.filter(a => a.author.difficulty === 'Beginner').length})</option>
-              <option value="Intermediate" className="bg-zinc-900 text-zinc-200">Intermediate ({allAuthorsWithLang.filter(a => a.author.difficulty === 'Intermediate').length})</option>
-              <option value="Advanced" className="bg-zinc-900 text-zinc-200">Advanced ({allAuthorsWithLang.filter(a => a.author.difficulty === 'Advanced').length})</option>
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-3 text-zinc-500 pointer-events-none" />
-          </div>
-        </div>
-
-        {/* Laptop Filter Tabs (Pills) */}
-        <div className="hidden md:block">
-          {/* Language Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto pt-4 pb-3 no-scrollbar border-b border-zinc-800/60">
-            <span className="text-xs font-semibold text-zinc-400 pr-2 whitespace-nowrap flex items-center gap-1.5">
-              <Languages className="size-3.5 text-emerald-400" /> Language:
-            </span>
+        {/* Language Filter Tabs (Permanent Row) */}
+        <div className="flex items-center gap-2 overflow-x-auto pt-4 pb-4 no-scrollbar border-b border-zinc-800/60 w-full">
+          <span className="text-xs font-semibold text-zinc-400 pr-2 whitespace-nowrap flex items-center gap-1.5 shrink-0">
+            <Languages className="size-3.5 text-emerald-400" /> Language:
+          </span>
+          <button
+            onClick={() => setSelectedLanguage("All")}
+            className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
+              selectedLanguage === "All"
+                ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
+                : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+            }`}
+          >
+            All Languages ({allAuthorsWithLang.length})
+          </button>
+          {languages.map((lang) => (
             <button
-              onClick={() => setSelectedLanguage("All")}
-              className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                selectedLanguage === "All"
+              key={lang.id}
+              onClick={() => setSelectedLanguage(lang.name)}
+              className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
+                selectedLanguage === lang.name
                   ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
                   : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
               }`}
             >
-              All Languages ({allAuthorsWithLang.length})
+              {lang.name} ({lang.authors.length})
             </button>
-            {languages.map((lang) => (
-              <button
-                key={lang.id}
-                onClick={() => setSelectedLanguage(lang.name)}
-                className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                  selectedLanguage === lang.name
-                    ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
-                    : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
-                }`}
-              >
-                {lang.name} ({lang.authors.length})
-              </button>
-            ))}
-          </div>
-
-          {/* Era Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto pt-3 pb-3 no-scrollbar border-b border-zinc-800/60">
-            <span className="text-xs font-semibold text-zinc-400 pr-2 whitespace-nowrap flex items-center gap-1.5">
-              <BookOpen className="size-3.5 text-emerald-400" /> Era:
-            </span>
-            {ERAS.map((eraName) => {
-              const count = eraName === "All Eras" 
-                ? allAuthorsWithLang.length 
-                : allAuthorsWithLang.filter(a => a.author.era === eraName).length;
-              return (
-                <button
-                  key={eraName}
-                  onClick={() => setSelectedEra(eraName)}
-                  className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                    selectedEra === eraName
-                      ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
-                      : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
-                  }`}
-                >
-                  {eraName.replace(" & Contemporary", "")} ({count})
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Difficulty Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto pt-3 pb-4 no-scrollbar border-b border-zinc-800/80">
-            <span className="text-xs font-semibold text-zinc-400 pr-2 whitespace-nowrap flex items-center gap-1.5">
-              <Sparkles className="size-3.5 text-emerald-400" /> Difficulty:
-            </span>
-            {["All Levels", "Beginner", "Intermediate", "Advanced"].map((level) => {
-              const count = level === "All Levels" 
-                ? allAuthorsWithLang.length 
-                : allAuthorsWithLang.filter(a => a.author.difficulty === level).length;
-              return (
-                <button
-                  key={level}
-                  onClick={() => setSelectedDifficulty(level)}
-                  className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                    selectedDifficulty === level
-                      ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
-                      : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
-                  }`}
-                >
-                  {level} ({count})
-                </button>
-              );
-            })}
-          </div>
+          ))}
         </div>
       </div>
 
