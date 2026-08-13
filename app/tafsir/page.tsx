@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import Link from "next/link";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
-import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter } from "lucide-react";
+import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library } from "lucide-react";
 import LogoIcon from "@/components/svg/icons/LogoIcon";
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
 import TafsirTextRenderer from "@/components/tafsir/TafsirTextRenderer";
@@ -877,189 +877,202 @@ export default function TafsirPage() {
       </div>
 
       {/* Hero Header */}
-      <div className="relative pt-12 pb-8 px-4 md:px-8 max-w-7xl mx-auto">
-        <div className="absolute left-10 top-10 size-96 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
+      {/* Hero Header (Non-sticky) */}
+      <div className="relative pt-4 md:pt-5 pb-3 px-4 md:px-8 max-w-[1700px] mx-auto">
+        <div className="absolute left-10 top-0 size-64 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
+        <div className="space-y-1.5 relative z-10 max-w-3xl">
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
+            Explore All Tafsirs
+          </h1>
+          <p className="text-zinc-400 text-xs md:text-sm hidden md:block">
+            Select any classical or contemporary Quranic commentary below to enter full reading mode.
+          </p>
+        </div>
+      </div>
 
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 relative z-10">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
-              <Sparkles className="size-3.5" />
-              <span>Comprehensive Library</span>
-            </div>
-            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight">
-              Explore All Tafsirs
-            </h1>
-            <p className="text-zinc-400 max-w-2xl text-sm md:text-base">
-              Select any classical or contemporary Quranic commentary below to enter full reading mode.
-            </p>
-          </div>
-
-          {/* Actions: Search & Filters Dropdown */}
-          <div className="relative flex items-center justify-between md:justify-end gap-2 w-full md:w-auto mt-4 md:mt-0">
-            <div className="relative w-full md:w-80">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-zinc-500" />
-              <input
-                type="text"
-                placeholder="Search by author, tafsir name, language..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-zinc-900/80 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-emerald-500/60 transition-all shadow-sm"
-              />
-            </div>
+      {/* Sticky Filters & Search (Action Bar) */}
+      <div className="sticky top-0 md:top-[53px] z-30 bg-zinc-950/90 backdrop-blur-xl border-y border-zinc-800/60 shadow-sm mb-6">
+        <div className="max-w-[1700px] mx-auto px-4 md:px-8 py-3">
+          
+          {/* Action Row: Search, Refine, Active Chips */}
+          <div className="flex flex-col md:flex-row md:items-center gap-3 w-full">
             
-            <div className="relative shrink-0">
-              <button
-                onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
-                className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border transition-all ${
-                  isFilterPanelOpen || selectedEra !== "All Eras" || selectedDifficulty !== "All Levels"
-                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-                    : "bg-zinc-900/80 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
-                }`}
-              >
-                <Filter className="size-4" />
-                <span className="text-sm font-semibold hidden sm:inline">Refine</span>
-                {(selectedEra !== "All Eras" || selectedDifficulty !== "All Levels") && (
-                  <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-                  </span>
-                )}
-              </button>
+            {/* Left side: Title + Active Chips */}
+            <div className="flex items-center gap-4 flex-1">
+              <div className="flex items-center gap-2 shrink-0">
+                <Library className="size-5 text-emerald-400" />
+                <span className="font-bold text-white text-base md:text-lg hidden sm:block">Tafsir Library</span>
+              </div>
               
-              {/* Filter Popover Panel */}
-              {isFilterPanelOpen && (
-                <>
-                  <div className="fixed inset-0 z-40 md:hidden bg-black/40 backdrop-blur-sm" onClick={() => setIsFilterPanelOpen(false)}></div>
-                  <div className="fixed md:absolute right-0 bottom-0 md:bottom-auto md:top-full mt-2 w-full md:w-[400px] bg-zinc-950 md:bg-zinc-900 border-t md:border border-zinc-800/80 shadow-2xl z-50 overflow-hidden rounded-t-2xl md:rounded-2xl p-5 md:p-5 flex flex-col gap-6 max-h-[85vh] overflow-y-auto transform transition-transform">
-                    <div className="flex items-center justify-between md:hidden pb-3 border-b border-zinc-800">
-                      <h3 className="font-bold text-white text-lg">Filters</h3>
-                      <button onClick={() => setIsFilterPanelOpen(false)} className="p-1.5 rounded-full bg-zinc-900 text-zinc-400 hover:text-white transition-colors">
-                        <X className="size-5" />
-                      </button>
-                    </div>
-                    
-                    {/* Era Selection inside Panel */}
-                    <div className="flex flex-col gap-3">
-                      <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5 uppercase tracking-wider">
-                        <BookOpen className="size-3.5 text-emerald-400" /> Era
-                      </span>
-                      <div className="flex flex-wrap gap-2">
-                        {ERAS.map((eraName) => {
-                          const count = eraName === "All Eras" 
-                            ? allAuthorsWithLang.length 
-                            : allAuthorsWithLang.filter(a => a.author.era === eraName).length;
-                          return (
-                            <button
-                              key={eraName}
-                              onClick={() => setSelectedEra(eraName)}
-                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                                selectedEra === eraName
-                                  ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
-                                  : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
-                              }`}
-                            >
-                              {eraName.replace(" & Contemporary", "")} <span className="opacity-60 ml-0.5">({count})</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Difficulty Selection inside Panel */}
-                    <div className="flex flex-col gap-3 pb-4 md:pb-0">
-                      <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5 uppercase tracking-wider">
-                        <Sparkles className="size-3.5 text-emerald-400" /> Difficulty
-                      </span>
-                      <div className="flex flex-wrap gap-2">
-                        {["All Levels", "Beginner", "Intermediate", "Advanced"].map((level) => {
-                          const count = level === "All Levels" 
-                            ? allAuthorsWithLang.length 
-                            : allAuthorsWithLang.filter(a => a.author.difficulty === level).length;
-                          return (
-                            <button
-                              key={level}
-                              onClick={() => setSelectedDifficulty(level)}
-                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                                selectedDifficulty === level
-                                  ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
-                                  : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
-                              }`}
-                            >
-                              {level} <span className="opacity-60 ml-0.5">({count})</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                </>
+              {/* Active Filter Feedback Chips */}
+              {(selectedEra !== "All Eras" || selectedDifficulty !== "All Levels") && (
+                <div className="flex flex-wrap items-center gap-2 md:pl-2">
+                  {selectedEra !== "All Eras" && (
+                    <button 
+                      onClick={() => setSelectedEra("All Eras")}
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-medium text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors group"
+                    >
+                      {selectedEra.replace(" & Contemporary", "")}
+                      <X className="size-3 text-zinc-500 group-hover:text-red-400 transition-colors" />
+                    </button>
+                  )}
+                  {selectedDifficulty !== "All Levels" && (
+                    <button 
+                      onClick={() => setSelectedDifficulty("All Levels")}
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-medium text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors group"
+                    >
+                      {selectedDifficulty}
+                      <X className="size-3 text-zinc-500 group-hover:text-red-400 transition-colors" />
+                    </button>
+                  )}
+                  <button 
+                    onClick={() => {
+                      setSelectedEra("All Eras");
+                      setSelectedDifficulty("All Levels");
+                    }}
+                    className="text-[10px] text-zinc-500 hover:text-zinc-300 ml-1 underline decoration-zinc-700 underline-offset-2 transition-colors"
+                  >
+                    Clear all
+                  </button>
+                </div>
               )}
             </div>
-          </div>
-        </div>
 
-        {/* Active Filter Feedback Chips (Dismissible) */}
-        {(selectedEra !== "All Eras" || selectedDifficulty !== "All Levels") && (
-          <div className="flex flex-wrap items-center gap-2 pt-4 -mb-1">
-            <span className="text-xs font-medium text-zinc-500 mr-1 hidden sm:inline">Active Filters:</span>
-            {selectedEra !== "All Eras" && (
-              <button 
-                onClick={() => setSelectedEra("All Eras")}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-medium text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors group"
-              >
-                {selectedEra.replace(" & Contemporary", "")}
-                <X className="size-3 text-zinc-500 group-hover:text-red-400 transition-colors" />
-              </button>
-            )}
-            {selectedDifficulty !== "All Levels" && (
-              <button 
-                onClick={() => setSelectedDifficulty("All Levels")}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-medium text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors group"
-              >
-                {selectedDifficulty}
-                <X className="size-3 text-zinc-500 group-hover:text-red-400 transition-colors" />
-              </button>
-            )}
-            <button 
-              onClick={() => {
-                setSelectedEra("All Eras");
-                setSelectedDifficulty("All Levels");
-              }}
-              className="text-[10px] text-zinc-500 hover:text-zinc-300 ml-1 underline decoration-zinc-700 underline-offset-2 transition-colors"
-            >
-              Clear all
-            </button>
-          </div>
-        )}
+            {/* Right side: Search and Refine */}
+            <div className="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto shrink-0">
+              <div className="relative w-full md:w-80">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-zinc-500" />
+                <input
+                  type="text"
+                  placeholder="Search tafsirs..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-zinc-900/80 border border-emerald-500/30 rounded-xl pl-10 pr-4 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-emerald-500/60 transition-all hover:border-emerald-500/50 shadow-sm"
+                />
+              </div>
+              
+              <div className="relative shrink-0">
+                <button
+                  onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
+                  className={`flex items-center justify-center gap-2 px-3 py-2 rounded-xl border transition-all ${
+                    isFilterPanelOpen || selectedEra !== "All Eras" || selectedDifficulty !== "All Levels"
+                      ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400"
+                      : "bg-zinc-900/80 border-emerald-500/30 text-zinc-400 hover:text-emerald-400 hover:border-emerald-500/50"
+                  }`}
+                >
+                  <Filter className="size-4" />
+                  <span className="text-sm font-semibold hidden sm:inline">Refine</span>
+                  {(selectedEra !== "All Eras" || selectedDifficulty !== "All Levels") && (
+                    <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                    </span>
+                  )}
+                </button>
+                
+                {/* Filter Popover Panel */}
+                {isFilterPanelOpen && (
+                  <>
+                    <div className="fixed inset-0 z-[60] md:hidden bg-black/40 backdrop-blur-sm" onClick={() => setIsFilterPanelOpen(false)}></div>
+                    <div className="fixed md:absolute right-0 bottom-0 md:bottom-auto md:top-full mt-2 w-full md:w-[400px] bg-zinc-950 md:bg-zinc-900 border-t md:border border-zinc-800/80 shadow-2xl z-[60] overflow-hidden rounded-t-2xl md:rounded-2xl p-5 md:p-5 flex flex-col gap-6 max-h-[85vh] overflow-y-auto transform transition-transform">
+                      <div className="flex items-center justify-between md:hidden pb-3 border-b border-zinc-800">
+                        <h3 className="font-bold text-white text-lg">Filters</h3>
+                        <button onClick={() => setIsFilterPanelOpen(false)} className="p-1.5 rounded-full bg-zinc-900 text-zinc-400 hover:text-white transition-colors">
+                          <X className="size-5" />
+                        </button>
+                      </div>
+                      
+                      {/* Era Selection inside Panel */}
+                      <div className="flex flex-col gap-3">
+                        <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5 uppercase tracking-wider">
+                          <BookOpen className="size-3.5 text-emerald-400" /> Era
+                        </span>
+                        <div className="flex flex-wrap gap-2">
+                          {ERAS.map((eraName) => {
+                            const count = eraName === "All Eras" 
+                              ? allAuthorsWithLang.length 
+                              : allAuthorsWithLang.filter(a => a.author.era === eraName).length;
+                            return (
+                              <button
+                                key={eraName}
+                                onClick={() => setSelectedEra(eraName)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                                  selectedEra === eraName
+                                    ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
+                                    : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+                                }`}
+                              >
+                                {eraName.replace(" & Contemporary", "")} <span className="opacity-60 ml-0.5">({count})</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
 
-        {/* Language Filter Tabs (Permanent Row) */}
-        <div className="flex items-center gap-2 overflow-x-auto pt-4 pb-4 no-scrollbar border-b border-zinc-800/60 w-full">
-          <span className="text-xs font-semibold text-zinc-400 pr-2 whitespace-nowrap flex items-center gap-1.5 shrink-0">
-            <Languages className="size-3.5 text-emerald-400" /> Language:
-          </span>
-          <button
-            onClick={() => setSelectedLanguage("All")}
-            className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
-              selectedLanguage === "All"
-                ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
-                : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
-            }`}
-          >
-            All Languages ({allAuthorsWithLang.length})
-          </button>
-          {languages.map((lang) => (
+                      {/* Difficulty Selection inside Panel */}
+                      <div className="flex flex-col gap-3 pb-4 md:pb-0">
+                        <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5 uppercase tracking-wider">
+                          <Sparkles className="size-3.5 text-emerald-400" /> Difficulty
+                        </span>
+                        <div className="flex flex-wrap gap-2">
+                          {["All Levels", "Beginner", "Intermediate", "Advanced"].map((level) => {
+                            const count = level === "All Levels" 
+                              ? allAuthorsWithLang.length 
+                              : allAuthorsWithLang.filter(a => a.author.difficulty === level).length;
+                            return (
+                              <button
+                                key={level}
+                                onClick={() => setSelectedDifficulty(level)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                                  selectedDifficulty === level
+                                    ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
+                                    : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+                                }`}
+                              >
+                                {level} <span className="opacity-60 ml-0.5">({count})</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+            
+          </div>
+
+          {/* Language Filter Tabs */}
+          <div className="flex items-center gap-2 overflow-x-auto mt-3 pt-3 border-t border-zinc-800/60 no-scrollbar w-full">
+            <span className="text-xs font-semibold text-zinc-400 pr-2 whitespace-nowrap flex items-center gap-1.5 shrink-0">
+              <Languages className="size-3.5 text-emerald-400" /> Language:
+            </span>
             <button
-              key={lang.id}
-              onClick={() => setSelectedLanguage(lang.name)}
+              onClick={() => setSelectedLanguage("All")}
               className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
-                selectedLanguage === lang.name
+                selectedLanguage === "All"
                   ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
                   : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
               }`}
             >
-              {lang.name} ({lang.authors.length})
+              All Languages ({allAuthorsWithLang.length})
             </button>
-          ))}
+            {languages.map((lang) => (
+              <button
+                key={lang.id}
+                onClick={() => setSelectedLanguage(lang.name)}
+                className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
+                  selectedLanguage === lang.name
+                    ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
+                    : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+                }`}
+              >
+                {lang.name} ({lang.authors.length})
+              </button>
+            ))}
+          </div>
+
         </div>
       </div>
 
