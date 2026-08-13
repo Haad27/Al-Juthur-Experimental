@@ -14,6 +14,11 @@ const BottomNav = () => {
   const { immersiveMode, setImmersiveMode } = useGlobalState();
   const isPlayingAudio = useAudioStore((s) => s.isPlaying);
   const [isAudioActive, setIsAudioActive] = React.useState(false);
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   React.useEffect(() => {
     const checkAudio = () => {
@@ -59,10 +64,10 @@ const BottomNav = () => {
     },
   ];
 
-  if (pathname === "/" || isAudioActive) return null;
+  if (!mounted || pathname === "/" || isAudioActive) return null;
 
   return (
-    <div className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-md z-50 md:hidden">
+    <div suppressHydrationWarning className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-md z-50 md:hidden">
       <nav className="rounded-full border border-zinc-700/50 border-t-zinc-600/50 bg-zinc-950/60 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] px-2 py-1.5">
         <div className="flex justify-around items-center h-14 relative">
           {navItems.map((item) => {

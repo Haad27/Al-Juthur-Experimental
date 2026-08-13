@@ -6,7 +6,7 @@ import { Languages, Loader2, ArrowRightLeft, ShieldAlert, Copy, Check, LayoutGri
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { useGlobalState } from '@/lib/providers/GlobalStatesProvider';
-import { copyToClipboard } from '@/lib/utils';
+import { cn, copyToClipboard } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import LogoIcon from '@/components/svg/icons/LogoIcon';
 
