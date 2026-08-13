@@ -734,13 +734,13 @@ export default function TafsirPage() {
                               copyToClipboard(cleanText, "Tafsir explanation copied to clipboard!");
                             }}
                             className={cn(
-                              "flex items-center rounded-lg bg-zinc-800/80 hover:bg-zinc-700 transition font-medium text-zinc-300 whitespace-nowrap gap-2 px-3 py-1.5 text-xs",
+                              "flex items-center rounded-lg bg-zinc-800/80 hover:bg-zinc-700 transition font-medium text-zinc-300 whitespace-nowrap gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs",
                               aiChatContext && "lg:gap-1 lg:px-2 lg:text-[10px]"
                             )}
                             title="Copy Tafsir"
                           >
                             <Copy className={cn("shrink-0 size-3.5", aiChatContext && "lg:size-3")} />
-                            <span className={cn(aiChatContext && "lg:hidden")}>Copy</span>
+                            <span className={cn("hidden sm:inline", aiChatContext && "lg:hidden")}>Copy</span>
                           </button>
                           {activeLangName !== 'English' && (
                             <button
@@ -750,13 +750,13 @@ export default function TafsirPage() {
                                 router.push("/ai");
                               }}
                               className={cn(
-                                "flex items-center rounded-lg bg-emerald-500/20 border border-emerald-400/50 hover:bg-emerald-500/30 transition-all duration-300 font-medium text-emerald-300 whitespace-nowrap gap-2 px-3 py-1.5 text-xs shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)]",
+                                "flex items-center rounded-lg bg-emerald-500/20 border border-emerald-400/50 hover:bg-emerald-500/30 transition-all duration-300 font-medium text-emerald-300 whitespace-nowrap gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)]",
                                 aiChatContext && "lg:gap-1 lg:px-2 lg:text-[10px]"
                               )}
-                              title="Translate to English"
+                              title="Translate"
                             >
                               <Languages className={cn("text-emerald-300 shrink-0 size-3.5", aiChatContext && "lg:size-3")} />
-                              <span className={cn(aiChatContext && "lg:hidden")}>Translate to English</span>
+                              <span className={cn("hidden sm:inline", aiChatContext && "lg:hidden")}>Translate</span>
                             </button>
                           )}
                         </div>

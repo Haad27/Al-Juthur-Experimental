@@ -523,10 +523,10 @@ function LexiconPageContent() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleCopyDefinition(entry.definitions.join('\n'), entry.dictName)}
-                          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 transition text-xs font-medium text-zinc-300"
+                          className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 transition text-xs font-medium text-zinc-300"
                           title="Copy Definition"
                         >
-                          <Copy className="size-3.5" />
+                          <Copy className="size-3.5 shrink-0" />
                           <span className="hidden sm:inline">Copy</span>
                         </button>
                         {!entry.isEnglish && (
@@ -536,12 +536,11 @@ function LexiconPageContent() {
                               sessionStorage.setItem("ai_translator_input", cleanText);
                               router.push("/ai");
                             }}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition text-xs font-medium text-emerald-400"
-                            title="Translate to English"
+                            className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition text-xs font-medium text-emerald-400"
+                            title="Translate"
                           >
-                            <Languages className="size-3.5 text-emerald-400" />
-                            <span className="hidden sm:inline">Translate to English</span>
-                            <span className="sm:hidden">Translate</span>
+                            <Languages className="size-3.5 text-emerald-400 shrink-0" />
+                            <span className="hidden sm:inline">Translate</span>
                           </button>
                         )}
                       </div>

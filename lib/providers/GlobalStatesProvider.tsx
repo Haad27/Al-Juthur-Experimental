@@ -156,11 +156,18 @@ function parseMarkdownTable(text: string, sourceTextBlocks?: string[]): Array<{ 
     
     const columns = trimmed.split('|').map(p => p.trim());
     if (columns.length >= 1) {
-      const transcreated = columns[0] || '';
+      let transcreated = columns[0] || '';
       let source = columns[1] || '';
       
-      // If 1-column table format, pull the source text from the provided blocks
-      if (columns.length === 1 && !source && sourceTextBlocks && sourceTextBlocks.length > rowIndex) {
+      // If the second column is just a paragraph number, pull the actual source text from the blocks
+      if (source && sourceTextBlocks && sourceTextBlocks.length > 0) {
+        const pNum = parseInt(source.replace(/\D/g, ''));
+        if (!isNaN(pNum) && pNum > 0 && pNum <= sourceTextBlocks.length) {
+          source = sourceTextBlocks[pNum - 1];
+        } else if (!isNaN(pNum)) {
+          source = sourceTextBlocks[rowIndex] || sourceTextBlocks[0];
+        }
+      } else if (columns.length === 1 && !source && sourceTextBlocks && sourceTextBlocks.length > rowIndex) {
         source = sourceTextBlocks[rowIndex];
       }
       

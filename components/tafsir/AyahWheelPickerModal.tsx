@@ -159,7 +159,7 @@ function WheelColumn<T>({
         onMouseUp={handleScrollEnd}
         onTouchEnd={handleScrollEnd}
         className="h-full overflow-y-auto overflow-x-hidden no-scrollbar py-[101px] snap-y snap-mandatory touch-pan-y"
-        style={{ scrollSnapType: "y mandatory", touchAction: "pan-y", overscrollBehaviorX: "none" }}
+        style={{ scrollSnapType: "y mandatory", touchAction: "pan-y", overscrollBehaviorX: "none", WebkitOverflowScrolling: "touch" }}
       >
         {items.map((item, index) => {
           const distance = Math.abs(index - selectedIndex);
@@ -265,13 +265,13 @@ export default function AyahWheelPickerModal({
 
         {/* Modal Top Bar: Badge, Tafsir Name, Close X */}
         <div className="relative z-10 flex items-center justify-between gap-2">
-          <div className="flex flex-col min-w-0">
+          <div className="flex flex-col min-w-0 flex-1 pr-2">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-mono tracking-wider font-semibold w-fit">
               <BookOpen className="size-3.5 text-emerald-400" />
               <span>AL-QUR&apos;AN</span>
             </div>
             {tafsirName && (
-              <p className="text-xs text-zinc-400 font-medium mt-1 truncate max-w-xs sm:max-w-sm">
+              <p className="text-[10px] sm:text-xs text-zinc-400 font-medium mt-1.5 truncate">
                 Target Tafsir: <span className="text-emerald-300 font-bold">{tafsirName}</span>
               </p>
             )}
