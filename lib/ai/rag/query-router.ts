@@ -225,21 +225,21 @@ CRITICAL INSTRUCTIONS:
 3. **Query Type Classification**:
    - "specific": The user explicitly mentions a SINGLE Surah:Ayah reference (e.g. "explain 2:255"). Set targetSurah/targetAyah and leave suggestedVerses empty.
    - "specific_multiple": The user explicitly mentions MULTIPLE verses (e.g. "explain 3:44 and 5:33"). Set targetSurah and targetAyah to null, and put ALL the explicitly requested verses into the "suggestedVerses" array.
-   - "thematic": The user asks about a broad topic/concept WITHOUT referencing a specific verse (e.g. "what does the Quran say about patience"). Set targetSurah and targetAyah to null and populate suggestedVerses.
-4. **Verse Suggestion (THEMATIC ONLY)**: For thematic queries, identify the Quranic verses that DIRECTLY and GENUINELY address the topic. Suggest ONLY verses you are HIGHLY confident about. Maximum 6 verses.
+   - "thematic": The user asks about a broad topic/concept WITHOUT referencing a specific verse (e.g. "what does the Quran say about patience"). Set targetSurah and targetAyah to null and you MUST populate "suggestedVerses".
+4. **Verse Suggestion (THEMATIC ONLY)**: This is MANDATORY for thematic queries. You MUST identify 2 to 6 Quranic verses that DIRECTLY address the topic. You MUST provide BOTH "surah" (1-114) AND "ayah" for every single suggested verse. Do NOT provide only a surah.
 
 OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
 {
   "isScopeValid": true or false,
   "warningMessage": "Only if isScopeValid is false, state why clearly and suggest switching to Default Mode.",
-  "queryType": "specific" or "thematic",
+  "queryType": "specific", "specific_multiple", or "thematic",
   "targetSurah": null or exact Surah number (1 to 114) — ONLY for specific queries,
   "targetAyah": null or exact Ayah number — ONLY for specific queries,
   "expandedQueryAr": "Exact classical Arabic keywords, vocabulary, and synonyms corresponding to the query for BM25 matching.",
   "expandedQueryEn": "Expanded English terminology and synonyms.",
   "keywords": ["keyword1", "keyword2", "keyword3"],
   "rootWords": ["3-letter or 4-letter Arabic root if applicable, e.g. صبر, رحم, علم"],
-  "suggestedVerses": [{"surah": 49, "ayah": 10}, {"surah": 49, "ayah": 11}]
+  "suggestedVerses": [{"surah": 49, "ayah": 10}, {"surah": 49, "ayah": 11}] // Both surah AND ayah are strictly required for every object
 }`;
 
   try {
@@ -279,7 +279,8 @@ OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
                         properties: {
                           surah: { type: 'INTEGER' },
                           ayah: { type: 'INTEGER' }
-                        }
+                        },
+                        required: ['surah', 'ayah']
                       }
                     }
                   },

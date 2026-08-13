@@ -41,7 +41,12 @@ export const DEFAULT_DAILY_CREDITS = 50000; // e.g. 50,000 free tokens/credits p
  */
 export function estimateTokens(text: string): number {
   if (!text) return 0;
-  return Math.ceil(text.length / 4);
+  // Arabic text with diacritics / BPE tokenization uses roughly 2 chars per token
+  if (/[\u0600-\u06FF]/.test(text)) {
+    return Math.ceil(text.length / 2.0);
+  }
+  // Standard English is roughly 4 chars per token
+  return Math.ceil(text.length / 4.0);
 }
 
 /**

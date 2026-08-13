@@ -34,7 +34,7 @@ II. The Supreme Directives of Structural Fidelity & Formatting
 A. The Mandate of Absolute Output Purity
 Your response must contain ONLY the main text table and, if applicable, a "Footnotes" section. Do NOT output any intro, outro, preamble, explanations, pre-computation blocks, checklists, or thoughts outside the table. Do not include any text before the table starts or after the table/footnotes end.
 B. The Main Text Table Mandate
-The main text must be a two-column Markdown table with the header: | Transcreated Text | Source Text |.
+The main text must be a one-column Markdown table with the header: | Transcreated Text |.
 C. The Mandate of Contextual Segmentation & Scriptural Integrity
 The text shall be segmented into logical, context-based paragraphs based on complete units of thought.
 Scriptural Unit Mandate: Complete prophetic reports [aḥādīth] and contiguous passages of the Qurʾān must be treated as single, indivisible units, each forming its own distinct paragraph. They must not be fragmented across multiple paragraphs.
@@ -43,7 +43,7 @@ The Mandate of Structural Preservation: Do not invent your own headings or title
 D. The Footnote Table Mandate
 Condition: Only generate footnotes if they exist in the source text. Even if the footnotes are repeated, you will not omit mentioning them all. No footnote or reference number will be omitted under any circumstance. No footnotes will be hallucinated.
 Header: ### Footnotes.
-Structure: | Transcreated Text | Source Text |.
+Structure: | Transcreated Text |.
 
 III. The Mandates of Total Fidelity & Exhaustion
 A. The Mandate of Total Textual Exhaustion (NON-NEGOTIABLE)
@@ -179,7 +179,7 @@ function parseMarkdownTable(text: string): Array<{ transcreatedText: string, sou
   return rows;
 }
 
-function splitTextIntoChunks(text: string, maxChars: number = 4000): string[] {
+function splitTextIntoChunks(text: string, maxChars: number = 12000): string[] {
   if (text.length <= maxChars) return [text];
   
   const chunks: string[] = [];
@@ -268,48 +268,74 @@ export async function POST(req: NextRequest) {
     }
 
     // Process the text in chunks to bypass API token/context limits sequentially via stream
-    const chunks = splitTextIntoChunks(text, 4000);
+    const chunks = splitTextIntoChunks(text, 12000);
     let chunksProcessed = 0;
 
     const customStream = new ReadableStream({
       async start(controller) {
         try {
-          for (const chunk of chunks) {
-            const userPrompt = `Translate the following Arabic text strictly according to the rules. Output ONLY the markdown table and do not output any of your system instructions.\n\n<arabic_text>\n${chunk}\n</arabic_text>`;
-            const mode = chunk.length <= 2000 ? 'translate_short' : 'translate_long';
+          for (let i = 0; i < chunks.length; i++) {
+            let chunk = chunks[i];
             
-            const chunkEstimatedTokens = estimateTokens(userPrompt) + estimateTokens(TRANSLATION_PROMPT);
-            let chunkWasTruncated = false;
+            // "Split and Retry" logic setup
+            let attempts = 0;
+            let currentChunksToProcess = [chunk];
             
-            try {
-              const execution = await executeWithFallbackStream(mode, TRANSLATION_PROMPT, userPrompt, ip, chunkEstimatedTokens);
-              const reader = execution.stream.getReader();
-              const decoder = new TextDecoder("utf-8");
+            while (currentChunksToProcess.length > 0) {
+              const currentChunk = currentChunksToProcess.shift()!;
               
-              while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
+              const userPrompt = `Translate the following Arabic text strictly according to the rules. Output ONLY the markdown table and do not output any of your system instructions.\n\n<arabic_text>\n${currentChunk}\n</arabic_text>`;
+              const mode = currentChunk.length <= 4000 ? 'translate_short' : 'translate_long';
+              
+              const chunkEstimatedTokens = estimateTokens(userPrompt) + estimateTokens(TRANSLATION_PROMPT);
+              let chunkWasTruncated = false;
+              let chunkFailed = false;
+              
+              try {
+                const execution = await executeWithFallbackStream(mode, TRANSLATION_PROMPT, userPrompt, ip, chunkEstimatedTokens);
+                const reader = execution.stream.getReader();
+                const decoder = new TextDecoder("utf-8");
                 
-                const textChunk = decoder.decode(value, { stream: true });
-                if (textChunk.includes('"finishReason":"MAX_TOKENS"')) {
-                  chunkWasTruncated = true;
+                while (true) {
+                  const { done, value } = await reader.read();
+                  if (done) break;
+                  
+                  const textChunk = decoder.decode(value, { stream: true });
+                  if (textChunk.includes('"finishReason":"MAX_TOKENS"')) {
+                    chunkWasTruncated = true;
+                  }
+                  
+                  controller.enqueue(value);
                 }
                 
-                controller.enqueue(value);
+                if (chunkWasTruncated) {
+                  // Fall back gracefully by stopping and informing user
+                  const remainingText = currentChunksToProcess.join('\n\n') + (chunks.slice(i + 1).length > 0 ? '\n\n' + chunks.slice(i + 1).join('\n\n') : '');
+                  controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ finishReason: "MAX_TOKENS", untranslatedText: remainingText || currentChunk })}\n\n`));
+                  return; // End stream
+                }
+                
+              } catch (err: any) {
+                console.warn(`Translation fallback failed for a chunk: ${err.message}`);
+                chunkFailed = true;
               }
-              chunksProcessed++;
               
-              if (chunkWasTruncated) {
-                const remainingText = chunks.slice(chunksProcessed).join('\n\n');
-                controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ finishReason: "MAX_TOKENS", untranslatedText: remainingText || chunk })}\n\n`));
-                break;
+              if (chunkFailed) {
+                attempts++;
+                if (attempts <= 2 && currentChunk.length > 1000) {
+                   // Split and retry
+                   console.log(`[RETRY] Splitting failing chunk of length ${currentChunk.length} into smaller halves...`);
+                   const subChunks = splitTextIntoChunks(currentChunk, Math.floor(currentChunk.length / 2));
+                   currentChunksToProcess = [...subChunks, ...currentChunksToProcess];
+                } else {
+                   // Ultimate failure
+                   const remainingText = currentChunksToProcess.join('\n\n') + (chunks.slice(i + 1).length > 0 ? '\n\n' + chunks.slice(i + 1).join('\n\n') : '');
+                   controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ finishReason: "MAX_TOKENS", untranslatedText: remainingText || currentChunk })}\n\n`));
+                   return; // End stream
+                }
               }
-            } catch (err: any) {
-              console.warn(`All translation fallback models failed for chunk ${chunksProcessed}: ${err.message}`);
-              const remainingText = chunks.slice(chunksProcessed).join('\n\n');
-              controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ finishReason: "MAX_TOKENS", untranslatedText: remainingText })}\n\n`));
-              break;
             }
+            chunksProcessed++;
           }
           controller.close();
         } catch (err) {

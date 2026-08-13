@@ -177,25 +177,22 @@ export async function searchHybrid(
       const numVerses = filters.suggestedVerses.length;
       let verseResults: any[] = [];
       
-      // Distribute authors evenly across verses for breadth
-      // e.g. 6 authors across 3 verses = 2 per verse; 6 authors across 2 verses = 3 per verse
-      const maxAuthorsPerVerse = Math.max(1, Math.ceil(allowedAuthorIds.length / Math.max(1, numVerses)));
+      // Fetch all allowed authors for every verse (do not limit per verse)
       
       for (let i = 0; i < numVerses; i++) {
         const verse = filters.suggestedVerses[i];
-        const authorLimit = Math.min(maxAuthorsPerVerse, allowedAuthorIds.length);
         
         const querySql = `
           SELECT t.id, t.authorId, t.surahId, a.numberInSurah as ayahNo, t.text, au.name as authorName
           FROM TafsirEntry t
           JOIN Ayah a ON t.ayahId = a.id
           JOIN Author au ON t.authorId = au.id
-          WHERE t.authorId IN (${allowedAuthorIds.slice(0, authorLimit).join(',')})
+          WHERE t.authorId IN (${allowedAuthorIds.join(',')})
             AND t.surahId = ? AND a.numberInSurah = ?
         `;
         
         const rows = devDb.prepare(querySql).all(verse.surah, verse.ayah) as any[];
-        console.log(`[HYBRID-SEARCH] Verse ${verse.surah}:${verse.ayah} → ${rows.length} tafsir entries (${authorLimit} authors allowed)`);
+        console.log(`[HYBRID-SEARCH] Verse ${verse.surah}:${verse.ayah} → ${rows.length} tafsir entries (${allowedAuthorIds.length} authors allowed)`);
         verseResults.push(...rows);
       }
       
