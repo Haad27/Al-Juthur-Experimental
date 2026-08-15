@@ -15,8 +15,7 @@ export function getTafsirDifficulty(name: string, authorName?: string | null): T
     text.includes("israr") || text.includes("bayan-ul-quran") || text.includes("بيان القرآن") || text.includes("بیان القرآن") ||
     text.includes("taqi usmani") || text.includes("عثماني") || text.includes("عثمانی") ||
     text.includes("mukhtasar") || text.includes("مختصر") ||
-    text.includes("tazkirul") || text.includes("wahiduddin") || text.includes("وحيد الدين") ||
-    text.includes("translation") || text.includes("english")
+    text.includes("tazkirul") || text.includes("wahiduddin") || text.includes("وحيد الدين")
   ) {
     return 'Beginner';
   }

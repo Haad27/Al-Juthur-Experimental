@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 import { copyToClipboard, cn } from "@/lib/utils";
 import { getTafsirFameRank, getLanguagePriority, getTafsirDifficulty } from "@/lib/tafsirRanking";
+import { getTafsirWarning } from "@/lib/tafsirWarnings";
 import InlineTranslation from "@/components/shared/InlineTranslation";
 
 interface Author {
@@ -430,6 +431,8 @@ export default function TafsirPage() {
       
     const isUrduText = activeLangName.toLowerCase().includes("urdu");
 
+    const authorWarning = getTafsirWarning(activeAuthor.name, activeAuthor.authorName);
+
 
 
     // ── STANDARD MODE ──────────────────────────────────────────
@@ -621,6 +624,16 @@ export default function TafsirPage() {
 
           {/* Main Content Area */}
           <main className="flex-1 p-4 md:p-8 space-y-8 min-w-0 transition-all duration-300">
+
+            {authorWarning.hasWarning && (
+              <div className="bg-amber-500/10 border border-amber-500/40 rounded-xl p-4 flex gap-3 text-amber-200 text-sm">
+                <Sparkles className="size-5 shrink-0 text-amber-400 mt-0.5" />
+                <div>
+                  <h4 className="font-bold text-amber-400 mb-1">Methodological Note</h4>
+                  <p>{authorWarning.message}</p>
+                </div>
+              </div>
+            )}
 
             {/* Surah Banner Header */}
             <div className={cn(
@@ -1050,20 +1063,23 @@ export default function TafsirPage() {
                             </span>
                           </>
                         )}
+                        {difficultyLevel && (
+                          <>
+                            <span className="shrink-0">•</span>
+                            <span className={`px-1.5 py-0.5 rounded-sm text-[9px] font-bold uppercase tracking-wider border shrink-0 ${
+                              difficultyLevel === 'Beginner' ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400' :
+                              difficultyLevel === 'Advanced' ? 'bg-amber-500/15 border-amber-500/30 text-amber-400' :
+                              'bg-blue-500/15 border-blue-500/30 text-blue-400'
+                            }`}>
+                              {difficultyLevel}
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
 
-                    {/* Top Right: Difficulty Badge + Al-Juthur Logo */}
+                    {/* Top Right: Al-Juthur Logo */}
                     <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
-                      {difficultyLevel && (
-                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border shadow-sm ${
-                          difficultyLevel === 'Beginner' ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400' :
-                          difficultyLevel === 'Advanced' ? 'bg-amber-500/15 border-amber-500/30 text-amber-400' :
-                          'bg-blue-500/15 border-blue-500/30 text-blue-400'
-                        }`}>
-                          {difficultyLevel}
-                        </span>
-                      )}
                       <LogoIcon className="size-5 text-emerald-400 group-hover:scale-110 transition-transform" />
                     </div>
                   </div>
