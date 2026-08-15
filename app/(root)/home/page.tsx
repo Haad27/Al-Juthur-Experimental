@@ -1,6 +1,6 @@
 "use client";
 // Other -/-Essential Imports ⭐
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 // API ⭐
 import { fetchAllSurahs } from "@/api/api";
 // Next ⭐
@@ -40,6 +40,18 @@ const SurahsList = () => {
 
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [homeSearchQuery, setHomeSearchQuery] = useState("");
+  const [isHomeSearchFocused, setIsHomeSearchFocused] = useState(false);
+  const homeSearchContainerRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (homeSearchContainerRef.current && !homeSearchContainerRef.current.contains(event.target as Node)) {
+        setIsHomeSearchFocused(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
   // const [searchResults, setSearchResults] = useState([]);
   const [amount, setAmount] = useState(21);
   // Boolean 🔹
@@ -251,15 +263,42 @@ const SurahsList = () => {
             <h2 className="md:text-4xl text-3xl font-semibold text-white">
               Explore All Surahs
             </h2>
-            <div className="relative w-full md:w-72 z-20">
+            <div ref={homeSearchContainerRef} className="relative w-full md:w-72 z-20">
               <input
                 type="text"
                 placeholder="Search Surah (e.g., Baqarah)"
                 value={homeSearchQuery}
                 onChange={(e) => setHomeSearchQuery(e.target.value)}
+                onFocus={() => setIsHomeSearchFocused(true)}
                 className="w-full bg-zinc-900/50 border border-zinc-800/80 rounded-xl px-4 py-2.5 text-base md:text-sm text-zinc-300 focus:outline-none focus:border-emerald-500/50 transition-colors placeholder:text-zinc-600"
               />
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-zinc-500 pointer-events-none" />
+
+              {/* Autocomplete Dropdown */}
+              {isHomeSearchFocused && homeSearchQuery.trim().length > 0 && (
+                <div className="absolute top-full mt-2 left-0 right-0 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto custom-scrollbar">
+                  {filteredHomeSurahs.length > 0 ? (
+                    <div className="p-1.5 flex flex-col gap-1">
+                      {filteredHomeSurahs.slice(0, 10).map((surah) => (
+                        <button
+                          key={`suggest-surah-${surah.number}`}
+                          onClick={() => {
+                            setHomeSearchQuery(surah.englishName);
+                            setIsHomeSearchFocused(false);
+                            router.push(`/surah/${surah.number}`);
+                          }}
+                          className="flex flex-col text-left px-3 py-2 hover:bg-emerald-500/10 rounded-lg transition-colors w-full"
+                        >
+                          <span className="text-sm font-semibold text-zinc-200">{surah.englishName}</span>
+                          <span className="text-[10px] text-zinc-500">{surah.englishNameTranslation}</span>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="px-4 py-3 text-xs text-zinc-500 text-center">No matches found</div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
           <div

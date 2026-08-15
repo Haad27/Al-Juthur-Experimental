@@ -114,6 +114,19 @@ function LexiconPageContent() {
   const [topNavVisible, setTopNavVisible] = useState(true);
   const lastScrollYRef = useRef<number>(0);
 
+  const [isLexiconSearchFocused, setIsLexiconSearchFocused] = useState(false);
+  const lexiconSearchContainerRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (lexiconSearchContainerRef.current && !lexiconSearchContainerRef.current.contains(event.target as Node)) {
+        setIsLexiconSearchFocused(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   useEffect(() => {
     const rootParam = searchParams.get('root');
     if (rootParam && rootParam !== activeRoot) {
@@ -334,13 +347,14 @@ function LexiconPageContent() {
             </p>
           </div>
 
-          <form onSubmit={handleSearchSubmit} className="relative mb-3">
-            <div className="relative flex items-center">
+          <form ref={lexiconSearchContainerRef} onSubmit={handleSearchSubmit} className="relative mb-3">
+            <div className="relative flex items-center z-20">
               <Search className="absolute left-4 w-5 h-5 text-zinc-400 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsLexiconSearchFocused(true)}
                 placeholder="Search Arabic root (e.g. رحم, كتب, نور)..."
                 className="w-full pl-12 pr-28 py-2.5 md:py-3 bg-zinc-900/90 border border-zinc-800 rounded-xl text-sm md:text-base text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500/60 shadow-lg transition-all"
                 dir="auto"
@@ -352,6 +366,33 @@ function LexiconPageContent() {
                 Explore
               </button>
             </div>
+
+            {/* Autocomplete Dropdown */}
+            {isLexiconSearchFocused && searchQuery.trim().length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto custom-scrollbar">
+                {POPULAR_ROOTS.filter(r => r.root.includes(searchQuery.trim()) || r.meaning.toLowerCase().includes(searchQuery.trim().toLowerCase())).length > 0 ? (
+                  <div className="p-1.5 flex flex-col gap-1">
+                    {POPULAR_ROOTS.filter(r => r.root.includes(searchQuery.trim()) || r.meaning.toLowerCase().includes(searchQuery.trim().toLowerCase())).map((item) => (
+                      <button
+                        key={`suggest-root-${item.root}`}
+                        onClick={() => {
+                          setSearchQuery(item.root);
+                          setActiveRoot(item.root);
+                          setIsLexiconSearchFocused(false);
+                        }}
+                        type="button"
+                        className="flex items-center justify-between text-left px-3 py-2 hover:bg-emerald-500/10 rounded-lg transition-colors w-full"
+                      >
+                        <span className="font-arabic font-bold text-base text-zinc-200">{item.root}</span>
+                        <span className="text-xs text-zinc-500">{item.meaning}</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="px-4 py-3 text-xs text-zinc-500 text-center">Press Explore to search dictionary</div>
+                )}
+              </div>
+            )}
           </form>
 
           {/* Popular Roots (Single Horizontal Row on Mobile) */}

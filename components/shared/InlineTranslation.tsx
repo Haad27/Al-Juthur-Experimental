@@ -14,6 +14,7 @@ export default function InlineTranslation({ textToTranslate, onClose }: InlineTr
   const [isOpen, setIsOpen] = useState(false);
   const [translationText, setTranslationText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isDone, setIsDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleTranslate = async () => {
@@ -26,6 +27,7 @@ export default function InlineTranslation({ textToTranslate, onClose }: InlineTr
     if (translationText) return; // Already translated
 
     setIsLoading(true);
+    setIsDone(false);
     setError(null);
     setTranslationText("");
 
@@ -71,10 +73,13 @@ export default function InlineTranslation({ textToTranslate, onClose }: InlineTr
           }
         }
       }
+      // If we finished and still have no parsed text, fallback to raw fullText just in case it wasn't a table
+      setTranslationText((prev) => prev.trim() ? prev : fullText);
     } catch (err: any) {
       setError(err.message || "An error occurred during translation.");
     } finally {
       setIsLoading(false);
+      setIsDone(true);
     }
   };
 
@@ -115,7 +120,7 @@ export default function InlineTranslation({ textToTranslate, onClose }: InlineTr
         englishText += cleanedTransText + "\n\n";
       }
     }
-    return englishText.trim() || rawText; // fallback to raw text if parsing fails
+    return englishText.trim();
   };
 
   return (
@@ -141,6 +146,16 @@ export default function InlineTranslation({ textToTranslate, onClose }: InlineTr
             <h4 className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
               <Sparkles className="size-4" />
               English Translation
+              {isLoading && (
+                <span className="ml-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] text-emerald-400 font-medium">
+                  <Loader2 className="size-3 animate-spin" /> Translating
+                </span>
+              )}
+              {isDone && !error && (
+                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-400 font-medium">
+                  Completed
+                </span>
+              )}
             </h4>
             <div className="flex items-center gap-3">
               <Link

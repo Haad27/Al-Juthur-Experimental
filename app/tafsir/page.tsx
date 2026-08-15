@@ -174,6 +174,19 @@ export default function TafsirPage() {
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("All Levels");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  // Click outside to close search dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setIsSearchFocused(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const ERAS = useMemo(() => [
     "All Eras",
@@ -880,15 +893,44 @@ export default function TafsirPage() {
 
             {/* Right side: Search and Refine */}
             <div className="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto shrink-0">
-              <div className="relative w-full md:w-80">
+              <div ref={searchContainerRef} className="relative w-full md:w-80">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-zinc-500" />
                 <input
                   type="text"
                   placeholder="Search tafsirs..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setIsSearchFocused(true)}
                   className="w-full bg-zinc-900/80 border border-emerald-500/30 rounded-xl pl-10 pr-4 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-emerald-500/60 transition-all hover:border-emerald-500/50 shadow-sm"
                 />
+                
+                {/* Autocomplete Dropdown */}
+                {isSearchFocused && searchQuery.trim().length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto custom-scrollbar">
+                    {filteredAuthors.length > 0 ? (
+                      <div className="p-1.5 flex flex-col gap-1">
+                        {filteredAuthors.slice(0, 10).map(({ author, language }) => (
+                          <button
+                            key={`suggest-${language.id}-${author.id}`}
+                            onClick={() => {
+                              setSearchQuery(author.name);
+                              setIsSearchFocused(false);
+                            }}
+                            className="flex flex-col text-left px-3 py-2 hover:bg-emerald-500/10 rounded-lg transition-colors w-full"
+                          >
+                            <span className="text-sm font-semibold text-zinc-200">{author.name}</span>
+                            <span className="text-[10px] text-zinc-500 flex items-center gap-1">
+                              {author.authorName && <span>{author.authorName} • </span>}
+                              <span className="text-emerald-400">{language.name}</span>
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="px-4 py-3 text-xs text-zinc-500 text-center">No matches found</div>
+                    )}
+                  </div>
+                )}
               </div>
               
               <div className="relative shrink-0">
@@ -1063,18 +1105,6 @@ export default function TafsirPage() {
                             </span>
                           </>
                         )}
-                        {difficultyLevel && (
-                          <>
-                            <span className="shrink-0">•</span>
-                            <span className={`px-1.5 py-0.5 rounded-sm text-[9px] font-bold uppercase tracking-wider border shrink-0 ${
-                              difficultyLevel === 'Beginner' ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400' :
-                              difficultyLevel === 'Advanced' ? 'bg-amber-500/15 border-amber-500/30 text-amber-400' :
-                              'bg-blue-500/15 border-blue-500/30 text-blue-400'
-                            }`}>
-                              {difficultyLevel}
-                            </span>
-                          </>
-                        )}
                       </div>
                     </div>
 
@@ -1084,22 +1114,16 @@ export default function TafsirPage() {
                     </div>
                   </div>
 
-                {/* Methodology Badges */}
-                {author.tags && author.tags.length > 0 && (
+                {/* Difficulty Level Bottom Badge */}
+                {difficultyLevel && (
                   <div className="relative z-10 flex items-center gap-1.5 pt-1 border-t border-zinc-800/60 overflow-hidden">
-                    {author.tags.slice(0, 1).map((tag) => (
-                      <span
-                        key={tag.id}
-                        className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border truncate max-w-[170px] ${getTagColorClass(tag.color)}`}
-                      >
-                        {tag.name}
-                      </span>
-                    ))}
-                    {author.tags.length > 1 && (
-                      <span className="text-[9px] text-zinc-500 font-mono shrink-0">
-                        +{author.tags.length - 1}
-                      </span>
-                    )}
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border truncate max-w-[170px] ${
+                      difficultyLevel === 'Beginner' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
+                      difficultyLevel === 'Advanced' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
+                      'bg-blue-500/10 text-blue-400 border-blue-500/30'
+                    }`}>
+                      {difficultyLevel}
+                    </span>
                   </div>
                 )}
               </div>
