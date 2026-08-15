@@ -17,7 +17,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const map = getSurahWords(surah);
+    const map = await getSurahWords(surah);
     return NextResponse.json(map);
   } catch (error) {
     console.error('Error in /api/lexicon/surah-words:', error);

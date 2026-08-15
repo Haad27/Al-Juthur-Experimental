@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'surah, ayah, and wordIndex are required' }, { status: 400 });
     }
 
-    const morphology = getWordMorphology(surah, ayah, wordIndex);
+    const morphology = await getWordMorphology(surah, ayah, wordIndex);
     if (!morphology) {
       return NextResponse.json({ error: 'Word morphology not found' }, { status: 404 });
     }
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
 
     if (morphology.root) {
       rootQuery = morphology.root.replace(/\s+/g, '');
-      const lexiconResult = getLexiconEntriesForRoot(rootQuery);
+      const lexiconResult = await getLexiconEntriesForRoot(rootQuery);
       if (lexiconResult.structuredLane?.summary_en) {
         rootSummary = lexiconResult.structuredLane.summary_en;
       }

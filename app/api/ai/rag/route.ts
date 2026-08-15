@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
       // A. Lexicon Dictionary Retrieval for Root
       if (preparedQuery.rootWords && preparedQuery.rootWords.length > 0) {
         for (const root of preparedQuery.rootWords) {
-          const lexResult = getLexiconEntriesForRoot(root);
+          const lexResult = await getLexiconEntriesForRoot(root);
           for (const entry of lexResult.entries) {
             const fullContent = entry.definitions.join('\n\n');
             if (fullContent.trim().length > 0) {

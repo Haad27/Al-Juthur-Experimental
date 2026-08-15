@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
     const query = searchParams.get('q') || '';
     const limit = parseInt(searchParams.get('limit') || '50', 10);
 
-    const roots = searchRoots(query, limit);
+    const roots = await searchRoots(query, limit);
     return NextResponse.json({ query, roots });
   } catch (error: any) {
     console.error('Error in GET /api/lexicon/search:', error);

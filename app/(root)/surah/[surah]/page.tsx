@@ -105,7 +105,7 @@ export default async function SurahPage({
   const translationAyahs = await getQuranComSurahTranslation(surahNumber, editionParam);
 
   // 4. Fetch morphological mapping from our Lexicon service
-  const surahWordsMap = getSurahWords(surahNumber);
+  const surahWordsMap = await getSurahWords(surahNumber);
 
   // Pre-compute O(1) lookup map for translations
   const translationMap = new Map<number, string>();

@@ -1,4 +1,4 @@
-import Database from 'better-sqlite3';
+import { createClient } from '@libsql/client';
 import path from 'path';
 import fs from 'fs';
 
@@ -59,27 +59,20 @@ export interface RootLexiconResult {
 
 // Singleton database connections for Next.js HMR
 const globalForDb = globalThis as unknown as {
-  lexiconsDb: Database.Database | undefined;
-  wordRootDb: Database.Database | undefined;
+  tursoClient: any;
   structuredLaneCache: StructuredLaneEntry[] | undefined;
   surahWordsCache: Record<number, any> | undefined;
   aiSummariesCache: Record<string, { root_meaning_html: string; quranic_usage_html: string }> | undefined;
 };
 
-function getLexiconsDb(): Database.Database {
-  if (!globalForDb.lexiconsDb) {
-    const dbPath = path.join(process.cwd(), 'database', 'lexicon', 'data', 'arabic_lexicons.sqlite');
-    globalForDb.lexiconsDb = new Database(dbPath, { readonly: true, fileMustExist: true });
+function getTursoClient() {
+  if (!globalForDb.tursoClient) {
+    globalForDb.tursoClient = createClient({
+      url: process.env.TURSO_DATABASE_URL!,
+      authToken: process.env.TURSO_AUTH_TOKEN,
+    });
   }
-  return globalForDb.lexiconsDb;
-}
-
-function getWordRootDb(): Database.Database {
-  if (!globalForDb.wordRootDb) {
-    const dbPath = path.join(process.cwd(), 'database', 'lexicon', 'data', 'word-root.db');
-    globalForDb.wordRootDb = new Database(dbPath, { readonly: true, fileMustExist: true });
-  }
-  return globalForDb.wordRootDb;
+  return globalForDb.tursoClient;
 }
 
 function getStructuredLaneData(): StructuredLaneEntry[] {
@@ -237,17 +230,7 @@ export function getDictionaries(): DictionaryInfo[] {
   ];
 }
 
-function getMcpDb() {
-  const dbPath = path.join(process.cwd(), 'database', 'lexicon', 'data', 'quran.db');
-  return new Database(dbPath, { readonly: true });
-}
-
-function getEnglishMorphologyDb() {
-  const dbPath = path.join(process.cwd(), 'database', 'lexicon', 'data', 'english_morphology.sqlite');
-  return new Database(dbPath, { readonly: true });
-}
-
-export function getSurahWords(surah: number) {
+export async function getSurahWords(surah: number) {
   if (!globalForDb.surahWordsCache) {
     globalForDb.surahWordsCache = {};
   }
@@ -255,30 +238,36 @@ export function getSurahWords(surah: number) {
     return globalForDb.surahWordsCache[surah];
   }
   try {
-    const db = getMcpDb();
-    const rows = db.prepare(`
-      SELECT 
-        r.ayahNo,
-        r.wordNo, 
-        r.word as rasmWord, 
-        s.root, 
-        c.sarf, 
-        i.irabMushakkal
-      FROM word_content_rasm r
-      LEFT JOIN word_statistics s ON r.surahNo = s.surahNo AND r.ayahNo = s.ayahNo AND r.wordNo = s.wordNo
-      LEFT JOIN word_content_sarf c ON r.surahNo = c.surahNo AND r.ayahNo = c.ayahNo AND r.wordNo = c.wordNo
-      LEFT JOIN word_content_irab i ON r.surahNo = i.surahNo AND r.ayahNo = i.ayahNo AND r.wordNo = i.wordNo
-      WHERE r.surahNo = ?
-      ORDER BY r.ayahNo ASC, r.wordNo ASC
-    `).all(surah) as any[];
+    const turso = getTursoClient();
+    const res = await turso.execute({
+      sql: `
+        SELECT 
+          r.ayahNo,
+          r.wordNo, 
+          r.word as rasmWord, 
+          s.root, 
+          c.sarf, 
+          i.irabMushakkal
+        FROM word_content_rasm r
+        LEFT JOIN word_statistics s ON r.surahNo = s.surahNo AND r.ayahNo = s.ayahNo AND r.wordNo = s.wordNo
+        LEFT JOIN word_content_sarf c ON r.surahNo = c.surahNo AND r.ayahNo = c.ayahNo AND r.wordNo = c.wordNo
+        LEFT JOIN word_content_irab i ON r.surahNo = i.surahNo AND r.ayahNo = i.ayahNo AND r.wordNo = i.wordNo
+        WHERE r.surahNo = ?
+        ORDER BY r.ayahNo ASC, r.wordNo ASC
+      `,
+      args: [surah]
+    });
+    const rows = res.rows;
 
     // Fetch English Morphology
     let engMorphMap: Record<string, string> = {};
     try {
-      const engDb = getEnglishMorphologyDb();
-      const engRows = engDb.prepare(`SELECT ayah, word, pos_tags FROM word_morphology WHERE surah = ?`).all(surah) as any[];
-      for (const er of engRows) {
-        engMorphMap[`${er.ayah}:${er.word}`] = er.pos_tags;
+      const engRes = await turso.execute({
+        sql: `SELECT ayah, word, pos_tags FROM word_morphology WHERE surah = ?`,
+        args: [surah]
+      });
+      for (const er of engRes.rows) {
+        engMorphMap[`${er.ayah}:${er.word}`] = er.pos_tags as string;
       }
     } catch (e) {
       console.error('Error fetching English morphology:', e);
@@ -286,11 +275,13 @@ export function getSurahWords(surah: number) {
 
     const map: Record<number, any[]> = {};
     for (const r of rows) {
-      if (!map[r.ayahNo]) map[r.ayahNo] = [];
-      const normalizedWordIdx = (surah === 2 && r.ayahNo === 1 && r.wordNo === 5) ? 1 : r.wordNo;
-      const engMorph = engMorphMap[`${r.ayahNo}:${normalizedWordIdx}`] || engMorphMap[`${r.ayahNo}:${r.wordNo}`];
+      const ayahNo = r.ayahNo as number;
+      const wordNo = r.wordNo as number;
+      if (!map[ayahNo]) map[ayahNo] = [];
+      const normalizedWordIdx = (surah === 2 && ayahNo === 1 && wordNo === 5) ? 1 : wordNo;
+      const engMorph = engMorphMap[`${ayahNo}:${normalizedWordIdx}`] || engMorphMap[`${ayahNo}:${wordNo}`];
       
-      map[r.ayahNo].push({
+      map[ayahNo].push({
         wordIndex: normalizedWordIdx,
         word: r.rasmWord,
         root: r.root || null,
@@ -302,47 +293,54 @@ export function getSurahWords(surah: number) {
     globalForDb.surahWordsCache[surah] = map;
     return map;
   } catch (err) {
-    console.error('Error fetching surah words from MCP:', err);
+    console.error('Error fetching surah words from Turso:', err);
     return {};
   }
 }
 
-export function getAyahWords(surah: number, ayah: number) {
+export async function getAyahWords(surah: number, ayah: number) {
   if (!globalForDb.surahWordsCache?.[surah]) {
-    getSurahWords(surah);
+    await getSurahWords(surah);
   }
   if (globalForDb.surahWordsCache?.[surah]?.[ayah]) {
     return globalForDb.surahWordsCache[surah][ayah];
   }
   try {
-    const db = getMcpDb();
-    const rows = db.prepare(`
-      SELECT 
-        r.wordNo, 
-        r.word as rasmWord, 
-        s.root, 
-        c.sarf, 
-        i.irabMushakkal
-      FROM word_content_rasm r
-      LEFT JOIN word_statistics s ON r.surahNo = s.surahNo AND r.ayahNo = s.ayahNo AND r.wordNo = s.wordNo
-      LEFT JOIN word_content_sarf c ON r.surahNo = c.surahNo AND r.ayahNo = c.ayahNo AND r.wordNo = c.wordNo
-      LEFT JOIN word_content_irab i ON r.surahNo = i.surahNo AND r.ayahNo = i.ayahNo AND r.wordNo = i.wordNo
-      WHERE r.surahNo = ? AND r.ayahNo = ?
-      ORDER BY r.wordNo ASC
-    `).all(surah, ayah) as any[];
+    const turso = getTursoClient();
+    const res = await turso.execute({
+      sql: `
+        SELECT 
+          r.wordNo, 
+          r.word as rasmWord, 
+          s.root, 
+          c.sarf, 
+          i.irabMushakkal
+        FROM word_content_rasm r
+        LEFT JOIN word_statistics s ON r.surahNo = s.surahNo AND r.ayahNo = s.ayahNo AND r.wordNo = s.wordNo
+        LEFT JOIN word_content_sarf c ON r.surahNo = c.surahNo AND r.ayahNo = c.ayahNo AND r.wordNo = c.wordNo
+        LEFT JOIN word_content_irab i ON r.surahNo = i.surahNo AND r.ayahNo = i.ayahNo AND r.wordNo = i.wordNo
+        WHERE r.surahNo = ? AND r.ayahNo = ?
+        ORDER BY r.wordNo ASC
+      `,
+      args: [surah, ayah]
+    });
+    const rows = res.rows;
 
     let engMorphMap: Record<string, string> = {};
     try {
-      const engDb = getEnglishMorphologyDb();
-      const engRows = engDb.prepare(`SELECT word, pos_tags FROM word_morphology WHERE surah = ? AND ayah = ?`).all(surah, ayah) as any[];
-      for (const er of engRows) {
-        engMorphMap[er.word] = er.pos_tags;
+      const engRes = await turso.execute({
+        sql: `SELECT word, pos_tags FROM word_morphology WHERE surah = ? AND ayah = ?`,
+        args: [surah, ayah]
+      });
+      for (const er of engRes.rows) {
+        engMorphMap[er.word as string] = er.pos_tags as string;
       }
     } catch (e) { }
 
     return rows.map((r) => {
-      const normalizedWordIdx = (surah === 2 && ayah === 1 && r.wordNo === 5) ? 1 : r.wordNo;
-      const engMorph = engMorphMap[normalizedWordIdx] || engMorphMap[r.wordNo];
+      const wordNo = r.wordNo as number;
+      const normalizedWordIdx = (surah === 2 && ayah === 1 && wordNo === 5) ? 1 : wordNo;
+      const engMorph = engMorphMap[normalizedWordIdx] || engMorphMap[wordNo];
       return {
         wordIndex: normalizedWordIdx,
         word: r.rasmWord,
@@ -353,7 +351,7 @@ export function getAyahWords(surah: number, ayah: number) {
       };
     });
   } catch (err) {
-    console.error('Error fetching ayah words from MCP:', err);
+    console.error('Error fetching ayah words from Turso:', err);
     return [];
   }
 }
@@ -361,8 +359,8 @@ export function getAyahWords(surah: number, ayah: number) {
 /**
  * Get morphology & root for a specific word in Quran
  */
-export function getWordMorphology(surah: number, ayah: number, wordIndex: number): WordMorphology | null {
-  const words = getAyahWords(surah, ayah);
+export async function getWordMorphology(surah: number, ayah: number, wordIndex: number): Promise<WordMorphology | null> {
+  const words = await getAyahWords(surah, ayah);
   const word = words.find((w: any) => w.wordIndex === wordIndex || (surah === 2 && ayah === 1 && (wordIndex === 5 || wordIndex === 1)));
   
   if (word) {
@@ -370,12 +368,11 @@ export function getWordMorphology(surah: number, ayah: number, wordIndex: number
       surah,
       ayah,
       wordIndex: word.wordIndex,
-      word: word.word,
-      root: word.root,
+      word: word.word as string,
+      root: word.root as string | null,
       lemma: word.lemma,
-      stem: word.stem, // Sarf text
-      // @ts-ignore
-      irab: word.irab
+      stem: word.stem as string | null, // Sarf text
+      irab: word.irab as string | null
     };
   }
   return null;
@@ -384,7 +381,7 @@ export function getWordMorphology(surah: number, ayah: number, wordIndex: number
 /**
  * Search all roots by query string (supports Arabic root or English transliteration)
  */
-export function searchRoots(query: string, limit = 50): string[] {
+export async function searchRoots(query: string, limit = 50): Promise<string[]> {
   if (!query || query.trim().length === 0) return [];
   const qClean = query.trim();
   const compact = qClean.replace(/\s+/g, '');
@@ -404,24 +401,21 @@ export function searchRoots(query: string, limit = 50): string[] {
     }
   }
 
-  // Also search lanelexcon in sqlite
+  // Also search lanelexcon in Turso
   try {
-    const db = getLexiconsDb();
+    const turso = getTursoClient();
     const compactPattern = `%${compact}%`;
-    const rows = db
-      .prepare(
-        `SELECT word FROM lanelexcon 
-         WHERE is_root = 1 AND word LIKE ? 
-         LIMIT ?`
-      )
-      .all(compactPattern, limit) as { word: string }[];
+    const res = await turso.execute({
+      sql: `SELECT word FROM lanelexcon WHERE is_root = 1 AND word LIKE ? LIMIT ?`,
+      args: [compactPattern, limit]
+    });
 
-    for (const r of rows) {
-      const cleanRoot = r.word.replace(/\s+/g, '');
+    for (const r of res.rows) {
+      const cleanRoot = (r.word as string).replace(/\s+/g, '');
       matchedSet.add(cleanRoot);
     }
   } catch (err) {
-    console.error('Error searching roots in sqlite:', err);
+    console.error('Error searching roots in Turso:', err);
   }
 
   return Array.from(matchedSet).slice(0, limit);
@@ -430,12 +424,10 @@ export function searchRoots(query: string, limit = 50): string[] {
 /**
  * Fetches comprehensive lexicon entries across all dictionaries for a given root.
  */
-export function getLexiconEntriesForRoot(rootQuery: string): RootLexiconResult {
+export async function getLexiconEntriesForRoot(rootQuery: string): Promise<RootLexiconResult> {
   const variants = normalizeRootVariants(rootQuery);
   const dicts = getDictionaries();
-  const dictMap = new Map<number, DictionaryInfo>();
-  dicts.forEach((d) => dictMap.set(d.id, d));
-
+  
   // 1. Structured Lane's Lexicon
   const laneList = getStructuredLaneData();
   const structuredLane =
@@ -445,36 +437,51 @@ export function getLexiconEntriesForRoot(rootQuery: string): RootLexiconResult {
         r.root.replace(/\s+/g, '') === variants.compact
     ) || null;
 
-  // 2. Query dictionary tables in sqlite
-  const db = getLexiconsDb();
+  // 2. Query dictionary tables in Turso
+  const turso = getTursoClient();
   const entries: LexiconEntry[] = [];
 
   try {
     for (const dict of dicts) {
-      // Don't search if the table doesn't exist (handled by try/catch per dict)
       try {
         let row: any = null;
         if (dict.ident === 'lane') {
           // Lane is a bit different (is_root, parent_id)
-          let rootRow = db.prepare('SELECT id FROM lanelexcon WHERE is_root = 1 AND word = ?').get(variants.compact) as { id: number } | undefined;
-          if (!rootRow && variants.raw !== variants.compact) {
-              rootRow = db.prepare('SELECT id FROM lanelexcon WHERE is_root = 1 AND word = ?').get(variants.raw) as { id: number } | undefined;
+          let rootRes = await turso.execute({
+            sql: 'SELECT id FROM lanelexcon WHERE is_root = 1 AND word = ?',
+            args: [variants.compact]
+          });
+          if (rootRes.rows.length === 0 && variants.raw !== variants.compact) {
+            rootRes = await turso.execute({
+              sql: 'SELECT id FROM lanelexcon WHERE is_root = 1 AND word = ?',
+              args: [variants.raw]
+            });
           }
-          if (rootRow) {
-            const children = db.prepare('SELECT word, meanings FROM lanelexcon WHERE parent_id = ? AND is_root = 0 ORDER BY id ASC').all(rootRow.id) as { word: string; meanings: string }[];
-            if (children && children.length > 0) {
-              const definitions = children.map(c => `<div class="mb-2"><b class="text-amber-500 font-bold">${c.word}</b>: <span class="leading-relaxed">${c.meanings}</span></div>`);
+          if (rootRes.rows.length > 0) {
+            const rootId = rootRes.rows[0].id;
+            const childrenRes = await turso.execute({
+              sql: 'SELECT word, meanings FROM lanelexcon WHERE parent_id = ? AND is_root = 0 ORDER BY id ASC',
+              args: [rootId]
+            });
+            if (childrenRes.rows.length > 0) {
+              const definitions = childrenRes.rows.map(c => `<div class="mb-2"><b class="text-amber-500 font-bold">${c.word}</b>: <span class="leading-relaxed">${c.meanings}</span></div>`);
               entries.push({ dictId: dict.id, dictName: dict.name, dictIdent: dict.ident, isEnglish: dict.ar_en, definitions });
             }
           }
         } else {
           // Other dictionaries are simpler (word, meanings)
-          row = db.prepare(`SELECT meanings FROM ${dict.ident} WHERE word = ?`).get(variants.compact) as { meanings: string } | undefined;
-          if (!row && variants.raw !== variants.compact) {
-            row = db.prepare(`SELECT meanings FROM ${dict.ident} WHERE word = ?`).get(variants.raw) as { meanings: string } | undefined;
+          let res = await turso.execute({
+            sql: `SELECT meanings FROM ${dict.ident} WHERE word = ?`,
+            args: [variants.compact]
+          });
+          if (res.rows.length === 0 && variants.raw !== variants.compact) {
+            res = await turso.execute({
+              sql: `SELECT meanings FROM ${dict.ident} WHERE word = ?`,
+              args: [variants.raw]
+            });
           }
-          if (row && row.meanings) {
-            entries.push({ dictId: dict.id, dictName: dict.name, dictIdent: dict.ident, isEnglish: dict.ar_en, definitions: [row.meanings] });
+          if (res.rows.length > 0 && res.rows[0].meanings) {
+            entries.push({ dictId: dict.id, dictName: dict.name, dictIdent: dict.ident, isEnglish: dict.ar_en, definitions: [res.rows[0].meanings as string] });
           }
         }
       } catch (e) {
@@ -482,7 +489,7 @@ export function getLexiconEntriesForRoot(rootQuery: string): RootLexiconResult {
       }
     }
   } catch (err) {
-    console.error('Error querying dictionaries:', err);
+    console.error('Error querying dictionaries from Turso:', err);
   }
 
   // Sort entries so English / Lane's appear first, then Arabic Classical

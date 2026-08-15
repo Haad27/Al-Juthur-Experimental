@@ -9,7 +9,7 @@ export async function GET(
     const { root } = await params;
     const decodedRoot = decodeURIComponent(root);
 
-    const result = getLexiconEntriesForRoot(decodedRoot);
+    const result = await getLexiconEntriesForRoot(decodedRoot);
     return NextResponse.json(result);
   } catch (error: any) {
     console.error('Error in GET /api/lexicon/root/[root]:', error);
