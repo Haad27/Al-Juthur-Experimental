@@ -27,8 +27,8 @@ async function migrate() {
     }
   }
 
-  // 2. Copy Data for each table
-  const tableNames = ['Language', 'Author', 'Surah', 'Ayah', 'TafsirEntry', 'LexiconWord', 'LexiconBook', 'LexiconEntry'];
+  // 2. Copy Data for all tables dynamically
+  const tableNames = tables.map(t => t.name).filter(name => name !== '_prisma_migrations' && name !== 'sqlite_sequence');
   
   for (const tableName of tableNames) {
     console.log(`\nChecking local data for table: ${tableName}...`);

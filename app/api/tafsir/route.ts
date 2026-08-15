@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import Database from 'better-sqlite3';
 import path from 'path';
+import { getTafsirDifficulty } from '@/lib/tafsirDifficulty';
 import { getTafsirDifficulty } from '@/lib/tafsirDifficulty';
 
 export async function GET(request: Request) {
@@ -15,41 +15,33 @@ export async function GET(request: Request) {
     // 1. Basic query to fetch all languages & authors with eras and tags if no params provided
     if (!language && !surahId && !ayahNum && !authorId) {
       try {
-        const dbPath = path.join(process.cwd(), 'prisma', 'dev.db');
-        const db = new Database(dbPath, { readonly: true });
+        const langs = await prisma.language.findMany({
+          orderBy: { name: 'asc' },
+        });
         
-        const langs = db.prepare(`SELECT * FROM Language ORDER BY name ASC`).all() as any[];
-        const authors = db.prepare(`SELECT id, name, authorName, languageId, era FROM Author`).all() as any[];
-        const authorTags = db.prepare(`
-          SELECT at.A as authorId, t.id, t.name, t.color
-          FROM _AuthorToTag at
-          JOIN Tag t ON at.B = t.id
-        `).all() as any[];
-        db.close();
+        const authors = await prisma.author.findMany({
+          include: { tags: true },
+        });
 
         // Virtual Authors (Translations serving as Tafsir)
         const virtualAuthors = [
-          { id: 100095, name: "Tafheem e Qur'an - Sayyid Maududi", authorName: "Sayyid Abul Ala Maududi", languageId: 2, era: "Modern & Contemporary (19th-21st CE)" }, // English
-          { id: 100158, name: "Bayan-ul-Quran", authorName: "Dr. Israr Ahmad", languageId: 10, era: "Modern & Contemporary (19th-21st CE)" }, // Urdu
-          { id: 100084, name: "Taqi Usmani", authorName: "Mufti Taqi Usmani", languageId: 2, era: "Modern & Contemporary (19th-21st CE)" }, // English
+          { id: 100095, name: "Tafheem e Qur'an - Sayyid Maududi", authorName: "Sayyid Abul Ala Maududi", languageId: 2, era: "Modern & Contemporary (19th-21st CE)", tags: [] }, // English
+          { id: 100158, name: "Bayan-ul-Quran", authorName: "Dr. Israr Ahmad", languageId: 10, era: "Modern & Contemporary (19th-21st CE)", tags: [] }, // Urdu
+          { id: 100084, name: "Taqi Usmani", authorName: "Mufti Taqi Usmani", languageId: 2, era: "Modern & Contemporary (19th-21st CE)", tags: [] }, // English
         ];
         
-        const tagsMap: Record<number, any[]> = {};
-        for (const at of authorTags) {
-          if (!tagsMap[at.authorId]) tagsMap[at.authorId] = [];
-          tagsMap[at.authorId].push({ id: at.id, name: at.name, color: at.color });
-        }
+        const virtualTag = { id: 999, name: "Translation with Explanation", color: "emerald" };
         
-        // Add virtual tags
         virtualAuthors.forEach(va => {
-          tagsMap[va.id] = [{ id: 999, name: "Translation with Explanation", color: "emerald" }];
+          va.tags = [virtualTag];
         });
         
-        // Also tag the existing DB authors that we will upgrade
-        [138, 139, 105, 158, 100158].forEach(id => {
-          if (!tagsMap[id]) tagsMap[id] = [];
-          if (!tagsMap[id].find(t => t.id === 999)) {
-            tagsMap[id].push({ id: 999, name: "Translation with Explanation", color: "emerald" });
+        // Add the virtual tag to specific DB authors that we upgraded
+        authors.forEach(a => {
+          if ([138, 139, 105, 158].includes(a.id)) {
+            if (!a.tags.find((t: any) => t.id === 999)) {
+              a.tags.push(virtualTag as any);
+            }
           }
         });
 
@@ -58,7 +50,6 @@ export async function GET(request: Request) {
           if (!authorsByLang[a.languageId]) authorsByLang[a.languageId] = [];
           authorsByLang[a.languageId].push({
             ...a,
-            tags: tagsMap[a.id] || [],
             difficulty: getTafsirDifficulty(a.name, a.authorName)
           });
         }
@@ -69,13 +60,9 @@ export async function GET(request: Request) {
         }));
 
         return NextResponse.json({ success: true, data });
-      } catch (sqliteErr) {
-        console.error("SQLite fetch error, falling back to prisma:", sqliteErr);
-        const languages = await prisma.language.findMany({
-          include: { authors: true },
-          orderBy: { name: 'asc' }
-        });
-        return NextResponse.json({ success: true, data: languages });
+      } catch (err) {
+        console.error("Prisma fetch error in library load:", err);
+        return NextResponse.json({ success: false, error: 'Failed to load library' }, { status: 500 });
       }
     }
 
