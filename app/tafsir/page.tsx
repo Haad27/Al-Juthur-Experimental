@@ -332,7 +332,6 @@ export default function TafsirPage() {
 
   // Scroll behavior: headroom hide-on-scroll top nav across modes
   useEffect(() => {
-    if (!activeAuthor) return;
     setTopNavVisible(true);
 
     const onScroll = () => {
@@ -845,8 +844,8 @@ export default function TafsirPage() {
     <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white pb-36 md:pb-24 ${inter.className}`}>
       
       {/* Top Navigation Bar (Library View) */}
-      <div className="sticky top-0 z-40 bg-zinc-950/50 backdrop-blur-3xl border-b border-zinc-800/80 px-4 md:px-8 py-3 shadow-sm">
-        <div className="max-w-[1700px] mx-auto relative flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className={`fixed top-0 inset-x-0 z-50 bg-zinc-950/80 backdrop-blur-3xl border-b border-zinc-800/80 px-4 md:px-8 py-3 shadow-sm transition-transform duration-300 ${topNavVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+        <div className="max-w-7xl mx-auto relative flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Logo and App Name */}
           <div className="flex items-center gap-4">
             <Link href="/home" className="flex items-center gap-2">
@@ -878,7 +877,7 @@ export default function TafsirPage() {
 
       {/* Hero Header */}
       {/* Hero Header (Non-sticky) */}
-      <div className="relative pt-4 md:pt-5 pb-3 px-4 md:px-8 max-w-[1700px] mx-auto">
+      <div className="relative pt-20 md:pt-24 pb-3 px-4 md:px-8 max-w-7xl mx-auto">
         <div className="absolute left-10 top-0 size-64 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
         <div className="space-y-1.5 relative z-10 max-w-3xl">
           <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
@@ -891,8 +890,8 @@ export default function TafsirPage() {
       </div>
 
       {/* Sticky Filters & Search (Action Bar) */}
-      <div className="sticky top-0 md:top-[53px] z-30 bg-zinc-950/90 backdrop-blur-xl border-y border-zinc-800/60 shadow-sm mb-6">
-        <div className="max-w-[1700px] mx-auto px-4 md:px-8 py-3">
+      <div className={`sticky z-30 bg-zinc-950/90 backdrop-blur-xl border-y border-zinc-800/60 shadow-sm mb-6 transition-all duration-300 ${topNavVisible ? 'top-[53px]' : 'top-0'}`}>
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-3">
           
           {/* Action Row: Search, Refine, Active Chips */}
           <div className="flex flex-col md:flex-row md:items-center gap-3 w-full">
@@ -901,7 +900,7 @@ export default function TafsirPage() {
             <div className="flex items-center gap-4 flex-1">
               <div className="flex items-center gap-2 shrink-0">
                 <Library className="size-5 text-emerald-400" />
-                <span className="font-bold text-white text-base md:text-lg hidden sm:block">Tafsir Library</span>
+                <span className="font-bold text-white text-base md:text-lg">Tafsir Library</span>
               </div>
               
               {/* Active Filter Feedback Chips */}
@@ -1077,7 +1076,7 @@ export default function TafsirPage() {
       </div>
 
       {/* Grid of Tafsir Containers (1 col -> 2 -> 3 -> 4 cols on laptop view) */}
-      <div className="max-w-[1700px] mx-auto px-4 md:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
         {filteredAuthors.length === 0 ? (
           <div className="text-center py-20 bg-zinc-900/30 border border-zinc-800/60 rounded-xl">
             <p className="text-zinc-400 text-sm">No Tafsir books found matching your filter selections.</p>

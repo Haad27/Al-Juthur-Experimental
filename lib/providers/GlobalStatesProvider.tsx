@@ -167,6 +167,11 @@ function parseMarkdownTable(text: string, originalFragments?: {text: string, del
         cleanSource === 'sourcefragments' ||
         cleanSource === 'sourcetext' ||
         cleanTrans === 'readytogenerate' ||
+        cleanTrans === 'ready' ||
+        cleanTrans.includes('thecombinedtranslation') ||
+        cleanTrans.includes('waittheprompt') ||
+        cleanTrans.includes('output:markdowntable') ||
+        cleanTrans.startsWith('row1:') ||
         transcreated.includes('---') ||
         sourceCol.includes('---')
       ) {

@@ -5,7 +5,7 @@ import fetch from 'node-fetch';
 require('dotenv').config({ path: '.env' });
 
 async function runTest() {
-  const root = 'سكن';
+  const root = 'ودد';
   const result = getLexiconEntriesForRoot(root);
   
   let classicalArabicText = "";
@@ -32,13 +32,12 @@ Synthesize these classical definitions into a concise "Root & Word Family" summa
 CRITICAL CONSTRAINTS:
 - Use EXACTLY two headings: "### Root Word Meaning" and "### Quranic Usage".
 - Under each heading, write EXACTLY 1 paragraph.
-- The total length should be concise but profoundly academic.
-- USE SIMPLE, ACCESSIBLE ENGLISH VOCABULARY. Do NOT use overly complex, dense, or archaic English words (e.g., instead of "cessation of motion", say "stopping of movement"). Make it easy for a high school student to read.
-- However, you MUST keep the Arabic transliterations and classical quotes (e.g., keep phrases like "sakana fulān makān kadhā"). Do not simplify the Arabic, only the English explanations.
+- BOTH paragraphs should be roughly EQUAL in length (very concise, about 3-5 sentences each).
+- Keep the Arabic transliterations and classical quotes. Do not simplify the Arabic terms.
 
-Structure:
-- ### Root Word Meaning (approx 70% of the content): A deep dive into the classical lexicon meaning. Explain the core physical picture, the foundational meaning of the root, and linguistic nuances. Cite Al-Raghib (Mufradat) or Lisan al-Arab prominently.
-- ### Quranic Usage (approx 30% of the content): How the Quran uses this root and how it branches into its word family. Give a few specific Quranic examples of these derived words (like sakanan, sakun, maskanah, etc.).
+Structure & Tone:
+- ### Root Word Meaning: Use SIMPLE, ACCESSIBLE ENGLISH VOCABULARY. Explain the core physical picture, the foundational meaning of the root, and linguistic nuances. Cite Al-Raghib (Mufradat) or Lisan al-Arab prominently. Make this easy for a high school student to read.
+- ### Quranic Usage: MUST BE VERY CONCISE (do not write a massive paragraph, keep it as short as the first paragraph). Use an ELEGANT, PROFOUND, and RICHLY ACADEMIC tone. Briefly explain how the root branches into its word family (e.g. mawaddah, wadd, etc.) and give 1 or 2 specific Quranic examples. Start with a sentence similar to "From this semantic core, the Quranic lexicon richly develops..."
 
 Classical Arabic Source Text:
 ${classicalArabicText.substring(0, 5000)}
