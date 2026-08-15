@@ -81,7 +81,7 @@ async function getStructuredLaneData(): Promise<StructuredLaneEntry[]> {
     try {
       const turso = getTursoClient();
       const res = await turso.execute('SELECT * FROM structured_lane');
-      const data: StructuredLaneEntry[] = res.rows.map(r => ({
+      const data: StructuredLaneEntry[] = res.rows.map((r: any) => ({
         id: 0,
         root: r.root as string,
         root_buckwalter: r.root_buckwalter as string,
