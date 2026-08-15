@@ -35,7 +35,7 @@ interface WheelColumnProps<T> {
   items: T[];
   selectedIndex: number;
   onSelect: (index: number) => void;
-  renderItem: (item: T, isSelected: boolean) => React.ReactNode;
+  renderItem: (item: T) => React.ReactNode;
   ariaLabel: string;
 }
 
@@ -47,25 +47,32 @@ function WheelColumn<T>({
   ariaLabel,
 }: WheelColumnProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const selectedIndexRef = useRef(selectedIndex);
-  const itemsLengthRef = useRef(items.length);
-  const onSelectRef = useRef(onSelect);
-  const lastWheelTimeRef = useRef(0);
-  const wheelAccumulator = useRef(0);
-  const isProgrammaticScrollRef = useRef(false);
+  const itemsRef = useRef<(HTMLDivElement | null)[]>([]);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isProgrammaticScrollRef = useRef(false);
+
+  const updateStyles = useCallback(() => {
+    if (!containerRef.current) return;
+    const currentScrollTop = containerRef.current.scrollTop;
+    
+    itemsRef.current.forEach((el, index) => {
+      if (!el) return;
+      const distance = Math.abs((index * ITEM_HEIGHT) - currentScrollTop) / ITEM_HEIGHT;
+      const isSelected = Math.round(currentScrollTop / ITEM_HEIGHT) === index;
+      
+      const scale = isSelected ? 1.04 : Math.max(0.8, 1 - distance * 0.1);
+      const opacity = isSelected ? 1 : Math.max(0.18, 1 - distance * 0.38);
+
+      el.style.transform = `scale(${scale})`;
+      el.style.opacity = `${opacity}`;
+      el.setAttribute('data-selected', isSelected ? 'true' : 'false');
+    });
+  }, []);
 
   useEffect(() => {
-    selectedIndexRef.current = selectedIndex;
-  }, [selectedIndex]);
-
-  useEffect(() => {
-    itemsLengthRef.current = items.length;
-  }, [items.length]);
-
-  useEffect(() => {
-    onSelectRef.current = onSelect;
-  }, [onSelect]);
+    // Initial style update
+    updateStyles();
+  }, [items.length, updateStyles]);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -85,62 +92,24 @@ function WheelColumn<T>({
     }
   }, [selectedIndex]);
 
-  // Intercept desktop mouse wheel events for exact 1-step scrolling & fast swipe momentum
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const handleNativeWheel = (e: WheelEvent) => {
-      e.preventDefault();
-
-      const now = Date.now();
-      const dt = now - lastWheelTimeRef.current;
-      lastWheelTimeRef.current = now;
-
-      if (dt > 100) {
-        wheelAccumulator.current = 0;
-      }
-
-      wheelAccumulator.current += e.deltaY;
-      const threshold = 40;
-
-      if (Math.abs(wheelAccumulator.current) >= threshold) {
-        let steps = Math.trunc(wheelAccumulator.current / threshold);
-        
-        if (dt > 30 && Math.abs(steps) > 1) {
-          steps = steps > 0 ? 1 : -1;
-          wheelAccumulator.current = 0;
-        } else {
-          wheelAccumulator.current -= steps * threshold;
-        }
-
-        const nextIndex = Math.max(
-          0,
-          Math.min(itemsLengthRef.current - 1, selectedIndexRef.current + steps)
-        );
-
-        if (nextIndex !== selectedIndexRef.current) {
-          onSelectRef.current(nextIndex);
-        }
-      }
-    };
-
-    container.addEventListener("wheel", handleNativeWheel, { passive: false });
-    return () => {
-      container.removeEventListener("wheel", handleNativeWheel);
-    };
-  }, []);
-
   const handleScroll = useCallback(() => {
+    updateStyles(); // Update DOM instantly for 60fps visuals
+    
     if (isProgrammaticScrollRef.current) return;
     if (!containerRef.current) return;
+    
     const currentScrollTop = containerRef.current.scrollTop;
     const index = Math.round(currentScrollTop / ITEM_HEIGHT);
     const clampedIndex = Math.max(0, Math.min(items.length - 1, index));
-    if (clampedIndex !== selectedIndex) {
-      onSelect(clampedIndex);
-    }
-  }, [items.length, selectedIndex, onSelect]);
+    
+    // Debounce the React state update to avoid rendering during active scroll
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    scrollTimeoutRef.current = setTimeout(() => {
+      if (clampedIndex !== selectedIndex) {
+        onSelect(clampedIndex);
+      }
+    }, 100);
+  }, [items.length, selectedIndex, onSelect, updateStyles]);
 
   const handleScrollEnd = () => {
     if (!containerRef.current) return;
@@ -170,24 +139,19 @@ function WheelColumn<T>({
         style={{ scrollSnapType: "y mandatory", touchAction: "pan-y", overscrollBehaviorX: "none" }}
       >
         {items.map((item, index) => {
-          const distance = Math.abs(index - selectedIndex);
-          const isSelected = index === selectedIndex;
-
-          const scale = isSelected ? 1.04 : Math.max(0.8, 1 - distance * 0.1);
-          const opacity = isSelected ? 1 : Math.max(0.18, 1 - distance * 0.38);
-
           return (
             <div
               key={index}
+              ref={(el) => {
+                itemsRef.current[index] = el;
+              }}
               onClick={() => onSelect(index)}
-              className="h-[36px] flex items-center justify-center snap-center cursor-pointer transition-all duration-150 overflow-hidden px-2 touch-pan-y select-none"
+              className="group h-[36px] flex items-center justify-center snap-center cursor-pointer transition-all duration-150 overflow-hidden px-2 touch-pan-y select-none"
               style={{
-                transform: `scale(${scale})`,
-                opacity: opacity,
                 touchAction: "pan-y",
               }}
             >
-              {renderItem(item, isSelected)}
+              {renderItem(item)}
             </div>
           );
         })}
@@ -333,14 +297,11 @@ export default function TafsirWheelPickerModal({
                 selectedIndex={selectedIdx}
                 onSelect={setSelectedIdx}
                 ariaLabel="Select Tafsir"
-                renderItem={(item, isSelected) => (
+                renderItem={(item) => (
                   <div
-                    className={cn(
-                      "flex flex-col justify-center px-3 py-0.5 rounded-lg w-full text-center transition-colors min-w-0 max-w-[320px] mx-auto",
-                      isSelected ? "text-white drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" : "text-zinc-400"
-                    )}
+                    className="flex flex-col justify-center px-3 py-0.5 rounded-lg w-full text-center transition-colors min-w-0 max-w-[320px] mx-auto group-data-[selected=true]:text-white group-data-[selected=true]:drop-shadow-[0_0_8px_rgba(52,211,153,0.5)] group-data-[selected=false]:text-zinc-400"
                   >
-                    <span className={cn("text-xs sm:text-sm truncate leading-tight", isSelected ? "font-bold" : "font-medium")}>
+                    <span className="text-xs sm:text-sm truncate leading-tight group-data-[selected=true]:font-bold group-data-[selected=false]:font-medium">
                       {item.author.name}
                     </span>
                     <span className="text-[8px] sm:text-[9px] text-zinc-500 font-mono font-semibold uppercase tracking-widest">

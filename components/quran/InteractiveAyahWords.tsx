@@ -3,10 +3,12 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Sparkles, ArrowRight, BookOpen, Loader2, Bot } from 'lucide-react';
 
 import { useGlobalState } from '@/lib/providers/GlobalStatesProvider';
@@ -35,6 +37,10 @@ interface WordMorphologyData {
   };
   rootSummary: string | null;
   rootQuery: string | null;
+  aiSummary?: {
+    root_meaning_html: string;
+    quranic_usage_html: string;
+  } | null;
 }
 
 export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.memo(({
@@ -207,8 +213,8 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
         }
 
         return (
-          <Popover key={idx} onOpenChange={(open) => { if (open) handleWordClick(wordIdx); }}>
-            <PopoverTrigger asChild>
+          <Dialog key={idx} onOpenChange={(open) => { if (open) handleWordClick(wordIdx); }}>
+            <DialogTrigger asChild>
               <span
                 className="group inline-flex flex-col items-center justify-end cursor-pointer px-1 py-0.5 rounded-lg hover:bg-emerald-500/30 transition-colors duration-150 select-none min-w-[2.5rem]"
                 onClick={(e) => {
@@ -235,12 +241,13 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
                   </span>
                 )}
               </span>
-            </PopoverTrigger>
-            <PopoverContent
-              className="w-80 bg-slate-900 border border-slate-800 text-slate-100 p-4 rounded-2xl shadow-2xl z-50"
-              side="top"
-              align="center"
+            </DialogTrigger>
+            <DialogContent
+              className="max-w-[95vw] sm:max-w-xl md:max-w-2xl lg:max-w-3xl w-full max-h-[90vh] overflow-y-auto overflow-x-hidden bg-slate-950 border border-slate-800 text-slate-100 p-5 rounded-2xl shadow-2xl flex flex-col custom-scrollbar z-[100]"
             >
+              <DialogHeader className="sr-only">
+                <DialogTitle>Root Word Analysis</DialogTitle>
+              </DialogHeader>
               {loadingIndex === wordIdx && !data ? (
                 <div className="flex items-center justify-center py-6 gap-2 text-slate-400">
                   <Loader2 className="w-5 h-5 animate-spin text-emerald-400" />
@@ -283,8 +290,23 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
                     </div>
                   )}
 
-                  {/* Lane's Summary preview */}
-                  {data.rootSummary && (
+                  {/* AI Summary preview */}
+                  {data.aiSummary ? (
+                    <div className="text-xs text-slate-300 bg-slate-800/40 p-2.5 rounded-xl border border-slate-800 leading-relaxed space-y-3">
+                      <div>
+                        <strong className="text-emerald-400 font-semibold block mb-1">
+                          Root Meaning:
+                        </strong>
+                        <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-p:my-1" dangerouslySetInnerHTML={{ __html: data.aiSummary.root_meaning_html }} />
+                      </div>
+                      <div className="border-t border-slate-700/50 pt-2">
+                        <strong className="text-amber-400 font-semibold block mb-1">
+                          Quranic Usage:
+                        </strong>
+                        <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-p:my-1" dangerouslySetInnerHTML={{ __html: data.aiSummary.quranic_usage_html }} />
+                      </div>
+                    </div>
+                  ) : data.rootSummary && (
                     <div className="text-xs text-slate-300 bg-slate-800/40 p-2.5 rounded-xl border border-slate-800 leading-relaxed">
                       <strong className="text-emerald-400 font-semibold block mb-1">
                         Lane&apos;s Lexicon Summary:
@@ -329,8 +351,8 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
                   Click to inspect word morphology
                 </div>
               )}
-            </PopoverContent>
-          </Popover>
+            </DialogContent>
+          </Dialog>
         );
       })}
     </span>

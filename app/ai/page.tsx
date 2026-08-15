@@ -259,10 +259,10 @@ export default function AiTranslatorPage() {
                 </p>
                 <div className="bg-emerald-950/60 border border-emerald-500/30 rounded-2xl px-5 py-3 text-xs text-zinc-300 space-y-1.5 backdrop-blur-md shadow-inner">
                   <p className="font-medium text-emerald-200 flex items-center justify-center gap-1.5">
-                    <span>⏳</span> It may take a few minutes to translate accurately.
+                    <span>⏳</span> The AI is reviewing the text thoroughly. This may take 30+ seconds.
                   </p>
                   <p className="text-zinc-400">
-                    You may explore the app while it translates — we will remind you when it&apos;s done!
+                    You may explore the app while it translates — we will notify you when it's done!
                   </p>
                 </div>
               </div>

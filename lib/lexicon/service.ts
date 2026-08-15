@@ -54,6 +54,7 @@ export interface RootLexiconResult {
   normalizedRoot: string;
   structuredLane: StructuredLaneEntry | null;
   entries: LexiconEntry[];
+  ai_summary: { root_meaning_html: string; quranic_usage_html: string } | null;
 }
 
 // Singleton database connections for Next.js HMR
@@ -62,6 +63,7 @@ const globalForDb = globalThis as unknown as {
   wordRootDb: Database.Database | undefined;
   structuredLaneCache: StructuredLaneEntry[] | undefined;
   surahWordsCache: Record<number, any> | undefined;
+  aiSummariesCache: Record<string, { root_meaning_html: string; quranic_usage_html: string }> | undefined;
 };
 
 function getLexiconsDb(): Database.Database {
@@ -104,6 +106,30 @@ function getStructuredLaneData(): StructuredLaneEntry[] {
     }
   }
   return globalForDb.structuredLaneCache || [];
+}
+
+function getAiSummaries(): Record<string, { root_meaning_html: string; quranic_usage_html: string }> {
+  if (!globalForDb.aiSummariesCache) {
+    try {
+      const jsonPath = path.join(
+        process.cwd(),
+        'database',
+        'lexicon',
+        'data',
+        'comprehensive_root_summaries.json'
+      );
+      if (fs.existsSync(jsonPath)) {
+        const raw = fs.readFileSync(jsonPath, 'utf-8');
+        globalForDb.aiSummariesCache = JSON.parse(raw);
+      } else {
+        globalForDb.aiSummariesCache = {};
+      }
+    } catch (e) {
+      console.error('Error loading AI summaries JSON:', e);
+      globalForDb.aiSummariesCache = {};
+    }
+  }
+  return globalForDb.aiSummariesCache || {};
 }
 
 /**
@@ -466,10 +492,14 @@ export function getLexiconEntriesForRoot(rootQuery: string): RootLexiconResult {
     return a.dictId - b.dictId;
   });
 
+  const aiSummaries = getAiSummaries();
+  const ai_summary = aiSummaries[variants.compact] || aiSummaries[rootQuery] || null;
+
   return {
     root: rootQuery,
     normalizedRoot: variants.compact,
     structuredLane,
     entries,
+    ai_summary,
   };
 }

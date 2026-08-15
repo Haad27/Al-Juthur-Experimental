@@ -76,7 +76,20 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedModeId, setSelectedModeId] = useState(initialModeId || "default");
+  const [isContentReady, setIsContentReady] = useState(false);
   useVisualViewportOffset();
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isOpen) {
+      timer = setTimeout(() => {
+        setIsContentReady(true);
+      }, 150);
+    } else {
+      setIsContentReady(false);
+    }
+    return () => clearTimeout(timer);
+  }, [isOpen]);
   
   const [remainingTokens, setRemainingTokens] = useState<number | null>(null);
   const [tokenLimit, setTokenLimit] = useState<number>(250000);
@@ -388,11 +401,13 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
               </div>
             )}
 
-            {/* Chat Area */}
-            <div 
-              ref={scrollContainerRef}
-              className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y w-full p-3 sm:p-4 space-y-4 sm:space-y-6 custom-scrollbar"
-            >
+            {isContentReady ? (
+              <>
+                {/* Chat Area */}
+                <div 
+                  ref={scrollContainerRef}
+                  className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y w-full p-3 sm:p-4 space-y-4 sm:space-y-6 custom-scrollbar"
+                >
               {messages.map((msg, idx) => (
                 <div 
                   key={idx} 
@@ -577,6 +592,13 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                 </button>
               </div>
             </div>
+              </>
+            ) : (
+              <div className="flex-1 w-full flex flex-col items-center justify-center min-h-[300px] gap-3">
+                <Loader2 className="size-8 animate-spin text-emerald-500/50" />
+                <span className="text-xs text-zinc-500 font-medium">Loading Scholar AI...</span>
+              </div>
+            )}
           </motion.div>
         </>
       )}

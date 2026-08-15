@@ -139,7 +139,7 @@ const SurahsList = () => {
 
       <div className="space-y-16 w-full flex-col flex-1 text-white xl:px-20 lg:px-8 px-4 pb-36 md:pb-16">
         <div className="w-full flex flex-col space-y-16 relative">
-          <div className="grid md:grid-cols-2 grid-cols-1 items-center gap-8 pt-2 pb-8 md:py-16 relative">
+          <div className="grid md:grid-cols-2 grid-cols-1 items-center gap-8 pt-2 pb-8 md:pt-0 md:pb-16 relative">
             {/* 🌟 Left: Text content */}
             <Sparkle
               className="fill-emerald-500 text-emerald-500 absolute left-62 top-32 animate-pulse rotate-34 z-10"

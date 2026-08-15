@@ -473,11 +473,11 @@ export default function TafsirPage() {
                     <h1 className="text-sm md:text-base font-bold text-zinc-100 leading-tight truncate">
                       {activeAuthor.name.replace(/\s*\([^)]*\)\s*$/, '').trim()}
                     </h1>
-                    <span className="inline-flex text-[9px] px-1.5 py-0.5 rounded-sm bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-semibold uppercase tracking-wider shrink-0 mt-0.5">
+                    <span className="hidden md:inline-flex text-[9px] px-1.5 py-0.5 rounded-sm bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-semibold uppercase tracking-wider shrink-0 mt-0.5">
                       {activeLangName}
                     </span>
                     {activeAuthor.difficulty && (
-                      <span className={`inline-flex text-[9px] px-1.5 py-0.5 rounded-sm border font-semibold uppercase tracking-wider shrink-0 mt-0.5 ${
+                      <span className={`hidden md:inline-flex text-[9px] px-1.5 py-0.5 rounded-sm border font-semibold uppercase tracking-wider shrink-0 mt-0.5 ${
                         activeAuthor.difficulty === 'Beginner' ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400' :
                         activeAuthor.difficulty === 'Advanced' ? 'bg-amber-500/15 border-amber-500/30 text-amber-400' :
                         'bg-blue-500/15 border-blue-500/30 text-blue-400'

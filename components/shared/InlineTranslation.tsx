@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Languages, Loader2, Sparkles, X, ExternalLink } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Languages, Loader2, Sparkles, X, ExternalLink, Copy } from "lucide-react";
+import { cn, copyToClipboard } from "@/lib/utils";
 import Link from "next/link";
 
 interface InlineTranslationProps {
@@ -73,8 +73,7 @@ export default function InlineTranslation({ textToTranslate, onClose }: InlineTr
           }
         }
       }
-      // If we finished and still have no parsed text, fallback to raw fullText just in case it wasn't a table
-      setTranslationText((prev) => prev.trim() ? prev : fullText);
+      // Removed the raw text fallback to completely shield the UI from AI reasoning leaks
     } catch (err: any) {
       setError(err.message || "An error occurred during translation.");
     } finally {
@@ -97,8 +96,15 @@ export default function InlineTranslation({ textToTranslate, onClose }: InlineTr
       if (trimmed.endsWith("|")) trimmed = trimmed.substring(0, trimmed.length - 1);
       
       const columns = trimmed.split("|").map((p) => p.trim());
-      if (columns.length >= 1) {
+      if (columns.length >= 2) {
         let transcreated = columns[0] || "";
+        let sourceFragments = columns[1] || "";
+        
+        // Strictly require the second column to contain a fragment number
+        if (!/\d/.test(sourceFragments)) {
+          continue;
+        }
+
         const cleanTrans = transcreated.toLowerCase().replace(/[\*\s\.\?]/g, "");
         
         if (
@@ -152,12 +158,21 @@ export default function InlineTranslation({ textToTranslate, onClose }: InlineTr
                 </span>
               )}
               {isDone && !error && (
-                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-400 font-medium">
-                  Completed
+                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] text-emerald-400 font-medium">
+                  Translation Complete
                 </span>
               )}
             </h4>
             <div className="flex items-center gap-3">
+              {isDone && !error && translationText && (
+                <button
+                  onClick={() => copyToClipboard(translationText, "English translation copied!")}
+                  className="text-xs text-emerald-400 hover:text-emerald-300 flex items-center gap-1 transition"
+                  title="Copy English Translation"
+                >
+                  <Copy className="size-3" /> Copy
+                </button>
+              )}
               <Link
                 href="/ai"
                 onClick={() => {
@@ -177,9 +192,12 @@ export default function InlineTranslation({ textToTranslate, onClose }: InlineTr
 
           <div className="min-h-[60px] text-zinc-200 text-sm sm:text-base leading-relaxed font-inter whitespace-pre-wrap text-left">
             {isLoading && !translationText ? (
-              <div className="flex items-center justify-center h-full gap-2 text-zinc-400 py-4">
-                <Loader2 className="size-4 animate-spin" />
-                <span>Translating...</span>
+              <div className="flex flex-col items-center justify-center h-full gap-3 text-zinc-400 py-6 text-center">
+                <Loader2 className="size-5 animate-spin text-emerald-500" />
+                <div className="space-y-1">
+                  <p className="text-zinc-300 font-medium text-sm">Translating accurately...</p>
+                  <p className="text-xs text-zinc-500 max-w-xs mx-auto">The AI is reviewing the text thoroughly to ensure academic fidelity. This may take 30+ seconds. We will notify you when done.</p>
+                </div>
               </div>
             ) : error ? (
               <div className="text-red-400 py-2">{error}</div>
