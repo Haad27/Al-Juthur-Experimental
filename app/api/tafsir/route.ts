@@ -23,7 +23,7 @@ export async function GET(request: Request) {
         });
 
         // Virtual Authors (Translations serving as Tafsir)
-        const virtualAuthors = [
+        const virtualAuthors: any[] = [
           { id: 100095, name: "Tafheem e Qur'an - Sayyid Maududi", authorName: "Sayyid Abul Ala Maududi", languageId: 2, era: "Modern & Contemporary (19th-21st CE)", tags: [] }, // English
           { id: 100158, name: "Bayan-ul-Quran", authorName: "Dr. Israr Ahmad", languageId: 10, era: "Modern & Contemporary (19th-21st CE)", tags: [] }, // Urdu
           { id: 100084, name: "Taqi Usmani", authorName: "Mufti Taqi Usmani", languageId: 2, era: "Modern & Contemporary (19th-21st CE)", tags: [] }, // English

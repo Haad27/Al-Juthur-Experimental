@@ -190,7 +190,7 @@ export async function seedAllModesRagIndex(options?: {
   console.log(`\nIndexing Lexicon roots across ${ALL_LEXICON_DICT_IDS.length} primary dictionaries...`);
   let lexiconProcessed = 0;
   for (const root of rootsToSeed) {
-    const lexResult = getLexiconEntriesForRoot(root);
+    const lexResult = await getLexiconEntriesForRoot(root);
 
     for (const entry of lexResult.entries) {
       if (!ALL_LEXICON_DICT_IDS.includes(entry.dictId)) continue;
@@ -204,7 +204,7 @@ export async function seedAllModesRagIndex(options?: {
       }
 
       const fullContent = entry.definitions
-        .map((d) => d.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim())
+        .map((d: string) => d.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim())
         .join('\n\n');
 
       if (!fullContent || fullContent.trim().length === 0) continue;

@@ -21,6 +21,7 @@ export interface WordMorphology {
   root: string | null;
   lemma: string | null;
   stem: string | null;
+  irab?: string | null;
 }
 
 export interface StructuredLaneEntry {
@@ -337,7 +338,7 @@ export async function getAyahWords(surah: number, ayah: number) {
       }
     } catch (e) { }
 
-    return rows.map((r) => {
+    return rows.map((r: any) => {
       const wordNo = r.wordNo as number;
       const normalizedWordIdx = (surah === 2 && ayah === 1 && wordNo === 5) ? 1 : wordNo;
       const engMorph = engMorphMap[normalizedWordIdx] || engMorphMap[wordNo];
@@ -464,7 +465,7 @@ export async function getLexiconEntriesForRoot(rootQuery: string): Promise<RootL
               args: [rootId]
             });
             if (childrenRes.rows.length > 0) {
-              const definitions = childrenRes.rows.map(c => `<div class="mb-2"><b class="text-amber-500 font-bold">${c.word}</b>: <span class="leading-relaxed">${c.meanings}</span></div>`);
+              const definitions = childrenRes.rows.map((c: any) => `<div class="mb-2"><b class="text-amber-500 font-bold">${c.word}</b>: <span class="leading-relaxed">${c.meanings}</span></div>`);
               entries.push({ dictId: dict.id, dictName: dict.name, dictIdent: dict.ident, isEnglish: dict.ar_en, definitions });
             }
           }

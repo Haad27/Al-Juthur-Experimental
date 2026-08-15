@@ -77,13 +77,13 @@ export async function seedSampleRagIndex(options?: {
   // 2. Index Lexicon entries for sample roots (Lane's Lexicon + Lisan al-Arab)
   console.log(`Indexing Lexicon roots: ${sampleRoots.join(', ')}...`);
   for (const root of sampleRoots) {
-    const lexResult = getLexiconEntriesForRoot(root);
+    const lexResult = await getLexiconEntriesForRoot(root);
 
     // Index Lane's Lexicon & Lisan al-Arab entries
     for (const entry of lexResult.entries) {
       if (![1, 2].includes(entry.dictId)) continue; // 1 = Lane, 2 = Lisan al-Arab
       const fullContent = entry.definitions
-        .map((d) => d.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim())
+        .map((d: string) => d.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim())
         .join('\n\n');
 
       if (!fullContent || fullContent.length === 0) continue;
