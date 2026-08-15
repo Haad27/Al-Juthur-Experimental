@@ -76,50 +76,45 @@ function getTursoClient() {
   return globalForDb.tursoClient;
 }
 
-function getStructuredLaneData(): StructuredLaneEntry[] {
+async function getStructuredLaneData(): Promise<StructuredLaneEntry[]> {
   if (!globalForDb.structuredLaneCache) {
     try {
-      const jsonPath = path.join(
-        process.cwd(),
-        'database',
-        'lexicon',
-        'data',
-        'quran-arabic-roots-lane-lexicon-main',
-        'quran_arabic_roots_lane_lexicon_2026-02-12.json'
-      );
-      if (fs.existsSync(jsonPath)) {
-        const raw = fs.readFileSync(jsonPath, 'utf-8');
-        const parsed = JSON.parse(raw);
-        globalForDb.structuredLaneCache = parsed.roots || [];
-      } else {
-        globalForDb.structuredLaneCache = [];
-      }
+      const turso = getTursoClient();
+      const res = await turso.execute('SELECT * FROM structured_lane');
+      const data: StructuredLaneEntry[] = res.rows.map(r => ({
+        id: 0,
+        root: r.root as string,
+        root_buckwalter: r.root_buckwalter as string,
+        definition_en: r.definition_en as string,
+        summary_en: r.summary_en as string,
+        summary_tr: r.summary_tr as string,
+        quran_frequency: r.quran_frequency as number,
+        morphological_forms: JSON.parse((r.morphological_forms as string) || '[]')
+      }));
+      globalForDb.structuredLaneCache = data;
     } catch (e) {
-      console.error('Error loading structured Lane JSON:', e);
+      console.error('Error loading structured Lane from Turso:', e);
       globalForDb.structuredLaneCache = [];
     }
   }
   return globalForDb.structuredLaneCache || [];
 }
 
-function getAiSummaries(): Record<string, { root_meaning_html: string; quranic_usage_html: string }> {
+async function getAiSummaries(): Promise<Record<string, { root_meaning_html: string; quranic_usage_html: string }>> {
   if (!globalForDb.aiSummariesCache) {
     try {
-      const jsonPath = path.join(
-        process.cwd(),
-        'database',
-        'lexicon',
-        'data',
-        'comprehensive_root_summaries.json'
-      );
-      if (fs.existsSync(jsonPath)) {
-        const raw = fs.readFileSync(jsonPath, 'utf-8');
-        globalForDb.aiSummariesCache = JSON.parse(raw);
-      } else {
-        globalForDb.aiSummariesCache = {};
+      const turso = getTursoClient();
+      const res = await turso.execute('SELECT * FROM ai_root_summary');
+      const cache: Record<string, { root_meaning_html: string; quranic_usage_html: string }> = {};
+      for (const r of res.rows) {
+        cache[r.root as string] = {
+          root_meaning_html: r.root_meaning_html as string,
+          quranic_usage_html: r.quranic_usage_html as string,
+        };
       }
+      globalForDb.aiSummariesCache = cache;
     } catch (e) {
-      console.error('Error loading AI summaries JSON:', e);
+      console.error('Error loading AI summaries from Turso:', e);
       globalForDb.aiSummariesCache = {};
     }
   }
@@ -387,7 +382,7 @@ export async function searchRoots(query: string, limit = 50): Promise<string[]> 
   const qClean = query.trim();
   const compact = qClean.replace(/\s+/g, '');
   
-  const laneData = getStructuredLaneData();
+  const laneData = await getStructuredLaneData();
   const matchedSet = new Set<string>();
 
   // Check structured lane data
@@ -430,7 +425,7 @@ export async function getLexiconEntriesForRoot(rootQuery: string): Promise<RootL
   const dicts = getDictionaries();
   
   // 1. Structured Lane's Lexicon
-  const laneList = getStructuredLaneData();
+  const laneList = await getStructuredLaneData();
   const structuredLane =
     laneList.find(
       (r) =>
@@ -500,7 +495,7 @@ export async function getLexiconEntriesForRoot(rootQuery: string): Promise<RootL
     return a.dictId - b.dictId;
   });
 
-  const aiSummaries = getAiSummaries();
+  const aiSummaries = await getAiSummaries();
   const ai_summary = aiSummaries[variants.compact] || aiSummaries[rootQuery] || null;
 
   return {

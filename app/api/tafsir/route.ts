@@ -165,16 +165,28 @@ export async function GET(request: Request) {
         return NextResponse.json({ success: true, data: tafsirs });
       }
 
-      const tafsirs = await prisma.tafsirEntry.findMany({
+      const ayahs = await prisma.ayah.findMany({
+        where: { surahId: parseInt(surahId) },
+        orderBy: { numberInSurah: 'asc' }
+      });
+      const ayahMap = new Map(ayahs.map(a => [a.id, a]));
+      
+      const author = await prisma.author.findUnique({
+        where: { id: parseInt(authorId) }
+      });
+
+      const rawTafsirs = await prisma.tafsirEntry.findMany({
         where: {
           authorId: parseInt(authorId),
           surahId: parseInt(surahId),
-        },
-        include: {
-          ayah: true,
-          author: true,
-        },
+        }
       });
+
+      const tafsirs = rawTafsirs.map(t => ({
+        ...t,
+        ayah: ayahMap.get(t.ayahId),
+        author: author
+      }));
 
       // Sort properly by ayah.numberInSurah
       tafsirs.sort((a, b) => (a.ayah?.numberInSurah || 0) - (b.ayah?.numberInSurah || 0));
@@ -225,19 +237,28 @@ export async function GET(request: Request) {
         }
       }
 
-      const tafsirs = await prisma.tafsirEntry.findMany({
+      const rawTafsirs = await prisma.tafsirEntry.findMany({
         where: {
           authorId: parsedAuthorId,
           surahId: parsedSurahId,
           ayah: {
             numberInSurah: parsedAyahNum
           }
-        },
-        include: {
-          ayah: true,
-          author: true
         }
       });
+      
+      const author = await prisma.author.findUnique({
+        where: { id: parsedAuthorId }
+      });
+      const ayah = await prisma.ayah.findFirst({
+        where: { surahId: parsedSurahId, numberInSurah: parsedAyahNum }
+      });
+
+      const tafsirs = rawTafsirs.map(t => ({
+        ...t,
+        ayah: ayah,
+        author: author
+      }));
       return NextResponse.json({ success: true, data: tafsirs });
     }
 
