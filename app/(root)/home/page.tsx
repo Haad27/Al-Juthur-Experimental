@@ -176,8 +176,8 @@ const SurahsList = () => {
                 <span className="text-sm text-zinc-400 block mt-2"> - [38:29]</span>
               </h1>
 
-              <p className="max-w-md md:text-lg text-base font-medium text-zinc-400">
-                Explore authentic Tafsir and Lexicons. Understand the Quran deeply with our comprehensive tools, including AI translation and RAG.
+              <p className="max-w-md md:text-lg text-base font-medium text-zinc-400 italic">
+                "This is a blessed Book which We have revealed to you, [O Prophet], that they might reflect upon its verses and that those of understanding would be reminded."
               </p>
 
               <div className="flex gap-4">
