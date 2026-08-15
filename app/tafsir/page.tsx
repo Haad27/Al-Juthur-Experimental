@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 import { copyToClipboard, cn } from "@/lib/utils";
 import { getTafsirFameRank, getLanguagePriority, getTafsirDifficulty } from "@/lib/tafsirRanking";
+import InlineTranslation from "@/components/shared/InlineTranslation";
 
 interface Author {
   id: number;
@@ -686,89 +687,16 @@ export default function TafsirPage() {
                   totalCount={tafsirEntries.length}
                   itemContent={(idx) => {
                     const entry = tafsirEntries[idx];
-                    const ayahNumber = entry.ayah?.numberInSurah || idx + 1;
-                    const arabicText = entry.ayah?.text && entry.ayah.text !== "Arabic Text" ? entry.ayah.text : null;
                     return (
-                      <div className="pb-6">
-                        <div
-                          key={entry.id || idx}
-                          id={`ayah-${ayahNumber}`}
-                          data-ayah-idx={idx}
-                          className="border border-emerald-500/20 bg-zinc-900/40 rounded-xl p-5 md:p-7 transition-all hover:border-emerald-500/50 space-y-6 scroll-mt-24"
-                        >
-                          {/* Top Ayah Header */}
-                          <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3 gap-2 min-w-0">
-                            <div className="flex items-center gap-1.5 min-w-0 shrink-0">
-                              <span className="shrink-0 h-7 px-1.5 min-w-[1.75rem] rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-xs font-bold text-emerald-400 whitespace-nowrap">
-                                {activeSurah}:{ayahNumber}
-                              </span>
-                              <span className="text-xs sm:text-sm font-semibold text-zinc-300 whitespace-nowrap">Ayah {ayahNumber}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 shrink-0">
-                              <button
-                                onClick={() => {
-                                  const cleanText = entry.text.replace(/<[^>]*>?/gm, '');
-                                  copyToClipboard(cleanText, "Tafsir explanation copied to clipboard!");
-                                }}
-                                className={cn(
-                                  "flex items-center rounded-lg bg-zinc-800/80 hover:bg-zinc-700 transition font-medium text-zinc-300 whitespace-nowrap gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs",
-                                  aiChatContext && "lg:gap-1 lg:px-2 lg:text-[10px]"
-                                )}
-                                title="Copy Tafsir"
-                              >
-                                <Copy className={cn("shrink-0 size-3.5", aiChatContext && "lg:size-3")} />
-                                <span className={cn("hidden sm:inline", aiChatContext && "lg:hidden")}>Copy</span>
-                              </button>
-                              {activeLangName !== 'English' && (
-                                <button
-                                  onClick={() => {
-                                    const cleanText = entry.text.replace(/<[^>]*>?/gm, '');
-                                    sessionStorage.setItem("ai_translator_input", cleanText);
-                                    router.push("/ai");
-                                  }}
-                                  className={cn(
-                                    "flex items-center rounded-lg bg-emerald-500/20 border border-emerald-400/50 hover:bg-emerald-500/30 transition-all duration-300 font-medium text-emerald-300 whitespace-nowrap gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)]",
-                                    aiChatContext && "lg:gap-1 lg:px-2 lg:text-[10px]"
-                                  )}
-                                  title="Translate"
-                                >
-                                  <Languages className={cn("text-emerald-300 shrink-0 size-3.5", aiChatContext && "lg:size-3")} />
-                                  <span className={cn(aiChatContext && "lg:hidden")}>Translate</span>
-                                </button>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Arabic Verse */}
-                          {arabicText && (
-                            <div className="py-2">
-                              <p className={`font-mushaf-indopak-16 text-[1.65rem] md:text-4xl text-right leading-loose text-amber-100 font-normal`} dir="rtl" style={{ lineHeight: '2.4' }}>
-                                {arabicText}
-                              </p>
-                            </div>
-                          )}
-
-                          {/* Tafsir Text */}
-                          <div className="pt-2 border-t border-zinc-800/40">
-                            <TafsirTextRenderer
-                              text={entry.text}
-                              isArabic={isArabicOrUrdu}
-                              isUrdu={isUrduText}
-                              onNavigateToAyah={(num) => scrollToAyah(num)}
-                            />
-                          </div>
-
-                          {/* Explanation (Footnotes) */}
-                          {entry.footnoteIds && entry.footnoteIds.length > 0 && (
-                            <div className="mt-6 pt-4 border-t border-emerald-900/30">
-                              <div className="font-semibold text-emerald-500 uppercase tracking-wider text-[11px] mb-3 font-mono">
-                                Explanation
-                              </div>
-                              <TafsirFootnotesLoader footnoteIds={entry.footnoteIds} isUrdu={isUrduText} />
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                      <TafsirCard 
+                        key={entry.id || idx}
+                        entry={entry}
+                        idx={idx}
+                        activeSurah={activeSurah}
+                        activeLangName={activeLangName}
+                        aiChatContext={aiChatContext}
+                        scrollToAyah={scrollToAyah}
+                      />
                     );
                   }}
                 />
@@ -844,7 +772,7 @@ export default function TafsirPage() {
     <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white pb-36 md:pb-24 ${inter.className}`}>
       
       {/* Top Navigation Bar (Library View) */}
-      <div className={`fixed top-0 inset-x-0 z-50 bg-zinc-950/80 backdrop-blur-3xl border-b border-zinc-800/80 px-4 md:px-8 py-3 shadow-sm transition-transform duration-300 ${topNavVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+      <div className={`hidden md:block fixed top-0 inset-x-0 z-50 bg-zinc-950/80 backdrop-blur-3xl border-b border-zinc-800/80 px-4 md:px-8 py-3 shadow-sm transition-transform duration-300 ${topNavVisible ? 'translate-y-0' : '-translate-y-full'}`}>
         <div className="max-w-7xl mx-auto relative flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Logo and App Name */}
           <div className="flex items-center gap-4">
@@ -877,7 +805,7 @@ export default function TafsirPage() {
 
       {/* Hero Header */}
       {/* Hero Header (Non-sticky) */}
-      <div className="relative pt-20 md:pt-24 pb-3 px-4 md:px-8 max-w-7xl mx-auto">
+      <div className="hidden md:block relative pt-20 md:pt-24 pb-3 px-4 md:px-8 max-w-7xl mx-auto">
         <div className="absolute left-10 top-0 size-64 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
         <div className="space-y-1.5 relative z-10 max-w-3xl">
           <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
@@ -890,7 +818,7 @@ export default function TafsirPage() {
       </div>
 
       {/* Sticky Filters & Search (Action Bar) */}
-      <div className={`sticky z-30 bg-zinc-950/90 backdrop-blur-xl border-y border-zinc-800/60 shadow-sm mb-6 transition-all duration-300 ${topNavVisible ? 'top-[53px]' : 'top-0'}`}>
+      <div className={`sticky z-30 bg-zinc-950/90 backdrop-blur-xl border-y border-zinc-800/60 shadow-sm mb-6 transition-all duration-300 top-0 ${topNavVisible ? 'md:top-[53px]' : ''}`}>
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-3">
           
           {/* Action Row: Search, Refine, Active Chips */}
@@ -1182,6 +1110,99 @@ export default function TafsirPage() {
           setTargetAyahToScroll({ surah: surahNum, ayah: ayahNum });
         }}
       />
+    </div>
+  );
+}
+
+function TafsirCard({ 
+  entry, 
+  idx, 
+  activeSurah, 
+  activeLangName, 
+  aiChatContext, 
+  scrollToAyah 
+}: {
+  entry: any;
+  idx: number;
+  activeSurah: number;
+  activeLangName: string;
+  aiChatContext: any;
+  scrollToAyah: (num: number) => void;
+}) {
+  const ayahNumber = entry.ayah?.numberInSurah || idx + 1;
+  const arabicText = entry.ayah?.text && entry.ayah.text !== "Arabic Text" ? entry.ayah.text : null;
+  const isArabicOrUrdu = activeLangName === 'Arabic' || activeLangName === 'Urdu';
+  const isUrduText = activeLangName === 'Urdu';
+  const cleanText = entry.text.replace(/<[^>]*>?/gm, '');
+
+  return (
+    <div className="pb-6">
+      <div
+        id={`ayah-${ayahNumber}`}
+        data-ayah-idx={idx}
+        className="border border-emerald-500/20 bg-zinc-900/40 rounded-xl p-5 md:p-7 transition-all hover:border-emerald-500/50 space-y-6 scroll-mt-24"
+      >
+        {/* Top Ayah Header */}
+        <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3 gap-2 min-w-0">
+          <div className="flex items-center gap-1.5 min-w-0 shrink-0">
+            <span className="shrink-0 h-7 px-1.5 min-w-[1.75rem] rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-xs font-bold text-emerald-400 whitespace-nowrap">
+              {activeSurah}:{ayahNumber}
+            </span>
+            <span className="text-xs sm:text-sm font-semibold text-zinc-300 whitespace-nowrap">Ayah {ayahNumber}</span>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={() => {
+                copyToClipboard(cleanText, "Tafsir explanation copied to clipboard!");
+              }}
+              className={cn(
+                "flex items-center rounded-lg bg-zinc-800/80 hover:bg-zinc-700 transition font-medium text-zinc-300 whitespace-nowrap gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs",
+                aiChatContext && "lg:gap-1 lg:px-2 lg:text-[10px]"
+              )}
+              title="Copy Tafsir"
+            >
+              <Copy className={cn("shrink-0 size-3.5", aiChatContext && "lg:size-3")} />
+              <span className={cn("hidden sm:inline", aiChatContext && "lg:hidden")}>Copy</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Arabic Verse */}
+        {arabicText && (
+          <div className="py-2">
+            <p className={`font-mushaf-indopak-16 text-[1.65rem] md:text-4xl text-right leading-loose text-amber-100 font-normal`} dir="rtl" style={{ lineHeight: '2.4' }}>
+              {arabicText}
+            </p>
+          </div>
+        )}
+
+        {/* Tafsir Text */}
+        <div className="pt-2 border-t border-zinc-800/40">
+          <TafsirTextRenderer
+            text={entry.text}
+            isArabic={isArabicOrUrdu}
+            isUrdu={isUrduText}
+            onNavigateToAyah={(num) => scrollToAyah(num)}
+          />
+        </div>
+
+        {/* Inline Translation */}
+        {activeLangName !== 'English' && (
+          <div className="mt-4 pt-4 border-t border-zinc-800/40 w-full">
+            <InlineTranslation textToTranslate={cleanText} />
+          </div>
+        )}
+
+        {/* Explanation (Footnotes) */}
+        {entry.footnoteIds && entry.footnoteIds.length > 0 && (
+          <div className="mt-6 pt-4 border-t border-emerald-900/30">
+            <div className="font-semibold text-emerald-500 uppercase tracking-wider text-[11px] mb-3 font-mono">
+              Explanation
+            </div>
+            <TafsirFootnotesLoader footnoteIds={entry.footnoteIds} isUrdu={isUrduText} />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -20,6 +20,7 @@ import {
   Languages,
   Bot,
 } from 'lucide-react';
+import InlineTranslation from '@/components/shared/InlineTranslation';
 import { toast } from 'sonner';
 import { useGlobalState } from '@/lib/providers/GlobalStatesProvider';
 import { copyToClipboard } from '@/lib/utils';
@@ -529,20 +530,6 @@ function LexiconPageContent() {
                           <Copy className="size-3.5 shrink-0" />
                           <span className="hidden sm:inline">Copy</span>
                         </button>
-                        {!entry.isEnglish && (
-                          <button
-                            onClick={() => {
-                              const cleanText = entry.definitions.join('\n').replace(/<[^>]*>?/gm, '');
-                              sessionStorage.setItem("ai_translator_input", cleanText);
-                              router.push("/ai");
-                            }}
-                            className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition text-xs font-medium text-emerald-400"
-                            title="Translate"
-                          >
-                            <Languages className="size-3.5 text-emerald-400 shrink-0" />
-                            <span>Translate</span>
-                          </button>
-                        )}
                       </div>
                     </div>
 
@@ -553,6 +540,11 @@ function LexiconPageContent() {
                         </div>
                       ))}
                     </div>
+                    {!entry.isEnglish && (
+                      <div className="mt-4 pt-4 border-t border-zinc-800/40 w-full">
+                        <InlineTranslation textToTranslate={entry.definitions.join('\n').replace(/<[^>]*>?/gm, '')} />
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
