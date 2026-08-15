@@ -4,9 +4,10 @@ import React from "react";
 
 interface LexiconTextRendererProps {
   text: string;
+  compact?: boolean;
 }
 
-export default function LexiconTextRenderer({ text }: LexiconTextRendererProps) {
+export default function LexiconTextRenderer({ text, compact = false }: LexiconTextRendererProps) {
   if (!text) return null;
 
   // Transform raw text/HTML for modern typography
@@ -16,10 +17,15 @@ export default function LexiconTextRenderer({ text }: LexiconTextRendererProps) 
     .trim();
 
   // Transform raw HTML tags for 3-Role Color System (soft amber chips for root terms & quotes)
-  // We use em-based or inherited sizes so it scales correctly for both English (text-base) and Arabic (text-3xl)
+  // We use em-based or inherited sizes so it scales correctly for both English and Arabic
   content = content
     .replace(/<b([^>]*)>(.*?)<\/b>/gi, '<b$1 class="bg-amber-950/60 text-amber-200/90 border border-amber-500/30 px-2 py-0.5 rounded-md font-bold shadow-sm inline-block mx-1">$2</b>')
     .replace(/<span class="text-amber-500 font-bold">/gi, '<span class="bg-amber-950/60 text-amber-200/90 border border-amber-500/30 px-2 py-0.5 rounded-md font-bold shadow-sm inline-block mx-1">');
+
+  // Also replace <ul> and <li> to use custom styles if they exist
+  content = content
+    .replace(/<ul([^>]*)>/gi, '<ul$1 class="space-y-2.5 mt-2 mb-2 ml-1">')
+    .replace(/<li([^>]*)>/gi, '<li$1 class="flex items-start gap-2 before:content-[\'•\'] before:text-emerald-500/70 before:mr-1">');
 
   const lines = content
     .split(/\n+/)
@@ -27,12 +33,12 @@ export default function LexiconTextRenderer({ text }: LexiconTextRendererProps) 
     .filter(Boolean);
 
   return (
-    <div className="space-y-3 text-stone-300 leading-relaxed">
+    <div className={`space-y-3 text-stone-300 ${compact ? 'leading-snug' : 'leading-relaxed'}`}>
       {lines.map((line, idx) => {
         // Detect Arabic-dominant lines
         const isArabicLine = /[\u0600-\u06FF]/.test(line) && (line.match(/[\u0600-\u06FF]/g)?.length || 0) > line.length * 0.3;
 
-        if (isArabicLine) {
+        if (isArabicLine && !line.includes('<li')) {
           // Fix Uthmani sifr mark dotted circle bug
           const displayLine = line.replace(/(\S)([\u06DF\u06E0])/g, '<span class="font-mushaf-warsh">$1$2</span>');
 
@@ -40,7 +46,7 @@ export default function LexiconTextRenderer({ text }: LexiconTextRendererProps) 
           return (
             <p
               key={idx}
-              className="font-arabic text-2xl md:text-3xl text-stone-200 leading-loose md:leading-[2.5] text-right my-2"
+              className={`font-arabic text-stone-200 text-right my-2 ${compact ? 'text-xl md:text-2xl leading-relaxed' : 'text-2xl md:text-3xl leading-loose md:leading-[2.5]'}`}
               dir="rtl"
               dangerouslySetInnerHTML={{ __html: displayLine }}
             />
@@ -50,16 +56,19 @@ export default function LexiconTextRenderer({ text }: LexiconTextRendererProps) 
         // For lines that are mostly English but contain Arabic words, style the Arabic words
         let styledLine = line.replace(
           /([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+(?:\s+[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+)*)/g,
-          `<span class="font-arabic text-xl md:text-2xl text-emerald-200/90 leading-normal inline-block mx-1" dir="rtl">$&</span>`
+          `<span class="font-arabic text-emerald-200/90 leading-normal inline-block mx-1 ${compact ? 'text-lg md:text-xl' : 'text-xl md:text-2xl'}" dir="rtl">$&</span>`
         );
 
         // Fix Uthmani sifr mark dotted circle bug within mixed text lines
         styledLine = styledLine.replace(/(\S)([\u06DF\u06E0])/g, '<span class="font-mushaf-warsh">$1$2</span>');
 
+        // If it's a list item, use div instead of p so block styling works well
+        const Tag = line.includes('<li') || line.includes('<ul') ? 'div' : 'p';
+
         return (
-          <p
+          <Tag
             key={idx}
-            className="text-base md:text-lg text-stone-300 leading-relaxed whitespace-pre-wrap"
+            className={`text-stone-300 whitespace-pre-wrap ${compact ? 'text-sm' : 'text-base md:text-lg'} ${line.includes('<li') ? '' : (compact ? 'leading-snug' : 'leading-relaxed')}`}
             dangerouslySetInnerHTML={{ __html: styledLine }}
           />
         );

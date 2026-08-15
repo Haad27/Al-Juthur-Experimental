@@ -14,6 +14,7 @@ import { Sparkles, ArrowRight, BookOpen, Loader2, Bot } from 'lucide-react';
 import { useGlobalState } from '@/lib/providers/GlobalStatesProvider';
 import { useAudioStore } from '@/lib/stores/audioStore';
 import { toast } from 'sonner';
+import LexiconTextRenderer from '@/components/lexicon/LexiconTextRenderer';
 
 interface InteractiveAyahWordsProps {
   surahNumber: number;
@@ -42,6 +43,13 @@ interface WordMorphologyData {
     quranic_usage_html: string;
   } | null;
 }
+const formatArabicWithIndoPak = (html: string) => {
+  if (!html) return '';
+  return html.replace(
+    /([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+(?:\s+[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+)*)/g,
+    '<span class="font-mushaf-indopak-16 text-lg md:text-xl leading-normal inline-block mx-1" dir="rtl">$&</span>'
+  );
+};
 
 export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.memo(({
   surahNumber,
@@ -51,7 +59,7 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
   wbwTranslation,
   showWbw = true,
 }) => {
-  const { mushafStyle, wbwFontSize = 3 } = useGlobalState();
+  const { mushafStyle, wbwFontSize = 3, setIsWordDialogVisible } = useGlobalState();
   const isPlaying = useAudioStore((state) => state.isPlaying);
 
   const mushafFontClass = React.useMemo(() => {
@@ -213,7 +221,10 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
         }
 
         return (
-          <Dialog key={idx} onOpenChange={(open) => { if (open) handleWordClick(wordIdx); }}>
+          <Dialog key={idx} onOpenChange={(open) => { 
+            if (open) handleWordClick(wordIdx);
+            setIsWordDialogVisible(open);
+          }}>
             <DialogTrigger asChild>
               <span
                 className="group inline-flex flex-col items-center justify-end cursor-pointer px-1 py-0.5 rounded-lg hover:bg-emerald-500/30 transition-colors duration-150 select-none min-w-[2.5rem]"
@@ -256,7 +267,7 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
               ) : data ? (
                 <div className="space-y-3.5">
                   {/* Header: Clicked Word + Location */}
-                  <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-2.5 pr-8">
                     <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full">
                       {surahNumber}:{ayahNumber}:{wordIdx}
                     </span>
@@ -297,13 +308,13 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
                         <strong className="text-emerald-400 font-semibold block mb-1">
                           Root Meaning:
                         </strong>
-                        <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-p:my-1" dangerouslySetInnerHTML={{ __html: data.aiSummary.root_meaning_html }} />
+                        <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-slate-200 prose-em:text-slate-400" dangerouslySetInnerHTML={{ __html: formatArabicWithIndoPak(data.aiSummary.root_meaning_html) }} />
                       </div>
                       <div className="border-t border-slate-700/50 pt-2">
                         <strong className="text-amber-400 font-semibold block mb-1">
                           Quranic Usage:
                         </strong>
-                        <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-p:my-1" dangerouslySetInnerHTML={{ __html: data.aiSummary.quranic_usage_html }} />
+                        <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-slate-200 prose-em:text-slate-400" dangerouslySetInnerHTML={{ __html: formatArabicWithIndoPak(data.aiSummary.quranic_usage_html) }} />
                       </div>
                     </div>
                   ) : data.rootSummary && (

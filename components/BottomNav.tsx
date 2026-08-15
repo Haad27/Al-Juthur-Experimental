@@ -35,6 +35,7 @@ const BottomNav = () => {
   }, [pathname, setImmersiveMode]);
 
   const isImmersive = immersiveMode && (pathname?.startsWith("/tafsir") || pathname?.startsWith("/lexicon"));
+  const { isWordDialogVisible } = useGlobalState();
 
   const navItems = [
     {
@@ -64,7 +65,7 @@ const BottomNav = () => {
     },
   ];
 
-  if (!mounted || pathname === "/" || isAudioActive) return null;
+  if (!mounted || pathname === "/" || isAudioActive || isWordDialogVisible) return null;
 
   return (
     <div suppressHydrationWarning className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-md z-50 md:hidden">

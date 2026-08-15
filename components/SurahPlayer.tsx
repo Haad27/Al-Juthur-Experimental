@@ -54,7 +54,7 @@ export default function SurahPlayer({
   router,
   aiChatContext,
 }: SurahPlayerProps) {
-  const { mistakeDetection, selectedReciter, setSelectedReciter } = useGlobalState();
+  const { mistakeDetection, selectedReciter, setSelectedReciter, isWordDialogVisible } = useGlobalState();
   const audioStore = useAudioStore();
 
   const [reciters, setReciters] = useState<any[]>([]);
@@ -402,7 +402,8 @@ export default function SurahPlayer({
           mobileFabOpen
             ? "bg-emerald-700 border-emerald-300 shadow-[0_0_25px_rgba(16,185,129,0.6)] ring-4 ring-emerald-500/30"
             : "bg-emerald-600 border-emerald-400/40 hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(16,185,129,0.35)]",
-          aiChatContext ? "max-lg:hidden right-4 lg:right-[440px] xl:right-[470px]" : "right-4 md:right-8"
+          aiChatContext ? "max-lg:hidden right-4 lg:right-[440px] xl:right-[470px]" : "right-4 md:right-8",
+          isWordDialogVisible ? "max-md:hidden" : ""
         )}
         title={mobileFabOpen ? "Close Recitation Controls" : "Audio Recitation Controls"}
       >

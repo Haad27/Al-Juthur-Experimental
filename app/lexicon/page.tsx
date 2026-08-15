@@ -96,6 +96,13 @@ const POPULAR_ROOTS = [
   { root: 'قلب', meaning: 'Heart / Turning' },
   { root: 'هدي', meaning: 'Guidance / Leading' },
 ];
+const formatArabicWithIndoPak = (html: string) => {
+  if (!html) return '';
+  return html.replace(
+    /([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+(?:\s+[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+)*)/g,
+    '<span class="font-mushaf-indopak-16 text-lg md:text-xl leading-normal inline-block mx-1" dir="rtl">$&</span>'
+  );
+};
 
 function LexiconPageContent() {
   const router = useRouter();
@@ -575,16 +582,12 @@ function LexiconPageContent() {
                     </div>
                     <div className="space-y-2">
                       <h4 className="text-[11px] uppercase tracking-widest font-bold text-zinc-400 border-b border-zinc-800/80 pb-1.5">Root Word Meaning</h4>
-                      <div className="text-xs md:text-sm text-zinc-300 leading-snug font-medium">
-                        <LexiconTextRenderer text={result.ai_summary.root_meaning_html} />
-                      </div>
+                      <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-slate-200 prose-em:text-slate-400" dangerouslySetInnerHTML={{ __html: formatArabicWithIndoPak(result.ai_summary.root_meaning_html) }} />
                     </div>
                     
                     <div className="space-y-2">
                       <h4 className="text-[11px] uppercase tracking-widest font-bold text-emerald-500/80 border-b border-emerald-900/30 pb-1.5">Quranic Usage</h4>
-                      <div className="text-xs md:text-sm text-zinc-300 leading-snug font-medium">
-                        <LexiconTextRenderer text={result.ai_summary.quranic_usage_html} />
-                      </div>
+                      <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-slate-200 prose-em:text-slate-400" dangerouslySetInnerHTML={{ __html: formatArabicWithIndoPak(result.ai_summary.quranic_usage_html) }} />
                     </div>
                   </div>
                 </div>

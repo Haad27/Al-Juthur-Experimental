@@ -789,7 +789,9 @@ export default function SurahReaderClient({
 
   const handleOpenAiChat = (surah: number, ayah?: number) => {
     const targetAyah = typeof ayah === "number" && ayah > 0 ? ayah : visibleAyahNumber;
-    setAiChatContext({ surah, ayah: targetAyah });
+    React.startTransition(() => {
+      setAiChatContext({ surah, ayah: targetAyah });
+    });
     if (typeof window !== "undefined") {
       window.dispatchEvent(new Event("close-left-sidebar"));
     }

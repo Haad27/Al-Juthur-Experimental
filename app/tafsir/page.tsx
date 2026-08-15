@@ -251,7 +251,7 @@ export default function TafsirPage() {
             let matchedLang = "";
             for (const lang of sorted) {
               for (const author of lang.authors) {
-                if (normalizeText(author.name).includes(authorQuery) || (author.authorName && normalizeText(author.authorName).includes(authorQuery))) {
+                if (author.id.toString() === urlAuthor || normalizeText(author.name).includes(authorQuery) || (author.authorName && normalizeText(author.authorName).includes(authorQuery))) {
                   matchedAuthor = author;
                   matchedLang = lang.name;
                   break;

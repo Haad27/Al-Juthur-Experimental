@@ -37,6 +37,9 @@ interface GlobalState {
   aiError: string | null;
   triggerAiTranslation: (text: string, append?: boolean) => Promise<void>;
   clearAiTranslation: () => void;
+  
+  isWordDialogVisible: boolean;
+  setIsWordDialogVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 // Create the context with a default value
@@ -141,6 +144,7 @@ export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
   const [aiIsTranslating, setAiIsTranslating] = useState(false);
   const [aiUntranslatedText, setAiUntranslatedText] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [isWordDialogVisible, setIsWordDialogVisible] = useState(false);
 
 function parseMarkdownTable(text: string, originalFragments?: {text: string, delimiter: string}[], isFinal: boolean = false): Array<{ transcreatedText: string, sourceText: string }> {
   const lines = text.split('\n');
@@ -401,6 +405,8 @@ function parseMarkdownTable(text: string, originalFragments?: {text: string, del
         aiError,
         triggerAiTranslation,
         clearAiTranslation,
+        isWordDialogVisible,
+        setIsWordDialogVisible,
       }}
     >
       {children}
