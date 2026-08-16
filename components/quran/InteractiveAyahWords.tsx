@@ -332,23 +332,23 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
                       These are <strong>Huroof-e-Muqatta&apos;at</strong> (Quranic Initials). No one knows their true meaning except ALLAH ﷻ.
                     </div>
                   ) : data.rootQuery ? (
-                    <div className="flex flex-col gap-2 mt-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5 mt-3">
                       <Link
                         href={`/lexicon?root=${encodeURIComponent(data.rootQuery)}`}
-                        className="w-full px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/30 transition-all"
+                        className="w-full px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/30 transition-all text-center"
                       >
-                        <BookOpen className="w-3.5 h-3.5" />
-                        Explore Root [{data.rootQuery}] in Lexicons
-                        <ArrowRight className="w-3.5 h-3.5" />
+                        <BookOpen className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate">Explore Root [{data.rootQuery}] in Lexicons</span>
+                        <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                       </Link>
                       
                       <Link
                         href={`/rag/chat?mode=lexicon&q=${encodeURIComponent(`What does the root ${data.rootQuery} mean?`)}`}
-                        className="w-full px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-all"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-all text-center"
                       >
-                        <Bot className="w-3.5 h-3.5 text-emerald-400" />
-                        Ask our Lexicon RAG
-                        <ArrowRight className="w-3.5 h-3.5" />
+                        <Bot className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                        <span className="truncate">Ask our Lexicon RAG</span>
+                        <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                       </Link>
                     </div>
                   ) : (

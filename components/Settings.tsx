@@ -177,6 +177,9 @@ const Settings = () => {
     (l) => l.id === currentStyle || (currentStyle === "uthmani" && l.id === "v2")
   ) || MUSHAF_LAYOUTS[0];
 
+  const playbackRate = useAudioStore((s) => s.playbackRate || 1);
+  const setPlaybackRate = useAudioStore((s) => s.setPlaybackRate);
+
   return (
     <div className="p-4 space-y-4 max-w-md overflow-y-auto scrollable-container max-h-[calc(100vh-190px)]">
       <SettingSection
@@ -419,7 +422,21 @@ const Settings = () => {
       <SettingSection
         icon={<Zap className="w-4 h-4 text-emerald-400" />}
         title="Audio Playback Speed"
-        control={<Slider step={0.25} min={0.5} max={2} defaultValue={[1]} className="w-full py-1" />}
+        control={
+          <div className="flex items-center gap-3 w-full">
+            <Slider
+              step={0.25}
+              min={0.5}
+              max={2}
+              value={[playbackRate]}
+              onValueChange={(val) => setPlaybackRate(val[0])}
+              className="flex-1 py-1"
+            />
+            <span className="text-xs font-mono font-bold text-emerald-400 min-w-[2.5rem] text-right bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/30">
+              {playbackRate}x
+            </span>
+          </div>
+        }
         description="Adjust recitation playback speed (0.5x slow to 2.0x fast)."
       />
     </div>
