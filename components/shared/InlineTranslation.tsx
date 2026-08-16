@@ -219,13 +219,8 @@ export default function InlineTranslation({
               </h4>
 
               {isLoading && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[10px] text-emerald-400 font-medium animate-pulse">
-                  <div className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce [animation-delay:-0.3s]" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce [animation-delay:-0.15s]" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce" />
-                  </div>
-                  <span>Translating</span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] text-emerald-400 font-medium animate-pulse">
+                  <Loader2 className="size-3 animate-spin" /> Translating...
                 </span>
               )}
 
@@ -275,11 +270,7 @@ export default function InlineTranslation({
           <div className="min-h-[60px] text-zinc-200 text-sm sm:text-base leading-relaxed font-inter whitespace-pre-wrap text-left">
             {isLoading && !translationText ? (
               <div className="flex flex-col items-center justify-center h-full gap-3 text-zinc-400 py-6 text-center">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-bounce [animation-delay:-0.3s]" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-bounce [animation-delay:-0.15s]" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-bounce" />
-                </div>
+                <Loader2 className="w-6 h-6 animate-spin text-emerald-400" />
                 <div className="space-y-1">
                   <p className="text-zinc-300 font-medium text-sm">Translating with scholarly accuracy...</p>
                   <p className="text-xs text-zinc-500 max-w-xs mx-auto">
@@ -294,14 +285,6 @@ export default function InlineTranslation({
                 {translationText ? (
                   <div>
                     <span>{translationText}</span>
-                    {isLoading && (
-                      <span className="inline-flex items-center gap-1 ml-2 text-emerald-400 font-mono align-baseline select-none">
-                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce [animation-delay:-0.3s]" />
-                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce [animation-delay:-0.15s]" />
-                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce" />
-                        <span className="text-xs text-emerald-400/80 font-sans italic ml-1 font-medium">translating...</span>
-                      </span>
-                    )}
                   </div>
                 ) : (
                   <span className="flex items-center gap-2 text-zinc-400">

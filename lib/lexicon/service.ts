@@ -321,6 +321,20 @@ export const getSurahWords = unstable_cache(
   { revalidate: 2592000 } // 30 days
 );
 
+export const MUQATTAAT_SURAH_AYAHS = new Set([
+  "2:1", "3:1", "7:1", "10:1", "11:1", "12:1", "13:1", "14:1", "15:1",
+  "19:1", "20:1", "26:1", "27:1", "28:1", "29:1", "30:1", "31:1", "32:1",
+  "36:1", "38:1", "40:1", "41:1", "42:1", "42:2", "43:1", "44:1", "45:1",
+  "46:1", "50:1", "68:1"
+]);
+
+export function isMuqattaatWord(surah: number, ayah: number, stem?: string | null, root?: string | null): boolean {
+  if (MUQATTAAT_SURAH_AYAHS.has(`${surah}:${ayah}`)) return true;
+  if (stem && (stem.toLowerCase().includes('quranic initials') || stem.includes('مقطعة'))) return true;
+  if (root && (root.toLowerCase().includes('quranic initials') || root.includes('مقطعة'))) return true;
+  return false;
+}
+
 export async function getAyahWords(surah: number, ayah: number) {
   const map = await getSurahWords(surah);
   return map[ayah] || [];
@@ -334,15 +348,16 @@ export async function getWordMorphology(surah: number, ayah: number, wordIndex: 
   const word = words.find((w: any) => w.wordIndex === wordIndex || (surah === 2 && ayah === 1 && (wordIndex === 5 || wordIndex === 1)));
   
   if (word) {
+    const isMuq = isMuqattaatWord(surah, ayah, word.stem, word.root);
     return {
       surah,
       ayah,
       wordIndex: word.wordIndex,
       word: word.word as string,
-      root: word.root as string | null,
-      lemma: word.lemma,
-      stem: word.stem as string | null, // Sarf text
-      irab: word.irab as string | null
+      root: isMuq ? null : (word.root as string | null),
+      lemma: isMuq ? null : word.lemma,
+      stem: isMuq ? "Quranic Initials (حروف مقطعة)" : (word.stem as string | null),
+      irab: isMuq ? null : (word.irab as string | null)
     };
   }
   return null;

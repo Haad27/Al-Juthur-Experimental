@@ -277,85 +277,105 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
                   </div>
 
                   {/* Morphology details */}
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="p-2 rounded-xl bg-slate-800/60 border border-slate-800">
-                      <span className="text-slate-400 block mb-0.5">Root Word</span>
-                      <span className={`text-base font-bold text-emerald-300 ${(!data.morphology.root || data.morphology.stem?.toLowerCase().includes('quranic initials') || data.morphology.root?.toLowerCase().includes('quranic initials')) ? 'font-sans text-sm' : 'font-arabic'}`}>
-                        {(data.morphology.stem?.toLowerCase().includes('quranic initials') || data.morphology.root?.toLowerCase().includes('quranic initials')) ? 'None' : (data.morphology.root || 'N/A')}
-                      </span>
-                    </div>
-                    <div className="p-2 rounded-xl bg-slate-800/60 border border-slate-800">
-                      <span className="text-slate-400 block mb-0.5">Sarf (Morphology)</span>
-                      <span className="font-arabic text-xs font-medium text-white leading-relaxed line-clamp-3">
-                        {data.morphology.stem || 'N/A'}
-                      </span>
-                    </div>
-                  </div>
+                  {(() => {
+                    const isMuqattaat = Boolean(
+                      (data as any).isMuqattaat ||
+                      !data.morphology.root ||
+                      data.morphology.root === 'None' ||
+                      data.morphology.stem?.toLowerCase().includes('quranic initials') ||
+                      data.morphology.stem?.includes('مقطعة') ||
+                      data.morphology.root?.toLowerCase().includes('quranic initials')
+                    );
 
-                  {data.morphology.irab && (
-                    <div className="text-xs text-slate-300 bg-emerald-950/30 p-2.5 rounded-xl border border-emerald-900/50 leading-relaxed font-arabic text-right dir-rtl">
-                      <strong className="text-emerald-400 font-semibold block mb-1 font-sans text-left dir-ltr">
-                        I'rab (Grammar):
-                      </strong>
-                      {data.morphology.irab}
-                    </div>
-                  )}
+                    return (
+                      <>
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div className="p-2 rounded-xl bg-slate-800/60 border border-slate-800">
+                            <span className="text-slate-400 block mb-0.5">Root Word</span>
+                            <span className={`text-base font-bold text-emerald-300 ${isMuqattaat ? 'font-sans text-sm' : 'font-arabic'}`}>
+                              {isMuqattaat ? 'None' : (data.morphology.root || 'N/A')}
+                            </span>
+                          </div>
+                          <div className="p-2 rounded-xl bg-slate-800/60 border border-slate-800">
+                            <span className="text-slate-400 block mb-0.5">Sarf (Morphology)</span>
+                            <span className="font-arabic text-xs font-medium text-white leading-relaxed line-clamp-3">
+                              {isMuqattaat ? 'Quranic Initials (حروف مقطعة)' : (data.morphology.stem || 'N/A')}
+                            </span>
+                          </div>
+                        </div>
 
-                  {/* AI Summary preview */}
-                  {data.aiSummary ? (
-                    <div className="text-xs text-slate-300 bg-slate-800/40 p-2.5 rounded-xl border border-slate-800 leading-relaxed space-y-3">
-                      <div>
-                        <strong className="text-emerald-400 font-semibold block mb-1">
-                          Root Meaning:
-                        </strong>
-                        <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-slate-200 prose-em:text-slate-400" dangerouslySetInnerHTML={{ __html: formatArabicWithIndoPak(data.aiSummary.root_meaning_html) }} />
-                      </div>
-                      <div className="border-t border-slate-700/50 pt-2">
-                        <strong className="text-amber-400 font-semibold block mb-1">
-                          Quranic Usage:
-                        </strong>
-                        <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-slate-200 prose-em:text-slate-400" dangerouslySetInnerHTML={{ __html: formatArabicWithIndoPak(data.aiSummary.quranic_usage_html) }} />
-                      </div>
-                    </div>
-                  ) : data.rootSummary && (
-                    <div className="text-xs text-slate-300 bg-slate-800/40 p-2.5 rounded-xl border border-slate-800 leading-relaxed">
-                      <strong className="text-emerald-400 font-semibold block mb-1">
-                        Lane&apos;s Lexicon Summary:
-                      </strong>
-                      {data.rootSummary}
-                    </div>
-                  )}
+                        {data.morphology.irab && !isMuqattaat && (
+                          <div className="text-xs text-slate-300 bg-emerald-950/30 p-2.5 rounded-xl border border-emerald-900/50 leading-relaxed font-arabic text-right dir-rtl">
+                            <strong className="text-emerald-400 font-semibold block mb-1 font-sans text-left dir-ltr">
+                              I'rab (Grammar):
+                            </strong>
+                            {data.morphology.irab}
+                          </div>
+                        )}
 
-                  {/* Deep Lexicon CTA buttons or Quranic Initials Message */}
-                  {data.morphology.stem?.toLowerCase().includes('quranic initials') || data.morphology.root?.toLowerCase().includes('quranic initials') ? (
-                    <div className="mt-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs text-center leading-relaxed">
-                      These are <strong>Huroof-e-Muqatta&apos;at</strong> (Quranic Initials). No one knows their true meaning except ALLAH ﷻ.
-                    </div>
-                  ) : data.rootQuery ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5 mt-3">
-                      <Link
-                        href={`/lexicon?root=${encodeURIComponent(data.rootQuery)}`}
-                        className="w-full px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/30 transition-all text-center"
-                      >
-                        <BookOpen className="w-3.5 h-3.5 shrink-0" />
-                        <span className="truncate">Explore Root [{data.rootQuery}] in Lexicons</span>
-                        <ArrowRight className="w-3.5 h-3.5 shrink-0" />
-                      </Link>
-                      
-                      <Link
-                        href={`/rag/chat?mode=lexicon&q=${encodeURIComponent(`What does the root ${data.rootQuery} mean?`)}`}
-                        className="w-full px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-all text-center"
-                      >
-                        <Bot className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                        <span className="truncate">Ask our Lexicon RAG</span>
-                        <ArrowRight className="w-3.5 h-3.5 shrink-0" />
-                      </Link>
-                    </div>
-                  ) : (
-                    <div className="text-[11px] text-slate-500 text-center">
-                      No further lexicon entries for particle/non-root word
-                    </div>
-                  )}
+                        {/* If Huroof-e-Muqatta'at, show scholarly notice instead of Root Meaning / Quranic Usage */}
+                        {isMuqattaat ? (
+                          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs sm:text-sm text-center leading-relaxed space-y-2">
+                            <p className="font-bold text-amber-200 text-sm font-arabic">
+                              حروف مقطعة — Huroof-e-Muqatta&apos;at (Quranic Initials)
+                            </p>
+                            <p className="text-zinc-300 text-xs leading-relaxed">
+                              These disjointed letters appear at the opening of certain Surahs. Classical scholarship establishes that they do not possess an etymological root word, and their true reality and ultimate meaning reside exclusively with Allah ﷻ.
+                            </p>
+                          </div>
+                        ) : data.aiSummary ? (
+                          <div className="text-xs text-slate-300 bg-slate-800/40 p-2.5 rounded-xl border border-slate-800 leading-relaxed space-y-3">
+                            <div>
+                              <strong className="text-emerald-400 font-semibold block mb-1">
+                                Root Meaning:
+                              </strong>
+                              <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-slate-200 prose-em:text-slate-400" dangerouslySetInnerHTML={{ __html: formatArabicWithIndoPak(data.aiSummary.root_meaning_html) }} />
+                            </div>
+                            <div className="border-t border-slate-700/50 pt-2">
+                              <strong className="text-amber-400 font-semibold block mb-1">
+                                Quranic Usage:
+                              </strong>
+                              <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-slate-200 prose-em:text-slate-400" dangerouslySetInnerHTML={{ __html: formatArabicWithIndoPak(data.aiSummary.quranic_usage_html) }} />
+                            </div>
+                          </div>
+                        ) : data.rootSummary ? (
+                          <div className="text-xs text-slate-300 bg-slate-800/40 p-2.5 rounded-xl border border-slate-800 leading-relaxed">
+                            <strong className="text-emerald-400 font-semibold block mb-1">
+                              Lane&apos;s Lexicon Summary:
+                            </strong>
+                            {data.rootSummary}
+                          </div>
+                        ) : null}
+
+                        {/* Deep Lexicon CTA buttons (hidden for Muqatta'at) */}
+                        {!isMuqattaat && data.rootQuery ? (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5 mt-3">
+                            <Link
+                              href={`/lexicon?root=${encodeURIComponent(data.rootQuery)}`}
+                              className="w-full px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/30 transition-all text-center"
+                            >
+                              <BookOpen className="w-3.5 h-3.5 shrink-0" />
+                              <span className="truncate">Explore Root [{data.rootQuery}] in Lexicons</span>
+                              <ArrowRight className="w-3.5 h-3.5 shrink-0" />
+                            </Link>
+                            
+                            <Link
+                              href={`/rag/chat?mode=lexicon&q=${encodeURIComponent(`What does the root ${data.rootQuery} mean?`)}`}
+                              className="w-full px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-all text-center"
+                            >
+                              <Bot className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                              <span className="truncate">Ask our Lexicon RAG</span>
+                              <ArrowRight className="w-3.5 h-3.5 shrink-0" />
+                            </Link>
+                          </div>
+                        ) : !isMuqattaat ? (
+                          <div className="text-[11px] text-slate-500 text-center">
+                            No further lexicon entries for particle/non-root word
+                          </div>
+                        ) : null}
+                      </>
+                    );
+                  })()}
                 </div>
               ) : (
                 <div className="text-center py-4 text-xs text-slate-400">
