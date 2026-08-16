@@ -9,12 +9,14 @@ interface FloatingAskScholarButtonProps {
   onClick: () => void;
   label?: string;
   isVisible?: boolean;
+  className?: string;
 }
 
 export default function FloatingAskScholarButton({
   onClick,
   label = "Ask Scholar",
   isVisible = true,
+  className,
 }: FloatingAskScholarButtonProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isCollapsedMobile, setIsCollapsedMobile] = useState(false);
@@ -27,7 +29,10 @@ export default function FloatingAskScholarButton({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 50, scale: 0.8 }}
           transition={{ type: "spring", stiffness: 200, damping: 20 }}
-          className="fixed bottom-[calc(6rem+env(safe-area-inset-bottom,0px))] right-4 md:bottom-6 md:right-6 z-[90] flex items-center justify-center"
+          className={cn(
+            "fixed right-4 md:bottom-6 md:right-6 z-[90] flex items-center justify-center",
+            className || "bottom-[calc(6rem+env(safe-area-inset-bottom,0px))]"
+          )}
         >
           <button
             onClick={onClick}

@@ -623,7 +623,10 @@ function LexiconPageContent() {
                     </div>
                     {!entry.isEnglish && (
                       <div className="mt-4 pt-4 border-t border-zinc-800/40 w-full">
-                        <InlineTranslation textToTranslate={entry.definitions.join('\n').replace(/<[^>]*>?/gm, '')} />
+                        <InlineTranslation 
+                          textToTranslate={entry.definitions.join('\n').replace(/<[^>]*>?/gm, '')} 
+                          storageKey={`lexicon_${entry.dictId}_${result?.root || searchQuery}`}
+                        />
                       </div>
                     )}
                   </div>

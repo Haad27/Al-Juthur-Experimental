@@ -1311,7 +1311,10 @@ function TafsirCard({
         {/* Inline Translation */}
         {activeLangName !== 'English' && (
           <div className="mt-4 pt-4 border-t border-zinc-800/40 w-full">
-            <InlineTranslation textToTranslate={cleanText} />
+            <InlineTranslation 
+              textToTranslate={cleanText} 
+              storageKey={`tafsir_${entry.authorId || 'auth'}_${activeSurah}_${ayahNumber}`}
+            />
           </div>
         )}
 

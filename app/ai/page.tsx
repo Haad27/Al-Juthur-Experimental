@@ -379,6 +379,19 @@ function AiTranslatorContent() {
                     </div>
                   </div>
                 ))}
+
+                {/* Live Streaming Dots Indicator for Cards */}
+                {aiIsTranslating && (
+                  <div className="flex flex-col items-center justify-center gap-3 p-8 rounded-3xl bg-zinc-900/40 border border-emerald-500/30 text-emerald-400 backdrop-blur-xl animate-pulse text-center">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-bounce [animation-delay:-0.3s]" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-bounce [animation-delay:-0.15s]" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-bounce" />
+                    </div>
+                    <span className="text-sm font-semibold text-emerald-300">AI is actively translating the next section...</span>
+                    <span className="text-xs text-zinc-500">Live streaming in progress</span>
+                  </div>
+                )}
               </div>
             ) : viewMode === 'table' ? (
               /* Rendering: Classic Split (Table) */
@@ -408,6 +421,23 @@ function AiTranslatorContent() {
                         </td>
                       </tr>
                     ))}
+
+                    {/* Live Streaming Dots Indicator for Table */}
+                    {aiIsTranslating && (
+                      <tr className="bg-emerald-950/20 border-t border-emerald-500/30 animate-pulse">
+                        <td colSpan={2} className="p-6 md:p-8 text-center">
+                          <div className="flex flex-col items-center justify-center gap-2 text-emerald-400">
+                            <div className="flex items-center gap-1.5">
+                              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-bounce [animation-delay:-0.3s]" />
+                              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-bounce [animation-delay:-0.15s]" />
+                              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-bounce" />
+                            </div>
+                            <span className="text-sm font-semibold text-emerald-300">AI is actively translating the next section...</span>
+                            <span className="text-xs text-zinc-500">Live streaming in progress</span>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -425,6 +455,19 @@ function AiTranslatorContent() {
                     </div>
                   </div>
                 ))}
+
+                {/* Live Streaming Dots Indicator for English Only */}
+                {aiIsTranslating && (
+                  <div className="flex flex-col items-center justify-center gap-3 p-8 rounded-3xl bg-zinc-900/40 border border-emerald-500/30 text-emerald-400 backdrop-blur-xl animate-pulse text-center">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-bounce [animation-delay:-0.3s]" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-bounce [animation-delay:-0.15s]" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-bounce" />
+                    </div>
+                    <span className="text-sm font-semibold text-emerald-300">AI is actively translating the next section...</span>
+                    <span className="text-xs text-zinc-500">Live streaming in progress</span>
+                  </div>
+                )}
               </div>
             )}
 
