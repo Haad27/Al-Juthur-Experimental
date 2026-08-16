@@ -24,9 +24,9 @@ export async function GET(request: Request) {
 
         // Virtual Authors (Translations serving as Tafsir)
         const virtualAuthors: any[] = [
-          { id: 100095, name: "Tafheem e Qur'an - Sayyid Maududi", authorName: "Sayyid Abul Ala Maududi", languageId: 2, era: "Modern & Contemporary (19th-21st CE)", tags: [] }, // English
-          { id: 100158, name: "Bayan-ul-Quran", authorName: "Dr. Israr Ahmad", languageId: 10, era: "Modern & Contemporary (19th-21st CE)", tags: [] }, // Urdu
-          { id: 100084, name: "Taqi Usmani", authorName: "Mufti Taqi Usmani", languageId: 2, era: "Modern & Contemporary (19th-21st CE)", tags: [] }, // English
+          { id: 100095, name: "Tafheem e Qur'an - Sayyid Maududi", authorName: "Sayyid Abul Ala Maududi", languageId: 3, era: "Modern & Contemporary (19th-21st CE)", tags: [] }, // English (id: 3)
+          { id: 100158, name: "Bayan-ul-Quran", authorName: "Dr. Israr Ahmad", languageId: 10, era: "Modern & Contemporary (19th-21st CE)", tags: [] }, // Urdu (id: 10)
+          { id: 100084, name: "Taqi Usmani", authorName: "Mufti Taqi Usmani", languageId: 3, era: "Modern & Contemporary (19th-21st CE)", tags: [] }, // English (id: 3)
         ];
         
         const virtualTag = { id: 999, name: "Translation with Explanation", color: "emerald" };
