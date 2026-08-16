@@ -450,6 +450,20 @@ function TafsirContent() {
     scrollToAyah(n);
   }, [urlAyah, activeAuthor, scrollToAyah]);
 
+  const { setImmersiveMode } = useGlobalState();
+
+  // Hide mobile bottom nav when in Tafsir reading mode
+  useEffect(() => {
+    if (activeAuthor) {
+      setImmersiveMode(true);
+    } else {
+      setImmersiveMode(false);
+    }
+    return () => {
+      setImmersiveMode(false);
+    };
+  }, [activeAuthor, setImmersiveMode]);
+
   // Auto scroll to target ayah set by Ayah Picker
   useEffect(() => {
     if (targetAyahToScroll && targetAyahToScroll.surah === activeSurah) {
@@ -457,6 +471,19 @@ function TafsirContent() {
       setTargetAyahToScroll(null);
     }
   }, [targetAyahToScroll, activeSurah, scrollToAyah]);
+
+  // Reset to Verse 1 at the top of the page when changing Surah (unless a target ayah was selected)
+  useEffect(() => {
+    if (!targetAyahToScroll) {
+      setCurrentAyahIndex(0);
+      virtuosoRef.current?.scrollToIndex({ index: 0, align: "start" });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      const trackerEl = document.getElementById(`ayah-tracker-1`);
+      if (trackerEl) {
+        trackerEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  }, [activeSurah]);
 
   // Auto-scroll the left sidebar Surah selector to the active Surah
   useEffect(() => {

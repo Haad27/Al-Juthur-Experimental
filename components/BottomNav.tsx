@@ -69,7 +69,7 @@ const BottomNav = () => {
     },
   ];
 
-  if (!mounted || pathname === "/" || isAudioActive || isWordDialogVisible) return null;
+  if (!mounted || pathname === "/" || isAudioActive || isWordDialogVisible || (pathname?.startsWith("/tafsir") && immersiveMode)) return null;
 
   return (
     <div suppressHydrationWarning className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-md z-50 md:hidden">

@@ -164,10 +164,11 @@ export default function SurahPlayer({
     }
     const audio = audioRef.current;
     
-    // Pause previous playback if any, but since we are replacing src, it's fine.
+    const currentRate = audioStore.playbackRate || playbackRate || 1;
+    audio.defaultPlaybackRate = currentRate;
     audio.src = url;
-    audio.playbackRate = playbackRate;
     audio.load();
+    audio.playbackRate = currentRate;
 
     const onTime = () => {
       setCurrentTime(audio.currentTime);
@@ -186,7 +187,16 @@ export default function SurahPlayer({
       }
     };
     
-    const onLoaded = () => setDuration(audio.duration);
+    const onLoaded = () => {
+      setDuration(audio.duration);
+      const activeRate = audioStore.playbackRate || playbackRate || 1;
+      audio.defaultPlaybackRate = activeRate;
+      audio.playbackRate = activeRate;
+    };
+    const onPlay = () => {
+      const activeRate = audioStore.playbackRate || playbackRate || 1;
+      audio.playbackRate = activeRate;
+    };
     const onEnded = () => {
       if (currentAyahIndex + 1 < audioQueue.length) {
         setCurrentAyahIndex(prev => prev + 1);
@@ -205,6 +215,7 @@ export default function SurahPlayer({
 
     audio.addEventListener("timeupdate", onTime);
     audio.addEventListener("loadedmetadata", onLoaded);
+    audio.addEventListener("play", onPlay);
     audio.addEventListener("ended", onEnded);
     audio.addEventListener("error", onError);
 
@@ -215,6 +226,7 @@ export default function SurahPlayer({
     
     // Play automatically if playing is true (e.g. moving to next ayah)
     if (playing) {
+      audio.playbackRate = currentRate;
       audio.play().catch(e => console.error("Playback error", e));
       window.dispatchEvent(new CustomEvent('scrollToAyah', { detail: { index: ayahNum - 1 } }));
     }
@@ -222,6 +234,7 @@ export default function SurahPlayer({
     return () => {
       audio.removeEventListener("timeupdate", onTime);
       audio.removeEventListener("loadedmetadata", onLoaded);
+      audio.removeEventListener("play", onPlay);
       audio.removeEventListener("ended", onEnded);
       audio.removeEventListener("error", onError);
     };
@@ -507,17 +520,27 @@ export default function SurahPlayer({
 
               {/* Speed Selector */}
               <div className="flex items-center justify-center gap-1 bg-zinc-950/60 p-1 rounded-xl">
-                {playbackRates.slice(2, 6).map((rate) => (
-                  <button
-                    key={rate}
-                    onClick={() => audioStore.setPlaybackRate(rate)}
-                    className={`flex-1 py-1 rounded-lg text-xs font-semibold transition ${
-                      playbackRate === rate ? "bg-emerald-600 text-white" : "text-zinc-400 hover:text-white"
-                    }`}
-                  >
-                    {rate}×
-                  </button>
-                ))}
+                {playbackRates.slice(2, 6).map((rate) => {
+                  const isActive = (audioStore.playbackRate || playbackRate) === rate;
+                  return (
+                    <button
+                      key={rate}
+                      onClick={() => {
+                        audioStore.setPlaybackRate(rate);
+                        setPlaybackRate(rate);
+                        if (audioRef.current) {
+                          audioRef.current.defaultPlaybackRate = rate;
+                          audioRef.current.playbackRate = rate;
+                        }
+                      }}
+                      className={`flex-1 py-1 rounded-lg text-xs font-semibold transition ${
+                        isActive ? "bg-emerald-600 text-white shadow" : "text-zinc-400 hover:text-white"
+                      }`}
+                    >
+                      {rate}×
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Reciter Selector */}

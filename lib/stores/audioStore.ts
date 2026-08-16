@@ -53,8 +53,14 @@ export const useAudioStore = create<AudioState>((set, get) => ({
     }
 
     const audio = new Audio(audioUrl);
-    audio.playbackRate = state.playbackRate || 1;
+    const currentRate = state.playbackRate || 1;
+    audio.defaultPlaybackRate = currentRate;
+    audio.playbackRate = currentRate;
     
+    audio.addEventListener('loadedmetadata', () => {
+      audio.playbackRate = get().playbackRate || 1;
+    });
+
     audio.addEventListener('ended', () => {
       set({ currentAyah: null, isPlaying: false });
     });
@@ -64,6 +70,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
     });
 
     audio.addEventListener('play', () => {
+      audio.playbackRate = get().playbackRate || 1;
       set({ isPlaying: true });
     });
 
@@ -93,6 +100,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
   setPlaybackRate: (rate: number) => {
     const { audioElement } = get();
     if (audioElement) {
+      audioElement.defaultPlaybackRate = rate;
       audioElement.playbackRate = rate;
     }
     // Also trigger custom event so other active audio players sync
