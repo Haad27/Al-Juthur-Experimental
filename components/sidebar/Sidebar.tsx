@@ -76,6 +76,19 @@ const Sidebar = () => {
     return () => window.removeEventListener("close-left-sidebar", handleCloseLeftSidebar);
   }, []);
 
+  // Auto-scroll sidebar to the active selected Surah
+  useEffect(() => {
+    if (!isCollapsed && activeTab === "surah" && surahNumber > 0 && surahs.length > 0) {
+      const timer = setTimeout(() => {
+        const el = document.getElementById(`sidebar-surah-${surahNumber}`);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [surahNumber, isCollapsed, activeTab, surahs.length]);
+
   const toggleSidebar = () => {
     setIsCollapsed((c) => {
       const next = !c;
@@ -204,6 +217,7 @@ const Sidebar = () => {
               return (
                 <Link
                   key={surah.number}
+                  id={`sidebar-surah-${surah.number}`}
                   href={`/surah/${surah.number}`}
                   title={`${surah.englishName} — ${surah.englishNameTranslation}`}
                   className={cn(

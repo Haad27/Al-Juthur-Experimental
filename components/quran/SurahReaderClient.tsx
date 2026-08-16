@@ -779,6 +779,16 @@ export default function SurahReaderClient({
   }, [translationEdition]);
   // ─────────────────────────────────────────────────────────────────────────────
 
+  // Proactively prefetch adjacent Surahs so navigating to Next/Previous Surah is 100% instant
+  useEffect(() => {
+    if (surahNumber > 1) {
+      router.prefetch(`/surah/${surahNumber - 1}`);
+    }
+    if (surahNumber < 114) {
+      router.prefetch(`/surah/${surahNumber + 1}`);
+    }
+  }, [surahNumber, router]);
+
   // All clean texts for SurahPlayer (needed for audio segment tracking).
   // Derived from allArabicTexts so we don’t need all ayahs loaded.
   const allCleanTexts = useMemo(

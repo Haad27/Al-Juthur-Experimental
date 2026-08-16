@@ -53,6 +53,18 @@ const MobileSheet = ({
     return () => clearInterval(interval);
   }, [isPlayingAudio]);
 
+  useEffect(() => {
+    if (isOpen && activeTab === "search" && typeof surahNumber === "number" && surahNumber > 0 && surahs && surahs.length > 0) {
+      const timer = setTimeout(() => {
+        const el = document.getElementById(`mobile-surah-${surahNumber}`);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [surahNumber, isOpen, activeTab, surahs]);
+
   const filteredSurahs = surahs?.filter((surah: Surah) =>
     surah.englishName.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -245,6 +257,7 @@ const MobileSheet = ({
                 return (
                   <Link
                     key={surah.number}
+                    id={`mobile-surah-${surah.number}`}
                     href={`/surah/${surah.number}`}
                     title={`${surah.englishName} — ${surah.englishNameTranslation}`}
                     onClick={() => setIsOpen(false)}

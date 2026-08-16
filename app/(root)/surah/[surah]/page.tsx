@@ -1,7 +1,6 @@
 import React from "react";
 import SurahReaderClient from "@/components/quran/SurahReaderClient";
 import prisma from "@/lib/prisma";
-import { getSurahWords } from "@/lib/lexicon/service";
 import { SURAHS_DATA } from "@/lib/surahsData";
 import { getQuranComSurahTranslation } from "@/lib/translations";
 import fs from "fs";
@@ -28,10 +27,11 @@ const getAyahsForSurah = unstable_cache(
   async (surahNumber: number) => {
     return await prisma.ayah.findMany({
       where: { surahId: surahNumber },
-      orderBy: { numberInSurah: "asc" }
+      orderBy: { numberInSurah: "asc" },
+      select: { id: true, surahId: true, numberInSurah: true, text: true }
     });
   },
-  ["surah-ayahs-v2"],
+  ["surah-ayahs-v4"],
   { revalidate: 2592000 } // 30 days
 );
 
@@ -54,7 +54,7 @@ const getWbwTranslation = unstable_cache(
       }
     }
   },
-  ['wbw-translation-data-v3'],
+  ['wbw-translation-data-v4'],
   { revalidate: 2592000 }
 );
 
@@ -76,7 +76,7 @@ const getSurahInfoMap = unstable_cache(
       }
     }
   },
-  ['surah-info-meta-v3'],
+  ['surah-info-meta-v4'],
   { revalidate: 2592000 }
 );
 
@@ -109,11 +109,11 @@ export default async function SurahPage({
     revelationType: "Meccan"
   };
 
-  // 2. Fetch all required data in PARALLEL via Promise.all
-  const [localAyahs, translationAyahs, surahWordsMap, wbwTranslationData, allSurahInfo] = await Promise.all([
+  // 2. Fetch required data in PARALLEL via Promise.all
+  // We do NOT load massive morphology table on server SSR to keep HTML payload < 20KB (like Quran.com)
+  const [localAyahs, translationAyahs, wbwTranslationData, allSurahInfo] = await Promise.all([
     getAyahsForSurah(surahNumber),
     getQuranComSurahTranslation(surahNumber, editionParam),
-    getSurahWords(surahNumber),
     getWbwTranslation(),
     getSurahInfoMap(),
   ]);
@@ -158,7 +158,7 @@ export default async function SurahPage({
     };
   });
 
-  // 5. Generate word-by-word translation map for this entire Surah
+  // 5. Generate word-by-word translation map for this Surah
   const surahWbwTranslation: Record<string, string> = {};
   if (wbwTranslationData && typeof wbwTranslationData === 'object') {
     const prefix = `${surahNumber}:`;
@@ -172,7 +172,7 @@ export default async function SurahPage({
     }
   }
 
-  // 6. Paginated loading: send first PAGE_SIZE ayahs to the client
+  // 6. Paginated loading: send first PAGE_SIZE (20) ayahs to the client
   const PAGE_SIZE = 20;
   const initialAyahs = combinedAyahs.slice(0, PAGE_SIZE);
   const allArabicTexts = localAyahs.map((a) => stripBismillahPrefix(a.text, surahNumber, a.numberInSurah));
@@ -184,7 +184,7 @@ export default async function SurahPage({
       totalAyahs={localAyahs.length}
       allArabicTexts={allArabicTexts}
       initialEdition={editionParam}
-      surahWordsMap={surahWordsMap}
+      surahWordsMap={{}}
       ayahParam={ayahParam}
       juzParam={juzParam}
       surahWbwTranslation={surahWbwTranslation}

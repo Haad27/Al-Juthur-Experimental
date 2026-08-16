@@ -10,7 +10,8 @@ const NavigatorButton = ({
   surahNumber: number;
 }) => (
   <Link
-    href={`${surahNumber}`}
+    href={`/surah/${surahNumber}`}
+    prefetch={true}
     className={`
       flex items-center gap-2 px-5 py-2 transition
       shadow-md rounded-md text-sm

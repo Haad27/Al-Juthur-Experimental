@@ -166,9 +166,9 @@ const Settings = () => {
   const fontPresets = [
     { label: "0.5x", val: 0.5 },
     { label: "Small", val: 1 },
-    { label: "Standard", val: 3 },
-    { label: "Large", val: 5 },
-    { label: "Extra", val: 7 },
+    { label: "Standard", val: 1.5 },
+    { label: "Large", val: 3 },
+    { label: "Extra", val: 5 },
   ];
 
 
@@ -322,10 +322,10 @@ const Settings = () => {
 
             <Slider
               value={[fontSize]}
-              defaultValue={[3]}
-              max={8}
+              defaultValue={[1.5]}
+              max={6}
               min={0.5}
-              step={0.5}
+              step={0.25}
               onValueChange={handleFontSizeChange}
               className="w-full py-1"
             />
@@ -361,10 +361,10 @@ const Settings = () => {
               </div>
               <Slider
                 value={[wbwFontSize]}
-                defaultValue={[3]}
-                max={8}
+                defaultValue={[1.5]}
+                max={6}
                 min={0.5}
-                step={0.5}
+                step={0.25}
                 onValueChange={handleWbwFontSizeChange}
                 className="w-full py-1"
               />

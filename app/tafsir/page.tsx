@@ -385,14 +385,21 @@ export default function TafsirPage() {
     const n = parseInt(urlAyah, 10);
     if (isNaN(n)) return;
     
-    // Small delay to allow render
+    const entryIdx = tafsirEntries.findIndex((e, i) => (e.ayah?.numberInSurah || i + 1) === n);
+    const scrollIdx = entryIdx !== -1 ? entryIdx : Math.max(0, n - 1);
+    setCurrentAyahIndex(scrollIdx);
+
     const t = setTimeout(() => {
-      virtuosoRef.current?.scrollToIndex({ index: n - 1, align: "start", behavior: "smooth" });
+      virtuosoRef.current?.scrollToIndex({ index: scrollIdx, align: "start", behavior: "smooth" });
+      const trackerEl = document.getElementById(`ayah-tracker-${n}`);
+      if (trackerEl) {
+        trackerEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
       const el = document.getElementById(`ayah-${n}`);
       if (el) {
-        el.classList.add("highlighted");
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
       }
-    }, 400);
+    }, 300);
     return () => clearTimeout(t);
   }, [urlAyah, tafsirEntries, activeAuthor]);
 
@@ -411,27 +418,52 @@ export default function TafsirPage() {
       }
 
       const targetAyah = targetAyahToScroll.ayah;
-      setCurrentAyahIndex(targetAyah - 1);
+      const entryIdx = tafsirEntries.findIndex((e, i) => (e.ayah?.numberInSurah || i + 1) === targetAyah);
+      const scrollIdx = entryIdx !== -1 ? entryIdx : Math.max(0, targetAyah - 1);
+      setCurrentAyahIndex(scrollIdx);
       
       const t = setTimeout(() => {
-        virtuosoRef.current?.scrollToIndex({ index: targetAyah - 1, align: "start", behavior: "smooth" });
+        virtuosoRef.current?.scrollToIndex({ index: scrollIdx, align: "start", behavior: "smooth" });
         const trackerEl = document.getElementById(`ayah-tracker-${targetAyah}`);
         if (trackerEl) {
-          trackerEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          trackerEl.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        const cardEl = document.getElementById(`ayah-${targetAyah}`);
+        if (cardEl) {
+          cardEl.scrollIntoView({ behavior: "smooth", block: "start" });
         }
         setTargetAyahToScroll(null);
-      }, 100);
+      }, 200);
 
       return () => clearTimeout(t);
     }
   }, [targetAyahToScroll, activeSurah, tafsirEntries, loadingEntries]);
 
+  // Auto-scroll the left sidebar Surah selector to the active Surah
+  useEffect(() => {
+    if (activeAuthor && activeSurah > 0) {
+      const timer = setTimeout(() => {
+        const el = document.getElementById(`tafsir-surah-${activeSurah}`);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [activeSurah, activeAuthor]);
+
   const scrollToAyah = (num: number) => {
-    setCurrentAyahIndex(num - 1);
-    virtuosoRef.current?.scrollToIndex({ index: num - 1, align: "start", behavior: "smooth" });
+    const entryIdx = tafsirEntries.findIndex((e, i) => (e.ayah?.numberInSurah || i + 1) === num);
+    const scrollIdx = entryIdx !== -1 ? entryIdx : Math.max(0, num - 1);
+    setCurrentAyahIndex(scrollIdx);
+    virtuosoRef.current?.scrollToIndex({ index: scrollIdx, align: "start", behavior: "smooth" });
     const trackerEl = document.getElementById(`ayah-tracker-${num}`);
     if (trackerEl) {
-      trackerEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      trackerEl.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    const cardEl = document.getElementById(`ayah-${num}`);
+    if (cardEl) {
+      cardEl.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
@@ -600,9 +632,25 @@ export default function TafsirPage() {
                 return (
                   <button
                     key={surah.number}
+                    id={`tafsir-surah-${surah.number}`}
                     onClick={() => {
                       setActiveSurah(surah.number);
                       window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    onMouseEnter={() => {
+                      if (activeAuthor) {
+                        const key = `${activeAuthor.id}:${surah.number}`;
+                        if (!tafsirCacheRef.current.has(key)) {
+                          fetch(`/api/tafsir?authorId=${activeAuthor.id}&surahId=${surah.number}`)
+                            .then(r => r.json())
+                            .then(d => {
+                              if (d.success && Array.isArray(d.data)) {
+                                tafsirCacheRef.current.set(key, d.data);
+                              }
+                            })
+                            .catch(() => {});
+                        }
+                      }
                     }}
                     className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-all ${
                       isActive

@@ -56,8 +56,8 @@ export const useGlobalState = (): GlobalState => {
 export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
   children,
 }) => {
-  const [fontSize, _setFontSize] = useState(3);
-  const [wbwFontSize, _setWbwFontSize] = useState(3);
+  const [fontSize, _setFontSize] = useState(1.5);
+  const [wbwFontSize, _setWbwFontSize] = useState(1.5);
 
   const setFontSize: React.Dispatch<React.SetStateAction<number>> = (value) => {
     _setFontSize((prev) => {
@@ -79,12 +79,14 @@ export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
     if (typeof window !== "undefined") {
       const savedFontSize = localStorage.getItem("quran_fontSize");
       if (savedFontSize) {
-        _setFontSize(parseInt(savedFontSize, 10));
+        const parsed = parseFloat(savedFontSize);
+        if (!isNaN(parsed) && parsed > 0) _setFontSize(parsed);
       }
 
       const savedWbwFontSize = localStorage.getItem("quran_wbwFontSize");
       if (savedWbwFontSize) {
-        _setWbwFontSize(parseInt(savedWbwFontSize, 10));
+        const parsed = parseFloat(savedWbwFontSize);
+        if (!isNaN(parsed) && parsed > 0) _setWbwFontSize(parsed);
       }
     }
   }, []);
