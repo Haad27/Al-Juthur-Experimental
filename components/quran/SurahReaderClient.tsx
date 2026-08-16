@@ -833,18 +833,22 @@ export default function SurahReaderClient({
         virtuosoRef.current?.scrollToIndex({ index, align: 'center', behavior: 'smooth' });
       }
     };
-        const handleJump = (e: any) => {
+    const handleJump = (e: any) => {
       const index = e.detail?.index;
       if (typeof index === 'number') {
-        virtuosoRef.current?.scrollToIndex({ index, align: 'center', behavior: 'smooth' });
+        setIsNavigatingAyah(true);
         setTimeout(() => {
-          const element = document.getElementById(`ayah-${index + 1}`);
-          if (element) {
-            const c = ["dark:bg-[#1c1c1cff]", "bg-[var(--sephia-300)]"];
-            element.classList.add(...c);
-            setTimeout(() => element.classList.remove(...c), 2000);
-          }
-        }, 150);
+          virtuosoRef.current?.scrollToIndex({ index, align: 'center', behavior: 'smooth' });
+          setTimeout(() => {
+            const element = document.getElementById(`ayah-${index + 1}`);
+            if (element) {
+              const c = ["dark:bg-[#1c1c1cff]", "bg-[var(--sephia-300)]"];
+              element.classList.add(...c);
+              setTimeout(() => element.classList.remove(...c), 2000);
+            }
+            setIsNavigatingAyah(false);
+          }, 300);
+        }, 100);
       }
     };
     window.addEventListener('scrollToAyah', handleScroll);
@@ -856,6 +860,7 @@ export default function SurahReaderClient({
   }, []);
 
   const [collapsed, setCollapsed] = useState(true);
+  const [isNavigatingAyah, setIsNavigatingAyah] = useState(false);
 
   const isUrduTranslation = React.useMemo(() => {
     return ALL_TRANSLATION_OPTIONS.find(t => t.identifier === translationEdition)?.languageCode.toLowerCase() === 'urdu';
@@ -879,6 +884,7 @@ export default function SurahReaderClient({
     if (ayahParam && totalAyahs > 0) {
       const ayahIndex = Number(ayahParam) - 1; // 0-based
       if (ayahIndex >= 0 && ayahIndex < totalAyahs) {
+        setIsNavigatingAyah(true);
         const targetPage = Math.floor(ayahIndex / PAGE_SIZE);
         // Ensure the target page is fetched
         fetchPage(targetPage, translationEdition).then(() => {
@@ -891,8 +897,9 @@ export default function SurahReaderClient({
                 element.classList.add(...c);
                 setTimeout(() => element.classList.remove(...c), 2000);
               }
-            }, 150);
-          }, 50);
+              setIsNavigatingAyah(false);
+            }, 300);
+          }, 100);
         });
       } else {
         toast("Requested ayah was not found");
@@ -943,6 +950,35 @@ export default function SurahReaderClient({
 
   return (
     <div className="flex w-full min-h-[100dvh] relative dark:bg-zinc-900 bg-[var(--sephia-primary)]">
+      {/* Loading Overlay */}
+      <AnimatePresence>
+        {isNavigatingAyah && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[99999] bg-zinc-950/80 backdrop-blur-md flex items-center justify-center"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 10, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.9, y: 10, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              className="relative flex flex-col items-center gap-6 bg-zinc-900/90 border border-emerald-500/30 p-10 rounded-3xl shadow-[0_0_50px_rgba(16,185,129,0.15)] overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 to-transparent animate-pulse" />
+              <div className="relative z-10 flex items-center justify-center">
+                <div className="absolute size-16 border-2 border-emerald-500/20 border-t-emerald-400 rounded-full animate-spin shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
+                <LogoIcon className="size-6 text-emerald-400 animate-pulse drop-shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
+              </div>
+              <div className="relative z-10 space-y-1.5 text-center mt-2">
+                <p className="text-zinc-100 font-bold tracking-[0.2em] uppercase text-xs">Navigating</p>
+                <p className="text-emerald-500/80 text-[10px] font-mono tracking-wider">LOCATING VERSE...</p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <section className={cn(
         "flex items-center flex-col dark:bg-zinc-900 bg-[var(--sephia-primary)] dark:text-white text-black relative pb-6 md:pb-6 transition-all duration-300",
