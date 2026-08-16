@@ -829,22 +829,10 @@ export default function TafsirPage() {
         </div>
       </div>
 
-      {/* Hero Header */}
-      {/* Hero Header (Non-sticky) */}
-      <div className="hidden md:block relative pt-20 md:pt-24 pb-3 px-4 md:px-8 max-w-7xl mx-auto">
-        <div className="absolute left-10 top-0 size-64 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
-        <div className="space-y-1.5 relative z-10 max-w-3xl">
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-            Explore All Tafsirs
-          </h1>
-          <p className="text-zinc-400 text-xs md:text-sm hidden md:block">
-            Select any classical or contemporary Quranic commentary below to enter full reading mode.
-          </p>
-        </div>
-      </div>
+      {/* Hero Header removed for cleaner UI consistency */}
 
       {/* Sticky Filters & Search (Action Bar) */}
-      <div className={`sticky z-30 bg-zinc-950/90 backdrop-blur-xl border-y border-zinc-800/60 shadow-sm mb-6 transition-all duration-300 top-0 ${topNavVisible ? 'md:top-[53px]' : ''}`}>
+      <div className={`sticky z-30 bg-zinc-950/90 backdrop-blur-xl border-y border-zinc-800/60 shadow-sm mb-6 transition-all duration-300 top-0 mt-16 md:mt-20 ${topNavVisible ? 'md:top-[53px]' : ''}`}>
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-3">
           
           {/* Action Row: Search, Refine, Active Chips */}
