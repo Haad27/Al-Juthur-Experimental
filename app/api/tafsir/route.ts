@@ -83,6 +83,19 @@ const getTafsirLibrary = unstable_cache(
   { revalidate: 2592000 } // 30 days
 );
 
+// Cached Surah Ayahs (Quran text never changes; 30-day memory cache)
+const getAyahsForSurah = unstable_cache(
+  async (surahId: number) => {
+    return await prisma.ayah.findMany({
+      where: { surahId },
+      orderBy: { numberInSurah: 'asc' },
+      select: { id: true, surahId: true, numberInSurah: true, text: true }
+    });
+  },
+  ['tafsir-surah-ayahs-v1'],
+  { revalidate: 2592000 } // 30 days
+);
+
 // 2. Ultra-fast local file tafsir loader (Reads directly from disk in < 1ms)
 const getLocalDownloadedTafsir = unstable_cache(
   async (folder: string, isUrdu: boolean, authorId: number, surahId: number, authorName: string, name: string) => {
@@ -94,11 +107,7 @@ const getLocalDownloadedTafsir = unstable_cache(
 
       const raw = fs.readFileSync(tafsirFile, 'utf8');
       const parsed = JSON.parse(raw);
-      const ayahs = await prisma.ayah.findMany({
-        where: { surahId },
-        orderBy: { numberInSurah: 'asc' },
-        select: { id: true, surahId: true, numberInSurah: true, text: true }
-      });
+      const ayahs = await getAyahsForSurah(surahId);
 
       return (parsed.ayahs || []).map((a: any) => {
         const vNum = a.ayah;
@@ -135,11 +144,7 @@ const getLocalDownloadedTafsir = unstable_cache(
 const getSurahDbTafsir = unstable_cache(
   async (authorId: number, surahId: number) => {
     const [ayahs, author, rawTafsirs] = await Promise.all([
-      prisma.ayah.findMany({
-        where: { surahId },
-        orderBy: { numberInSurah: 'asc' },
-        select: { id: true, surahId: true, numberInSurah: true, text: true }
-      }),
+      getAyahsForSurah(surahId),
       prisma.author.findUnique({
         where: { id: authorId },
         select: { id: true, name: true, authorName: true, languageId: true, era: true }
@@ -169,11 +174,7 @@ const getVirtualTafsir = unstable_cache(
   async (authorId: number, surahId: number, transId: string) => {
     const [translations, ayahs] = await Promise.all([
       getQuranComSurahTranslation(surahId, transId),
-      prisma.ayah.findMany({
-        where: { surahId },
-        orderBy: { numberInSurah: 'asc' },
-        select: { id: true, surahId: true, numberInSurah: true, text: true }
-      })
+      getAyahsForSurah(surahId)
     ]);
     
     return translations.map((t: any, index: number) => {

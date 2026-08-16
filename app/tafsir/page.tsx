@@ -197,16 +197,27 @@ function TafsirContent() {
   ], []);
 
   // Reading Mode State
-  const [activeAuthor, setActiveAuthor] = useState<Author | null>(null);
+  // URL param target
+  const urlAyah = searchParams?.get("ayah");
+  const urlSurah = searchParams?.get("surah");
+  const urlAuthor = searchParams?.get("author");
+
+  const parsedUrlAuthorId = urlAuthor && !isNaN(parseInt(urlAuthor)) ? parseInt(urlAuthor) : null;
+  const parsedUrlSurahId = urlSurah && !isNaN(parseInt(urlSurah)) ? parseInt(urlSurah) : 1;
+
+  // Reading Mode State
+  const [activeAuthor, setActiveAuthor] = useState<Author | null>(() => {
+    if (parsedUrlAuthorId) {
+      return { id: parsedUrlAuthorId, name: `Tafsir #${parsedUrlAuthorId}`, languageId: 1 };
+    }
+    return null;
+  });
   const [activeLangName, setActiveLangName] = useState<string>("");
-  const [activeSurah, setActiveSurah] = useState<number>(1);
+  const [activeSurah, setActiveSurah] = useState<number>(parsedUrlSurahId);
   const [loadedTafsir, setLoadedTafsir] = useState<Record<number, TafsirEntry>>({});
   const [loadingEntries, setLoadingEntries] = useState<boolean>(false);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const tafsirCacheRef = useRef<Map<string, TafsirEntry[]>>(new Map());
-  const loadedPagesRef = useRef<Set<number>>(new Set());
-  const loadingPagesRef = useRef<Set<number>>(new Set());
-  const TAFSIR_PAGE_SIZE = 15;
 
   const [topNavVisible, setTopNavVisible] = useState<boolean>(true);
   const [currentAyahIndex, setCurrentAyahIndex] = useState<number>(0);
@@ -221,13 +232,7 @@ function TafsirContent() {
   const [selectedLangForWheel, setSelectedLangForWheel] = useState<string>("");
   const [targetAyahToScroll, setTargetAyahToScroll] = useState<{ surah: number; ayah: number } | null>(null);
 
-  // URL param target
-  const urlAyah = searchParams?.get("ayah");
-  const urlSurah = searchParams?.get("surah");
-  const urlAuthor = searchParams?.get("author");
-
   // Fetch all languages & authors on mount
-
   useEffect(() => {
     fetch("/api/tafsir")
       .then((res) => res.json())
@@ -273,63 +278,44 @@ function TafsirContent() {
       .catch((err) => console.error("Failed to fetch languages:", err));
   }, [urlAuthor]);
 
-  const fetchTafsirPage = useCallback(async (page: number) => {
-    if (!activeAuthor) return;
-    if (loadedPagesRef.current.has(page) || loadingPagesRef.current.has(page)) return;
-    loadingPagesRef.current.add(page);
-
-    const start = page * TAFSIR_PAGE_SIZE + 1;
-    const authorId = activeAuthor.id;
-    const surahId = activeSurah;
-
-    try {
-      const res = await fetch(
-        `/api/tafsir?authorId=${authorId}&surahId=${surahId}&start=${start}&count=${TAFSIR_PAGE_SIZE}`
-      );
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      if (data.success && Array.isArray(data.data)) {
-        setLoadedTafsir((prev) => {
-          const next = { ...prev };
-          data.data.forEach((entry: TafsirEntry, i: number) => {
-            next[start - 1 + i] = entry;
-          });
-          return next;
-        });
-        loadedPagesRef.current.add(page);
-      }
-    } catch (e) {
-      console.error(`[TafsirReader] Failed to load page ${page}:`, e);
-    } finally {
-      loadingPagesRef.current.delete(page);
-    }
-  }, [activeAuthor, activeSurah]);
-
-  // Fetch initial Tafsir page when author or surah changes (with instant client cache)
-  useEffect(() => {
-    if (!activeAuthor) return;
-
-    const cacheKey = `${activeAuthor.id}:${activeSurah}`;
+  // Load full Surah Tafsir in ONE single fast request and cache in memory
+  const loadSurahTafsir = useCallback(async (authorId: number, surahId: number) => {
+    const cacheKey = `${authorId}:${surahId}`;
     if (tafsirCacheRef.current.has(cacheKey)) {
       const cached = tafsirCacheRef.current.get(cacheKey)!;
       const map: Record<number, TafsirEntry> = {};
       cached.forEach((item, idx) => { map[idx] = item; });
       setLoadedTafsir(map);
-      loadedPagesRef.current = new Set(Array.from({ length: Math.ceil(cached.length / TAFSIR_PAGE_SIZE) }, (_, i) => i));
-      loadingPagesRef.current = new Set();
       setLoadingEntries(false);
       return;
     }
 
-    loadedPagesRef.current = new Set();
-    loadingPagesRef.current = new Set();
-    setLoadedTafsir({});
     setLoadingEntries(true);
 
-    fetchTafsirPage(0).finally(() => {
+    try {
+      const res = await fetch(`/api/tafsir?authorId=${authorId}&surahId=${surahId}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) {
+        const map: Record<number, TafsirEntry> = {};
+        data.data.forEach((entry: TafsirEntry, i: number) => {
+          map[i] = entry;
+        });
+        setLoadedTafsir(map);
+        tafsirCacheRef.current.set(cacheKey, data.data);
+      }
+    } catch (e) {
+      console.error(`[TafsirReader] Failed to load tafsir for author ${authorId}, surah ${surahId}:`, e);
+    } finally {
       setLoadingEntries(false);
-    });
-  }, [activeAuthor, activeSurah, fetchTafsirPage]);
+    }
+  }, []);
+
+  // Fetch initial Tafsir when author or surah changes (with instant client cache)
+  useEffect(() => {
+    if (!activeAuthor) return;
+    loadSurahTafsir(activeAuthor.id, activeSurah);
+  }, [activeAuthor?.id, activeSurah, loadSurahTafsir]);
 
   // We use Virtuoso now for virtualization, no need for manual infinite scroll observer.
 
@@ -406,40 +392,19 @@ function TafsirContent() {
     };
   }, [activeAuthor]);
 
-  // IntersectionObserver for Ayah index tracking removed to improve performance
-  // and eliminate the "live tracking" effect per user request.
-
   const scrollToAyah = useCallback((num: number) => {
     const targetIdx = Math.max(0, num - 1);
     setCurrentAyahIndex(targetIdx);
-    const targetPage = Math.floor(targetIdx / TAFSIR_PAGE_SIZE);
-
-    if (!loadedPagesRef.current.has(targetPage)) {
-      fetchTafsirPage(targetPage).then(() => {
-        setTimeout(() => {
-          virtuosoRef.current?.scrollToIndex({ index: targetIdx, align: "start", behavior: "smooth" });
-          const trackerEl = document.getElementById(`ayah-tracker-${num}`);
-          if (trackerEl) {
-            trackerEl.scrollIntoView({ behavior: "smooth", block: "center" });
-          }
-          const cardEl = document.getElementById(`ayah-${num}`);
-          if (cardEl) {
-            cardEl.scrollIntoView({ behavior: "smooth", block: "start" });
-          }
-        }, 100);
-      });
-    } else {
-      virtuosoRef.current?.scrollToIndex({ index: targetIdx, align: "start", behavior: "smooth" });
-      const trackerEl = document.getElementById(`ayah-tracker-${num}`);
-      if (trackerEl) {
-        trackerEl.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-      const cardEl = document.getElementById(`ayah-${num}`);
-      if (cardEl) {
-        cardEl.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
+    virtuosoRef.current?.scrollToIndex({ index: targetIdx, align: "start", behavior: "smooth" });
+    const trackerEl = document.getElementById(`ayah-tracker-${num}`);
+    if (trackerEl) {
+      trackerEl.scrollIntoView({ behavior: "smooth", block: "center" });
     }
-  }, [fetchTafsirPage]);
+    const cardEl = document.getElementById(`ayah-${num}`);
+    if (cardEl) {
+      cardEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, []);
 
   // Auto-scroll to target ayah from URL param
   useEffect(() => {
@@ -769,17 +734,9 @@ function TafsirContent() {
                   ref={virtuosoRef}
                   useWindowScroll
                   totalCount={currentSurahMeta.numberOfAyahs}
-                  rangeChanged={({ startIndex, endIndex }) => {
+                  rangeChanged={({ startIndex }) => {
                     if (typeof startIndex === "number" && startIndex >= 0) {
                       setCurrentAyahIndex(startIndex);
-                    }
-                    const BUFFER = 10;
-                    const firstNeeded = Math.max(0, startIndex - BUFFER);
-                    const lastNeeded = Math.min(currentSurahMeta.numberOfAyahs - 1, endIndex + BUFFER);
-                    const firstPage = Math.floor(firstNeeded / TAFSIR_PAGE_SIZE);
-                    const lastPage = Math.floor(lastNeeded / TAFSIR_PAGE_SIZE);
-                    for (let p = firstPage; p <= lastPage; p++) {
-                      fetchTafsirPage(p);
                     }
                   }}
                   itemContent={(idx) => {
