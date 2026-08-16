@@ -322,7 +322,7 @@ function LexiconPageContent() {
                   <select
                     onChange={(e) => {
                       if (e.target.value) {
-                        window.open(`/api/lexicon/pdf?file=${encodeURIComponent(e.target.value)}`, '_blank');
+                        window.location.href = `/api/lexicon/pdf?file=${encodeURIComponent(e.target.value)}`;
                       }
                     }}
                     className="w-full appearance-none bg-zinc-900/90 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-200 font-medium focus:outline-none focus:border-emerald-500/50 pr-7 shadow-sm truncate"

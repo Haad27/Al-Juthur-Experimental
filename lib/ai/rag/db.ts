@@ -35,12 +35,13 @@ const globalForRag = globalThis as unknown as {
 
 export function getRagDb(): Database.Database {
   if (!globalForRag.ragDb) {
-    const dbDir = path.join(process.cwd(), 'database', 'rag');
-    if (!fs.existsSync(dbDir)) {
-      fs.mkdirSync(dbDir, { recursive: true });
-    }
-    const dbPath = path.join(dbDir, 'ai_scholar_rag.sqlite');
-    const db = new Database(dbPath);
+    try {
+      const dbDir = path.join(process.cwd(), 'database', 'rag');
+      if (!fs.existsSync(dbDir)) {
+        fs.mkdirSync(dbDir, { recursive: true });
+      }
+      const dbPath = path.join(dbDir, 'ai_scholar_rag.sqlite');
+      const db = new Database(dbPath);
 
     // Optimize SQLite settings
     db.pragma('journal_mode = WAL');
@@ -93,9 +94,16 @@ export function getRagDb(): Database.Database {
       );
     `);
 
-    globalForRag.ragDb = db;
+      globalForRag.ragDb = db;
+    } catch (err) {
+      console.warn('Failed to initialize local RAG DB. RAG features will be disabled:', err);
+      // We cannot return undefined if the return type is strictly Database.Database.
+      // So we must change the signature or cast. Let's cast to any for a quick bypass,
+      // and let callers handle the falsy return.
+      return undefined as any;
+    }
   }
-  return globalForRag.ragDb;
+  return globalForRag.ragDb as Database.Database;
 }
 
 export function insertParentDocument(doc: RagParentDocument) {

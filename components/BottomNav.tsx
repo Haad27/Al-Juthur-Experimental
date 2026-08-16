@@ -30,12 +30,16 @@ const BottomNav = () => {
     return () => clearInterval(interval);
   }, [isPlayingAudio]);
 
+  const { isWordDialogVisible, setIsWordDialogVisible } = useGlobalState();
+
   React.useEffect(() => {
     setImmersiveMode(false);
-  }, [pathname, setImmersiveMode]);
+    if (setIsWordDialogVisible) {
+      setIsWordDialogVisible(false);
+    }
+  }, [pathname, setImmersiveMode, setIsWordDialogVisible]);
 
   const isImmersive = immersiveMode && (pathname?.startsWith("/tafsir") || pathname?.startsWith("/lexicon"));
-  const { isWordDialogVisible } = useGlobalState();
 
   const navItems = [
     {

@@ -34,6 +34,10 @@ export async function searchHybrid(
   topK = 6
 ): Promise<ScoredParentDocument[]> {
   const db = getRagDb();
+  if (!db) {
+    console.warn('[HYBRID-SEARCH] RAG DB is disabled or failed to load. Returning empty results.');
+    return [];
+  }
   if (!query || query.trim().length === 0) return [];
 
   const cleanQuery = query.trim();
