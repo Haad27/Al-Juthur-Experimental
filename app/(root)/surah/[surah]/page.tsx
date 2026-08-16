@@ -44,31 +44,39 @@ const getWbwTranslation = unstable_cache(
         const fileData = fs.readFileSync(filePath, 'utf8');
         return JSON.parse(fileData);
       }
-      return {};
+      return require('@/database/word-by-word-translation/english-wbw-translation.json');
     } catch (e) {
-      console.error("Could not load local WBW translation:", e);
-      return {};
+      try {
+        return require('@/database/word-by-word-translation/english-wbw-translation.json');
+      } catch (err) {
+        console.error("Could not load WBW translation:", err);
+        return {};
+      }
     }
   },
-  ['wbw-translation-data-v2'],
+  ['wbw-translation-data-v3'],
   { revalidate: 2592000 }
 );
 
 // Persistent cache for Surah info
 const getSurahInfoMap = unstable_cache(
-  async (): Promise<Record<number, any>> => {
+  async (): Promise<Record<string, any>> => {
     try {
       const surahInfoPath = path.join(process.cwd(), "database", "surah-meta", "surah-info-en.json");
       if (fs.existsSync(surahInfoPath)) {
         return JSON.parse(fs.readFileSync(surahInfoPath, "utf-8"));
       }
-      return {};
+      return require('@/database/surah-meta/surah-info-en.json');
     } catch (e) {
-      console.error("Error loading surah info:", e);
-      return {};
+      try {
+        return require('@/database/surah-meta/surah-info-en.json');
+      } catch (err) {
+        console.error("Error loading surah info:", err);
+        return {};
+      }
     }
   },
-  ['surah-info-meta-v2'],
+  ['surah-info-meta-v3'],
   { revalidate: 2592000 }
 );
 
@@ -110,7 +118,7 @@ export default async function SurahPage({
     getSurahInfoMap(),
   ]);
 
-  const surahInfo = allSurahInfo[surahNumber] || null;
+  const surahInfo = allSurahInfo[surahNumber] || allSurahInfo[String(surahNumber)] || null;
 
   // 3. Pre-compute lookup map for translations
   const translationMap = new Map<number, string>();
@@ -150,15 +158,16 @@ export default async function SurahPage({
     };
   });
 
-  // 5. Generate word-by-word translation map for this Surah
+  // 5. Generate word-by-word translation map for this entire Surah
   const surahWbwTranslation: Record<string, string> = {};
-  for (const ayah of localAyahs) {
-    const ayahNo = ayah.numberInSurah;
-    const wordCount = ayah.text.split(/\s+/).length;
-    for (let wIdx = 1; wIdx <= wordCount + 5; wIdx++) {
-      const key = `${surahNumber}:${ayahNo}:${wIdx}`;
-      if (wbwTranslationData && wbwTranslationData[key]) {
-        surahWbwTranslation[`${ayahNo}:${wIdx}`] = wbwTranslationData[key];
+  if (wbwTranslationData && typeof wbwTranslationData === 'object') {
+    const prefix = `${surahNumber}:`;
+    for (const key of Object.keys(wbwTranslationData)) {
+      if (key.startsWith(prefix)) {
+        const parts = key.split(':');
+        if (parts.length === 3) {
+          surahWbwTranslation[`${parts[1]}:${parts[2]}`] = wbwTranslationData[key];
+        }
       }
     }
   }
