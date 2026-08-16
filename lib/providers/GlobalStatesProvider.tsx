@@ -150,6 +150,64 @@ export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
   const [aiError, setAiError] = useState<string | null>(null);
   const [isWordDialogVisible, setIsWordDialogVisible] = useState(false);
 
+function isDummyOrPlaceholderText(str: string): boolean {
+  if (!str) return true;
+  const trimmed = str.trim();
+  if (!trimmed || trimmed === '...' || trimmed === '---' || trimmed === '***') return true;
+
+  const norm = trimmed.toLowerCase().replace(/[\*\[\]\(\)\:\-\_\s\"\'\`]/g, '');
+  
+  const dummyKeywords = new Set([
+    'text',
+    'originaltext',
+    'transcreatedtext',
+    'translation',
+    'englishtranslation',
+    'english',
+    'arabic',
+    'arabictext',
+    'englishtext',
+    'sourcetext',
+    'sourcefragments',
+    'sourcefragment',
+    'transcreation',
+    'meaning',
+    'content',
+    'verse',
+    'ayah',
+    'title',
+    'heading',
+    'section',
+    'paragraph',
+    'row',
+    'row1',
+    'row2',
+    'row3',
+    'readytogenerate',
+    'ready',
+    'na',
+    'none',
+    'null',
+    'placeholder',
+    'inserttranslation',
+    'inserttext',
+    'sample',
+    'outputmarkdowntable',
+    'table',
+    'markdowntable',
+    'thecombinedtranslation',
+    'waittheprompt'
+  ]);
+
+  if (dummyKeywords.has(norm)) return true;
+
+  if (/^\[?\s*(?:text|translation|english|transcreation|source|row\s*\d+|section\s*\d+|paragraph\s*\d+)\s*\]?$/i.test(trimmed)) {
+    return true;
+  }
+
+  return false;
+}
+
 function parseMarkdownTable(text: string, originalFragments?: {text: string, delimiter: string}[], isFinal: boolean = false): Array<{ transcreatedText: string, sourceText: string }> {
   const lines = text.split('\n');
   const rows: Array<{ transcreatedText: string, sourceText: string, claimedIndices: number[] }> = [];
@@ -190,6 +248,11 @@ function parseMarkdownTable(text: string, originalFragments?: {text: string, del
       
       const cleanedTransText = transcreated.replace(/^(?:\*\*)?(?:Row|Paragraph|Segment|Section)\s*\d+[:\-\.]?\s*(?:\*\*)?\s*/i, '').trim();
       
+      // If the translation column is just a dummy placeholder like "[Text]" or "Translation", drop it!
+      if (isDummyOrPlaceholderText(cleanedTransText)) {
+        continue;
+      }
+
       let sourceText = sourceCol;
       let claimedIndices: number[] = [];
       
@@ -217,7 +280,6 @@ function parseMarkdownTable(text: string, originalFragments?: {text: string, del
         
         if (claimedIndices.length === 0) {
           // If the AI failed to output a valid number, it's almost certainly hallucinating reasoning or preamble.
-          // We completely ignore this row. The final pass fallback will catch any legitimately missed fragments.
           continue;
         }
         
@@ -228,6 +290,22 @@ function parseMarkdownTable(text: string, originalFragments?: {text: string, del
       if (seenRows.has(rowKey)) continue;
       seenRows.add(rowKey);
       
+      // Check for redundancy: If an existing row already claims the exact same indices or has identical sourceText
+      const duplicateIdx = rows.findIndex(r => 
+        (claimedIndices.length > 0 && r.claimedIndices.length > 0 && claimedIndices.every((val, idx) => val === r.claimedIndices[idx]) && claimedIndices.length === r.claimedIndices.length) ||
+        (r.sourceText && sourceText && r.sourceText.trim() === sourceText.trim())
+      );
+
+      if (duplicateIdx !== -1) {
+        // Redundancy found: drop earlier row and replace with newer row
+        rows[duplicateIdx] = {
+          transcreatedText: cleanedTransText,
+          sourceText: sourceText,
+          claimedIndices
+        };
+        continue;
+      }
+
       rows.push({
         transcreatedText: cleanedTransText,
         sourceText: sourceText,
@@ -256,7 +334,20 @@ function parseMarkdownTable(text: string, originalFragments?: {text: string, del
     }
   }
   
-  return rows.map(r => ({ transcreatedText: r.transcreatedText, sourceText: r.sourceText }));
+  // Final pass: eliminate any placeholder rows and resolve overlaps
+  const filteredRows = rows.filter((row, idx) => {
+    if (isDummyOrPlaceholderText(row.transcreatedText)) return false;
+    
+    // If a later row has identical sourceText, drop this earlier row
+    const laterDuplicate = rows.slice(idx + 1).some(later => 
+      later.sourceText && row.sourceText && later.sourceText.trim() === row.sourceText.trim()
+    );
+    if (laterDuplicate) return false;
+
+    return true;
+  });
+
+  return filteredRows.map(r => ({ transcreatedText: r.transcreatedText, sourceText: r.sourceText }));
 }
 
   const triggerAiTranslation = async (textToTranslate: string, append = false) => {

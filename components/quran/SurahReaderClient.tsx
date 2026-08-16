@@ -34,13 +34,11 @@ import {
   Map,
   Compass,
   ChevronRight,
-  Languages,
 } from "lucide-react";
 import SurahPlayer from "@/components/SurahPlayer";
 import AyahChatSidebar from "@/components/ai/AyahChatSidebar";
 import TafsirWheelPickerModal from "@/components/quran/TafsirWheelPickerModal";
 import FloatingAskScholarButton from "@/components/ai/FloatingAskScholarButton";
-import InlineTranslation from "@/components/shared/InlineTranslation";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 import { amiri } from "@/app/fonts";
 import useScrollDirection from "@/hooks/useScrollDirection";
@@ -278,21 +276,14 @@ const AyahRow = React.memo(({
   const [fetchedFootnotes, setFetchedFootnotes] = useState<Record<string, string>>({});
   const [loadingFootnotes, setLoadingFootnotes] = useState(false);
   const [pulseAi, setPulseAi] = useState(false);
-  const [showAiTranslation, setShowAiTranslation] = useState(false);
-  const [hasSavedAiTranslation, setHasSavedAiTranslation] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       if (!localStorage.getItem("ayah_ai_seen")) {
         setPulseAi(true);
       }
-      const key = `ai_trans_ayah_${surahNumber}_${ayah.numberInSurah}`;
-      const saved = localStorage.getItem(key);
-      if (saved && saved.trim()) {
-        setHasSavedAiTranslation(true);
-      }
     }
-  }, [surahNumber, ayah.numberInSurah]);
+  }, []);
 
   const isTafsirEdition = React.useMemo(() => {
     return ["158", "97", "234", "151", "84"].includes(translationEdition);
@@ -708,33 +699,7 @@ const AyahRow = React.memo(({
                   </span>
                 </button>
               )}
-
-              <button
-                onClick={() => setShowAiTranslation((prev) => !prev)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-900/60 hover:bg-emerald-950/40 border border-emerald-500/35 hover:border-emerald-400/80 opacity-75 hover:opacity-100 transition-all cursor-pointer group shadow-sm"
-                title={showAiTranslation ? "Hide AI Translation" : "Translate Ayah with AI"}
-              >
-                <Languages size={14} className="text-emerald-400 group-hover:text-emerald-300 transition-colors" />
-                <span className="text-[11px] font-semibold tracking-wide text-emerald-300 group-hover:text-white transition-colors">
-                  {showAiTranslation ? "Hide AI Translation" : hasSavedAiTranslation ? "View Saved AI Translation" : "Quick Translate"}
-                </span>
-                {hasSavedAiTranslation && !showAiTranslation && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                )}
-              </button>
             </div>
-
-            {/* Inline AI Translation for Ayah */}
-            {showAiTranslation && (
-              <div className="mt-3 w-full">
-                <InlineTranslation
-                  textToTranslate={ayah.text}
-                  storageKey={`ayah_${surahNumber}_${ayah.numberInSurah}`}
-                  defaultOpen={true}
-                  onClose={() => setShowAiTranslation(false)}
-                />
-              </div>
-            )}
           </div>
         )}
       </div>

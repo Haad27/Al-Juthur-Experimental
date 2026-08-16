@@ -126,6 +126,64 @@ Citation Protocol: Append (Surah Name Chapter:Verse)
 | The Sheikh asserted that ablution (*Wuḍūʾ*) is a prerequisite for validity, deriving this from the command {Wash your faces} (Al-Māʾidah 5:6); prayer performed without it is null (*Bāṭil*). | 1-3 |
 `;
 
+function isDummyOrPlaceholderText(str: string): boolean {
+  if (!str) return true;
+  const trimmed = str.trim();
+  if (!trimmed || trimmed === '...' || trimmed === '---' || trimmed === '***') return true;
+
+  const norm = trimmed.toLowerCase().replace(/[\*\[\]\(\)\:\-\_\s\"\'\`]/g, '');
+  
+  const dummyKeywords = new Set([
+    'text',
+    'originaltext',
+    'transcreatedtext',
+    'translation',
+    'englishtranslation',
+    'english',
+    'arabic',
+    'arabictext',
+    'englishtext',
+    'sourcetext',
+    'sourcefragments',
+    'sourcefragment',
+    'transcreation',
+    'meaning',
+    'content',
+    'verse',
+    'ayah',
+    'title',
+    'heading',
+    'section',
+    'paragraph',
+    'row',
+    'row1',
+    'row2',
+    'row3',
+    'readytogenerate',
+    'ready',
+    'na',
+    'none',
+    'null',
+    'placeholder',
+    'inserttranslation',
+    'inserttext',
+    'sample',
+    'outputmarkdowntable',
+    'table',
+    'markdowntable',
+    'thecombinedtranslation',
+    'waittheprompt'
+  ]);
+
+  if (dummyKeywords.has(norm)) return true;
+
+  if (/^\[?\s*(?:text|translation|english|transcreation|source|row\s*\d+|section\s*\d+|paragraph\s*\d+)\s*\]?$/i.test(trimmed)) {
+    return true;
+  }
+
+  return false;
+}
+
 function parseMarkdownTable(text: string): Array<{ transcreatedText: string, sourceText: string }> {
   const lines = text.split('\n');
   const rows: Array<{ transcreatedText: string, sourceText: string }> = [];
@@ -161,7 +219,21 @@ function parseMarkdownTable(text: string): Array<{ transcreatedText: string, sou
       if (!transcreated && !source) {
         continue;
       }
+
+      if (isDummyOrPlaceholderText(transcreated)) {
+        continue;
+      }
       
+      // Check if an existing row has identical source: replace with newer
+      const duplicateIdx = rows.findIndex(r => r.sourceText && source && r.sourceText.trim() === source.trim());
+      if (duplicateIdx !== -1) {
+        rows[duplicateIdx] = {
+          transcreatedText: transcreated,
+          sourceText: source
+        };
+        continue;
+      }
+
       // Deduplicate identical rows (prevents hallucinated loops)
       const rowKey = `${transcreated.trim()}|||${source.trim()}`;
       if (seenRows.has(rowKey)) {
@@ -176,7 +248,17 @@ function parseMarkdownTable(text: string): Array<{ transcreatedText: string, sou
     }
   }
   
-  return rows;
+  // Final pass: eliminate any placeholder rows and resolve overlaps
+  const filteredRows = rows.filter((row, idx) => {
+    if (isDummyOrPlaceholderText(row.transcreatedText)) return false;
+    const laterDuplicate = rows.slice(idx + 1).some(later => 
+      later.sourceText && row.sourceText && later.sourceText.trim() === row.sourceText.trim()
+    );
+    if (laterDuplicate) return false;
+    return true;
+  });
+
+  return filteredRows;
 }
 
 function splitTextIntoChunks(text: string, maxChars: number = 12000): string[] {

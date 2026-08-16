@@ -76,15 +76,48 @@ function AiTranslatorContent() {
       });
   };
 
+  const isDummyText = (str?: string) => {
+    if (!str) return true;
+    const trimmed = str.trim();
+    if (!trimmed || trimmed === '...' || trimmed === '---' || trimmed === '***') return true;
+    const norm = trimmed.toLowerCase().replace(/[\*\[\]\(\)\:\-\_\s\"\'\`]/g, '');
+    const dummyKeywords = new Set([
+      'text', 'originaltext', 'transcreatedtext', 'translation', 'englishtranslation',
+      'english', 'arabic', 'arabictext', 'englishtext', 'sourcetext', 'sourcefragments',
+      'sourcefragment', 'transcreation', 'meaning', 'content', 'verse', 'ayah', 'title',
+      'heading', 'section', 'paragraph', 'row', 'row1', 'row2', 'row3', 'readytogenerate',
+      'ready', 'na', 'none', 'null', 'placeholder', 'inserttranslation', 'inserttext',
+      'sample', 'outputmarkdowntable', 'table', 'markdowntable', 'thecombinedtranslation', 'waittheprompt'
+    ]);
+    if (dummyKeywords.has(norm)) return true;
+    if (/^\[?\s*(?:text|translation|english|transcreation|source|row\s*\d+|section\s*\d+|paragraph\s*\d+)\s*\]?$/i.test(trimmed)) {
+      return true;
+    }
+    return false;
+  };
+
+  const cleanTranslationData = React.useMemo(() => {
+    if (!aiTranslationData) return [];
+    return aiTranslationData.filter((row, idx) => {
+      if (!row.transcreatedText || isDummyText(row.transcreatedText)) return false;
+      // If a later row has the identical sourceText, drop this earlier row
+      const laterDuplicate = aiTranslationData.slice(idx + 1).some(later => 
+        later.sourceText && row.sourceText && later.sourceText.trim() === row.sourceText.trim()
+      );
+      if (laterDuplicate) return false;
+      return true;
+    });
+  }, [aiTranslationData]);
+
   useEffect(() => {
     fetchQuota();
   }, []);
 
   useEffect(() => {
-    if (!aiIsTranslating && aiTranslationData && aiTranslationData.length > 0) {
+    if (!aiIsTranslating && cleanTranslationData && cleanTranslationData.length > 0) {
       fetchQuota();
     }
-  }, [aiIsTranslating, aiTranslationData]);
+  }, [aiIsTranslating, cleanTranslationData]);
 
   const copySegment = (text: string, index: string) => {
     copyToClipboard(text, "Translation segment copied!");
@@ -93,15 +126,15 @@ function AiTranslatorContent() {
   };
 
   const copyAll = (format: 'english' | 'reader' | 'split') => {
-    if (!aiTranslationData) return;
+    if (!cleanTranslationData || cleanTranslationData.length === 0) return;
     let textToCopy = '';
     
     if (format === 'english') {
-      textToCopy = aiTranslationData.map(row => row.transcreatedText).join('\n\n');
+      textToCopy = cleanTranslationData.map(row => row.transcreatedText).join('\n\n');
     } else if (format === 'reader') {
-      textToCopy = aiTranslationData.map(row => `${row.sourceText}\n\n${row.transcreatedText}`).join('\n\n---\n\n');
+      textToCopy = cleanTranslationData.map(row => `${row.sourceText}\n\n${row.transcreatedText}`).join('\n\n---\n\n');
     } else if (format === 'split') {
-      textToCopy = aiTranslationData.map(row => `${row.transcreatedText}\n\n${row.sourceText}`).join('\n\n---\n\n');
+      textToCopy = cleanTranslationData.map(row => `${row.transcreatedText}\n\n${row.sourceText}`).join('\n\n---\n\n');
     }
 
     copyToClipboard(textToCopy, `Copied all translations in ${format} format!`);
@@ -257,10 +290,10 @@ function AiTranslatorContent() {
         )}
 
         {/* The Zenith Results */}
-        {((aiTranslationData && aiTranslationData.length > 0) || aiIsTranslating) && (
+        {((cleanTranslationData && cleanTranslationData.length > 0) || aiIsTranslating) && (
           <div id="ai-results-container" className="mt-6 flex flex-col gap-6 animate-fadeIn pb-24">
             {/* Initial Stream Loading State */}
-            {aiIsTranslating && (!aiTranslationData || aiTranslationData.length === 0) && (
+            {aiIsTranslating && (!cleanTranslationData || cleanTranslationData.length === 0) && (
               <div className="flex flex-col items-center justify-center p-8 sm:p-12 bg-zinc-900/40 border border-zinc-800/80 rounded-3xl backdrop-blur-xl animate-pulse space-y-4 shadow-2xl text-center max-w-2xl mx-auto">
                 <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
                 <p className="text-sm font-semibold text-emerald-300">
@@ -367,7 +400,7 @@ function AiTranslatorContent() {
             {/* Rendering: Reader Mode (Cards) */}
             {viewMode === 'cards' ? (
               <div className="flex flex-col gap-8">
-                {(aiTranslationData || []).map((row, idx) => (
+                {cleanTranslationData.map((row, idx) => (
                   <div key={idx} className="relative overflow-hidden bg-zinc-900/40 border border-zinc-800/80 rounded-3xl p-6 md:p-10 hover:border-emerald-500/40 transition-all duration-500 hover:shadow-[0_0_40px_rgba(16,185,129,0.08)] space-y-8 shadow-2xl backdrop-blur-xl group animate-fadeIn">
                     <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                     {/* Arabic Box */}
@@ -413,7 +446,7 @@ function AiTranslatorContent() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-800/80">
-                    {(aiTranslationData || []).map((row, idx) => (
+                    {cleanTranslationData.map((row, idx) => (
                       <tr key={idx} className="group hover:bg-zinc-800/40 transition-colors duration-300">
                         <td className="p-6 md:p-8 align-top text-base leading-relaxed text-zinc-300 border-r border-zinc-800/80 relative group/td-en">
                           <div className="absolute inset-0 bg-emerald-500/5 blur-2xl opacity-0 group-hover/td-en:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -453,7 +486,7 @@ function AiTranslatorContent() {
             ) : (
               /* Rendering: English Only */
               <div className="flex flex-col gap-6">
-                {(aiTranslationData || []).map((row, idx) => (
+                {cleanTranslationData.map((row, idx) => (
                   <div key={idx} className="relative overflow-hidden bg-zinc-900/40 border border-zinc-800/80 rounded-3xl p-6 md:p-8 hover:border-emerald-500/40 transition-all duration-500 hover:shadow-[0_0_40px_rgba(16,185,129,0.08)] shadow-2xl backdrop-blur-xl group animate-fadeIn">
                     <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                     <div className="relative group/english">
