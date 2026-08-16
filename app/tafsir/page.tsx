@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
+import React, { useEffect, useState, useMemo, useRef, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library } from "lucide-react";
@@ -165,7 +165,7 @@ const TafsirFootnotesLoader = ({ footnoteIds, isUrdu }: { footnoteIds: string[],
   );
 };
 
-export default function TafsirPage() {
+function TafsirContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [languages, setLanguages] = useState<Language[]>([]);
@@ -1198,6 +1198,14 @@ export default function TafsirPage() {
         }}
       />
     </div>
+  );
+}
+
+export default function TafsirPage() {
+  return (
+    <Suspense fallback={null}>
+      <TafsirContent />
+    </Suspense>
   );
 }
 

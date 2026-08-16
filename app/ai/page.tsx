@@ -10,7 +10,7 @@ import { cn, copyToClipboard } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import LogoIcon from '@/components/svg/icons/LogoIcon';
 
-export default function AiTranslatorPage() {
+function AiTranslatorContent() {
   const searchParams = useSearchParams();
   
   const {
@@ -468,5 +468,13 @@ export default function AiTranslatorPage() {
 
       </main>
     </div>
+  );
+}
+
+export default function AiTranslatorPage() {
+  return (
+    <React.Suspense fallback={null}>
+      <AiTranslatorContent />
+    </React.Suspense>
   );
 }
