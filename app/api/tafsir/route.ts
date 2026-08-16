@@ -1,7 +1,15 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import path from 'path';
 import { getTafsirDifficulty } from '@/lib/tafsirDifficulty';
+
+// Helper to build a cached NextResponse
+function cachedJson(data: unknown, maxAge: number, staleWhileRevalidate = Math.floor(maxAge / 4)) {
+  return NextResponse.json(data, {
+    headers: {
+      'Cache-Control': `public, s-maxage=${maxAge}, stale-while-revalidate=${staleWhileRevalidate}`,
+    },
+  });
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -58,7 +66,8 @@ export async function GET(request: Request) {
           authors: authorsByLang[l.id] || []
         }));
 
-        return NextResponse.json({ success: true, data });
+        // Library data: languages + authors. Cache for 7 days — almost never changes.
+        return cachedJson({ success: true, data }, 604800, 86400);
       } catch (err) {
         console.error("Prisma fetch error in library load:", err);
         return NextResponse.json({ success: false, error: 'Failed to load library' }, { status: 500 });
@@ -109,7 +118,8 @@ export async function GET(request: Request) {
                 author: { name: "Dr. Israr Ahmad", authorName: "Dr. Israr Ahmad" }
               };
             });
-            return NextResponse.json({ success: true, data: tafsirs });
+            // Dr. Israr surah tafsir from local file. Cache 24h.
+            return cachedJson({ success: true, data: tafsirs }, 86400, 3600);
           } catch(e) {
             console.error("Error loading Israr local file", e);
           }
@@ -162,7 +172,8 @@ export async function GET(request: Request) {
           };
         });
         
-        return NextResponse.json({ success: true, data: tafsirs });
+        // Virtual/translation-based tafsir. Cache 24h.
+        return cachedJson({ success: true, data: tafsirs }, 86400, 3600);
       }
 
       const ayahs = await prisma.ayah.findMany({
@@ -191,7 +202,8 @@ export async function GET(request: Request) {
       // Sort properly by ayah.numberInSurah
       tafsirs.sort((a, b) => (a.ayah?.numberInSurah || 0) - (b.ayah?.numberInSurah || 0));
 
-      return NextResponse.json({ success: true, data: tafsirs });
+      // Full surah tafsir from DB. Cache 24h.
+      return cachedJson({ success: true, data: tafsirs }, 86400, 3600);
     }
 
     // 3. Query a specific Ayah within a Surah for an Author
@@ -213,7 +225,8 @@ export async function GET(request: Request) {
               const arabicAyah = await prisma.ayah.findFirst({
                 where: { surahId: parsedSurahId, numberInSurah: parsedAyahNum }
               });
-              return NextResponse.json({
+              // Single ayah from Dr. Israr. Cache 1h.
+              return cachedJson({
                 success: true,
                 data: [{
                   id: 100158 * 1000 + parsedAyahNum,
@@ -229,7 +242,7 @@ export async function GET(request: Request) {
                   },
                   author: { name: "Dr. Israr Ahmad", authorName: "Dr. Israr Ahmad" }
                 }]
-              });
+              }, 3600, 600);
             }
           } catch(e) {
             console.error("Error reading Israr single verse", e);
@@ -259,7 +272,8 @@ export async function GET(request: Request) {
         ayah: ayah,
         author: author
       }));
-      return NextResponse.json({ success: true, data: tafsirs });
+      // Single ayah tafsir from DB. Cache 1h.
+      return cachedJson({ success: true, data: tafsirs }, 3600, 600);
     }
 
     return NextResponse.json({ success: false, message: 'Invalid parameters' }, { status: 400 });

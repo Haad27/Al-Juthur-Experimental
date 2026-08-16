@@ -54,7 +54,24 @@ const renderInlineBadges = (children: React.ReactNode): React.ReactNode => {
           part.startsWith('[') && 
           part.endsWith(']') && 
           part.length > 2 && 
-          (part.includes('Tafsir') || part.includes('Surah') || part.includes('Adwa') || part.includes('Kathir') || part.includes('Tabari') || part.includes('Qurtubi') || part.includes('Wasit') || part.includes('Root:') || part.match(/\[\d+:\d+\]/))
+          (
+            part.includes('Tafsir') || 
+            part.includes('Surah') || 
+            part.includes('Adwa') || 
+            part.includes('Kathir') || 
+            part.includes('Tabari') || 
+            part.includes('Qurtubi') || 
+            part.includes('Wasit') || 
+            part.includes('Root') || 
+            part.includes('Lexicon') || 
+            part.includes('Lisan') || 
+            part.includes('Mufradat') || 
+            part.includes('Maqayis') || 
+            part.includes('Qamus') || 
+            part.includes('Shihah') || 
+            part.includes("Mu'jam") || 
+            part.match(/\[\d+:\d+\]/)
+          )
         ) {
           const badgeText = part.slice(1, -1);
           return (
@@ -411,7 +428,7 @@ function RagChatContent() {
                       p: ({node, children, ...props}) => {
                         const textStr = React.Children.toArray(children).join('');
                         const arabicMatches = textStr.match(/[\u0600-\u06FF]/g) || [];
-                        const isPredominantlyArabic = arabicMatches.length > 5 && (arabicMatches.length / textStr.length > 0.25);
+                        const isPredominantlyArabic = arabicMatches.length > 10 && (arabicMatches.length / textStr.length > 0.35);
                         
                         const containerClasses = "quran-block my-4 p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/30 shadow-sm relative overflow-hidden [&_.quran-block]:!p-0 [&_.quran-block]:!m-0 [&_.quran-block:not(:first-child)]:!mt-4 [&_.quran-block]:!border-none [&_.quran-block]:!bg-transparent [&_.quran-block]:!shadow-none [&_.quran-block>.quran-bar]:!hidden";
 
@@ -448,13 +465,14 @@ function RagChatContent() {
                             textStr += React.Children.toArray((c as any).props.children).join('');
                           }
                         });
-                        const hasArabic = /[\u0600-\u06FF]/.test(textStr);
+                        const arabicMatches = textStr.match(/[\u0600-\u06FF]/g) || [];
+                        const isPredominantlyArabic = arabicMatches.length > 10 && (arabicMatches.length / textStr.length > 0.35);
                         const containerClasses = "quran-block my-4 p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/30 shadow-sm relative overflow-hidden [&_.quran-block]:!p-0 [&_.quran-block]:!m-0 [&_.quran-block:not(:first-child)]:!mt-4 [&_.quran-block]:!border-none [&_.quran-block]:!bg-transparent [&_.quran-block]:!shadow-none [&_.quran-block>.quran-bar]:!hidden";
 
                         return (
                           <div className={containerClasses}>
                             <div className="quran-bar absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
-                            <blockquote className={`m-0 border-none p-0 text-zinc-200 ${hasArabic ? `${amiri.className} text-lg md:text-xl leading-loose text-right text-emerald-200` : 'italic text-sm sm:text-base text-zinc-200'}`}>
+                            <blockquote className={`m-0 border-none p-0 text-zinc-200 ${isPredominantlyArabic ? `${amiri.className} text-lg md:text-xl leading-loose text-right text-emerald-200` : 'italic text-sm sm:text-base text-zinc-200'}`}>
                               {renderInlineBadges(children)}
                             </blockquote>
                           </div>

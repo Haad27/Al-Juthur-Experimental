@@ -2,76 +2,57 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getQuranComSurahTranslation } from "@/lib/translations";
 import { stripBismillahPrefix } from "@/lib/utils";
+import { unstable_cache } from "next/cache";
 
 const removeDiacritics = (text: string) =>
   text.replace(/[\u064B-\u065F\u0670]/g, "");
 
-// Re-use the same global singleton cache as page.tsx so ayahs are never
-// fetched from DB more than once per server lifetime.
-const globalForAyahs = globalThis as unknown as {
-  surahAyahsCache: Record<number, any[]> | undefined;
-};
+// Persistent cross-invocation cache using Next.js built-in cache.
+// Unlike globalThis, this survives Vercel serverless cold starts.
+const getAyahsForSurah = unstable_cache(
+  async (surahNumber: number) => {
+    return await prisma.ayah.findMany({
+      where: { surahId: surahNumber },
+      orderBy: { numberInSurah: "asc" },
+    });
+  },
+  ["ayahs-for-surah"],
+  { revalidate: 2592000 } // 30 days — the Quran text does not change
+);
 
-async function getAyahsForSurah(surahNumber: number) {
-  if (!globalForAyahs.surahAyahsCache) {
-    globalForAyahs.surahAyahsCache = {};
-  }
-  if (globalForAyahs.surahAyahsCache[surahNumber]) {
-    return globalForAyahs.surahAyahsCache[surahNumber];
-  }
-  const ayahs = await prisma.ayah.findMany({
-    where: { surahId: surahNumber },
-    orderBy: { numberInSurah: "asc" },
-  });
-  globalForAyahs.surahAyahsCache[surahNumber] = ayahs;
-  return ayahs;
-}
+const getTranslationMaps = unstable_cache(
+  async (surahNumber: number, edition: string) => {
+    const translationAyahs = await getQuranComSurahTranslation(surahNumber, edition);
+    const translationMap: Record<number, string> = {};
+    const footnoteMap: Record<number, string[]> = {};
 
-// Cache translations per surah+edition so the same JSON isn't re-read on
-// every paginated request.
-const globalForTranslations = globalThis as unknown as {
-  translationCache: Record<string, { translationMap: Map<number, string>; footnoteMap: Map<number, string[]> }> | undefined;
-};
+    translationAyahs.forEach((t: any, index: number) => {
+      const fIds: string[] = [];
+      let cleanText = "";
+      if (typeof t.text === "string") {
+        let fIdsCount = 0;
+        cleanText = t.text.replace(
+          /<sup foot_note=["']?(\d+)["']?>.*?<\/sup>/gi,
+          (_match: string, id: string) => {
+            fIds.push(id);
+            fIdsCount++;
+            return `<span class="text-emerald-500 font-bold mx-1">[${fIdsCount}]</span>`;
+          }
+        );
+        cleanText = cleanText.replace(/<sup[^>]*>.*?<\/sup>/gi, "");
+      } else {
+        cleanText = t.text || "";
+      }
+      const verseNum = t.verse_number || t.numberInSurah || index + 1;
+      translationMap[verseNum] = cleanText;
+      footnoteMap[verseNum] = fIds;
+    });
 
-async function getTranslationMaps(surahNumber: number, edition: string) {
-  if (!globalForTranslations.translationCache) {
-    globalForTranslations.translationCache = {};
-  }
-  const key = `${surahNumber}:${edition}`;
-  if (globalForTranslations.translationCache[key]) {
-    return globalForTranslations.translationCache[key];
-  }
-
-  const translationAyahs = await getQuranComSurahTranslation(surahNumber, edition);
-  const translationMap = new Map<number, string>();
-  const footnoteMap = new Map<number, string[]>();
-
-  translationAyahs.forEach((t: any, index: number) => {
-    const fIds: string[] = [];
-    let cleanText = "";
-    if (typeof t.text === "string") {
-      let fIdsCount = 0;
-      cleanText = t.text.replace(
-        /<sup foot_note=["']?(\d+)["']?>.*?<\/sup>/gi,
-        (_match: string, id: string) => {
-          fIds.push(id);
-          fIdsCount++;
-          return `<span class="text-emerald-500 font-bold mx-1">[${fIdsCount}]</span>`;
-        }
-      );
-      cleanText = cleanText.replace(/<sup[^>]*>.*?<\/sup>/gi, "");
-    } else {
-      cleanText = t.text || "";
-    }
-    const verseNum = t.verse_number || t.numberInSurah || index + 1;
-    translationMap.set(verseNum, cleanText);
-    footnoteMap.set(verseNum, fIds);
-  });
-
-  const result = { translationMap, footnoteMap };
-  globalForTranslations.translationCache[key] = result;
-  return result;
-}
+    return { translationMap, footnoteMap };
+  },
+  ["translation-maps"],
+  { revalidate: 86400 } // 24 hours — translation files are static
+);
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -100,12 +81,20 @@ export async function GET(req: NextRequest) {
         numberInSurah: localAyah.numberInSurah,
         text: rawText,
         cleanText: removeDiacritics(rawText),
-        translation: translationMap.get(localAyah.numberInSurah) || "Translation missing.",
-        footnoteIds: footnoteMap.get(localAyah.numberInSurah) || [],
+        translation: translationMap[localAyah.numberInSurah] || "Translation missing.",
+        footnoteIds: footnoteMap[localAyah.numberInSurah] || [],
       };
     });
 
-    return NextResponse.json({ ayahs });
+    // Cache for 30 days at the CDN edge — Quran text + translations are immutable
+    return NextResponse.json(
+      { ayahs },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=2592000, stale-while-revalidate=86400",
+        },
+      }
+    );
   } catch (error) {
     console.error("Error in /api/ayahs:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

@@ -26,6 +26,13 @@ const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'; // Depre
 const BASE_CONCEPT_KEYWORDS: Record<string, { ar: string[]; roots: string[] }> = {
   patience: { ar: ['الصبر', 'صبر', 'صابرين', 'الابتلاء'], roots: ['صبر', 'بلي'] },
   mercy: { ar: ['الرحمن', 'الرحيم', 'رحمة', 'الرأفة'], roots: ['رحم', 'رأف'] },
+  love: { ar: ['المودة', 'الود', 'المحبة', 'الحب'], roots: ['ودد', 'حبب'] },
+  affection: { ar: ['المودة', 'الود'], roots: ['ودد'] },
+  mawaddah: { ar: ['المودة', 'الود'], roots: ['ودد'] },
+  rahmah: { ar: ['الرحمة', 'الرحمن', 'الرحيم'], roots: ['رحم'] },
+  peace: { ar: ['السكينة', 'السلام'], roots: ['سكن', 'سلم'] },
+  tranquility: { ar: ['السكينة', 'الطمأنينة'], roots: ['سكن', 'طمن'] },
+  marriage: { ar: ['الزواج', 'النكاح', 'المودة', 'الرحمة'], roots: ['زوج', 'نكح', 'ودد', 'رحم'] },
   knowledge: { ar: ['العلم', 'عليم', 'العلماء', 'الحكمة'], roots: ['علم', 'حكم'] },
   worship: { ar: ['العبادة', 'إياك نعبد', 'العبودية', 'الصلاة'], roots: ['عبد', 'صلي'] },
   guidance: { ar: ['الهدى', 'اهدنا', 'الصراط', 'التقوى'], roots: ['هدي', 'وقي'] },
@@ -192,13 +199,13 @@ export async function prepareRagQuery(userMessage: string, mode: RagMode = 'defa
 
   const systemPrompt = mode === 'lexicon' 
     ? `You are the Lexicon Query Preparation Router for a Classical Quranic RAG System.
-Your task is to analyze the user's prompt and extract the exact Arabic root word, along with exemplary verses.
+Your task is to analyze the user's prompt and extract all relevant Arabic root words, along with exemplary verses.
 
 ACTIVE MODE: "lexicon"
 
 CRITICAL INSTRUCTIONS:
-1. **Root Word Extraction**: You MUST identify the core 3-letter or 4-letter Arabic root word(s) from the user's inquiry (e.g. if user asks about 'taksanunu' or 'earning', identify root 'كسب'; if 'sakana' or 'tranquility', identify root 'سكن'). This is the most important field!
-2. **Verse Suggestion**: Provide 1 to 3 prime examples of verses where this root is beautifully showcased in the Quran. These verses will be used to demonstrate Quranic application of the root.
+1. **Root Word Extraction**: You MUST identify and extract ALL relevant 3-letter or 4-letter Arabic root words from the user's inquiry or referenced verses (e.g., if the user asks about 'mawaddah and rahmah', extract BOTH 'ودد' and 'رحم'; if asking about 'tranquility (sakina) and love', extract 'سكن' and 'ودد'; if asking about a specific verse, extract the primary roots present in that verse). Always return all relevant roots in the "rootWords" array.
+2. **Verse Suggestion**: Provide 1 to 3 prime examples of verses where these root words are beautifully showcased in the Quran. These verses will be used to demonstrate Quranic application of the roots.
 3. **Aqeedah & Fiqh Guardrail**: Strictly refuse theological (Aqeedah), sectarian, or Fiqh questions. Set isScopeValid to false.
 
 OUTPUT JSON FORMAT ONLY:
@@ -211,7 +218,7 @@ OUTPUT JSON FORMAT ONLY:
   "expandedQueryAr": "Exact classical Arabic keywords",
   "expandedQueryEn": "Expanded English terminology",
   "keywords": ["keyword1", "keyword2"],
-  "rootWords": ["3-letter or 4-letter Arabic root if applicable, e.g. صبر, رحم, علم, سكن"],
+  "rootWords": ["3-letter or 4-letter Arabic root, e.g. ودد, رحم, سكن"],
   "suggestedVerses": [{"surah": 30, "ayah": 21}]
 }`
     : `You are the Light Query Preparation & Guardrail Router for a Classical Quranic RAG System.

@@ -4,7 +4,7 @@ import { executeWithFallback, executeWithFallbackStream } from '@/lib/ai/model-r
 import { estimateTokens } from '@/lib/ai/token-budget';
 import { prepareRagQuery, RagMode } from '@/lib/ai/rag/query-router';
 import { searchHybrid, ScoredParentDocument } from '@/lib/ai/rag/hybrid-search';
-import { getLexiconEntriesForRoot } from '@/lib/lexicon/service';
+import { getLexiconEntriesForRoot, getAyahWords } from '@/lib/lexicon/service';
 
 export async function POST(req: NextRequest) {
   try {
@@ -64,7 +64,23 @@ export async function POST(req: NextRequest) {
     let documents: ScoredParentDocument[] = [];
     if (mode === 'lexicon') {
       // Lexicon Dual-Retrieval Strategy
-      // A. Lexicon Dictionary Retrieval for Root
+      // If a specific verse is targeted and rootWords is empty or needs verse roots
+      if (preparedQuery.targetSurahAyah?.surah && preparedQuery.targetSurahAyah?.ayah) {
+        try {
+          const ayahWords = await getAyahWords(preparedQuery.targetSurahAyah.surah, preparedQuery.targetSurahAyah.ayah);
+          const verseRoots = ayahWords
+            .map((w: any) => w.root)
+            .filter((r: any): r is string => !!r && r.trim().length > 0);
+          
+          if (!preparedQuery.rootWords || preparedQuery.rootWords.length === 0) {
+            preparedQuery.rootWords = Array.from(new Set(verseRoots));
+          }
+        } catch (e) {
+          console.error('Error fetching ayah words for lexicon mode:', e);
+        }
+      }
+
+      // A. Lexicon Dictionary Retrieval for Root(s)
       if (preparedQuery.rootWords && preparedQuery.rootWords.length > 0) {
         for (const root of preparedQuery.rootWords) {
           const lexResult = await getLexiconEntriesForRoot(root);
@@ -206,7 +222,7 @@ export async function POST(req: NextRequest) {
         modeSpecificRole = 'You are a master of scholastic theology (Ilm al-Kalam). Engage with deep rational arguments and logical proofs. Use rigorous, systematic logic to synthesize the answer based ONLY on the provided retrieved context. Maintain strict academic neutrality on sectarian differences.';
         break;
       case 'lexicon':
-        modeSpecificRole = 'You are an expert Arabic lexicographer and Quranic linguist. Your response must follow a strict structure:\n\n1. Lexical & Root Analysis: (Devote 80% of your response to this). Dive deep into the root semantics, classical meanings, and morphology. You MUST synthesize definitions by actively comparing the provided classical Arabic lexicons (e.g., Lisan al-Arab, Maqayis al-Lughah, Mufradat) alongside English lexicons (Lane\'s).\n\n2. Quranic Application: (Devote 20% of your response to this). Connect the root word\'s classical meaning directly to the Quran. Use the retrieved verses to explain the majestic rhetorical precision of why Allah used this specific root in that context.\n\nSTRICT GUARDRAIL: Do not provide modern fatwas or general theological debates. Keep it strictly linguistic and profoundly Quranic.';
+        modeSpecificRole = 'You are an expert Arabic lexicographer and Quranic linguist. Your response must follow a strict structure:\n\n1. Lexical & Root Analysis: (Devote 80% of your response to this). Dive deep into the root semantics, classical meanings, and morphology. You MUST synthesize definitions by actively comparing the provided classical Arabic lexicons (e.g., Lisan al-Arab, Maqayis al-Lughah, Mufradat) alongside English lexicons (Lane\'s).\n\n2. Quranic Application: (Devote 20% of your response to this). Connect the root word\'s classical meaning directly to the Quran. Use the retrieved verses to explain the majestic rhetorical precision of why Allah used this specific root in that context.\n\n3. Gem from this Root Word: Provide a dedicated section titled \'### Gem from this Root Word\' before the suggested follow-ups.\n\nSTRICT GUARDRAIL: Do not provide modern fatwas or general theological debates. Keep it strictly linguistic and profoundly Quranic.';
         break;
 
     }
@@ -232,7 +248,10 @@ CRITICAL MANDATORY FACTUALITY RULES:
 4. CLEAR & STRUCTURED: Organize your response into neat markdown sections for your student.
 5. FOLLOW-UP SUGGESTIONS: Always append 3 concise, short suggested follow-up questions at the very end of your response under the heading '### Suggested Follow-ups'. Format them as a bulleted list. Ensure the questions are brief.
 6. VERSE FORMATTING RULE: Whenever you quote or translate a Quranic verse in ANY mode, ALWAYS place it in a markdown blockquote (e.g. > "Verse text..." [Surah X:Y]). Never embed Quranic verse quotes inside plain text paragraphs.
-7. GEM / MIRACLE OF QURAN: Before the suggested follow-ups, include a section titled '### Gem from this Ayat' (or '### Miracle of Quran' if in Grammar mode). Provide one profound, mind-blowing point from the verse (linguistic/grammatical if in grammar mode, otherwise a profound tafsir point).
+7. GEM / MIRACLE OF QURAN / ROOT GEM: Before the suggested follow-ups, include a dedicated section titled:
+- In Lexicon mode: '### Gem from this Root Word' (Provide one profound, mind-blowing lexical insight about the root's core linguistic origin, classical nuance, or morphological beauty).
+- In Grammar mode: '### Miracle of Quran' (Provide a profound grammatical/balagha subtlety).
+- In all other modes: '### Gem from this Ayat' (Provide a profound tafsir or thematic point).
 8. UNRETRIEVED TOPICS: If the user asks about multiple topics but the retrieved texts only cover the main one, DO NOT invent or hallucinate answers for the unretrieved topics. Answer the main topic using the provided texts, and at the very end of your response (before the suggested follow-ups), explicitly ask the user if they want to proceed to the unaddressed topics (e.g., "You also asked about [Topic X and Topic Y]. Since we focused on [Main Topic] here, if this is clear, should we explore those next?").
 9. MULTI-VERSE THEMATIC COVERAGE: When the retrieved texts span MULTIPLE different verses (e.g. sources from 4:19, 2:228, 65:6, 30:21), you MUST touch on ALL of them. Dedicate a section or paragraph to each verse. Do NOT deep-dive exhaustively into just one verse and ignore the rest. Give balanced coverage across all retrieved verses so the student gets a holistic Quranic perspective on the topic. If they want to go deeper into a specific verse, they can ask.
 10. EQUAL SOURCE CITATION: You MUST actively cite and quote from ALL the different scholars/authors provided in the retrieved texts (e.g. if Tabari, Ibn Kathir, and Qurtubi are retrieved, you must quote all of them). Do not rely heavily on just one author and ignore the rest. Give equal weight and citation to all retrieved authors to provide a rich, multi-scholar perspective.

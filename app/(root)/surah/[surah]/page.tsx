@@ -8,49 +8,45 @@ import { cookies } from "next/headers";
 import fs from "fs";
 import path from "path";
 import { stripBismillahPrefix } from "@/lib/utils";
+import { unstable_cache } from "next/cache";
+
+// ISR: Build and cache this page at the CDN edge, revalidate every 24 hours.
+// First visitor after deployment builds the page; all subsequent visitors get
+// the cached version in <50ms from Vercel's global CDN edge network.
+export const revalidate = 86400;
 
 const removeDiacritics = (text: string) => {
   return text.replace(/[\u064B-\u065F\u0670]/g, ""); // removes harakat + dagger alif
 };
 
-// Singleton cache for Ayahs
-const globalForAyahs = globalThis as unknown as {
-  surahAyahsCache: Record<number, any[]> | undefined;
-};
+// Persistent cache for Ayahs — survives Vercel cold starts unlike globalThis.
+// Quran text is 1400 years old, so we cache it for 30 days.
+const getAyahsForSurah = unstable_cache(
+  async (surahNumber: number) => {
+    return await prisma.ayah.findMany({
+      where: { surahId: surahNumber },
+      orderBy: { numberInSurah: "asc" }
+    });
+  },
+  ["surah-ayahs"],
+  { revalidate: 2592000 } // 30 days
+);
 
-async function getAyahsForSurah(surahNumber: number) {
-  if (!globalForAyahs.surahAyahsCache) {
-    globalForAyahs.surahAyahsCache = {};
-  }
-  if (globalForAyahs.surahAyahsCache[surahNumber]) {
-    return globalForAyahs.surahAyahsCache[surahNumber];
-  }
-  const localAyahs = await prisma.ayah.findMany({
-    where: { surahId: surahNumber },
-    orderBy: { numberInSurah: "asc" }
-  });
-  globalForAyahs.surahAyahsCache[surahNumber] = localAyahs;
-  return localAyahs;
-}
-
-// Singleton cache for WBW JSON
-const globalForTranslation = globalThis as unknown as {
-  wbwTranslationCache: Record<string, string> | undefined;
-};
-
-function getWbwTranslation() {
-  if (!globalForTranslation.wbwTranslationCache) {
+// Persistent cache for WBW translation JSON — cached for 30 days.
+const getWbwTranslation = unstable_cache(
+  async (): Promise<Record<string, string>> => {
     try {
       const filePath = path.join(process.cwd(), 'database', 'word-by-word-translation', 'english-wbw-translation.json');
       const fileData = fs.readFileSync(filePath, 'utf8');
-      globalForTranslation.wbwTranslationCache = JSON.parse(fileData);
+      return JSON.parse(fileData);
     } catch (e) {
       console.error("Could not load local WBW translation:", e);
-      globalForTranslation.wbwTranslationCache = {};
+      return {};
     }
-  }
-  return globalForTranslation.wbwTranslationCache;
-}
+  },
+  ['wbw-translation-data'],
+  { revalidate: 2592000 } // 30 days — static file
+);
 
 export default async function SurahPage({
   params,
@@ -147,7 +143,7 @@ export default async function SurahPage({
   });
 
   // 6. Generate word-by-word translation map for this Surah
-  const wbwTranslationData = getWbwTranslation();
+  const wbwTranslationData = await getWbwTranslation();
   const surahWbwTranslation: Record<string, string> = {}; // key: "ayahNumber:wordIndex" -> translation
   
   for (const ayah of localAyahs) {
