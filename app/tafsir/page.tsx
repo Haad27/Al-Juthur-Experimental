@@ -200,10 +200,13 @@ export default function TafsirPage() {
   const [activeAuthor, setActiveAuthor] = useState<Author | null>(null);
   const [activeLangName, setActiveLangName] = useState<string>("");
   const [activeSurah, setActiveSurah] = useState<number>(1);
-  const [tafsirEntries, setTafsirEntries] = useState<TafsirEntry[]>([]);
+  const [loadedTafsir, setLoadedTafsir] = useState<Record<number, TafsirEntry>>({});
   const [loadingEntries, setLoadingEntries] = useState<boolean>(false);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const tafsirCacheRef = useRef<Map<string, TafsirEntry[]>>(new Map());
+  const loadedPagesRef = useRef<Set<number>>(new Set());
+  const loadingPagesRef = useRef<Set<number>>(new Set());
+  const TAFSIR_PAGE_SIZE = 15;
 
   const [topNavVisible, setTopNavVisible] = useState<boolean>(true);
   const [currentAyahIndex, setCurrentAyahIndex] = useState<number>(0);
@@ -270,36 +273,63 @@ export default function TafsirPage() {
       .catch((err) => console.error("Failed to fetch languages:", err));
   }, [urlAuthor]);
 
-  // Fetch full Surah tafsir when author or surah changes (with instant client cache)
+  const fetchTafsirPage = useCallback(async (page: number) => {
+    if (!activeAuthor) return;
+    if (loadedPagesRef.current.has(page) || loadingPagesRef.current.has(page)) return;
+    loadingPagesRef.current.add(page);
+
+    const start = page * TAFSIR_PAGE_SIZE + 1;
+    const authorId = activeAuthor.id;
+    const surahId = activeSurah;
+
+    try {
+      const res = await fetch(
+        `/api/tafsir?authorId=${authorId}&surahId=${surahId}&start=${start}&count=${TAFSIR_PAGE_SIZE}`
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) {
+        setLoadedTafsir((prev) => {
+          const next = { ...prev };
+          data.data.forEach((entry: TafsirEntry, i: number) => {
+            next[start - 1 + i] = entry;
+          });
+          return next;
+        });
+        loadedPagesRef.current.add(page);
+      }
+    } catch (e) {
+      console.error(`[TafsirReader] Failed to load page ${page}:`, e);
+    } finally {
+      loadingPagesRef.current.delete(page);
+    }
+  }, [activeAuthor, activeSurah]);
+
+  // Fetch initial Tafsir page when author or surah changes (with instant client cache)
   useEffect(() => {
     if (!activeAuthor) return;
 
     const cacheKey = `${activeAuthor.id}:${activeSurah}`;
     if (tafsirCacheRef.current.has(cacheKey)) {
-      setTafsirEntries(tafsirCacheRef.current.get(cacheKey)!);
+      const cached = tafsirCacheRef.current.get(cacheKey)!;
+      const map: Record<number, TafsirEntry> = {};
+      cached.forEach((item, idx) => { map[idx] = item; });
+      setLoadedTafsir(map);
+      loadedPagesRef.current = new Set(Array.from({ length: Math.ceil(cached.length / TAFSIR_PAGE_SIZE) }, (_, i) => i));
+      loadingPagesRef.current = new Set();
       setLoadingEntries(false);
       return;
     }
 
+    loadedPagesRef.current = new Set();
+    loadingPagesRef.current = new Set();
+    setLoadedTafsir({});
     setLoadingEntries(true);
-    fetch(`/api/tafsir?authorId=${activeAuthor.id}&surahId=${activeSurah}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && Array.isArray(data.data)) {
-          tafsirCacheRef.current.set(cacheKey, data.data);
-          setTafsirEntries(data.data);
-        } else {
-          setTafsirEntries([]);
-        }
-      })
-      .catch((err) => {
-        console.error("Failed to fetch tafsir entries:", err);
-        setTafsirEntries([]);
-      })
-      .finally(() => {
-        setLoadingEntries(false);
-      });
-  }, [activeAuthor, activeSurah]);
+
+    fetchTafsirPage(0).finally(() => {
+      setLoadingEntries(false);
+    });
+  }, [activeAuthor, activeSurah, fetchTafsirPage]);
 
   // We use Virtuoso now for virtualization, no need for manual infinite scroll observer.
 
@@ -379,65 +409,54 @@ export default function TafsirPage() {
   // IntersectionObserver for Ayah index tracking removed to improve performance
   // and eliminate the "live tracking" effect per user request.
 
-  // Auto-scroll to target ayah from URL param after entries load
-  useEffect(() => {
-    if (!urlAyah || !tafsirEntries.length || !activeAuthor) return;
-    const n = parseInt(urlAyah, 10);
-    if (isNaN(n)) return;
-    
-    const entryIdx = tafsirEntries.findIndex((e, i) => (e.ayah?.numberInSurah || i + 1) === n);
-    const scrollIdx = entryIdx !== -1 ? entryIdx : Math.max(0, n - 1);
-    setCurrentAyahIndex(scrollIdx);
+  const scrollToAyah = useCallback((num: number) => {
+    const targetIdx = Math.max(0, num - 1);
+    setCurrentAyahIndex(targetIdx);
+    const targetPage = Math.floor(targetIdx / TAFSIR_PAGE_SIZE);
 
-    const t = setTimeout(() => {
-      virtuosoRef.current?.scrollToIndex({ index: scrollIdx, align: "start", behavior: "smooth" });
-      const trackerEl = document.getElementById(`ayah-tracker-${n}`);
+    if (!loadedPagesRef.current.has(targetPage)) {
+      fetchTafsirPage(targetPage).then(() => {
+        setTimeout(() => {
+          virtuosoRef.current?.scrollToIndex({ index: targetIdx, align: "start", behavior: "smooth" });
+          const trackerEl = document.getElementById(`ayah-tracker-${num}`);
+          if (trackerEl) {
+            trackerEl.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+          const cardEl = document.getElementById(`ayah-${num}`);
+          if (cardEl) {
+            cardEl.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }, 100);
+      });
+    } else {
+      virtuosoRef.current?.scrollToIndex({ index: targetIdx, align: "start", behavior: "smooth" });
+      const trackerEl = document.getElementById(`ayah-tracker-${num}`);
       if (trackerEl) {
         trackerEl.scrollIntoView({ behavior: "smooth", block: "center" });
       }
-      const el = document.getElementById(`ayah-${n}`);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      const cardEl = document.getElementById(`ayah-${num}`);
+      if (cardEl) {
+        cardEl.scrollIntoView({ behavior: "smooth", block: "start" });
       }
-    }, 300);
-    return () => clearTimeout(t);
-  }, [urlAyah, tafsirEntries, activeAuthor]);
+    }
+  }, [fetchTafsirPage]);
+
+  // Auto-scroll to target ayah from URL param
+  useEffect(() => {
+    if (!urlAyah || !activeAuthor) return;
+    const n = parseInt(urlAyah, 10);
+    if (isNaN(n) || n < 1) return;
+    
+    scrollToAyah(n);
+  }, [urlAyah, activeAuthor, scrollToAyah]);
 
   // Auto scroll to target ayah set by Ayah Picker
   useEffect(() => {
-    if (
-      targetAyahToScroll &&
-      targetAyahToScroll.surah === activeSurah &&
-      tafsirEntries.length > 0 &&
-      !loadingEntries
-    ) {
-      // Check if entries loaded match current activeSurah
-      const firstEntrySurah = tafsirEntries[0]?.surahId || tafsirEntries[0]?.ayah?.surahId;
-      if (firstEntrySurah && firstEntrySurah !== activeSurah) {
-        return;
-      }
-
-      const targetAyah = targetAyahToScroll.ayah;
-      const entryIdx = tafsirEntries.findIndex((e, i) => (e.ayah?.numberInSurah || i + 1) === targetAyah);
-      const scrollIdx = entryIdx !== -1 ? entryIdx : Math.max(0, targetAyah - 1);
-      setCurrentAyahIndex(scrollIdx);
-      
-      const t = setTimeout(() => {
-        virtuosoRef.current?.scrollToIndex({ index: scrollIdx, align: "start", behavior: "smooth" });
-        const trackerEl = document.getElementById(`ayah-tracker-${targetAyah}`);
-        if (trackerEl) {
-          trackerEl.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-        const cardEl = document.getElementById(`ayah-${targetAyah}`);
-        if (cardEl) {
-          cardEl.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-        setTargetAyahToScroll(null);
-      }, 200);
-
-      return () => clearTimeout(t);
+    if (targetAyahToScroll && targetAyahToScroll.surah === activeSurah) {
+      scrollToAyah(targetAyahToScroll.ayah);
+      setTargetAyahToScroll(null);
     }
-  }, [targetAyahToScroll, activeSurah, tafsirEntries, loadingEntries]);
+  }, [targetAyahToScroll, activeSurah, scrollToAyah]);
 
   // Auto-scroll the left sidebar Surah selector to the active Surah
   useEffect(() => {
@@ -452,26 +471,10 @@ export default function TafsirPage() {
     }
   }, [activeSurah, activeAuthor]);
 
-  const scrollToAyah = (num: number) => {
-    const entryIdx = tafsirEntries.findIndex((e, i) => (e.ayah?.numberInSurah || i + 1) === num);
-    const scrollIdx = entryIdx !== -1 ? entryIdx : Math.max(0, num - 1);
-    setCurrentAyahIndex(scrollIdx);
-    virtuosoRef.current?.scrollToIndex({ index: scrollIdx, align: "start", behavior: "smooth" });
-    const trackerEl = document.getElementById(`ayah-tracker-${num}`);
-    if (trackerEl) {
-      trackerEl.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-    const cardEl = document.getElementById(`ayah-${num}`);
-    if (cardEl) {
-      cardEl.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
-
   const navigateAyah = useCallback((delta: number) => {
-    const nextIdx = Math.max(0, Math.min(tafsirEntries.length - 1, currentAyahIndex + delta));
-    setCurrentAyahIndex(nextIdx);
-    virtuosoRef.current?.scrollToIndex({ index: nextIdx, align: "start", behavior: "smooth" });
-  }, [currentAyahIndex, tafsirEntries.length]);
+    const nextIdx = Math.max(0, Math.min(currentSurahMeta.numberOfAyahs - 1, currentAyahIndex + delta));
+    scrollToAyah(nextIdx + 1);
+  }, [currentAyahIndex, currentSurahMeta.numberOfAyahs, scrollToAyah]);
 
 
   // ==========================================
@@ -740,18 +743,43 @@ export default function TafsirPage() {
                 <div className="size-10 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
                 <p className="text-zinc-400 text-sm">Loading Tafsir for Surah {currentSurahMeta.englishName}...</p>
               </div>
-            ) : tafsirEntries.length === 0 ? (
-              <div className="text-center py-20 bg-zinc-900/40 border border-zinc-800 rounded-xl p-8">
-                <p className="text-zinc-400">No Tafsir entries found for this Surah in this collection.</p>
-              </div>
             ) : (
               <div className="flex-1 w-full min-h-0">
                 <Virtuoso
                   ref={virtuosoRef}
                   useWindowScroll
-                  totalCount={tafsirEntries.length}
+                  totalCount={currentSurahMeta.numberOfAyahs}
+                  rangeChanged={({ startIndex, endIndex }) => {
+                    if (typeof startIndex === "number" && startIndex >= 0) {
+                      setCurrentAyahIndex(startIndex);
+                    }
+                    const BUFFER = 10;
+                    const firstNeeded = Math.max(0, startIndex - BUFFER);
+                    const lastNeeded = Math.min(currentSurahMeta.numberOfAyahs - 1, endIndex + BUFFER);
+                    const firstPage = Math.floor(firstNeeded / TAFSIR_PAGE_SIZE);
+                    const lastPage = Math.floor(lastNeeded / TAFSIR_PAGE_SIZE);
+                    for (let p = firstPage; p <= lastPage; p++) {
+                      fetchTafsirPage(p);
+                    }
+                  }}
                   itemContent={(idx) => {
-                    const entry = tafsirEntries[idx];
+                    const entry = loadedTafsir[idx];
+                    if (!entry) {
+                      return (
+                        <div key={`skeleton-${idx}`} className="border border-zinc-800/80 bg-zinc-900/40 rounded-xl p-6 mb-6 animate-pulse flex flex-col gap-4">
+                          <div className="flex justify-between items-center border-b border-zinc-800/60 pb-3">
+                            <div className="w-20 h-6 bg-zinc-800 rounded-lg" />
+                            <div className="w-16 h-6 bg-zinc-800/60 rounded" />
+                          </div>
+                          <div className="w-full h-12 bg-zinc-800/40 rounded-lg" />
+                          <div className="space-y-2 mt-2">
+                            <div className="w-full h-4 bg-zinc-800/30 rounded" />
+                            <div className="w-5/6 h-4 bg-zinc-800/30 rounded" />
+                            <div className="w-3/4 h-4 bg-zinc-800/20 rounded" />
+                          </div>
+                        </div>
+                      );
+                    }
                     return (
                       <TafsirCard 
                         key={entry.id || idx}

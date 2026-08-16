@@ -231,15 +231,21 @@ export async function GET(request: Request) {
       }
     }
 
-    // 2. Query all Ayahs + Tafsir for a specific Author and Surah (Full Surah Reader Mode)
+    // 2. Query all Ayahs + Tafsir for a specific Author and Surah (Full Surah Reader Mode with optional pagination)
     if (authorId && surahId && !ayahNum) {
       const parsedAuthorId = parseInt(authorId);
       const parsedSurahId = parseInt(surahId);
+      const startParam = searchParams.get('start');
+      const countParam = searchParams.get('count');
+      const startNum = startParam ? Math.max(1, parseInt(startParam)) : 1;
+      const countNum = countParam ? Math.max(1, parseInt(countParam)) : 0;
       
       const DB_TO_TRANS_MAP: Record<number, string> = {
         138: "97",  // Maududi UR
         139: "151", // Taqi Usmani UR
       };
+
+      let tafsirs: any[] = [];
 
       // FAST PATH 1: Pre-downloaded Local JSON Tafsirs (< 1ms read from disk)
       const localMeta = LOCAL_TAFSIR_MAP[parsedAuthorId];
@@ -253,20 +259,27 @@ export async function GET(request: Request) {
           localMeta.name
         );
         if (localData && localData.length > 0) {
-          return cachedJson({ success: true, data: localData }, 2592000, 86400);
+          tafsirs = localData;
         }
       }
       
       // FAST PATH 2: Virtual translation-based tafsirs
-      if (parsedAuthorId > 100000 || DB_TO_TRANS_MAP[parsedAuthorId]) {
+      if (tafsirs.length === 0 && (parsedAuthorId > 100000 || DB_TO_TRANS_MAP[parsedAuthorId])) {
         const transId = parsedAuthorId > 100000 ? (parsedAuthorId - 100000).toString() : DB_TO_TRANS_MAP[parsedAuthorId];
-        const tafsirs = await getVirtualTafsir(parsedAuthorId, parsedSurahId, transId);
-        return cachedJson({ success: true, data: tafsirs }, 2592000, 86400);
+        tafsirs = await getVirtualTafsir(parsedAuthorId, parsedSurahId, transId);
       }
 
       // FALLBACK: Database query
-      const tafsirs = await getSurahDbTafsir(parsedAuthorId, parsedSurahId);
-      return cachedJson({ success: true, data: tafsirs }, 2592000, 86400);
+      if (tafsirs.length === 0) {
+        tafsirs = await getSurahDbTafsir(parsedAuthorId, parsedSurahId);
+      }
+
+      if (countNum > 0) {
+        const sliced = tafsirs.slice(startNum - 1, startNum - 1 + countNum);
+        return cachedJson({ success: true, data: sliced, totalCount: tafsirs.length }, 2592000, 86400);
+      }
+
+      return cachedJson({ success: true, data: tafsirs, totalCount: tafsirs.length }, 2592000, 86400);
     }
 
     // 3. Query a specific Ayah within a Surah for an Author
