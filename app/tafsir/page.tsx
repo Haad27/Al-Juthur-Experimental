@@ -855,6 +855,7 @@ function TafsirContent() {
           onClick={() => setAiChatContext({ surah: activeSurah, ayah: currentAyahIndex + 1 })}
           label="Ask Tafsir Scholar"
           isVisible={!aiChatContext}
+          className="bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))]"
         />
 
         <AyahWheelPickerModal
