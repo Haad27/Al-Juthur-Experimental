@@ -36,15 +36,20 @@ export default function InlineTranslation({
   const [isDone, setIsDone] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [rawMarkdown, setRawMarkdown] = useState<string>("");
 
   // Load from localStorage on mount or text change
   useEffect(() => {
     if (typeof window === "undefined" || !textToTranslate) return;
-    const key = getCacheKey(textToTranslate, storageKey);
     try {
-      const saved = localStorage.getItem(key);
-      if (saved && saved.trim()) {
-        setTranslationText(saved);
+      const key = getCacheKey(textToTranslate, storageKey);
+      const cached = localStorage.getItem(key);
+      const cachedRaw = localStorage.getItem(key + "_raw");
+      if (cached) {
+        setTranslationText(cached);
+        if (cachedRaw) {
+          setRawMarkdown(cachedRaw);
+        }
         setIsDone(true);
         setIsSaved(true);
       }
@@ -67,6 +72,7 @@ export default function InlineTranslation({
     setIsSaved(false);
     setError(null);
     setTranslationText("");
+    setRawMarkdown("");
 
     try {
       const response = await fetch("/api/ai/translate", {
@@ -115,9 +121,11 @@ export default function InlineTranslation({
       const finalParsed = parseSimpleTranslation(fullText);
       if (finalParsed) {
         setTranslationText(finalParsed);
+        setRawMarkdown(fullText);
         try {
           const key = getCacheKey(textToTranslate, storageKey);
           localStorage.setItem(key, finalParsed);
+          localStorage.setItem(key + "_raw", fullText);
           setIsSaved(true);
         } catch (e) {}
       }
@@ -248,6 +256,9 @@ export default function InlineTranslation({
                 href="/ai"
                 onClick={() => {
                   sessionStorage.setItem("ai_translator_input", textToTranslate);
+                  if (rawMarkdown) {
+                    sessionStorage.setItem("ai_translator_raw_markdown", rawMarkdown);
+                  }
                 }}
                 className="text-xs text-zinc-400 hover:text-emerald-400 flex items-center gap-1 transition px-2 py-1 rounded-lg hover:bg-zinc-900"
               >

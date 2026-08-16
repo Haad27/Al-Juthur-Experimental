@@ -131,36 +131,46 @@ const getLocalDownloadedTafsir = unstable_cache(
   { revalidate: 2592000 }
 );
 
-// 3. Cached DB Surah Tafsir Loader (Fallback for authors not pre-downloaded)
-const getSurahDbTafsir = unstable_cache(
-  async (authorId: number, surahId: number) => {
-    const [ayahs, author, rawTafsirs] = await Promise.all([
-      prisma.ayah.findMany({
-        where: { surahId },
-        orderBy: { numberInSurah: 'asc' },
-        select: { id: true, surahId: true, numberInSurah: true, text: true }
+// 3. Cached DB Surah Tafsir Loader (Direct Paginated Query - fetches only requested 15 rows)
+const getSurahDbTafsirPaginated = unstable_cache(
+  async (authorId: number, surahId: number, start: number, count: number) => {
+    const [rawTafsirs, totalCount, author] = await Promise.all([
+      prisma.tafsirEntry.findMany({
+        where: { authorId, surahId },
+        orderBy: { ayahId: 'asc' },
+        skip: Math.max(0, start - 1),
+        take: count > 0 ? count : undefined,
+        include: {
+          ayah: {
+            select: { id: true, surahId: true, numberInSurah: true, text: true }
+          },
+          author: {
+            select: { id: true, name: true, authorName: true, languageId: true, era: true }
+          }
+        }
+      }),
+      prisma.tafsirEntry.count({
+        where: { authorId, surahId }
       }),
       prisma.author.findUnique({
         where: { id: authorId },
         select: { id: true, name: true, authorName: true, languageId: true, era: true }
-      }),
-      prisma.tafsirEntry.findMany({
-        where: { authorId, surahId },
-        select: { id: true, authorId: true, surahId: true, ayahId: true, text: true }
       })
     ]);
 
-    const ayahMap = new Map(ayahs.map(a => [a.id, a]));
-    const tafsirs = rawTafsirs.map(t => ({
-      ...t,
-      ayah: ayahMap.get(t.ayahId),
-      author: author
+    const data = rawTafsirs.map(t => ({
+      id: t.id,
+      authorId: t.authorId,
+      surahId: t.surahId,
+      ayahId: t.ayahId,
+      text: t.text,
+      ayah: t.ayah,
+      author: t.author || author
     }));
 
-    tafsirs.sort((a, b) => (a.ayah?.numberInSurah || 0) - (b.ayah?.numberInSurah || 0));
-    return tafsirs;
+    return { data, totalCount };
   },
-  ['surah-db-tafsir-v2'],
+  ['surah-db-tafsir-paginated-v1'],
   { revalidate: 2592000 } // 30 days
 );
 
@@ -269,17 +279,18 @@ export async function GET(request: Request) {
         tafsirs = await getVirtualTafsir(parsedAuthorId, parsedSurahId, transId);
       }
 
-      // FALLBACK: Database query
-      if (tafsirs.length === 0) {
-        tafsirs = await getSurahDbTafsir(parsedAuthorId, parsedSurahId);
+      // If local or virtual tafsirs were found, slice and return
+      if (tafsirs.length > 0) {
+        if (countNum > 0) {
+          const sliced = tafsirs.slice(startNum - 1, startNum - 1 + countNum);
+          return cachedJson({ success: true, data: sliced, totalCount: tafsirs.length }, 2592000, 86400);
+        }
+        return cachedJson({ success: true, data: tafsirs, totalCount: tafsirs.length }, 2592000, 86400);
       }
 
-      if (countNum > 0) {
-        const sliced = tafsirs.slice(startNum - 1, startNum - 1 + countNum);
-        return cachedJson({ success: true, data: sliced, totalCount: tafsirs.length }, 2592000, 86400);
-      }
-
-      return cachedJson({ success: true, data: tafsirs, totalCount: tafsirs.length }, 2592000, 86400);
+      // FAST PATH 3: Direct paginated database query (queries ONLY requested 15 rows from Turso)
+      const { data: dbData, totalCount } = await getSurahDbTafsirPaginated(parsedAuthorId, parsedSurahId, startNum, countNum);
+      return cachedJson({ success: true, data: dbData, totalCount }, 2592000, 86400);
     }
 
     // 3. Query a specific Ayah within a Surah for an Author

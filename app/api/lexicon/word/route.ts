@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getWordMorphology, getLexiconEntriesForRoot } from '@/lib/lexicon/service';
+import { getWordMorphology, getRootWordSummary } from '@/lib/lexicon/service';
 
 export async function GET(req: NextRequest) {
   try {
@@ -23,13 +23,9 @@ export async function GET(req: NextRequest) {
 
     if (morphology.root) {
       rootQuery = morphology.root.replace(/\s+/g, '');
-      const lexiconResult = await getLexiconEntriesForRoot(rootQuery);
-      if (lexiconResult.structuredLane?.summary_en) {
-        rootSummary = lexiconResult.structuredLane.summary_en;
-      }
-      if (lexiconResult.ai_summary) {
-        aiSummary = lexiconResult.ai_summary;
-      }
+      const summaryResult = await getRootWordSummary(rootQuery);
+      rootSummary = summaryResult.rootSummary;
+      aiSummary = summaryResult.aiSummary;
     }
 
     return NextResponse.json(

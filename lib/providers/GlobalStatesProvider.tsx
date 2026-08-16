@@ -31,11 +31,13 @@ interface GlobalState {
   aiInputText: string;
   setAiInputText: React.Dispatch<React.SetStateAction<string>>;
   aiTranslationData: any[] | null;
+  setAiTranslationData: React.Dispatch<React.SetStateAction<any[] | null>>;
   aiIsTranslating: boolean;
   aiUntranslatedText: string | null;
   setAiUntranslatedText: React.Dispatch<React.SetStateAction<string | null>>;
   aiError: string | null;
   triggerAiTranslation: (text: string, append?: boolean) => Promise<void>;
+  loadCachedAiTranslation: (input: string, rawMarkdown: string) => void;
   clearAiTranslation: () => void;
   
   isWordDialogVisible: boolean;
@@ -368,6 +370,16 @@ function parseMarkdownTable(text: string, originalFragments?: {text: string, del
     }
   };
 
+  const loadCachedAiTranslation = (input: string, rawMarkdown: string) => {
+    setAiInputText(input);
+    const originalFragments = fragmentArabicText(input);
+    const rows = parseMarkdownTable(rawMarkdown, originalFragments, true);
+    setAiTranslationData(rows);
+    setAiUntranslatedText(null);
+    setAiError(null);
+    setAiIsTranslating(false);
+  };
+
   const clearAiTranslation = () => {
     setAiInputText("");
     setAiTranslationData(null);
@@ -401,11 +413,13 @@ function parseMarkdownTable(text: string, originalFragments?: {text: string, del
         aiInputText,
         setAiInputText,
         aiTranslationData,
+        setAiTranslationData,
         aiIsTranslating,
         aiUntranslatedText,
         setAiUntranslatedText,
         aiError,
         triggerAiTranslation,
+        loadCachedAiTranslation,
         clearAiTranslation,
         isWordDialogVisible,
         setIsWordDialogVisible,

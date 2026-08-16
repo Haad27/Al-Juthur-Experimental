@@ -21,6 +21,7 @@ function AiTranslatorContent() {
     aiUntranslatedText,
     aiError,
     triggerAiTranslation,
+    loadCachedAiTranslation,
     clearAiTranslation,
   } = useGlobalState();
 
@@ -32,16 +33,24 @@ function AiTranslatorContent() {
   useEffect(() => {
     const inputParam = searchParams.get('input');
     const sessionInput = typeof window !== 'undefined' ? sessionStorage.getItem('ai_translator_input') : null;
+    const sessionRawMarkdown = typeof window !== 'undefined' ? sessionStorage.getItem('ai_translator_raw_markdown') : null;
     const targetText = sessionInput || inputParam;
 
     if (sessionInput) {
       sessionStorage.removeItem('ai_translator_input');
     }
+    if (sessionRawMarkdown) {
+      sessionStorage.removeItem('ai_translator_raw_markdown');
+    }
 
     if (targetText && targetText.trim()) {
-      triggerAiTranslation(targetText);
+      if (sessionRawMarkdown) {
+        loadCachedAiTranslation(targetText, sessionRawMarkdown);
+      } else {
+        triggerAiTranslation(targetText);
+      }
     }
-  }, [searchParams, triggerAiTranslation]);
+  }, [searchParams, triggerAiTranslation, loadCachedAiTranslation]);
 
   // Auto scroll down to translation results whenever translation starts
   useEffect(() => {

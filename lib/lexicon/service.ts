@@ -124,6 +124,34 @@ const getAiSummaries = unstable_cache(
 );
 
 /**
+ * Lightweight instant lookup for word click popup (0 database roundtrips, < 1ms)
+ */
+export async function getRootWordSummary(rootQuery: string): Promise<{
+  rootSummary: string | null;
+  aiSummary: { root_meaning_html: string; quranic_usage_html: string } | null;
+}> {
+  const variants = normalizeRootVariants(rootQuery);
+  const [laneList, aiSummaries] = await Promise.all([
+    getStructuredLaneData(),
+    getAiSummaries(),
+  ]);
+
+  const structuredLane =
+    laneList.find(
+      (r) =>
+        r.root === variants.compact ||
+        r.root.replace(/\s+/g, '') === variants.compact
+    ) || null;
+
+  const aiSummary = aiSummaries[variants.compact] || aiSummaries[rootQuery] || null;
+
+  return {
+    rootSummary: structuredLane?.summary_en || null,
+    aiSummary,
+  };
+}
+
+/**
  * Strips Arabic diacritics (Tashkeel / Harakat), Kashida, and standardizes spaces/Alif.
  */
 export function normalizeArabic(text: string): string {
