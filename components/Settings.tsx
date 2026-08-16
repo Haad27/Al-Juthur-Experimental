@@ -1,4 +1,5 @@
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
+import { useAudioStore } from "@/lib/stores/audioStore";
 import React from "react";
 import { Slider } from "./ui/slider";
 import { Switch } from "./ui/switch";

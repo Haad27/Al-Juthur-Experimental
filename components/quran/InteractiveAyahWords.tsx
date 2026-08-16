@@ -47,7 +47,7 @@ const formatArabicWithIndoPak = (html: string) => {
   if (!html) return '';
   return html.replace(
     /([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+(?:\s+[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+)*)/g,
-    '<span class="font-mushaf-indopak-16 text-lg md:text-xl leading-normal inline-block mx-1" dir="rtl">$&</span>'
+    '<span class="font-mushaf-indopak-16 text-sm sm:text-base leading-normal text-emerald-200 inline-block mx-1" dir="rtl">$&</span>'
   );
 };
 

@@ -51,4 +51,10 @@ next-env.d.ts
 *.sqlite3
 *.zip
 database/
+!database/surah-meta/
+!database/surah-meta/**
+!database/word-by-word-translation/
+!database/word-by-word-translation/**
+!database/pdf/
+!database/pdf/**
 localtunnel_output.txt

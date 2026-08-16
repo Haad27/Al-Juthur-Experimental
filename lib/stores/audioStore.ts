@@ -5,6 +5,7 @@ interface AudioState {
   currentAyah: number | null;
   currentWord: number | null;
   isPlaying: boolean;
+  playbackRate: number;
   audioElement: HTMLAudioElement | null;
   
   // Actions
@@ -15,6 +16,7 @@ interface AudioState {
   setCurrentAyah: (ayah: number | null) => void;
   setCurrentWord: (word: number | null) => void;
   setIsPlaying: (isPlaying: boolean) => void;
+  setPlaybackRate: (rate: number) => void;
   clearAudio: () => void;
 }
 
@@ -23,6 +25,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
   currentAyah: null,
   currentWord: null,
   isPlaying: false,
+  playbackRate: 1,
   audioElement: null,
 
   playAyah: (surahNumber, ayahNumber, audioUrl) => {
@@ -35,6 +38,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
           state.audioElement.pause();
           set({ isPlaying: false });
         } else {
+          state.audioElement.playbackRate = state.playbackRate || 1;
           state.audioElement.play();
           set({ isPlaying: true });
         }
@@ -49,6 +53,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
     }
 
     const audio = new Audio(audioUrl);
+    audio.playbackRate = state.playbackRate || 1;
     
     audio.addEventListener('ended', () => {
       set({ currentAyah: null, isPlaying: false });
@@ -84,6 +89,18 @@ export const useAudioStore = create<AudioState>((set, get) => ({
   setCurrentAyah: (ayah) => set({ currentAyah: ayah }),
   setCurrentWord: (word) => set({ currentWord: word }),
   setIsPlaying: (isPlaying) => set({ isPlaying }),
+  
+  setPlaybackRate: (rate: number) => {
+    const { audioElement } = get();
+    if (audioElement) {
+      audioElement.playbackRate = rate;
+    }
+    // Also trigger custom event so other active audio players sync
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('playbackRateChange', { detail: { rate } }));
+    }
+    set({ playbackRate: rate });
+  },
 
   clearAudio: () => {
     const { audioElement } = get();

@@ -203,6 +203,7 @@ export default function TafsirPage() {
   const [tafsirEntries, setTafsirEntries] = useState<TafsirEntry[]>([]);
   const [loadingEntries, setLoadingEntries] = useState<boolean>(false);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
+  const tafsirCacheRef = useRef<Map<string, TafsirEntry[]>>(new Map());
 
   const [topNavVisible, setTopNavVisible] = useState<boolean>(true);
   const [currentAyahIndex, setCurrentAyahIndex] = useState<number>(0);
@@ -269,15 +270,23 @@ export default function TafsirPage() {
       .catch((err) => console.error("Failed to fetch languages:", err));
   }, [urlAuthor]);
 
-  // Fetch full Surah tafsir when author or surah changes
+  // Fetch full Surah tafsir when author or surah changes (with instant client cache)
   useEffect(() => {
     if (!activeAuthor) return;
+
+    const cacheKey = `${activeAuthor.id}:${activeSurah}`;
+    if (tafsirCacheRef.current.has(cacheKey)) {
+      setTafsirEntries(tafsirCacheRef.current.get(cacheKey)!);
+      setLoadingEntries(false);
+      return;
+    }
 
     setLoadingEntries(true);
     fetch(`/api/tafsir?authorId=${activeAuthor.id}&surahId=${activeSurah}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.data)) {
+          tafsirCacheRef.current.set(cacheKey, data.data);
           setTafsirEntries(data.data);
         } else {
           setTafsirEntries([]);

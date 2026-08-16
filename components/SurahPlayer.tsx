@@ -89,7 +89,15 @@ export default function SurahPlayer({
   const [playing, setPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
-  const [playbackRate, setPlaybackRate] = useState(1);
+  const globalPlaybackRate = useAudioStore(s => s.playbackRate || 1);
+  const [playbackRate, setPlaybackRate] = useState(globalPlaybackRate);
+
+  useEffect(() => {
+    setPlaybackRate(globalPlaybackRate);
+    if (audioRef.current) {
+      audioRef.current.playbackRate = globalPlaybackRate;
+    }
+  }, [globalPlaybackRate]);
 
   const [recording, setRecording] = useState(false);
   const [showReciteGuide, setShowReciteGuide] = useState(false);
@@ -502,7 +510,7 @@ export default function SurahPlayer({
                 {playbackRates.slice(2, 6).map((rate) => (
                   <button
                     key={rate}
-                    onClick={() => setPlaybackRate(rate)}
+                    onClick={() => audioStore.setPlaybackRate(rate)}
                     className={`flex-1 py-1 rounded-lg text-xs font-semibold transition ${
                       playbackRate === rate ? "bg-emerald-600 text-white" : "text-zinc-400 hover:text-white"
                     }`}

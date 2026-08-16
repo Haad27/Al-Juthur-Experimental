@@ -32,12 +32,19 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({
-      morphology,
-      rootSummary,
-      rootQuery,
-      aiSummary,
-    });
+    return NextResponse.json(
+      {
+        morphology,
+        rootSummary,
+        rootQuery,
+        aiSummary,
+      },
+      {
+        headers: {
+          'Cache-Control': 'public, s-maxage=2592000, stale-while-revalidate=86400',
+        },
+      }
+    );
   } catch (error: any) {
     console.error('Error in GET /api/lexicon/word:', error);
     return NextResponse.json({ error: error.message || 'Failed to fetch word morphology' }, { status: 500 });

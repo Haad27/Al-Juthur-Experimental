@@ -228,135 +228,74 @@ export function getDictionaries(): DictionaryInfo[] {
   ];
 }
 
-export async function getSurahWords(surah: number) {
-  // surahWordsCache stored separately on globalThis since it grows per-surah
-  // and unstable_cache requires serializable keys. globalThis is acceptable here
-  // because surah-words responses are also cached at the CDN HTTP layer for 30 days.
-  const globalForCache = globalThis as unknown as { surahWordsCache: Record<number, any> | undefined };
-  if (!globalForCache.surahWordsCache) {
-    globalForCache.surahWordsCache = {};
-  }
-  if (globalForCache.surahWordsCache[surah]) {
-    return globalForCache.surahWordsCache[surah];
-  }
-  try {
-    const turso = getTursoClient();
-    const res = await turso.execute({
-      sql: `
-        SELECT 
-          r.ayahNo,
-          r.wordNo, 
-          r.word as rasmWord, 
-          s.root, 
-          c.sarf, 
-          i.irabMushakkal
-        FROM word_content_rasm r
-        LEFT JOIN word_statistics s ON r.surahNo = s.surahNo AND r.ayahNo = s.ayahNo AND r.wordNo = s.wordNo
-        LEFT JOIN word_content_sarf c ON r.surahNo = c.surahNo AND r.ayahNo = c.ayahNo AND r.wordNo = c.wordNo
-        LEFT JOIN word_content_irab i ON r.surahNo = i.surahNo AND r.ayahNo = i.ayahNo AND r.wordNo = i.wordNo
-        WHERE r.surahNo = ?
-        ORDER BY r.ayahNo ASC, r.wordNo ASC
-      `,
-      args: [surah]
-    });
-    const rows = res.rows;
-
-    // Fetch English Morphology
-    let engMorphMap: Record<string, string> = {};
+export const getSurahWords = unstable_cache(
+  async (surah: number): Promise<Record<number, any[]>> => {
     try {
-      const engRes = await turso.execute({
-        sql: `SELECT ayah, word, pos_tags FROM word_morphology WHERE surah = ?`,
-        args: [surah]
-      });
+      const turso = getTursoClient();
+      const [res, engRes] = await Promise.all([
+        turso.execute({
+          sql: `
+            SELECT 
+              r.ayahNo,
+              r.wordNo, 
+              r.word as rasmWord, 
+              s.root, 
+              c.sarf, 
+              i.irabMushakkal
+            FROM word_content_rasm r
+            LEFT JOIN word_statistics s ON r.surahNo = s.surahNo AND r.ayahNo = s.ayahNo AND r.wordNo = s.wordNo
+            LEFT JOIN word_content_sarf c ON r.surahNo = c.surahNo AND r.ayahNo = c.ayahNo AND r.wordNo = c.wordNo
+            LEFT JOIN word_content_irab i ON r.surahNo = i.surahNo AND r.ayahNo = i.ayahNo AND r.wordNo = i.wordNo
+            WHERE r.surahNo = ?
+            ORDER BY r.ayahNo ASC, r.wordNo ASC
+          `,
+          args: [surah]
+        }),
+        turso.execute({
+          sql: `SELECT ayah, word, pos_tags FROM word_morphology WHERE surah = ?`,
+          args: [surah]
+        }).catch((e: any) => {
+          console.error('Error fetching English morphology:', e);
+          return { rows: [] };
+        })
+      ]);
+
+      const rows = res.rows;
+      const engMorphMap: Record<string, string> = {};
       for (const er of engRes.rows) {
         engMorphMap[`${er.ayah}:${er.word}`] = er.pos_tags as string;
       }
-    } catch (e) {
-      console.error('Error fetching English morphology:', e);
-    }
 
-    const map: Record<number, any[]> = {};
-    for (const r of rows) {
-      const ayahNo = r.ayahNo as number;
-      const wordNo = r.wordNo as number;
-      if (!map[ayahNo]) map[ayahNo] = [];
-      const normalizedWordIdx = (surah === 2 && ayahNo === 1 && wordNo === 5) ? 1 : wordNo;
-      const engMorph = engMorphMap[`${ayahNo}:${normalizedWordIdx}`] || engMorphMap[`${ayahNo}:${wordNo}`];
-      
-      map[ayahNo].push({
-        wordIndex: normalizedWordIdx,
-        word: r.rasmWord,
-        root: r.root || null,
-        lemma: null,
-        stem: engMorph || r.sarf || null, // Using stem for Sarf text, preferring English
-        irab: engMorph ? null : (r.irabMushakkal || null), // Omit Arabic irab if we have English
-      });
+      const map: Record<number, any[]> = {};
+      for (const r of rows) {
+        const ayahNo = r.ayahNo as number;
+        const wordNo = r.wordNo as number;
+        if (!map[ayahNo]) map[ayahNo] = [];
+        const normalizedWordIdx = (surah === 2 && ayahNo === 1 && wordNo === 5) ? 1 : wordNo;
+        const engMorph = engMorphMap[`${ayahNo}:${normalizedWordIdx}`] || engMorphMap[`${ayahNo}:${wordNo}`];
+        
+        map[ayahNo].push({
+          wordIndex: normalizedWordIdx,
+          word: r.rasmWord,
+          root: r.root || null,
+          lemma: null,
+          stem: engMorph || r.sarf || null,
+          irab: engMorph ? null : (r.irabMushakkal || null),
+        });
+      }
+      return map;
+    } catch (err) {
+      console.error('Error fetching surah words from Turso:', err);
+      return {};
     }
-    globalForCache.surahWordsCache[surah] = map;
-    return map;
-  } catch (err) {
-    console.error('Error fetching surah words from Turso:', err);
-    return {};
-  }
-}
+  },
+  ['surah-words-map-v2'],
+  { revalidate: 2592000 } // 30 days
+);
 
 export async function getAyahWords(surah: number, ayah: number) {
-  const globalForCache = globalThis as unknown as { surahWordsCache: Record<number, any> | undefined };
-  if (!globalForCache.surahWordsCache?.[surah]) {
-    await getSurahWords(surah);
-  }
-  if (globalForCache.surahWordsCache?.[surah]?.[ayah]) {
-    return globalForCache.surahWordsCache[surah][ayah];
-  }
-  try {
-    const turso = getTursoClient();
-    const res = await turso.execute({
-      sql: `
-        SELECT 
-          r.wordNo, 
-          r.word as rasmWord, 
-          s.root, 
-          c.sarf, 
-          i.irabMushakkal
-        FROM word_content_rasm r
-        LEFT JOIN word_statistics s ON r.surahNo = s.surahNo AND r.ayahNo = s.ayahNo AND r.wordNo = s.wordNo
-        LEFT JOIN word_content_sarf c ON r.surahNo = c.surahNo AND r.ayahNo = c.ayahNo AND r.wordNo = c.wordNo
-        LEFT JOIN word_content_irab i ON r.surahNo = i.surahNo AND r.ayahNo = i.ayahNo AND r.wordNo = i.wordNo
-        WHERE r.surahNo = ? AND r.ayahNo = ?
-        ORDER BY r.wordNo ASC
-      `,
-      args: [surah, ayah]
-    });
-    const rows = res.rows;
-
-    let engMorphMap: Record<string, string> = {};
-    try {
-      const engRes = await turso.execute({
-        sql: `SELECT word, pos_tags FROM word_morphology WHERE surah = ? AND ayah = ?`,
-        args: [surah, ayah]
-      });
-      for (const er of engRes.rows) {
-        engMorphMap[er.word as string] = er.pos_tags as string;
-      }
-    } catch (e) { }
-
-    return rows.map((r: any) => {
-      const wordNo = r.wordNo as number;
-      const normalizedWordIdx = (surah === 2 && ayah === 1 && wordNo === 5) ? 1 : wordNo;
-      const engMorph = engMorphMap[normalizedWordIdx] || engMorphMap[wordNo];
-      return {
-        wordIndex: normalizedWordIdx,
-        word: r.rasmWord,
-        root: r.root || null,
-        lemma: null,
-        stem: engMorph || r.sarf || null, // repurposing stem field for sarf text
-        irab: engMorph ? null : (r.irabMushakkal || null),
-      };
-    });
-  } catch (err) {
-    console.error('Error fetching ayah words from Turso:', err);
-    return [];
-  }
+  const map = await getSurahWords(surah);
+  return map[ayah] || [];
 }
 
 /**

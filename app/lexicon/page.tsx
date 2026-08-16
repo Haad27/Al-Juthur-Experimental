@@ -100,7 +100,7 @@ const formatArabicWithIndoPak = (html: string) => {
   if (!html) return '';
   return html.replace(
     /([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+(?:\s+[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+)*)/g,
-    '<span class="font-mushaf-indopak-16 text-lg md:text-xl leading-normal inline-block mx-1" dir="rtl">$&</span>'
+    '<span class="font-mushaf-indopak-16 text-sm sm:text-base leading-normal text-emerald-200 inline-block mx-1" dir="rtl">$&</span>'
   );
 };
 
@@ -555,39 +555,29 @@ function LexiconPageContent() {
                 </div>
               )}
 
-              {/* AI Comprehensive Root Summary (Collapsible) */}
+              {/* AI Comprehensive Root Summary (Always Open & Styled like Root Word Analysis) */}
               {result.ai_summary && (
-                <div className="bg-gradient-to-br from-zinc-900/90 via-zinc-900/70 to-zinc-950/90 border border-emerald-500/30 rounded-2xl shadow-xl overflow-hidden transition-all duration-300">
-                  <button 
-                    onClick={() => setIsAiSummaryExpanded(!isAiSummaryExpanded)}
-                    className="w-full flex items-center justify-between p-4 hover:bg-emerald-500/5 transition-colors group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="p-1.5 bg-emerald-500/20 rounded-md border border-emerald-500/30 text-emerald-400 group-hover:scale-110 transition-transform">
-                        <Sparkles className="size-4" />
-                      </div>
-                      <h3 className="text-sm font-bold text-emerald-300 tracking-tight">Comprehensive Root Summary</h3>
-                      {!isAiSummaryExpanded && (
-                        <span className="hidden md:inline-block text-xs text-zinc-500 ml-2 truncate max-w-[300px] font-medium">
-                          Click to expand AI-generated insights...
-                        </span>
-                      )}
+                <div className="bg-gradient-to-br from-zinc-900/90 via-zinc-900/70 to-zinc-950/90 border border-emerald-500/30 rounded-2xl p-4 sm:p-6 shadow-xl space-y-4">
+                  <div className="flex items-center gap-2.5 border-b border-zinc-800/80 pb-3">
+                    <div className="p-1.5 bg-emerald-500/20 rounded-md border border-emerald-500/30 text-emerald-400">
+                      <Sparkles className="size-4" />
                     </div>
-                    <ChevronDown className={`size-4 text-emerald-500/70 transition-transform duration-300 ${isAiSummaryExpanded ? 'rotate-180' : ''}`} />
-                  </button>
+                    <h3 className="text-sm sm:text-base font-bold text-emerald-300 tracking-tight">Comprehensive Root Summary</h3>
+                  </div>
 
-                  <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10 px-5 pb-6 pt-2 border-t border-emerald-500/10 transition-all duration-300 ${isAiSummaryExpanded ? 'block opacity-100' : 'hidden opacity-0'}`}>
-                    <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                      <Sparkles className="size-32 text-emerald-400" />
-                    </div>
-                    <div className="space-y-2">
-                      <h4 className="text-[11px] uppercase tracking-widest font-bold text-zinc-400 border-b border-zinc-800/80 pb-1.5">Root Word Meaning</h4>
-                      <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-slate-200 prose-em:text-slate-400" dangerouslySetInnerHTML={{ __html: formatArabicWithIndoPak(result.ai_summary.root_meaning_html) }} />
+                  <div className="space-y-4">
+                    <div>
+                      <strong className="text-emerald-400 font-semibold block mb-1 text-xs sm:text-sm">
+                        Root Meaning:
+                      </strong>
+                      <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-slate-200 prose-em:text-slate-400 text-xs sm:text-sm" dangerouslySetInnerHTML={{ __html: formatArabicWithIndoPak(result.ai_summary.root_meaning_html) }} />
                     </div>
                     
-                    <div className="space-y-2">
-                      <h4 className="text-[11px] uppercase tracking-widest font-bold text-emerald-500/80 border-b border-emerald-900/30 pb-1.5">Quranic Usage</h4>
-                      <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-slate-200 prose-em:text-slate-400" dangerouslySetInnerHTML={{ __html: formatArabicWithIndoPak(result.ai_summary.quranic_usage_html) }} />
+                    <div className="border-t border-zinc-800/80 pt-3">
+                      <strong className="text-amber-400 font-semibold block mb-1 text-xs sm:text-sm">
+                        Quranic Usage:
+                      </strong>
+                      <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-slate-200 prose-em:text-slate-400 text-xs sm:text-sm" dangerouslySetInnerHTML={{ __html: formatArabicWithIndoPak(result.ai_summary.quranic_usage_html) }} />
                     </div>
                   </div>
                 </div>
