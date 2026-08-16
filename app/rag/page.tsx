@@ -16,12 +16,10 @@ import {
 } from "lucide-react";
 import { inter } from "@/app/fonts";
 import { RAG_MODES } from "@/lib/ai/rag/modes-config";
-import Loading from "@/app/loading";
 
 export default function RagLandingPage() {
   const router = useRouter();
   const [showDataInfo, setShowDataInfo] = useState(false);
-  const [isLoadingMode, setIsLoadingMode] = useState(false);
 
   return (
     <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-slate-100 flex flex-col pb-36 md:pb-16 ${inter.className}`}>
@@ -206,7 +204,6 @@ export default function RagLandingPage() {
                 <div className="pt-4 mt-4 border-t border-zinc-800/80">
                   <button
                     onClick={() => {
-                      setIsLoadingMode(true);
                       router.push(`/rag/chat?mode=${mode.id}`);
                     }}
                     className="w-full py-2 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500 border border-emerald-500/30 hover:border-emerald-500 text-emerald-400 hover:text-white font-semibold text-xs sm:text-sm flex items-center justify-between transition-all duration-200 shadow-sm group/btn"
@@ -228,9 +225,6 @@ export default function RagLandingPage() {
         </div>
 
       </main>
-      
-      {/* Loading Overlay when switching models */}
-      {isLoadingMode && <Loading />}
     </div>
   );
 }

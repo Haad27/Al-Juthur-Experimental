@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Loading from "@/app/loading";
 import LoadingScreen from "@/components/landing3d/LoadingScreen";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -23,52 +22,49 @@ const ScrollSections = dynamic(() => import("@/components/landing3d/ScrollSectio
 const APP_IMAGES = [
   "/images/landing/image1.png",
   "/images/landing/image3.png",
-  "/images/landing/image5.png",
-  "/images/landing/image8.png",
-  "/images/landing/image11.png",
-  "/images/landing/image13.png",
+  "/images/landing/image2.png",
+  "/images/landing/image4.png",
 ];
 
 const APP_CAPTIONS = [
-  "Modern Interface",
-  "Quran Reader",
-  "130+ Tafsirs",
-  "8+ Lexicons",
-  "AI Translation",
-  "6 AI Models",
+  "Comprehensive Lexicons",
+  "Thematic Tafsir Insights",
+  "Word-by-Word Analysis",
+  "Contextual Discovery",
 ];
 
 export default function LandingPage() {
-  const scrollProgress = useRef(0);
-  const mainRef = useRef<HTMLDivElement>(null);
-  const heroRef = useRef<HTMLDivElement>(null);
-  const heroContentRef = useRef<HTMLDivElement>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const mainRef = useRef<HTMLDivElement>(null);
+  const heroContentRef = useRef<HTMLDivElement>(null);
+  const scrollProgress = useRef<number>(0);
 
-  // Set up master ScrollTrigger to track overall page progress
   useEffect(() => {
-    if (!mainRef.current) return;
+    // Lock scroll briefly while 3D assets load
+    document.body.style.overflow = "hidden";
+    const timer = setTimeout(() => {
+      document.body.style.overflow = "";
+    }, 1800);
+    return () => {
+      document.body.style.overflow = "";
+      clearTimeout(timer);
+    };
+  }, []);
 
+  useEffect(() => {
     const ctx = gsap.context(() => {
       ScrollTrigger.create({
         trigger: mainRef.current,
         start: "top top",
         end: "bottom bottom",
-        scrub: 0,
+        scrub: 0.5,
         onUpdate: (self) => {
           scrollProgress.current = self.progress;
         },
       });
-    });
+    }, mainRef);
 
-    // Refresh after fonts/images load
-    const timer = setTimeout(() => ScrollTrigger.refresh(), 800);
-
-    return () => {
-      clearTimeout(timer);
-      ctx.revert();
-    };
+    return () => ctx.revert();
   }, []);
 
   // Hero content fade-out on scroll
@@ -98,14 +94,12 @@ export default function LandingPage() {
   };
 
   const handleStartUsingIt = () => {
-    setIsLoading(true);
     router.push("/home");
   };
 
   return (
     <div ref={mainRef} className="relative w-full bg-black text-white selection:bg-emerald-500/30">
       <LoadingScreen />
-      {isLoading && <Loading />}
       {/* Fixed 3D Canvas — persists behind entire page */}
       <div className="fixed inset-0 z-0">
         <Scene avatars={APP_IMAGES} captions={APP_CAPTIONS} scrollProgress={scrollProgress} />

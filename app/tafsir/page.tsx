@@ -737,15 +737,8 @@ export default function TafsirPage() {
               )}
             </div>
 
-            {/* Loading Indicator */}
-            {loadingEntries ? (
-              <div className="flex flex-col items-center justify-center py-24 space-y-4">
-                <div className="size-10 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
-                <p className="text-zinc-400 text-sm">Loading Tafsir for Surah {currentSurahMeta.englishName}...</p>
-              </div>
-            ) : (
-              <div className="flex-1 w-full min-h-0">
-                <Virtuoso
+            <div className="flex-1 w-full min-h-0">
+              <Virtuoso
                   ref={virtuosoRef}
                   useWindowScroll
                   totalCount={currentSurahMeta.numberOfAyahs}
@@ -794,7 +787,6 @@ export default function TafsirPage() {
                   }}
                 />
               </div>
-            )}
           </main>
 
           {/* Right Sidebar: Compact Ayah Jump Index */}
