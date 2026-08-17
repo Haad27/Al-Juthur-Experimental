@@ -31,7 +31,7 @@ import {
   Loader2,
   SkipBack,
   SkipForward,
-  Map,
+  Map as MapIcon,
   Compass,
   ChevronRight,
 } from "lucide-react";
@@ -44,6 +44,7 @@ import { amiri } from "@/app/fonts";
 import useScrollDirection from "@/hooks/useScrollDirection";
 import { KeyValue } from "@/components/ui/key-value";
 import { ALL_TRANSLATION_OPTIONS } from "@/lib/translationsManifest";
+import AlJuthurLoadingProgress from "@/components/shared/AlJuthurLoadingProgress";
 
 interface AyahProps {
   number: number;
@@ -146,15 +147,15 @@ function processTranslation(rawTranslation: string) {
 
   const footnotes: string[] = [];
 
-  // Extract inline footnotes: <sup footnote-id="...">...</sup>
+  // Extract inline footnotes: <sup ...>...</sup> or <a ...>...</a>
   let clean = rawTranslation.replace(
-    /<sup\s+footnote-id="([^"]+)">([\s\S]*?)<\/sup>/gi,
+    /<(?:sup|a|span)\b[^>]*(?:foot_note|footnote_id|footnote-id|footnote|data-footnote|data-foot_note)=["']?([^"'>\s]+)["']?[^>]*>([\s\S]*?)<\/(?:sup|a|span)>/gi,
     (_match, _id, content) => {
       const footnoteText = content.replace(/<[^>]*>?/gm, '').trim();
-      if (footnoteText) {
+      if (footnoteText && !/^\d+$/.test(footnoteText)) {
         footnotes.push(footnoteText);
       }
-      return ` <span class="text-emerald-400 font-semibold cursor-pointer text-xs">(${footnotes.length})</span>`;
+      return ` <span class="text-emerald-400 font-semibold cursor-pointer text-xs footnote-indicator">(${footnotes.length || content})</span>`;
     }
   );
 
@@ -304,43 +305,60 @@ const AyahRow = React.memo(({
         setLoadingFootnotes(true);
         const newFootnotes = { ...fetchedFootnotes };
 
+        const fetchPromises: Promise<any>[] = [];
+
         // 1. If it's a translation with Tafsir/Commentary (Dr. Israr, Maududi, Taqi Usmani)
         if (isTafsirEdition) {
-          try {
-            let authorId = "100158";
-            if (translationEdition === "97" || translationEdition === "234") authorId = "138";
-            if (translationEdition === "151" || translationEdition === "84") authorId = "139";
-            if (translationEdition === "158") authorId = "158";
+          let authorId = "100158";
+          if (translationEdition === "97" || translationEdition === "234") authorId = "138";
+          if (translationEdition === "151" || translationEdition === "84") authorId = "139";
+          if (translationEdition === "158") authorId = "158";
 
-            const res = await fetch(`/api/tafsir?authorId=${authorId}&surahId=${surahNumber}&ayahId=${ayah.numberInSurah}`);
-            if (res.ok) {
-              const data = await res.json();
-              if (data.data && data.data[0]?.text) {
-                newFootnotes["tafsir_note"] = data.data[0].text;
-              }
-            }
-          } catch(e) {
-            console.error("Error fetching dynamic tafsir note:", e);
-          }
-        }
-
-        // 2. Standard Quran.com API footnotes
-        if (ayah.footnoteIds && ayah.footnoteIds.length > 0) {
-          for (const fId of ayah.footnoteIds) {
-            try {
-              const res = await fetch(`https://api.quran.com/api/v4/foot_notes/${fId}`);
-              if (res.ok) {
-                const data = await res.json();
-                if (data.foot_note) {
-                  newFootnotes[fId] = data.foot_note.text;
+          fetchPromises.push(
+            fetch(`/api/tafsir?authorId=${authorId}&surahId=${surahNumber}&ayahId=${ayah.numberInSurah}`)
+              .then(res => res.ok ? res.json() : null)
+              .then(data => {
+                if (data?.data && data.data[0]?.text) {
+                  newFootnotes["tafsir_note"] = data.data[0].text;
                 }
-              }
-            } catch(e) {
-              console.error(e);
-            }
-          }
+              })
+              .catch(e => console.error("Error fetching dynamic tafsir note:", e))
+          );
         }
 
+        // 2. Standard Quran.com API footnotes - Batch & Parallel
+        if (ayah.footnoteIds && ayah.footnoteIds.length > 0) {
+          const idsToFetch = ayah.footnoteIds.join(",");
+          fetchPromises.push(
+            fetch(`/api/footnote?ids=${idsToFetch}`)
+              .then(res => res.ok ? res.json() : null)
+              .then(data => {
+                if (data?.footnotes) {
+                  Object.assign(newFootnotes, data.footnotes);
+                }
+              })
+              .catch(async () => {
+                // Fallback to Quran.com direct parallel
+                await Promise.all(
+                  ayah.footnoteIds!.map(async (fId) => {
+                    try {
+                      const res = await fetch(`https://api.quran.com/api/v4/foot_notes/${fId}`);
+                      if (res.ok) {
+                        const data = await res.json();
+                        if (data?.foot_note?.text) {
+                          newFootnotes[fId] = data.foot_note.text;
+                        }
+                      }
+                    } catch (e) {
+                      console.error(e);
+                    }
+                  })
+                );
+              })
+          );
+        }
+
+        await Promise.all(fetchPromises);
         setFetchedFootnotes(newFootnotes);
         setLoadingFootnotes(false);
       }
@@ -728,13 +746,29 @@ export default function SurahReaderClient({
   const [aiChatContext, setAiChatContext] = useState<{ surah: number; ayah: number } | null>(null);
   const [tafsirWheelContext, setTafsirWheelContext] = useState<{ surah: number; ayah: number } | null>(null);
 
-  // ─── Paginated loading state ─────────────────────────────────────────────────
+  const currentTranslationOption = useMemo(() => {
+    return ALL_TRANSLATION_OPTIONS.find(t => t.identifier === translationEdition);
+  }, [translationEdition]);
+
+  // ─── Paginated loading state & Instant Translation Cache ─────────────────────
   // Keyed by 0-based index. Starts pre-populated with the server-rendered first page.
   const [loadedAyahs, setLoadedAyahs] = useState<Record<number, AyahProps>>(() => {
     const map: Record<number, AyahProps> = {};
     initialAyahs.forEach((a, i) => { map[i] = a; });
     return map;
   });
+
+  const [isSwitchingTranslation, setIsSwitchingTranslation] = useState(false);
+
+  // In-memory client cache: stores loaded ayahs per translation edition for 0ms instant switches
+  const translationCacheRef = useRef<Map<string, { ayahs: Record<number, AyahProps>; pages: Set<number> }>>(
+    new Map([
+      [`${surah?.number || 1}:${initialEdition}`, {
+        ayahs: initialAyahs.reduce((acc, a, i) => { acc[i] = a; return acc; }, {} as Record<number, AyahProps>),
+        pages: new Set([0])
+      }]
+    ])
+  );
 
   // Which page numbers are already loaded / currently in-flight (avoid duplicate fetches)
   const loadedPagesRef = useRef<Set<number>>(new Set([0]));
@@ -755,6 +789,14 @@ export default function SurahReaderClient({
       setLoadedAyahs(prev => {
         const next = { ...prev };
         data.ayahs.forEach((ayah, i) => { next[start - 1 + i] = ayah; });
+
+        // Update in-memory translation cache
+        const cacheKey = `${surahNumber}:${edition}`;
+        const existing = translationCacheRef.current.get(cacheKey) || { ayahs: {}, pages: new Set<number>() };
+        existing.ayahs = { ...existing.ayahs, ...next };
+        existing.pages.add(page);
+        translationCacheRef.current.set(cacheKey, existing);
+
         return next;
       });
       loadedPagesRef.current.add(page);
@@ -765,20 +807,47 @@ export default function SurahReaderClient({
     }
   }, [surahNumber]);
 
-  // When the translation edition changes, wipe the loaded ayahs and refetch
-  // from scratch. Skip on first mount (server data already matches initialEdition).
+  // When translation edition changes:
+  // 1. If in cache -> 0ms instant swap
+  // 2. If not -> trigger immediate fetch of visible pages and show progress bar
   const isFirstEditionMount = useRef(true);
   useEffect(() => {
     if (isFirstEditionMount.current) {
       isFirstEditionMount.current = false;
       return;
     }
-    // Clear everything
+
+    const cacheKey = `${surahNumber}:${translationEdition}`;
+    const cached = translationCacheRef.current.get(cacheKey);
+
+    if (cached && Object.keys(cached.ayahs).length > 0) {
+      // 0ms INSTANT cache restore
+      loadedPagesRef.current = new Set(cached.pages);
+      loadingPagesRef.current = new Set();
+      setLoadedAyahs({ ...cached.ayahs });
+      setIsSwitchingTranslation(false);
+      return;
+    }
+
+    // Reset and immediately trigger fetching page 0 (and visible page)
+    setIsSwitchingTranslation(true);
     loadedPagesRef.current = new Set();
     loadingPagesRef.current = new Set();
     setLoadedAyahs({});
-    // rangeChanged will fire and fetch the visible pages automatically
-  }, [translationEdition]);
+
+    const targetPage = Math.max(0, Math.floor((visibleAyahNumber - 1) / PAGE_SIZE));
+
+    fetchPage(targetPage, translationEdition)
+      .then(() => {
+        setIsSwitchingTranslation(false);
+        if (targetPage === 0 && totalAyahs > PAGE_SIZE) {
+          fetchPage(1, translationEdition);
+        }
+      })
+      .catch(() => {
+        setIsSwitchingTranslation(false);
+      });
+  }, [translationEdition, surahNumber, fetchPage, visibleAyahNumber, totalAyahs]);
   // ─────────────────────────────────────────────────────────────────────────────
 
   // Proactively prefetch adjacent Surahs so navigating to Next/Previous Surah is 100% instant
@@ -1016,7 +1085,7 @@ export default function SurahReaderClient({
                   
                   <div className="font-semibold text-emerald-400 uppercase tracking-wider text-[11px] mb-5 border-b border-emerald-500/20 pb-3 flex items-center justify-between">
                     <span className="text-emerald-400 font-bold uppercase tracking-wider text-[12px] flex items-center gap-2">
-                      <Map size={15} />
+                      <MapIcon size={15} />
                       CONTEXT & THEME OF {surahInfo.surah_name?.toUpperCase() || surah?.englishName?.toUpperCase()}
                     </span>
                     <button onClick={() => setShowSurahContext(false)} className="hover:bg-zinc-800 p-1.5 rounded-full transition-colors text-zinc-400 hover:text-white">
@@ -1043,27 +1112,39 @@ export default function SurahReaderClient({
         </div>
 
         <div className="flex flex-col w-full min-h-[100dvh] px-2 sm:px-4 md:px-6 lg:px-8">
-          <Virtuoso
-            ref={virtuosoRef}
-            useWindowScroll
-            totalCount={totalAyahs}
-            rangeChanged={({ startIndex, endIndex }) => {
-              // Update the visible ayah tracker
-              if (typeof startIndex === "number" && startIndex >= 0) {
-                setVisibleAyahNumber(startIndex + 1);
-              }
-              // Pre-fetch pages that overlap with the visible range + a buffer of 15 items
-              const BUFFER = 15;
-              const firstNeeded = Math.max(0, startIndex - BUFFER);
-              const lastNeeded = Math.min(totalAyahs - 1, endIndex + BUFFER);
-              const firstPage = Math.floor(firstNeeded / PAGE_SIZE);
-              const lastPage = Math.floor(lastNeeded / PAGE_SIZE);
-              for (let p = firstPage; p <= lastPage; p++) {
-                fetchPage(p, translationEdition);
-              }
-            }}
-            itemContent={(index) => {
-              const ayah = loadedAyahs[index];
+          {isSwitchingTranslation && Object.keys(loadedAyahs).length === 0 ? (
+            <AlJuthurLoadingProgress
+              title={`Switching to ${currentTranslationOption?.englishName || "Translation"}...`}
+              subtitle={`Language: ${currentTranslationOption?.languageLabel || "Multilingual"} (${translationEdition})`}
+              statusMessages={[
+                "Connecting to verified Quranic translations...",
+                "Aligning footnote annotations & linguistic nuance...",
+                "Preparing verse typography & layout..."
+              ]}
+              minDurationMs={600}
+            />
+          ) : (
+            <Virtuoso
+              ref={virtuosoRef}
+              useWindowScroll
+              totalCount={totalAyahs}
+              rangeChanged={({ startIndex, endIndex }) => {
+                // Update the visible ayah tracker
+                if (typeof startIndex === "number" && startIndex >= 0) {
+                  setVisibleAyahNumber(startIndex + 1);
+                }
+                // Pre-fetch pages that overlap with the visible range + a buffer of 15 items
+                const BUFFER = 15;
+                const firstNeeded = Math.max(0, startIndex - BUFFER);
+                const lastNeeded = Math.min(totalAyahs - 1, endIndex + BUFFER);
+                const firstPage = Math.floor(firstNeeded / PAGE_SIZE);
+                const lastPage = Math.floor(lastNeeded / PAGE_SIZE);
+                for (let p = firstPage; p <= lastPage; p++) {
+                  fetchPage(p, translationEdition);
+                }
+              }}
+              itemContent={(index) => {
+                const ayah = loadedAyahs[index];
               if (!ayah) {
                 // Show a height-matched skeleton so Virtuoso never needs to correct
                 // the scroll position when real content arrives.
@@ -1100,6 +1181,7 @@ export default function SurahReaderClient({
               );
             }}
           />
+        )}
 
           <div className="mb-32 md:mb-12 w-full flex justify-center items-center pb-12">
             <div className="flex gap-4 w-full max-w-md px-2 justify-center mt-8 sm:mt-10 pt-2">

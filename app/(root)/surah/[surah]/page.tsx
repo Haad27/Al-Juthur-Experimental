@@ -130,12 +130,15 @@ export default async function SurahPage({
     
     if (typeof t.text === "string") {
       let fIdsCount = 0;
-      cleanText = t.text.replace(/<sup foot_note=["']?(\d+)["']?>.*?<\/sup>/gi, (_match: string, id: string) => {
-        fIds.push(id);
-        fIdsCount++;
-        return `<span class="text-emerald-500 font-bold mx-1">[${fIdsCount}]</span>`;
-      });
-      cleanText = cleanText.replace(/<sup[^>]*>.*?<\/sup>/gi, "");
+      cleanText = t.text.replace(
+        /<(?:sup|a|span)\b[^>]*(?:foot_note|footnote_id|footnote-id|footnote|data-foot_note|data-footnote)=["']?(\d+)["']?[^>]*>([\s\S]*?)<\/(?:sup|a|span)>/gi,
+        (_match: string, id: string) => {
+          fIds.push(id);
+          fIdsCount++;
+          return `<span class="text-emerald-500 font-bold mx-1 cursor-pointer footnote-ref" data-findex="${fIdsCount}" data-fid="${id}">[${fIdsCount}]</span>`;
+        }
+      );
+      cleanText = cleanText.replace(/<sup[^>]*>([\s\S]*?)<\/sup>/gi, "$1");
     } else {
       cleanText = t.text || "";
     }

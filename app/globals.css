@@ -134,10 +134,21 @@ html, body {
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-/* Font Face for UthmanicHafs (KFQPC Glyph Font V2 — Madani Mushaf) */
+/* Font Face for UthmanicHafs (KFQPC Hafs V22 — Modern Madani Mushaf) */
 @font-face {
   font-family: 'UthmanicHafs';
-  src: url('/assets/fonts/UthmanicHafs1Ver18.woff2') format('woff2');
+  src: url('/assets/fonts/UthmanicHafs_V22.woff2') format('woff2'),
+       url('/assets/fonts/UthmanicHafs1Ver18.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* UthmanicHafs V17 — Classic Old KFQPC Hafs font */
+@font-face {
+  font-family: 'UthmanicHafs17';
+  src: url('/assets/fonts/UthmanicHafs1-Ver17.woff2') format('woff2'),
+       url('/assets/fonts/UthmanicHafs1Ver18.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -147,6 +158,15 @@ html, body {
 @font-face {
   font-family: 'UthmanicHafs18';
   src: url('/assets/fonts/UthmanicHafs1Ver18.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* UthmanicHafs V22 */
+@font-face {
+  font-family: 'UthmanicHafs22';
+  src: url('/assets/fonts/UthmanicHafs_V22.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -203,15 +223,15 @@ html, body {
 /* MUSHAF SCRIPT STYLES — 9 Authentic QUL Layouts               */
 /* ============================================================ */
 
-/* 1. Madani Mushaf V2 — KFQPC Uthmanic Hafs Glyph Font (default) */
+/* 1. Madani Mushaf V2 — KFQPC Uthmanic Hafs V22 Glyph Font (default) */
 .font-mushaf-v2 {
-  font-family: 'UthmanicHafs', 'Amiri', serif;
+  font-family: 'UthmanicHafs', 'UthmanicHafs22', 'Amiri', serif;
   font-feature-settings: 'kern' 1, 'liga' 1;
 }
 
-/* 2. Madani Mushaf V1 — Old KFQPC glyph font (same base, lighter weight) */
+/* 2. Madani Mushaf V1 — Old KFQPC glyph font (V17) */
 .font-mushaf-v1 {
-  font-family: 'UthmanicHafs', 'Amiri', serif;
+  font-family: 'UthmanicHafs17', 'UthmanicHafs', 'Amiri', serif;
   font-weight: 400;
   letter-spacing: normal;
 }
@@ -224,14 +244,14 @@ html, body {
 
 /* 4. Uthmani Simple — Amiri Quran Unicode text */
 .font-mushaf-uthmani-simple {
-  font-family: 'UthmanicHafs18', 'Amiri', serif;
+  font-family: 'UthmanicHafs', 'Amiri', serif;
   font-weight: 400;
   letter-spacing: normal;
 }
 
-/* 5. KFQPC Premium — UthmanicHafs V18 (higher quality) */
+/* 5. KFQPC Premium — UthmanicHafs V22 / V18 HD */
 .font-mushaf-kfqpc {
-  font-family: 'UthmanicHafs18', 'UthmanicHafs', serif;
+  font-family: 'UthmanicHafs22', 'UthmanicHafs18', 'UthmanicHafs', serif;
   font-weight: 400;
   letter-spacing: normal;
 }

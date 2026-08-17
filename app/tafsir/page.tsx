@@ -19,6 +19,7 @@ import { copyToClipboard, cn } from "@/lib/utils";
 import { getTafsirFameRank, getLanguagePriority, getTafsirDifficulty } from "@/lib/tafsirRanking";
 import { getTafsirWarning } from "@/lib/tafsirWarnings";
 import InlineTranslation from "@/components/shared/InlineTranslation";
+import AlJuthurLoadingProgress from "@/components/shared/AlJuthurLoadingProgress";
 
 interface Author {
   id: number;
@@ -114,25 +115,38 @@ const TafsirFootnotesLoader = ({ footnoteIds, isUrdu }: { footnoteIds: string[],
     setLoading(true);
     const fetchAll = async () => {
       const newFootnotes = { ...fetchedFootnotes };
-      let updated = false;
-      for (const fId of footnoteIds) {
-        if (!newFootnotes[fId]) {
-          try {
-            const res = await fetch(`https://api.quran.com/api/v4/foot_notes/${fId}`);
-            if (res.ok) {
-              const data = await res.json();
-              if (data.foot_note) {
-                newFootnotes[fId] = data.foot_note.text;
-                updated = true;
-              }
+      const missingIds = footnoteIds.filter(fId => !newFootnotes[fId]);
+
+      if (missingIds.length > 0) {
+        try {
+          const res = await fetch(`/api/footnote?ids=${missingIds.join(",")}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data?.footnotes) {
+              Object.assign(newFootnotes, data.footnotes);
             }
-          } catch(e) {
-            console.error(e);
           }
+        } catch {
+          await Promise.all(
+            missingIds.map(async (fId) => {
+              try {
+                const res = await fetch(`https://api.quran.com/api/v4/foot_notes/${fId}`);
+                if (res.ok) {
+                  const data = await res.json();
+                  if (data?.foot_note?.text) {
+                    newFootnotes[fId] = data.foot_note.text;
+                  }
+                }
+              } catch (e) {
+                console.error(e);
+              }
+            })
+          );
         }
       }
+
       if (isMounted) {
-        if (updated) setFetchedFootnotes(newFootnotes);
+        setFetchedFootnotes(newFootnotes);
         setLoading(false);
       }
     };
@@ -141,7 +155,7 @@ const TafsirFootnotesLoader = ({ footnoteIds, isUrdu }: { footnoteIds: string[],
   }, [footnoteIds]);
 
   if (loading && Object.keys(fetchedFootnotes).length === 0) {
-    return <p className="text-zinc-500 animate-pulse text-xs">Loading explanation...</p>;
+    return <p className="text-emerald-400/80 animate-pulse text-xs">Loading commentary notes...</p>;
   }
 
   return (
@@ -730,7 +744,19 @@ function TafsirContent() {
             </div>
 
             <div className="flex-1 w-full min-h-0">
-              <Virtuoso
+              {loadingEntries && Object.keys(loadedTafsir).length === 0 ? (
+                <AlJuthurLoadingProgress
+                  title={`Loading ${activeAuthor?.name?.replace(/\s*\([^)]*\)\s*$/, '').trim() || "Tafsir"}`}
+                  subtitle={`Surah ${currentSurahMeta.englishName} (${activeLangName || "Scholarly Exegesis"})`}
+                  statusMessages={[
+                    "Retrieving authentic classical exegesis...",
+                    "Cross-referencing scholarly commentary & notes...",
+                    "Preparing typography & structured annotations..."
+                  ]}
+                  minDurationMs={600}
+                />
+              ) : (
+                <Virtuoso
                   ref={virtuosoRef}
                   useWindowScroll
                   totalCount={currentSurahMeta.numberOfAyahs}
@@ -770,7 +796,8 @@ function TafsirContent() {
                     );
                   }}
                 />
-              </div>
+              )}
+            </div>
           </main>
 
           {/* Right Sidebar: Compact Ayah Jump Index */}

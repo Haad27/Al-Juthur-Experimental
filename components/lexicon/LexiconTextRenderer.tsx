@@ -39,8 +39,9 @@ export default function LexiconTextRenderer({ text, compact = false }: LexiconTe
         const isArabicLine = /[\u0600-\u06FF]/.test(line) && (line.match(/[\u0600-\u06FF]/g)?.length || 0) > line.length * 0.3;
 
         if (isArabicLine && !line.includes('<li')) {
-          // Fix Uthmani sifr mark dotted circle bug
-          const displayLine = line.replace(/(\S)([\u06DF\u06E0])/g, '<span class="font-mushaf-warsh">$1$2</span>');
+          const displayLine = line
+            .replace(/\u064E\u0670/g, '\u0670')
+            .replace(/\u0670\u064E/g, '\u0670');
 
           // Render plain Arabic text with beautiful font, no heavy green wrapper
           return (
@@ -56,11 +57,11 @@ export default function LexiconTextRenderer({ text, compact = false }: LexiconTe
         // For lines that are mostly English but contain Arabic words, style the Arabic words
         let styledLine = line.replace(
           /([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+(?:\s+[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+)*)/g,
-          `<span class="font-arabic text-emerald-200/90 leading-normal inline-block mx-1 ${compact ? 'text-lg md:text-xl' : 'text-xl md:text-2xl'}" dir="rtl">$&</span>`
+          (match) => {
+            const cleaned = match.replace(/\u064E\u0670/g, '\u0670').replace(/\u0670\u064E/g, '\u0670');
+            return `<span class="font-arabic text-emerald-200/90 leading-normal inline-block mx-1 ${compact ? 'text-lg md:text-xl' : 'text-xl md:text-2xl'}" dir="rtl">${cleaned}</span>`;
+          }
         );
-
-        // Fix Uthmani sifr mark dotted circle bug within mixed text lines
-        styledLine = styledLine.replace(/(\S)([\u06DF\u06E0])/g, '<span class="font-mushaf-warsh">$1$2</span>');
 
         // If it's a list item, use div instead of p so block styling works well
         const Tag = line.includes('<li') || line.includes('<ul') ? 'div' : 'p';

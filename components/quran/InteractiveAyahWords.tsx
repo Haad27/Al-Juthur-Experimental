@@ -208,17 +208,8 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
 
         const data = wordDataMap[wordIdx];
         const meaning = wbwTranslation?.[`${ayahNumber}:${wordIdx}`];
-
-        // The Uthmanic Hafs V18 font has a known OpenType bug where Sifr marks (U+06DF, U+06E0)
-        // and small meem marks (U+06D2, U+06E2, U+06ED) fail to combine with their base letters, 
-        // rendering an ugly dotted circle or mixing with the word.
-        // To fix this without losing the small circle/meem, we wrap the base letter and the mark
-        // in IndoPak 15-line font (which has a straight Alif matching Uthmani) which renders it flawlessly.
-        // We override line-height to 1 to prevent it from elevating the flex item.
-        let displayWord = word;
-        if (mushafFontClass.includes('v1') || mushafFontClass.includes('v2') || mushafFontClass.includes('uthmani') || mushafFontClass.includes('kfqpc')) {
-          displayWord = word.replace(/(\S)([\u06DF\u06E0\u06D2\u06E2\u06ED])/g, '<span class="font-mushaf-indopak-15" style="line-height: 1 !important; display: inline-block;">$1$2</span>');
-        }
+        // Normalize redundant double-vowel markings (e.g. Fatha + Dagger Alif) to single authentic Dagger Alif
+        const displayWord = word.replace(/\u064E\u0670/g, '\u0670').replace(/\u0670\u064E/g, '\u0670');
 
         return (
           <Dialog key={idx} onOpenChange={(open) => { 
