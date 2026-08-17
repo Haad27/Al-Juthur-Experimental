@@ -195,47 +195,94 @@ const getSurahDbTafsir = unstable_cache(
   { revalidate: 2592000 } // 30 days
 );
 
-// 4. Cached Virtual Translation-Based Tafsir Loader
+// Helper to prefetch all footnotes for a Surah in parallel
+async function fetchSurahFootnotes(fIds: string[]): Promise<Record<string, string>> {
+  if (!fIds || fIds.length === 0) return {};
+  const uniqueIds = Array.from(new Set(fIds));
+  const results: Record<string, string> = {};
+
+  await Promise.all(
+    uniqueIds.map(async (id) => {
+      try {
+        const res = await fetch(`https://api.quran.com/api/v4/foot_notes/${id}`, {
+          next: { revalidate: 2592000 }, // Cache 30 days
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.foot_note?.text) {
+            results[id] = data.foot_note.text;
+          }
+        }
+      } catch (e) {
+        console.error(`Failed to prefetch footnote ${id}:`, e);
+      }
+    })
+  );
+  return results;
+}
+
+// 4. Cached Virtual Translation-Based Tafsir Loader (Pre-fetches and embeds all commentary footnotes)
 const getVirtualTafsir = unstable_cache(
   async (authorId: number, surahId: number, transId: string) => {
     const [translations, ayahs] = await Promise.all([
       getQuranComSurahTranslation(surahId, transId),
-      getAyahsForSurah(surahId)
+      getAyahsForSurah(surahId),
     ]);
-    
+
+    const footnoteRegex = /<[a-z0-9]+\b[^>]*(?:foot_note|footnote_id|footnote-id|footnote|data-foot_note|data-footnote)=["']?(\d+)["']?[^>]*>[\s\S]*?<\/[a-z0-9]+>/gi;
+
+    // Collect all footnote IDs for the entire Surah to batch-fetch in 1 parallel wave
+    const allFootnoteIds: string[] = [];
+    translations.forEach((t: any) => {
+      if (typeof t.text === "string") {
+        let match;
+        const localRegex = new RegExp(footnoteRegex.source, "gi");
+        while ((match = localRegex.exec(t.text)) !== null) {
+          allFootnoteIds.push(match[1]);
+        }
+      }
+    });
+
+    const footnoteTexts = await fetchSurahFootnotes(allFootnoteIds);
+
     return translations.map((t: any, index: number) => {
       let cleanText = t.text || "";
       const fIds: string[] = [];
-      
+      const verseFootnotes: Record<string, string> = {};
+
       if (typeof t.text === "string") {
-        cleanText = t.text.replace(/<sup foot_note=["']?(\d+)["']?>.*?<\/sup>/gi, (match: string, id: string) => {
+        cleanText = t.text.replace(footnoteRegex, (_match: string, id: string) => {
           fIds.push(id);
+          if (footnoteTexts[id]) {
+            verseFootnotes[id] = footnoteTexts[id];
+          }
           return ` <span class="text-emerald-500 font-bold">[${fIds.length}]</span> `;
         });
         cleanText = cleanText.replace(/<sup[^>]*>.*?<\/sup>/gi, "");
       }
-      
+
       const verseNum = t.verse_number || t.numberInSurah || (index + 1);
-      const arabicAyah = ayahs.find(a => a.numberInSurah === verseNum);
-      
+      const arabicAyah = ayahs.find((a) => a.numberInSurah === verseNum);
+
       return {
         id: authorId * 1000 + verseNum,
         authorId: authorId,
         surahId: surahId,
         ayahId: verseNum,
         text: cleanText,
-        footnoteIds: fIds, // We pass footnoteIds to the client
+        footnoteIds: fIds,
+        footnotes: verseFootnotes, // Pre-populated footnotes for frame-0 instant rendering!
         ayah: {
           id: arabicAyah?.id || verseNum,
           surahId: surahId,
           numberInSurah: verseNum,
-          text: arabicAyah?.text || "Arabic Text", 
+          text: arabicAyah?.text || "Arabic Text",
         },
-        author: { name: "Virtual Tafsir" }
+        author: { name: "Virtual Tafsir" },
       };
     });
   },
-  ['virtual-tafsir-v3'],
+  ['virtual-tafsir-v5'],
   { revalidate: 2592000 } // 30 days
 );
 
@@ -245,7 +292,7 @@ export async function GET(request: Request) {
   const surahId = searchParams.get('surahId');
   const ayahNum = searchParams.get('ayahId');
   const authorId = searchParams.get('authorId');
-  
+
   try {
     // 1. Basic query to fetch all languages & authors
     if (!language && !surahId && !ayahNum && !authorId) {
@@ -266,7 +313,7 @@ export async function GET(request: Request) {
       const countParam = searchParams.get('count');
       const startNum = startParam ? Math.max(1, parseInt(startParam)) : 1;
       const countNum = countParam ? Math.max(1, parseInt(countParam)) : 0;
-      
+
       const DB_TO_TRANS_MAP: Record<number, string> = {
         138: "97",  // Maududi UR
         139: "151", // Taqi Usmani UR
@@ -290,7 +337,7 @@ export async function GET(request: Request) {
           tafsirs = localData;
         }
       }
-      
+
       // FAST PATH 2: Virtual translation-based tafsirs
       if (tafsirs.length === 0 && (parsedAuthorId > 100000 || DB_TO_TRANS_MAP[parsedAuthorId])) {
         const transId = parsedAuthorId > 100000 ? (parsedAuthorId - 100000).toString() : DB_TO_TRANS_MAP[parsedAuthorId];
@@ -316,7 +363,12 @@ export async function GET(request: Request) {
       const parsedSurahId = parseInt(surahId);
       const parsedAyahNum = parseInt(ayahNum);
 
-      // FAST PATH: Check local downloaded tafsir first
+      const DB_TO_TRANS_MAP: Record<number, string> = {
+        138: "97",  // Maududi UR
+        139: "151", // Taqi Usmani UR
+      };
+
+      // FAST PATH 1: Check local downloaded tafsir first
       const localMeta = LOCAL_TAFSIR_MAP[parsedAuthorId];
       if (localMeta) {
         const allSurahTafsirs = await getLocalDownloadedTafsir(
@@ -334,29 +386,39 @@ export async function GET(request: Request) {
         }
       }
 
+      // FAST PATH 2: Check virtual translation-based tafsir for single ayah
+      if (parsedAuthorId > 100000 || DB_TO_TRANS_MAP[parsedAuthorId]) {
+        const transId = parsedAuthorId > 100000 ? (parsedAuthorId - 100000).toString() : DB_TO_TRANS_MAP[parsedAuthorId];
+        const allSurahTafsirs = await getVirtualTafsir(parsedAuthorId, parsedSurahId, transId);
+        if (allSurahTafsirs && allSurahTafsirs.length > 0) {
+          const match = allSurahTafsirs.filter((t: any) => t.ayahId === parsedAyahNum || t.ayah?.numberInSurah === parsedAyahNum);
+          return cachedJson({ success: true, data: match }, 2592000, 86400);
+        }
+      }
+
       const [rawTafsirs, author, ayah] = await Promise.all([
         prisma.tafsirEntry.findMany({
           where: {
             authorId: parsedAuthorId,
             surahId: parsedSurahId,
-            ayah: { numberInSurah: parsedAyahNum }
+            ayah: { numberInSurah: parsedAyahNum },
           },
-          select: { id: true, authorId: true, surahId: true, ayahId: true, text: true }
+          select: { id: true, authorId: true, surahId: true, ayahId: true, text: true },
         }),
         prisma.author.findUnique({
           where: { id: parsedAuthorId },
-          select: { id: true, name: true, authorName: true }
+          select: { id: true, name: true, authorName: true },
         }),
         prisma.ayah.findFirst({
           where: { surahId: parsedSurahId, numberInSurah: parsedAyahNum },
-          select: { id: true, surahId: true, numberInSurah: true, text: true }
-        })
+          select: { id: true, surahId: true, numberInSurah: true, text: true },
+        }),
       ]);
 
-      const tafsirs = rawTafsirs.map(t => ({
+      const tafsirs = rawTafsirs.map((t) => ({
         ...t,
         ayah: ayah,
-        author: author
+        author: author,
       }));
       return cachedJson({ success: true, data: tafsirs }, 2592000, 86400);
     }

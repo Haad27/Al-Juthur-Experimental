@@ -54,6 +54,7 @@ interface TafsirEntry {
   ayah?: Ayah;
   author?: Author;
   footnoteIds?: string[];
+  footnotes?: Record<string, string>;
 }
 
 const getTagColorClass = (color?: string) => {
@@ -99,24 +100,38 @@ const matchesSmartSearch = (
   } ${author.era || ""}`;
 
   const normalizedTarget = normalizeText(rawTarget);
-  const strippedTarget = normalizedTarget.replace(/\b(al|ar|an|at|az|as|ad|ash|el)\s+/g, " ");
+  const strippedTarget = rawTarget.toLowerCase().replace(/[^a-z0-9]/g, "");
 
   return queryTokens.every((token) => {
     return normalizedTarget.includes(token) || strippedTarget.includes(token);
   });
 };
 
-const TafsirFootnotesLoader = ({ footnoteIds, isUrdu }: { footnoteIds: string[], isUrdu?: boolean }) => {
-  const [fetchedFootnotes, setFetchedFootnotes] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(true);
+const TafsirFootnotesLoader = ({ 
+  footnoteIds, 
+  initialFootnotes,
+  isUrdu 
+}: { 
+  footnoteIds: string[]; 
+  initialFootnotes?: Record<string, string>;
+  isUrdu?: boolean;
+}) => {
+  const [fetchedFootnotes, setFetchedFootnotes] = useState<Record<string, string>>(initialFootnotes || {});
+  const [loading, setLoading] = useState(!initialFootnotes || Object.keys(initialFootnotes).length === 0);
 
   useEffect(() => {
     let isMounted = true;
+    const newFootnotes = { ...(initialFootnotes || {}), ...fetchedFootnotes };
+    const missingIds = footnoteIds.filter(fId => !newFootnotes[fId]);
+
+    if (missingIds.length === 0) {
+      setLoading(false);
+      setFetchedFootnotes(newFootnotes);
+      return;
+    }
+
     setLoading(true);
     const fetchAll = async () => {
-      const newFootnotes = { ...fetchedFootnotes };
-      const missingIds = footnoteIds.filter(fId => !newFootnotes[fId]);
-
       if (missingIds.length > 0) {
         try {
           const res = await fetch(`/api/footnote?ids=${missingIds.join(",")}`);
@@ -152,27 +167,34 @@ const TafsirFootnotesLoader = ({ footnoteIds, isUrdu }: { footnoteIds: string[],
     };
     fetchAll();
     return () => { isMounted = false; };
-  }, [footnoteIds]);
+  }, [footnoteIds, initialFootnotes]);
 
   if (loading && Object.keys(fetchedFootnotes).length === 0) {
     return <p className="text-emerald-400/80 animate-pulse text-xs">Loading commentary notes...</p>;
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 mt-2">
       {footnoteIds.map((fId, idx) => (
         <div 
           key={fId} 
-          className="leading-relaxed text-sm text-zinc-300" 
+          className="leading-relaxed text-sm md:text-base text-zinc-200 bg-zinc-900/70 p-4 rounded-xl border border-zinc-800/80 shadow-sm" 
           dir={isUrdu ? "rtl" : "auto"}
           style={{
             fontFamily: isUrdu ? "'Noto Nastaliq Urdu', serif" : undefined,
-            lineHeight: isUrdu ? "2.2" : undefined,
-            fontSize: isUrdu ? "1.1rem" : undefined
+            lineHeight: isUrdu ? "2.6" : "1.75",
+            fontSize: isUrdu ? "1.15rem" : undefined
           }}
         >
-          <span className="text-emerald-500 font-bold mx-2 inline-block" dir="ltr">[{idx + 1}]</span>
-          <span dangerouslySetInnerHTML={{ __html: fetchedFootnotes[fId] || "Explanation unavailable." }} />
+          <div className="flex items-start gap-2.5">
+            <span className="text-emerald-400 font-bold px-2 py-0.5 bg-emerald-950/60 rounded border border-emerald-500/30 text-xs shrink-0 inline-block font-mono" dir="ltr">
+              [{idx + 1}]
+            </span>
+            <div 
+              className="flex-1"
+              dangerouslySetInnerHTML={{ __html: fetchedFootnotes[fId] || "Explanation loading..." }} 
+            />
+          </div>
         </div>
       ))}
     </div>
@@ -1450,10 +1472,15 @@ function TafsirCard({
         {/* Explanation (Footnotes) */}
         {entry.footnoteIds && entry.footnoteIds.length > 0 && (
           <div className="mt-6 pt-4 border-t border-emerald-900/30">
-            <div className="font-semibold text-emerald-500 uppercase tracking-wider text-[11px] mb-3 font-mono">
-              Explanation
+            <div className="flex items-center gap-2 font-semibold text-emerald-400 text-xs md:text-sm mb-3">
+              <BookOpenText className="size-4 text-emerald-400" />
+              <span>{isUrduText ? "تفسیری حواشی و تشریح (Footnotes & Commentary)" : "Explanatory Commentary & Footnotes"}</span>
             </div>
-            <TafsirFootnotesLoader footnoteIds={entry.footnoteIds} isUrdu={isUrduText} />
+            <TafsirFootnotesLoader 
+              footnoteIds={entry.footnoteIds} 
+              initialFootnotes={entry.footnotes}
+              isUrdu={isUrduText} 
+            />
           </div>
         )}
       </div>

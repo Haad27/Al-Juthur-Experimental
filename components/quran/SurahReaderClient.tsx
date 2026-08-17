@@ -287,7 +287,7 @@ const AyahRow = React.memo(({
   }, []);
 
   const isTafsirEdition = React.useMemo(() => {
-    return ["158", "97", "234", "151", "84"].includes(translationEdition);
+    return ["158", "97", "234", "151", "84", "95", "149", "156", "819", "831"].includes(translationEdition);
   }, [translationEdition]);
 
   const { mainText, footnotes } = React.useMemo(() => {
@@ -307,11 +307,15 @@ const AyahRow = React.memo(({
 
         const fetchPromises: Promise<any>[] = [];
 
-        // 1. If it's a translation with Tafsir/Commentary (Dr. Israr, Maududi, Taqi Usmani)
+        // 1. If it's a translation with Tafsir/Commentary (Dr. Israr, Maududi, Taqi Usmani, etc.)
         if (isTafsirEdition) {
           let authorId = "100158";
-          if (translationEdition === "97" || translationEdition === "234") authorId = "138";
+          if (translationEdition === "97" || translationEdition === "234" || translationEdition === "831") authorId = "138";
+          if (translationEdition === "95") authorId = "100095";
           if (translationEdition === "151" || translationEdition === "84") authorId = "139";
+          if (translationEdition === "156") authorId = "100156";
+          if (translationEdition === "149") authorId = "100149";
+          if (translationEdition === "819") authorId = "100819";
           if (translationEdition === "158") authorId = "158";
 
           fetchPromises.push(
