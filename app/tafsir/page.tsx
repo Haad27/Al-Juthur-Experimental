@@ -213,47 +213,16 @@ function TafsirContent() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
-  // More Languages Dropdown State
-  const [moreLangsOpen, setMoreLangsOpen] = useState<boolean>(false);
-  const [moreLangsSearch, setMoreLangsSearch] = useState<string>("");
-  const moreLangsRef = useRef<HTMLDivElement>(null);
-
-  // Click outside to close search dropdown and more languages dropdown
+  // Click outside to close search dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
         setIsSearchFocused(false);
       }
-      if (moreLangsRef.current && !moreLangsRef.current.contains(event.target as Node)) {
-        setMoreLangsOpen(false);
-      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  const PRIMARY_LANG_NAMES = useMemo(
-    () => ["English", "Arabic", "Urdu", "Pashto", "Bengali", "Indonesian", "Russian", "Turkish", "French", "Kurdish"],
-    []
-  );
-
-  const primaryLangs = useMemo(() => {
-    return languages.filter((l) => PRIMARY_LANG_NAMES.includes(l.name));
-  }, [languages, PRIMARY_LANG_NAMES]);
-
-  const secondaryLangs = useMemo(() => {
-    return languages.filter((l) => !PRIMARY_LANG_NAMES.includes(l.name));
-  }, [languages, PRIMARY_LANG_NAMES]);
-
-  const filteredSecondaryLangs = useMemo(() => {
-    if (!moreLangsSearch.trim()) return secondaryLangs;
-    const query = moreLangsSearch.toLowerCase().trim();
-    return secondaryLangs.filter((l) => l.name.toLowerCase().includes(query));
-  }, [secondaryLangs, moreLangsSearch]);
-
-  const isSelectedSecondary = useMemo(() => {
-    return selectedLanguage !== "All" && !PRIMARY_LANG_NAMES.includes(selectedLanguage);
-  }, [selectedLanguage, PRIMARY_LANG_NAMES]);
 
   const ERAS = useMemo(() => [
     "All Eras",
@@ -1130,154 +1099,34 @@ function TafsirContent() {
             
           </div>
 
-          {/* Language Filter Tabs (Option 1: Top Pills + 'More Languages' Dropdown) */}
-          <div className="flex flex-wrap items-center justify-between gap-2 mt-3 pt-3 border-t border-zinc-800/60 w-full relative">
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar flex-1 min-w-0 py-0.5">
-              <span className="text-xs font-semibold text-zinc-400 pr-2 whitespace-nowrap flex items-center gap-1.5 shrink-0">
-                <Languages className="size-3.5 text-emerald-400" /> Language:
-              </span>
-
-              {/* All Languages */}
+          {/* Language Filter Tabs */}
+          <div className="flex items-center gap-2 overflow-x-auto mt-3 pt-3 border-t border-zinc-800/60 no-scrollbar w-full">
+            <span className="text-xs font-semibold text-zinc-400 pr-2 whitespace-nowrap flex items-center gap-1.5 shrink-0">
+              <Languages className="size-3.5 text-emerald-400" /> Language:
+            </span>
+            <button
+              onClick={() => setSelectedLanguage("All")}
+              className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
+                selectedLanguage === "All"
+                  ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
+                  : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+              }`}
+            >
+              All Languages ({allAuthorsWithLang.length})
+            </button>
+            {languages.map((lang) => (
               <button
-                onClick={() => setSelectedLanguage("All")}
+                key={lang.id}
+                onClick={() => setSelectedLanguage(lang.name)}
                 className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
-                  selectedLanguage === "All"
+                  selectedLanguage === lang.name
                     ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
                     : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
                 }`}
               >
-                All Languages ({allAuthorsWithLang.length})
+                {lang.name} ({lang.authors?.length || 0})
               </button>
-
-              {/* Primary Language Pills */}
-              {primaryLangs.map((lang) => (
-                <button
-                  key={lang.id}
-                  onClick={() => setSelectedLanguage(lang.name)}
-                  className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
-                    selectedLanguage === lang.name
-                      ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
-                      : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
-                  }`}
-                >
-                  {lang.name} ({lang.authors.length})
-                </button>
-              ))}
-
-              {/* Dynamic Active Pill for Secondary Language */}
-              {isSelectedSecondary && (
-                <div className="flex items-center gap-1.5 bg-emerald-500 text-zinc-950 px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap shadow-md shadow-emerald-500/20 shrink-0">
-                  <span>{selectedLanguage}</span>
-                  <span className="opacity-80 font-normal">
-                    ({languages.find((l) => l.name === selectedLanguage)?.authors.length || 1})
-                  </span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedLanguage("All");
-                    }}
-                    className="p-0.5 hover:bg-zinc-950/20 rounded-full transition-colors"
-                    title="Clear filter"
-                  >
-                    <X className="size-3" />
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* More Languages Dropdown Button */}
-            <div className="relative shrink-0" ref={moreLangsRef}>
-              <button
-                onClick={() => {
-                  setMoreLangsOpen((prev) => !prev);
-                  setMoreLangsSearch("");
-                }}
-                className={`flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                  isSelectedSecondary || moreLangsOpen
-                    ? "bg-emerald-950/80 text-emerald-300 border border-emerald-500/50 shadow-sm"
-                    : "bg-zinc-900/80 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 hover:bg-zinc-800"
-                }`}
-              >
-                <span>+{secondaryLangs.length} More Languages</span>
-                <ChevronDown className={`size-3.5 transition-transform duration-200 ${moreLangsOpen ? "rotate-180 text-emerald-400" : ""}`} />
-              </button>
-
-              {/* Popover / Dropdown Menu */}
-              {moreLangsOpen && (
-                <div className="absolute right-0 mt-2 w-72 max-h-84 bg-zinc-950/95 border border-zinc-800 rounded-2xl shadow-2xl backdrop-blur-2xl p-2.5 z-50 flex flex-col gap-2 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="flex items-center justify-between px-1.5 pb-1 border-b border-zinc-800/80">
-                    <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
-                      All Global Languages
-                    </span>
-                    <span className="text-[10px] text-emerald-400/80 font-medium">
-                      {secondaryLangs.length} Available
-                    </span>
-                  </div>
-
-                  {/* Search inside dropdown */}
-                  <div className="relative">
-                    <Search className="size-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    <input
-                      type="text"
-                      value={moreLangsSearch}
-                      onChange={(e) => setMoreLangsSearch(e.target.value)}
-                      placeholder="Search languages..."
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-8 pr-7 py-1.5 text-xs text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50"
-                      autoFocus
-                    />
-                    {moreLangsSearch && (
-                      <button
-                        onClick={() => setMoreLangsSearch("")}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 p-0.5"
-                      >
-                        <X className="size-3" />
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Languages list */}
-                  <div className="overflow-y-auto max-h-56 space-y-1 pr-1 scrollbar-thin scrollbar-thumb-zinc-800">
-                    {filteredSecondaryLangs.length === 0 ? (
-                      <div className="py-6 text-center text-zinc-500 text-xs">
-                        No languages matching &quot;{moreLangsSearch}&quot;
-                      </div>
-                    ) : (
-                      filteredSecondaryLangs.map((lang) => {
-                        const isSelected = selectedLanguage === lang.name;
-                        return (
-                          <button
-                            key={lang.id}
-                            onClick={() => {
-                              setSelectedLanguage(lang.name);
-                              setMoreLangsOpen(false);
-                            }}
-                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all ${
-                              isSelected
-                                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-                                : "text-zinc-300 hover:bg-zinc-900 hover:text-white"
-                            }`}
-                          >
-                            <div className="flex items-center gap-2">
-                              {isSelected ? (
-                                <Check className="size-3.5 text-emerald-400 shrink-0" />
-                              ) : (
-                                <span className="size-3.5 shrink-0" />
-                              )}
-                              <span>{lang.name}</span>
-                            </div>
-                            <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold ${
-                              isSelected ? "bg-emerald-500/30 text-emerald-200" : "bg-zinc-900 text-zinc-500"
-                            }`}>
-                              {lang.authors.length} {lang.authors.length === 1 ? "Tafsir" : "Tafsirs"}
-                            </span>
-                          </button>
-                        );
-                      })
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
+            ))}
           </div>
 
         </div>
