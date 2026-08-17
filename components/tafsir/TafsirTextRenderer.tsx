@@ -4,12 +4,25 @@ interface TafsirTextRendererProps {
   text: string;
   isArabic?: boolean;
   isUrdu?: boolean;
+  langName?: string;
   onNavigateToAyah?: (ayahNum: number) => void;
 }
 
-export default function TafsirTextRenderer({ text, isArabic, isUrdu, onNavigateToAyah }: TafsirTextRendererProps) {
+export default function TafsirTextRenderer({ 
+  text, 
+  isArabic: propIsArabic, 
+  isUrdu: propIsUrdu, 
+  langName = "",
+  onNavigateToAyah 
+}: TafsirTextRendererProps) {
   if (!text) return null;
-  const isRtl = isArabic || isUrdu;
+
+  const lowerLang = (langName || "").toLowerCase();
+  const isUrdu = !!propIsUrdu || lowerLang.includes("urdu");
+  const isPashto = lowerLang.includes("pashto") || lowerLang === "ps";
+  const isPersian = lowerLang.includes("persian") || lowerLang.includes("farsi") || lowerLang.includes("uyghur") || lowerLang.includes("kurdish") || lowerLang.includes("sindhi");
+  const isArabic = !!propIsArabic || lowerLang.includes("arabic") || lowerLang === "العربية";
+  const isRtl = isArabic || isUrdu || isPashto || isPersian;
 
   const trimmedText = text.trim();
 
@@ -56,22 +69,20 @@ export default function TafsirTextRenderer({ text, isArabic, isUrdu, onNavigateT
     .trim();
 
   // 2. Parse blocks by splitting on double newlines or block tags (<p>, <h2>, <h3>)
-  // We can convert HTML tags into styled React components block by block
-  // Let's normalize <br> and <br/> to \n
   content = content.replace(/<br\s*\/?>/gi, "\n");
 
   // Helper to transform HTML span classes into styled classes
-  const transformHtmlForTailwind = (rawHtml: string, isAr: boolean) => {
+  const transformHtmlForTailwind = (rawHtml: string, isRightToLeft: boolean) => {
     let html = rawHtml;
 
-    // Helper to wrap raw Arabic text in a styled span, ignoring HTML tags
-    const applyArabicFont = (text: string) => {
-      return text.replace(/(<[^>]+>)|([^<]+)/g, (match, tag, content) => {
+    // Helper to wrap raw Arabic text in a styled span ONLY for LTR languages (English, French, etc.)
+    const applyArabicFont = (textToFormat: string) => {
+      return textToFormat.replace(/(<[^>]+>)|([^<]+)/g, (match, tag, contentInside) => {
         if (tag) return tag;
-        if (content) {
-          return content.replace(
+        if (contentInside) {
+          return contentInside.replace(
             /([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u08E4-\u08FE\uFB50-\uFDFF\uFE70-\uFEFF]+(?:[\s\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u08E4-\u08FE\uFB50-\uFDFF\uFE70-\uFEFF\d\(\)\[\]«».,;:؟!]+)*[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u08E4-\u08FE\uFB50-\uFDFF\uFE70-\uFEFF]+|[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u08E4-\u08FE\uFB50-\uFDFF\uFE70-\uFEFF]+)/g,
-            '<span style="font-family: \'UthmanicHafs\', serif; font-size: 1.35em; line-height: 2.2; font-weight: normal; color: #f1f5f9; display: inline-block; text-align: right;" dir="rtl">$1</span>'
+            '<span style="font-family: \'Noto Naskh Arabic\', \'Amiri\', serif; font-size: 1.25em; line-height: 2.2; font-weight: normal; color: #f1f5f9; display: inline-block; text-align: right;" dir="rtl">$1</span>'
           );
         }
         return match;
@@ -79,7 +90,7 @@ export default function TafsirTextRenderer({ text, isArabic, isUrdu, onNavigateT
     };
 
     // Standard mode (3-Role Color System)
-    // 1. Quranic Verse Citations → Soft amber citation chip (tinted background, not harsh text)
+    // 1. Quranic Verse Citations → Soft amber citation chip
     html = html.replace(
       /<span[^>]*class="qpc-hafs"[^>]*>/gi,
       '<span class="bg-amber-950/60 text-amber-200/90 border border-amber-500/30 px-2 py-0.5 rounded-md font-serif text-lg md:text-xl leading-loose inline-block mx-1 my-0.5 shadow-sm" style="font-family: \'UthmanicHafs\', serif;">'
@@ -89,20 +100,19 @@ export default function TafsirTextRenderer({ text, isArabic, isUrdu, onNavigateT
       /<span[^>]*class="hlt"[^>]*>/gi,
       '<span class="text-amber-300/90 font-semibold">'
     );
-    // 3. Footnotes / Gray Text → Green container (for long quotes) or muted pill (for short words)
+    // 3. Footnotes / Gray Text → Green container or muted pill
     html = html.replace(
       /<span[^>]*class="gray"[^>]*>([\s\S]*?)<\/span>/gi,
       (match, innerText) => {
-        // If the text is short (e.g., less than 50 characters), it's probably just a small translation of a word
         if (innerText.length < 50) {
           return `<span class="text-zinc-400 italic bg-zinc-800/40 px-1.5 py-0.5 rounded border border-zinc-700/40 inline-block my-0.5 text-xs md:text-sm">${innerText}</span>`;
         }
-        // For longer texts (usually full Ayats), use the green block
         return `<span class="block my-4 p-4 border-l-4 border-emerald-500 bg-emerald-950/30 rounded-r-xl text-emerald-100/90 text-sm md:text-base italic shadow-sm">${innerText}</span>`;
       }
     );
 
-    if (!isAr) {
+    // Only apply Arabic snippet font wrapper if this is an LTR translation (e.g. English, French)
+    if (!isRightToLeft) {
       html = applyArabicFont(html);
     }
 
@@ -110,7 +120,6 @@ export default function TafsirTextRenderer({ text, isArabic, isUrdu, onNavigateT
   };
 
   // Split content into lines or tag blocks
-  // Let's extract <h2>...</h2> and <h3>...</h3> and <p>...</p> into distinct blocks
   const blockRegex = /<(h[1-6]|p)[^>]*>(.*?)<\/\1>/gi;
   const blocks: { type: string; text: string }[] = [];
   let lastBlockIndex = 0;
@@ -134,7 +143,6 @@ export default function TafsirTextRenderer({ text, isArabic, isUrdu, onNavigateT
     }
   }
 
-  // If no HTML block tags were matched, split by newlines
   if (blocks.length === 0) {
     content
       .split(/\n+/)
@@ -145,17 +153,40 @@ export default function TafsirTextRenderer({ text, isArabic, isUrdu, onNavigateT
       });
   }
 
+  const getFontFamily = () => {
+    if (isUrdu) return "'Noto Nastaliq Urdu', 'IndoPakNastaleeq', serif";
+    if (isPashto) return "'Noto Naskh Arabic', 'Noto Sans Arabic', 'Scheherazade New', 'Amiri', serif";
+    if (isPersian) return "'Noto Naskh Arabic', 'Noto Sans Arabic', 'Amiri', serif";
+    if (isArabic) return "Amiri, 'Noto Naskh Arabic', serif";
+    return undefined;
+  };
+
+  const getLineHeight = () => {
+    if (isUrdu) return "2.6";
+    if (isPashto) return "2.2";
+    if (isPersian || isArabic) return "2.0";
+    return "1.65";
+  };
+
+  const getFontSize = () => {
+    if (isUrdu) return "1.25rem";
+    if (isPashto) return "1.15rem";
+    if (isArabic || isPersian) return "1.15rem";
+    return undefined;
+  };
+
   return (
     <div
       className={`space-y-4 ${isRtl ? "text-right" : "text-left"}`}
       dir={isRtl ? "rtl" : "ltr"}
       style={{
-        fontFamily: isUrdu ? "'Noto Nastaliq Urdu', 'IndoPakNastaleeq', serif" : isArabic ? "Amiri, serif" : undefined,
-        lineHeight: isUrdu ? "2.6" : undefined,
+        fontFamily: getFontFamily(),
+        lineHeight: getLineHeight(),
+        fontSize: getFontSize(),
       }}
     >
       {blocks.map((block, idx) => {
-        const transformedHtml = transformHtmlForTailwind(block.text, !!isRtl);
+        const transformedHtml = transformHtmlForTailwind(block.text, isRtl);
 
         if (block.type.startsWith("h")) {
           return (
@@ -164,7 +195,7 @@ export default function TafsirTextRenderer({ text, isArabic, isUrdu, onNavigateT
               className={`font-bold text-emerald-300/90 text-base md:text-lg my-4 leading-snug ${
                 isRtl ? "border-r-2 border-emerald-500/60 pr-3" : "border-l-2 border-emerald-500/60 pl-3"
               }`}
-              style={{ fontSize: isUrdu ? "1.25rem" : undefined, lineHeight: isUrdu ? "2.2" : undefined }}
+              style={{ fontSize: getFontSize(), lineHeight: getLineHeight() }}
               dangerouslySetInnerHTML={{ __html: transformedHtml }}
             />
           );
@@ -182,7 +213,7 @@ export default function TafsirTextRenderer({ text, isArabic, isUrdu, onNavigateT
             <p
               key={idx}
               className="font-bold text-emerald-300/90 text-base md:text-lg mt-4 pb-1 border-r-2 border-emerald-500/60 pr-3 inline-block"
-              style={{ fontSize: isUrdu ? "1.25rem" : undefined, lineHeight: isUrdu ? "2.2" : undefined }}
+              style={{ fontSize: getFontSize(), lineHeight: getLineHeight() }}
               dangerouslySetInnerHTML={{ __html: transformedHtml }}
             />
           );
@@ -193,8 +224,8 @@ export default function TafsirTextRenderer({ text, isArabic, isUrdu, onNavigateT
             key={idx}
             className="text-stone-300 text-base md:text-lg whitespace-pre-wrap"
             style={{ 
-              lineHeight: isUrdu ? "2.6" : "1.625", 
-              fontSize: isUrdu ? "1.25rem" : undefined 
+              lineHeight: getLineHeight(), 
+              fontSize: getFontSize() 
             }}
             dangerouslySetInnerHTML={{ __html: transformedHtml }}
           />

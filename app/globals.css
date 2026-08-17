@@ -1,5 +1,5 @@
-/* Google Fonts — for Scheherazade New, Lateef (Nastaliq), Lora (Tafsir serif), and Noto Nastaliq Urdu (Urdu Tafsir) */
-@import url('https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;500;600;700&family=Lateef:wght@400;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap');
+/* Google Fonts — for Scheherazade New, Lateef (Nastaliq), Lora (Tafsir serif), Noto Nastaliq Urdu (Urdu Tafsir), and Noto Sans/Naskh Arabic (Pashto/Persian) */
+@import url('https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;500;600;700&family=Lateef:wght@400;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Nastaliq+Urdu:wght@400;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap');
 
 /* Import Tailwind CSS and animations */
 @import "tailwindcss";

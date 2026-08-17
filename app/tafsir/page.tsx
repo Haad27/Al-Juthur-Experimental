@@ -319,6 +319,7 @@ function TafsirContent() {
       return;
     }
 
+    setLoadedTafsir({}); // Clear old tafsir immediately so previous language doesn't linger!
     setLoadingEntries(true);
 
     try {
@@ -759,7 +760,7 @@ function TafsirContent() {
             </div>
 
             <div className="flex-1 w-full min-h-0">
-              {loadingEntries && Object.keys(loadedTafsir).length === 0 ? (
+              {loadingEntries || Object.keys(loadedTafsir).length === 0 || (loadedTafsir[0] && loadedTafsir[0].authorId !== activeAuthor.id) ? (
                 <AlJuthurLoadingProgress
                   title={`Loading ${activeAuthor?.name?.replace(/\s*\([^)]*\)\s*$/, '').trim() || "Tafsir"}`}
                   subtitle={`Surah ${currentSurahMeta.englishName} (${activeLangName || "Scholarly Exegesis"})`}
@@ -768,7 +769,7 @@ function TafsirContent() {
                     "Cross-referencing scholarly commentary & notes...",
                     "Preparing typography & structured annotations..."
                   ]}
-                  minDurationMs={600}
+                  minDurationMs={400}
                 />
               ) : (
                 <Virtuoso
@@ -1029,10 +1030,12 @@ function TafsirContent() {
                 {/* Filter Popover Panel */}
                 {isFilterPanelOpen && (
                   <>
-                    <div className="fixed inset-0 z-[60] md:hidden bg-black/40 backdrop-blur-sm" onClick={() => setIsFilterPanelOpen(false)}></div>
-                    <div className="fixed md:absolute right-0 bottom-0 md:bottom-auto md:top-full mt-2 w-full md:w-[400px] bg-zinc-950 md:bg-zinc-900 border-t md:border border-zinc-800/80 shadow-2xl z-[60] overflow-hidden rounded-t-2xl md:rounded-2xl p-5 md:p-5 flex flex-col gap-6 max-h-[85vh] overflow-y-auto transform transition-transform">
-                      <div className="flex items-center justify-between md:hidden pb-3 border-b border-zinc-800">
-                        <h3 className="font-bold text-white text-lg">Filters</h3>
+                    <div className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm transition-opacity" onClick={() => setIsFilterPanelOpen(false)}></div>
+                    <div className="fixed md:absolute inset-x-0 bottom-0 md:inset-auto md:right-0 md:top-full mt-2 w-full md:w-[420px] bg-zinc-950 md:bg-zinc-900 border-t md:border border-emerald-500/30 md:border-zinc-800/80 shadow-2xl z-[80] overflow-hidden rounded-t-3xl md:rounded-2xl p-5 md:p-6 flex flex-col gap-5 max-h-[80vh] overflow-y-auto custom-scrollbar pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))] md:pb-6 animate-in slide-in-from-bottom-4 md:slide-in-from-top-2 duration-200">
+                      <div className="flex items-center justify-between pb-3 border-b border-zinc-800 sticky top-0 bg-zinc-950 md:bg-zinc-900 z-10">
+                        <h3 className="font-bold text-white text-base sm:text-lg flex items-center gap-2">
+                          <Filter className="size-4 text-emerald-400" /> Filter Tafsirs
+                        </h3>
                         <button onClick={() => setIsFilterPanelOpen(false)} className="p-1.5 rounded-full bg-zinc-900 text-zinc-400 hover:text-white transition-colors">
                           <X className="size-5" />
                         </button>
@@ -1100,7 +1103,14 @@ function TafsirContent() {
           </div>
 
           {/* Language Filter Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto mt-3 pt-3 border-t border-zinc-800/60 no-scrollbar w-full">
+          <div 
+            onWheel={(e) => {
+              if (e.deltaY !== 0) {
+                e.currentTarget.scrollLeft += e.deltaY;
+              }
+            }}
+            className="flex items-center gap-2 overflow-x-auto mt-3 pt-3 border-t border-zinc-800/60 no-scrollbar w-full scroll-smooth select-none cursor-grab active:cursor-grabbing"
+          >
             <span className="text-xs font-semibold text-zinc-400 pr-2 whitespace-nowrap flex items-center gap-1.5 shrink-0">
               <Languages className="size-3.5 text-emerald-400" /> Language:
             </span>
@@ -1112,7 +1122,7 @@ function TafsirContent() {
                   : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
               }`}
             >
-              All Languages ({allAuthorsWithLang.length})
+              All ({allAuthorsWithLang.length})
             </button>
             {languages.map((lang) => (
               <button
@@ -1305,6 +1315,7 @@ function TafsirCard({
             text={entry.text}
             isArabic={isArabicOrUrdu}
             isUrdu={isUrduText}
+            langName={activeLangName}
             onNavigateToAyah={(num) => scrollToAyah(num)}
           />
         </div>

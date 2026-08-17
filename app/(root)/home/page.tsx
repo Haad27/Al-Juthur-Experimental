@@ -302,7 +302,7 @@ const SurahsList = () => {
             </div>
           </div>
           <div
-            className={`w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5 relative ${inter.className}`}
+            className={`w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 min-[1920px]:grid-cols-6 min-[2400px]:grid-cols-7 gap-4 lg:gap-5 relative ${inter.className}`}
           >
             <Sparkle
               className="fill-emerald-500 text-emerald-500 absolute left-56 top-32 animate-pulse rotate-45 -z-1"
