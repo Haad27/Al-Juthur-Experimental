@@ -28,6 +28,7 @@ import { motion } from "framer-motion";
 import { Search, SlidersHorizontal, ChevronRight } from "lucide-react";
 import { SURAHS_DATA } from "@/lib/surahsData";
 import { useAudioStore } from "@/lib/stores/audioStore";
+import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 
 const MobileSheet = ({
   isOpen,
@@ -42,6 +43,7 @@ const MobileSheet = ({
   const show = useScrollDirection();
   const isPlayingAudio = useAudioStore((s) => s.isPlaying);
   const [isAudioActive, setIsAudioActive] = useState(false);
+  const { isWordDialogVisible } = useGlobalState();
 
   useEffect(() => {
     const checkAudio = () => {
@@ -73,8 +75,10 @@ const MobileSheet = ({
       {surahNumber ? (
         <div
           className={cn(
-            "fixed top-0 left-0 right-0 w-full lg:hidden flex flex-col gap-2 transition-transform duration-300 ease-out p-2 pl-4 pr-2 dark:bg-zinc-950/60 bg-zinc-950/60 backdrop-blur-3xl border-b dark:border-zinc-800/60 border-black/10 shadow-md min-h-16 z-[99999]",
-            (show && !isAudioActive) ? "translate-y-0" : "-translate-y-full"
+            "fixed top-0 left-0 right-0 w-full lg:hidden flex flex-col gap-2 transition-all duration-300 ease-out p-2 pl-4 pr-2 dark:bg-zinc-950/60 bg-zinc-950/60 backdrop-blur-3xl border-b dark:border-zinc-800/60 border-black/10 shadow-md min-h-16 z-[99999]",
+            (show && !isAudioActive && !isWordDialogVisible)
+              ? "translate-y-0 opacity-100 pointer-events-auto"
+              : "-translate-y-full opacity-0 pointer-events-none"
           )}
         >
           {(() => {
@@ -168,8 +172,10 @@ const MobileSheet = ({
       ) : (
         <SheetTrigger
           className={cn(
-            "fixed top-0 left-0 right-0 w-full lg:hidden flex justify-between items-center transition-transform duration-300 ease-out p-2 px-4 dark:bg-zinc-950/60 bg-zinc-950/60 backdrop-blur-3xl border-b dark:border-zinc-800/60 border-black/10 shadow-md min-h-16 z-[99999]",
-            show ? "translate-y-0" : "-translate-y-full"
+            "fixed top-0 left-0 right-0 w-full lg:hidden flex justify-between items-center transition-all duration-300 ease-out p-2 px-4 dark:bg-zinc-950/60 bg-zinc-950/60 backdrop-blur-3xl border-b dark:border-zinc-800/60 border-black/10 shadow-md min-h-16 z-[99999]",
+            (show && !isWordDialogVisible)
+              ? "translate-y-0 opacity-100 pointer-events-auto"
+              : "-translate-y-full opacity-0 pointer-events-none"
           )}
           id="mobile-menu-trigger"
         >
