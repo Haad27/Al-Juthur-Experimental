@@ -33,8 +33,8 @@ export const ROUTING_CHAINS: Record<string, string[]> = {
   'grammar': ['gemini-3.0-flash', 'gemini-2.5-flash', 'gemma-4-31b'],
   'classical': ['gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-3.0-flash'],
   'philosophical': ['gemini-2.5-flash', 'gemini-3.6-flash', 'gemini-3.1-flash-lite'],
-  'translate_short': ['gemma-4-31b', 'gemma-4-26b', 'gemini-3.1-flash-lite', 'gemini-3.5-flash', 'gemini-2.5-flash'],
-  'translate_long': ['gemini-3.1-flash-lite', 'gemini-3.5-flash', 'gemini-2.5-flash'],
+  'translate_short': ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-2.5-flash-lite', 'gemini-3.5-flash', 'gemma-4-31b', 'gemma-4-26b'],
+  'translate_long': ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-3.6-flash', 'gemma-4-31b', 'gemma-4-26b'],
 };
 
 interface ExecutionResult {
