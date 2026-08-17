@@ -44,30 +44,30 @@ export const metadata = {
     locale: "en_US",
     url: "https://aljuthur.vercel.app",
     siteName: "Al-Juthur",
-    title: "Al-Juthur | Classical Arabic Roots, 130+ Tafsirs & AI Scholar",
+    title: "Al-Juthur",
     description:
-      "Explore classical Arabic root morphology, 130+ Tafsirs in 33 languages, 8+ historical Lexicons, and a 6-mode Academic AI RAG engine.",
+      "Explore classical Arabic root morphology, 130+ Tafsirs in 33 languages, 8+ historical Lexicons, and a 6-mode Academic AI RAG engine—all unified in a high-performance modern workspace.",
     images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Al-Juthur - Classical Qur'anic Morphology, Tafsir & AI Scholar",
-      },
       {
         url: "/assets/favicon/android-chrome-512x512.png",
         width: 512,
         height: 512,
-        alt: "Al-Juthur Emblem",
+        alt: "Al-Juthur",
+      },
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Al-Juthur",
       },
     ],
   },
   twitter: {
-    card: "summary_large_image",
-    title: "Al-Juthur | Classical Arabic Roots, 130+ Tafsirs & AI Scholar",
+    card: "summary",
+    title: "Al-Juthur",
     description:
       "Explore classical Arabic root morphology, 130+ Tafsirs in 33 languages, 8+ historical Lexicons, and a 6-mode Academic AI RAG engine.",
-    images: ["/og-image.png"],
+    images: ["/assets/favicon/android-chrome-512x512.png"],
   },
 };
 
