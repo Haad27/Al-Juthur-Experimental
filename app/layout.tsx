@@ -13,7 +13,7 @@ export const metadata = {
     template: "%s | Al-Juthur",
   },
   description:
-    "Explore classical Arabic root morphology, 130+ Tafsirs in 33 languages, 8+ historical Lexicons, and a 6-mode Academic AI RAG engine—all unified in a high-performance modern workspace.",
+    "A modern Quran study platform featuring clean reading views, Surah contexts, root word analysis, 130+ Tafsirs across 33 languages, 127 translations, 12 historical lexicons, and specialized AI for accurate classical Arabic translation.",
   applicationName: "Al-Juthur",
   keywords: [
     "Quran",
@@ -46,7 +46,7 @@ export const metadata = {
     siteName: "Al-Juthur",
     title: "Al-Juthur",
     description:
-      "Explore classical Arabic root morphology, 130+ Tafsirs in 33 languages, 8+ historical Lexicons, and a 6-mode Academic AI RAG engine—all unified in a high-performance modern workspace.",
+      "A modern Quran study platform featuring clean reading views, Surah contexts, root word analysis, 130+ Tafsirs across 33 languages, 127 translations, 12 historical lexicons, and specialized AI for accurate classical Arabic translation.",
     images: [
       {
         url: "/assets/favicon/android-chrome-512x512.png",
@@ -66,7 +66,7 @@ export const metadata = {
     card: "summary",
     title: "Al-Juthur",
     description:
-      "Explore classical Arabic root morphology, 130+ Tafsirs in 33 languages, 8+ historical Lexicons, and a 6-mode Academic AI RAG engine.",
+      "A modern Quran study platform featuring clean reading views, Surah contexts, root word analysis, 130+ Tafsirs across 33 languages, 127 translations, 12 historical lexicons, and specialized AI for accurate classical Arabic translation.",
     images: ["/assets/favicon/android-chrome-512x512.png"],
   },
 };

@@ -13,15 +13,15 @@ const features = [
     color: "emerald"
   },
   {
-    title: "110+ Classical & Modern Tafsirs",
-    description: "Dive into centuries of Islamic scholarship. Access a vast library of over 110 exegeses ranging from early classical works to contemporary interpretations, all beautifully formatted.",
+    title: "130+ Classical & Modern Tafsirs",
+    description: "Dive into centuries of Islamic scholarship. Access a vast library of over 130 exegeses across 33 languages ranging from early classical works to contemporary interpretations, all beautifully formatted.",
     image: "/images/features/tafsir.png",
     icon: <Library className="w-8 h-8 text-blue-400" />,
     color: "blue"
   },
   {
-    title: "8+ Classical Lexicons",
-    description: "Uncover the precise linguistic nuances with access to more than 8 authoritative classical Arabic lexicons, perfectly synchronized with your reading.",
+    title: "12 Classical Lexicons",
+    description: "Uncover the precise linguistic nuances with access to 12 authoritative classical Arabic lexicons and dictionaries, perfectly synchronized with your reading.",
     image: "/images/features/lexicon.png",
     icon: <BookText className="w-8 h-8 text-purple-400" />,
     color: "purple"

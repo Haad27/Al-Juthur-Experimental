@@ -123,7 +123,7 @@ export default function LandingPage() {
             </h1>
           </div>
           <p className="text-sm md:text-lg text-zinc-300 font-light leading-relaxed">
-            The most comprehensive platform featuring 130+ Tafsirs, 8+ Lexicons, RAG technology, and AI Translation with a Clean Modern UI.
+            The most comprehensive platform featuring 130+ Tafsirs in 33 languages, 127 Translations, 12 Lexicons, RAG technology, and AI Translation with a Clean Modern UI.
           </p>
         </div>
 

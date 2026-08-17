@@ -5,7 +5,7 @@
   # 🌿 Al-Juthur (الجذور)
   **The Ultimate Classical & AI-Powered Qur'anic Research Platform**
 
-  *Explore classical Arabic root morphology, 130+ Tafsirs, 8+ historical Lexicons, and a 6-mode Academic AI RAG engine—all wrapped in a high-performance, modern 3D UI.*
+  *Explore classical Arabic root morphology, 130+ Tafsirs in 33 languages, 127 translations, 12 historical Lexicons, and a 6-mode Academic AI RAG engine—all wrapped in a high-performance, modern UI.*
 
   [![Next.js](https://img.shields.io/badge/Next.js-15.2-black?style=flat-square&logo=next.js)](https://nextjs.org/)
   [![React](https://img.shields.io/badge/React-19.0-61DAFB?style=flat-square&logo=react)](https://react.dev/)
@@ -32,11 +32,11 @@ Traditional platforms separate translations, tafsirs, and root dictionaries. **A
 - **High-Performance Virtuoso Reader:** Handles 6,236 Ayahs smoothly with zero lag, instant word-by-word (WBW) translation, and interactive diacritic controls.
 - **Typography & Mushaf Support:** Multiple fonts including Amiri, KFQPC, Uthmani, Warsh, Naskh, and IndoPak 15/16 line formats.
 
-### 📚 2. Classical Tafsir Library (130+ Sources)
-- Comprehensive catalog of over **130 Tafsir works** spanning classical eras (Ibn Kathir, Al-Tabari, Al-Qurtubi) to contemporary scholarly commentaries.
+### 📚 2. Classical Tafsir Library (130+ Sources in 33 Languages)
+- Comprehensive catalog of over **130 Tafsir works** across **33 languages** spanning classical eras (Ibn Kathir, Al-Tabari, Al-Qurtubi) to contemporary scholarly commentaries.
 - Instant parallel comparison and verse-level commentary lookup.
 
-### 📖 3. Root Word Morphology & Lexicons (8+ Dictionaries)
+### 📖 3. Root Word Morphology & Lexicons (12 Dictionaries)
 - Deep root-level breakdown for every single word in the Qur'an.
 - Integrated classical dictionaries: **Lane's Lexicon**, **Lisan al-Arab**, **Mu'jam al-Ghani**, **Mufradat Alfaz al-Quran**, **Al-Qamus al-Muhit**, and **Maqayis al-Lughah**.
 - Embedded PDF viewers for authoritative reference lexicons (Abdel Haleem, Abdul Mannan Omar, Lughat-ul-Quran).

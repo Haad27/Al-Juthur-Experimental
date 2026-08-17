@@ -48,7 +48,7 @@ const SECTIONS: SectionData[] = [
   {
     id: "lexicon",
     icon: <BookText className="w-6 h-6" />,
-    title: "8+ Classical Lexicons",
+    title: "12 Classical Lexicons",
     subtitle: "Root Word Morphology",
     description:
       "Dive into root word morphology and meaning sourced from Lisan al Arab, Mufradat al Raghib and more. Understand every word at its deepest level.",
@@ -201,7 +201,7 @@ function FinalCTA() {
           Start Your Journey
         </h2>
         <p className="text-base md:text-lg text-zinc-400 max-w-lg mx-auto font-light leading-relaxed">
-          The most comprehensive Qur'anic study platform. 130+ Tafsirs, 8+ Lexicons, AI-powered insights — all in one place.
+          The most comprehensive Qur'anic study platform. 130+ Tafsirs in 33 languages, 12 Lexicons, 127 Translations, and AI-powered insights.
         </p>
       </div>
 
