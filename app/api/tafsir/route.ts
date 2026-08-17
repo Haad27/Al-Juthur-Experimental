@@ -14,22 +14,27 @@ function cachedJson(data: unknown, maxAge: number, staleWhileRevalidate = Math.f
 }
 
 // Map of Authors with 100% pre-downloaded local JSON files for lightning-fast 0ms file reads
-const LOCAL_TAFSIR_MAP: Record<number, { folder: string; isUrdu: boolean; authorName: string; name: string }> = {
-  60: { folder: "en-tafsir-al-mukhtasar", isUrdu: false, authorName: "Center for Quranic Interpretation", name: "Abridged Explanation of the Quran" },
-  63: { folder: "en-al-jalalayn", isUrdu: false, authorName: "Jalal al-Din al-Mahalli & Jalal al-Din al-Suyuti", name: "Tafsir al-Jalalayn" },
-  64: { folder: "en-tazkirul-quran", isUrdu: false, authorName: "Maulana Wahiduddin Khan", name: "Tazkirul Quran" },
+const LOCAL_TAFSIR_MAP: Record<number, { folder: string; isUrdu?: boolean; isPashto?: boolean; authorName: string; name: string }> = {
+  60: { folder: "en-tafsir-al-mukhtasar", authorName: "Center for Quranic Interpretation", name: "Abridged Explanation of the Quran" },
+  63: { folder: "en-al-jalalayn", authorName: "Jalal al-Din al-Mahalli & Jalal al-Din al-Suyuti", name: "Tafsir al-Jalalayn" },
+  64: { folder: "en-tazkirul-quran", authorName: "Maulana Wahiduddin Khan", name: "Tazkirul Quran" },
   102: { folder: "ur-tafseer-ibn-e-kaseer", isUrdu: true, authorName: "Hafiz Ibn Kathir", name: "Tafsir Ibn Kathir" },
   103: { folder: "ur-tafsir-as-saadi-urdu", isUrdu: true, authorName: "Shaykh Abdur-Rahman ibn Nasir as-Sa'di", name: "Tafsir as-Sa'di" },
   104: { folder: "ur-tafsir-bayan-ul-quran", isUrdu: true, authorName: "Dr. Israr Ahmad / Maulana Thanwi", name: "Bayan-ul-Quran" },
   105: { folder: "tafsir-fe-zalul-quran-syed-qatab", isUrdu: true, authorName: "Sayyid Qutb", name: "Fi Zilal al-Quran" },
   106: { folder: "ur-tazkirul-quran", isUrdu: true, authorName: "Maulana Wahiduddin Khan", name: "Tazkirul Quran" },
-  107: { folder: "en-kashf-al-asrar-tafsir", isUrdu: false, authorName: "Rashid al-Din Maybudi", name: "Kashf al-Asrar" },
-  109: { folder: "en-kashani-tafsir", isUrdu: false, authorName: "Abd al-Razzaq al-Kashani", name: "Tafsir al-Kashani" },
-  110: { folder: "en-tafsir-al-tustari", isUrdu: false, authorName: "Sahl al-Tustari", name: "Tafsir al-Tustari" },
-  125: { folder: "ar-tafseer-tanwir-al-miqbas", isUrdu: false, authorName: "Attributed to Abdullah ibn Abbas", name: "Tanwir al-Miqbas" },
-  128: { folder: "en-al-qushairi-tafsir", isUrdu: false, authorName: "Imam Abu al-Qasim al-Qushayri", name: "Lata'if al-Isharat" },
-  129: { folder: "en-asbab-al-nuzul-by-al-wahidi", isUrdu: false, authorName: "Imam Ali ibn Ahmad al-Wahidi", name: "Asbab al-Nuzul" },
-  131: { folder: "en-tafsir-ibn-abbas", isUrdu: false, authorName: "Attributed to Abdullah ibn Abbas", name: "Tanwir al-Miqbas" },
+  107: { folder: "en-kashf-al-asrar-tafsir", authorName: "Rashid al-Din Maybudi", name: "Kashf al-Asrar" },
+  108: { folder: "en-al-qushairi-tafsir", authorName: "Imam Abu al-Qasim al-Qushayri", name: "Lata'if al-Isharat" },
+  109: { folder: "en-kashani-tafsir", authorName: "Abd al-Razzaq al-Kashani", name: "Tafsir al-Kashani" },
+  110: { folder: "en-tafsir-al-tustari", authorName: "Sahl al-Tustari", name: "Tafsir al-Tustari" },
+  111: { folder: "en-asbab-al-nuzul-by-al-wahidi", authorName: "Imam Ali ibn Ahmad al-Wahidi", name: "Asbab al-Nuzul" },
+  112: { folder: "en-tafsir-ibn-abbas", authorName: "Attributed to Abdullah ibn Abbas", name: "Tanwir al-Miqbas" },
+  113: { folder: "en-al-jalalayn", authorName: "Jalal al-Din al-Mahalli & Jalal al-Din al-Suyuti", name: "Tafsir al-Jalalayn" },
+  114: { folder: "ps-pashto-mokhtasar", isPashto: true, authorName: "Center for Quranic Interpretation", name: "Al-Mukhtasar (Pashto)" },
+  125: { folder: "ar-tafseer-tanwir-al-miqbas", authorName: "Attributed to Abdullah ibn Abbas", name: "Tanwir al-Miqbas" },
+  128: { folder: "en-al-qushairi-tafsir", authorName: "Imam Abu al-Qasim al-Qushayri", name: "Lata'if al-Isharat" },
+  129: { folder: "en-asbab-al-nuzul-by-al-wahidi", authorName: "Imam Ali ibn Ahmad al-Wahidi", name: "Asbab al-Nuzul" },
+  131: { folder: "en-tafsir-ibn-abbas", authorName: "Attributed to Abdullah ibn Abbas", name: "Tanwir al-Miqbas" },
   158: { folder: "ur-tafsir-bayan-ul-quran", isUrdu: true, authorName: "Dr. Israr Ahmad", name: "Bayan-ul-Quran" },
   100158: { folder: "ur-tafsir-bayan-ul-quran", isUrdu: true, authorName: "Dr. Israr Ahmad", name: "Bayan-ul-Quran" },
 };
@@ -46,10 +51,26 @@ const getTafsirLibrary = unstable_cache(
       }),
     ]);
 
+    // Virtual Authors (Translations with rich footnotes / commentary serving as Tafsir)
     const virtualAuthors: any[] = [
-      { id: 100095, name: "Tafheem e Qur'an - Sayyid Maududi", authorName: "Sayyid Abul Ala Maududi", languageId: 3, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
-      { id: 100158, name: "Bayan-ul-Quran", authorName: "Dr. Israr Ahmad", languageId: 10, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
-      { id: 100084, name: "Taqi Usmani", authorName: "Mufti Taqi Usmani", languageId: 3, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
+      // English (languageId: 3)
+      { id: 100095, name: "Tafheem-ul-Quran (Commentary)", authorName: "Sayyid Abul Ala Maududi", languageId: 3, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
+      { id: 100084, name: "The Noble Quran (with Explanatory Notes)", authorName: "Mufti Taqi Usmani", languageId: 3, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
+      { id: 100022, name: "Quran Translation & Commentary", authorName: "Abdullah Yusuf Ali", languageId: 3, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
+      { id: 100203, name: "The Noble Quran (Interpretation & Notes)", authorName: "Muhammad Taqi-ud-Din al-Hilali & Muhammad Muhsin Khan", languageId: 3, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
+      { id: 100149, name: "Bridges’ Translation (Linguistic & Qira'at Notes)", authorName: "Fadel Soliman", languageId: 3, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
+      { id: 100085, name: "The Quran (Oxford World's Classics)", authorName: "M.A.S. Abdel Haleem", languageId: 3, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
+      
+      // Urdu (languageId: 10)
+      { id: 100097, name: "Tafheem-ul-Quran (تفہیم القرآن)", authorName: "Syed Abul A'la Maududi", languageId: 10, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
+      { id: 100158, name: "Bayan-ul-Quran (بیان القرآن)", authorName: "Dr. Israr Ahmad", languageId: 10, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
+      { id: 100151, name: "Aasan Tarjuma Quran (آسان ترجمہ قرآن مع تفسیری حواشی)", authorName: "Mufti Muhammad Taqi Usmani", languageId: 10, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
+      { id: 100156, name: "Fi Zilal al-Qur'an (فی ظلال القرآن)", authorName: "Sayyid Ibrahim Qutb", languageId: 10, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
+      { id: 100819, name: "Tazkirul Quran (تذکیر القرآن)", authorName: "Maulana Wahiduddin Khan", languageId: 10, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
+      { id: 100831, name: "Tafheem-ul-Quran (Roman Urdu)", authorName: "Sayyid Abul Ala Maududi", languageId: 10, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
+
+      // Pashto (languageId: 11)
+      { id: 100118, name: "Pashto Translation & Commentary (د قرآن پښتو تفسیر)", authorName: "Zakaria Abulsalam", languageId: 11, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
     ];
     
     const virtualTag = { id: 999, name: "Translation with Explanation", color: "emerald" };
@@ -79,7 +100,7 @@ const getTafsirLibrary = unstable_cache(
       authors: authorsByLang[l.id] || []
     }));
   },
-  ['tafsir-library-v3'],
+  ['tafsir-library-v4'],
   { revalidate: 2592000 } // 30 days
 );
 
@@ -98,7 +119,7 @@ const getAyahsForSurah = unstable_cache(
 
 // 2. Ultra-fast local file tafsir loader (Reads directly from disk in < 1ms)
 const getLocalDownloadedTafsir = unstable_cache(
-  async (folder: string, isUrdu: boolean, authorId: number, surahId: number, authorName: string, name: string) => {
+  async (folder: string, isUrdu: boolean, isPashto: boolean, authorId: number, surahId: number, authorName: string, name: string) => {
     try {
       const fs = await import('fs');
       const path = await import('path');
@@ -107,14 +128,19 @@ const getLocalDownloadedTafsir = unstable_cache(
 
       const raw = fs.readFileSync(tafsirFile, 'utf8');
       const parsed = JSON.parse(raw);
+      const rawAyahs = Array.isArray(parsed) ? parsed : (parsed.ayahs || []);
       const ayahs = await getAyahsForSurah(surahId);
 
-      return (parsed.ayahs || []).map((a: any) => {
-        const vNum = a.ayah;
+      return rawAyahs.map((a: any, idx: number) => {
+        const vNum = a.ayah || a.numberInSurah || (idx + 1);
         const arabicAyah = ayahs.find(ar => ar.numberInSurah === vNum);
-        const textFormatted = isUrdu
-          ? `<div class='text-zinc-100 leading-[2.8] text-right font-nastaliq' style="font-family: 'Noto Nastaliq Urdu', serif; line-height: 2.8; font-size: 1.15rem; color: #f4f4f5;">${a.text}</div>`
-          : a.text;
+        
+        let textFormatted = a.text;
+        if (isUrdu) {
+          textFormatted = `<div class='text-zinc-100 leading-[2.8] text-right font-nastaliq' style="font-family: 'Noto Nastaliq Urdu', serif; line-height: 2.8; font-size: 1.15rem; color: #f4f4f5;">${a.text}</div>`;
+        } else if (isPashto) {
+          textFormatted = `<div class='text-zinc-100 leading-[2.4] text-right font-arabic' style="font-family: var(--font-amiri, serif); line-height: 2.4; font-size: 1.2rem; color: #f4f4f5;" dir="rtl">${a.text}</div>`;
+        }
 
         return {
           id: authorId * 1000 + vNum,
@@ -136,7 +162,7 @@ const getLocalDownloadedTafsir = unstable_cache(
       return null;
     }
   },
-  ['local-downloaded-tafsir-v3'],
+  ['local-downloaded-tafsir-v4'],
   { revalidate: 2592000 }
 );
 
@@ -165,7 +191,7 @@ const getSurahDbTafsir = unstable_cache(
     tafsirs.sort((a, b) => (a.ayah?.numberInSurah || 0) - (b.ayah?.numberInSurah || 0));
     return tafsirs;
   },
-  ['surah-db-tafsir-v2'],
+  ['surah-db-tafsir-v3'],
   { revalidate: 2592000 } // 30 days
 );
 
@@ -198,7 +224,7 @@ const getVirtualTafsir = unstable_cache(
         surahId: surahId,
         ayahId: verseNum,
         text: cleanText,
-        footnoteIds: fIds,
+        footnoteIds: fIds, // We pass footnoteIds to the client
         ayah: {
           id: arabicAyah?.id || verseNum,
           surahId: surahId,
@@ -209,7 +235,7 @@ const getVirtualTafsir = unstable_cache(
       };
     });
   },
-  ['virtual-tafsir-v2'],
+  ['virtual-tafsir-v3'],
   { revalidate: 2592000 } // 30 days
 );
 
@@ -253,7 +279,8 @@ export async function GET(request: Request) {
       if (localMeta) {
         const localData = await getLocalDownloadedTafsir(
           localMeta.folder,
-          localMeta.isUrdu,
+          !!localMeta.isUrdu,
+          !!localMeta.isPashto,
           parsedAuthorId,
           parsedSurahId,
           localMeta.authorName,
@@ -294,7 +321,8 @@ export async function GET(request: Request) {
       if (localMeta) {
         const allSurahTafsirs = await getLocalDownloadedTafsir(
           localMeta.folder,
-          localMeta.isUrdu,
+          !!localMeta.isUrdu,
+          !!localMeta.isPashto,
           parsedAuthorId,
           parsedSurahId,
           localMeta.authorName,

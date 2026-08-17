@@ -192,12 +192,15 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
 
         if (!isClickable || wordIdx === null) {
           return (
-            <span key={idx} className="inline-flex flex-col items-center justify-end px-1 py-0.5 text-zinc-400 select-none min-w-[2rem]">
-              <span>{word}</span>
+            <span 
+              key={idx} 
+              className={`inline-flex flex-col items-center justify-end px-0.5 py-0.5 text-zinc-400 select-none min-w-0 -mx-1.5 ${mushafFontClass}`}
+            >
+              <span className="text-[0.85em] leading-none mb-1">{word}</span>
               {showWbw && (
                 <span 
-                  className="mt-0.5 block opacity-0 pointer-events-none select-none"
-                  style={{ fontSize: `${0.5 + (wbwFontSize * 0.1)}rem` }}
+                  className="mt-0.5 block opacity-0 pointer-events-none select-none text-[0.6rem]"
+                  aria-hidden="true"
                 >
                   -
                 </span>

@@ -91,7 +91,8 @@ export function getLanguagePriority(langName: string): number {
   if (lower.includes("english")) return 1;
   if (lower.includes("arabic")) return 2;
   if (lower.includes("urdu")) return 3;
-  return 4;
+  if (lower.includes("pashto")) return 4;
+  return 5;
 }
 
 /**

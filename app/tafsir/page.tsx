@@ -211,7 +211,7 @@ function TafsirContent() {
   }, []);
 
   const PRIMARY_LANG_NAMES = useMemo(
-    () => ["English", "Arabic", "Urdu", "Bengali", "Indonesian", "Russian", "Turkish", "French", "Kurdish"],
+    () => ["English", "Arabic", "Urdu", "Pashto", "Bengali", "Indonesian", "Russian", "Turkish", "French", "Kurdish"],
     []
   );
 
