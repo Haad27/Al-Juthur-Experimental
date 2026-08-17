@@ -181,9 +181,9 @@ const TafsirFootnotesLoader = ({
           className="leading-relaxed text-sm md:text-base text-zinc-200 bg-zinc-900/70 p-4 rounded-xl border border-zinc-800/80 shadow-sm" 
           dir={isUrdu ? "rtl" : "auto"}
           style={{
-            fontFamily: isUrdu ? "'Noto Nastaliq Urdu', serif" : undefined,
+            fontFamily: isUrdu ? "'Noto Nastaliq Urdu', 'IndoPakNastaleeq', serif" : undefined,
             lineHeight: isUrdu ? "2.6" : "1.75",
-            fontSize: isUrdu ? "1.15rem" : undefined
+            fontSize: isUrdu ? "1.18rem" : undefined
           }}
         >
           <div className="flex items-start gap-2.5">
@@ -1404,8 +1404,9 @@ function TafsirCard({
 }) {
   const ayahNumber = entry.ayah?.numberInSurah || idx + 1;
   const arabicText = entry.ayah?.text && entry.ayah.text !== "Arabic Text" ? entry.ayah.text : null;
-  const isArabicOrUrdu = activeLangName === 'Arabic' || activeLangName === 'Urdu';
-  const isUrduText = activeLangName === 'Urdu';
+  const isArabic = activeLangName.toLowerCase().includes('arabic') || activeLangName === 'العربية';
+  const isUrduText = activeLangName.toLowerCase().includes('urdu');
+  const isArabicOrUrdu = isArabic || isUrduText;
   const cleanText = entry.text.replace(/<[^>]*>?/gm, '');
 
   return (
@@ -1459,8 +1460,8 @@ function TafsirCard({
           />
         </div>
 
-        {/* Inline Translation */}
-        {activeLangName !== 'English' && (
+        {/* Inline Translation (Exclusively for Arabic Tafsirs) */}
+        {isArabic && (
           <div className="mt-4 pt-4 border-t border-zinc-800/40 w-full">
             <InlineTranslation 
               textToTranslate={cleanText} 
@@ -1469,12 +1470,12 @@ function TafsirCard({
           </div>
         )}
 
-        {/* Explanation (Footnotes) */}
+        {/* Tafsir (Commentary / Footnotes) */}
         {entry.footnoteIds && entry.footnoteIds.length > 0 && (
           <div className="mt-6 pt-4 border-t border-emerald-900/30">
-            <div className="flex items-center gap-2 font-semibold text-emerald-400 text-xs md:text-sm mb-3">
+            <div className="flex items-center gap-2 font-bold text-emerald-400 text-xs md:text-sm tracking-wider uppercase mb-3">
               <BookOpenText className="size-4 text-emerald-400" />
-              <span>{isUrduText ? "تفسیری حواشی و تشریح (Footnotes & Commentary)" : "Explanatory Commentary & Footnotes"}</span>
+              <span>{isUrduText ? "تفسیر (TAFSIR)" : "TAFSIR"}</span>
             </div>
             <TafsirFootnotesLoader 
               footnoteIds={entry.footnoteIds} 

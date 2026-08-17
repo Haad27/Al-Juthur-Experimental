@@ -20,7 +20,7 @@ const LOCAL_TAFSIR_MAP: Record<number, { folder: string; isUrdu?: boolean; isPas
   64: { folder: "en-tazkirul-quran", authorName: "Maulana Wahiduddin Khan", name: "Tazkirul Quran" },
   102: { folder: "ur-tafseer-ibn-e-kaseer", isUrdu: true, authorName: "Hafiz Ibn Kathir", name: "Tafsir Ibn Kathir" },
   103: { folder: "ur-tafsir-as-saadi-urdu", isUrdu: true, authorName: "Shaykh Abdur-Rahman ibn Nasir as-Sa'di", name: "Tafsir as-Sa'di" },
-  104: { folder: "ur-tafsir-bayan-ul-quran", isUrdu: true, authorName: "Dr. Israr Ahmad / Maulana Thanwi", name: "Bayan-ul-Quran" },
+  104: { folder: "ur-tafsir-bayan-ul-quran", isUrdu: true, authorName: "Dr. Israr Ahmad", name: "Bayan-ul-Quran (بیان القرآن)" },
   105: { folder: "tafsir-fe-zalul-quran-syed-qatab", isUrdu: true, authorName: "Sayyid Qutb", name: "Fi Zilal al-Quran" },
   106: { folder: "ur-tazkirul-quran", isUrdu: true, authorName: "Maulana Wahiduddin Khan", name: "Tazkirul Quran" },
   107: { folder: "en-kashf-al-asrar-tafsir", authorName: "Rashid al-Din Maybudi", name: "Kashf al-Asrar" },
@@ -35,14 +35,14 @@ const LOCAL_TAFSIR_MAP: Record<number, { folder: string; isUrdu?: boolean; isPas
   128: { folder: "en-al-qushairi-tafsir", authorName: "Imam Abu al-Qasim al-Qushayri", name: "Lata'if al-Isharat" },
   129: { folder: "en-asbab-al-nuzul-by-al-wahidi", authorName: "Imam Ali ibn Ahmad al-Wahidi", name: "Asbab al-Nuzul" },
   131: { folder: "en-tafsir-ibn-abbas", authorName: "Attributed to Abdullah ibn Abbas", name: "Tanwir al-Miqbas" },
-  158: { folder: "ur-tafsir-bayan-ul-quran", isUrdu: true, authorName: "Dr. Israr Ahmad", name: "Bayan-ul-Quran" },
-  100158: { folder: "ur-tafsir-bayan-ul-quran", isUrdu: true, authorName: "Dr. Israr Ahmad", name: "Bayan-ul-Quran" },
+  158: { folder: "ur-tafsir-bayan-ul-quran", isUrdu: true, authorName: "Dr. Israr Ahmad", name: "Bayan-ul-Quran (بیان القرآن)" },
+  100158: { folder: "ur-tafsir-bayan-ul-quran", isUrdu: true, authorName: "Dr. Israr Ahmad", name: "Bayan-ul-Quran (بیان القرآن)" },
 };
 
 // 1. Cached library loader (languages + authors with tags & difficulty)
 const getTafsirLibrary = unstable_cache(
   async () => {
-    const [langs, authors] = await Promise.all([
+    const [langs, rawAuthors] = await Promise.all([
       prisma.language.findMany({
         orderBy: { name: 'asc' },
       }),
@@ -50,6 +50,17 @@ const getTafsirLibrary = unstable_cache(
         include: { tags: true },
       }),
     ]);
+
+    const authors = rawAuthors.map(a => {
+      if (a.id === 104) {
+        return {
+          ...a,
+          name: "Bayan-ul-Quran (بیان القرآن)",
+          authorName: "Dr. Israr Ahmad",
+        };
+      }
+      return a;
+    });
 
     // Virtual Authors (Translations with rich footnotes / commentary serving as Tafsir)
     const virtualAuthors: any[] = [
@@ -63,7 +74,6 @@ const getTafsirLibrary = unstable_cache(
       
       // Urdu (languageId: 10)
       { id: 100097, name: "Tafheem-ul-Quran (تفہیم القرآن)", authorName: "Syed Abul A'la Maududi", languageId: 10, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
-      { id: 100158, name: "Bayan-ul-Quran (بیان القرآن)", authorName: "Dr. Israr Ahmad", languageId: 10, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
       { id: 100151, name: "Aasan Tarjuma Quran (آسان ترجمہ قرآن مع تفسیری حواشی)", authorName: "Mufti Muhammad Taqi Usmani", languageId: 10, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
       { id: 100156, name: "Fi Zilal al-Qur'an (فی ظلال القرآن)", authorName: "Sayyid Ibrahim Qutb", languageId: 10, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
       { id: 100819, name: "Tazkirul Quran (تذکیر القرآن)", authorName: "Maulana Wahiduddin Khan", languageId: 10, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
@@ -100,7 +110,7 @@ const getTafsirLibrary = unstable_cache(
       authors: authorsByLang[l.id] || []
     }));
   },
-  ['tafsir-library-v4'],
+  ['tafsir-library-v6'],
   { revalidate: 2592000 } // 30 days
 );
 
@@ -162,7 +172,7 @@ const getLocalDownloadedTafsir = unstable_cache(
       return null;
     }
   },
-  ['local-downloaded-tafsir-v4'],
+  ['local-downloaded-tafsir-v6'],
   { revalidate: 2592000 }
 );
 
@@ -191,7 +201,7 @@ const getSurahDbTafsir = unstable_cache(
     tafsirs.sort((a, b) => (a.ayah?.numberInSurah || 0) - (b.ayah?.numberInSurah || 0));
     return tafsirs;
   },
-  ['surah-db-tafsir-v3'],
+  ['surah-db-tafsir-v6'],
   { revalidate: 2592000 } // 30 days
 );
 
@@ -282,7 +292,7 @@ const getVirtualTafsir = unstable_cache(
       };
     });
   },
-  ['virtual-tafsir-v5'],
+  ['virtual-tafsir-v6'],
   { revalidate: 2592000 } // 30 days
 );
 

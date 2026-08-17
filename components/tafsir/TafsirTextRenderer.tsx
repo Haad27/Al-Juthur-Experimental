@@ -150,7 +150,7 @@ export default function TafsirTextRenderer({ text, isArabic, isUrdu, onNavigateT
       className={`space-y-4 ${isRtl ? "text-right" : "text-left"}`}
       dir={isRtl ? "rtl" : "ltr"}
       style={{
-        fontFamily: isUrdu ? "'Noto Nastaliq Urdu', serif" : isArabic ? "Amiri, serif" : undefined,
+        fontFamily: isUrdu ? "'Noto Nastaliq Urdu', 'IndoPakNastaleeq', serif" : isArabic ? "Amiri, serif" : undefined,
         lineHeight: isUrdu ? "2.6" : undefined,
       }}
     >
