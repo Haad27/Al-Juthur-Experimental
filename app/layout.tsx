@@ -49,7 +49,7 @@ export const metadata = {
       "A modern Quran study platform featuring clean reading views, Surah contexts, root word analysis, 130+ Tafsirs across 33 languages, 127 translations, 12 historical lexicons, and specialized AI for accurate classical Arabic translation.",
     images: [
       {
-        url: "/assets/favicon/android-chrome-512x512.png",
+        url: "/og-share-icon.png",
         width: 512,
         height: 512,
         alt: "Al-Juthur",
@@ -67,7 +67,7 @@ export const metadata = {
     title: "Al-Juthur",
     description:
       "A modern Quran study platform featuring clean reading views, Surah contexts, root word analysis, 130+ Tafsirs across 33 languages, 127 translations, 12 historical lexicons, and specialized AI for accurate classical Arabic translation.",
-    images: ["/assets/favicon/android-chrome-512x512.png"],
+    images: ["/og-share-icon.png"],
   },
 };
 
