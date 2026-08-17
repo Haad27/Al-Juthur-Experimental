@@ -253,15 +253,8 @@ function TafsirContent() {
       .then((data) => {
         if (data.success && Array.isArray(data.data)) {
           const sorted = [...data.data].sort((a, b) => {
-            const getRank = (name: string) => {
-              const lower = name.toLowerCase();
-              if (lower === 'arabic') return 1;
-              if (lower === 'english') return 2;
-              if (lower === 'urdu') return 3;
-              return 4;
-            };
-            const rankA = getRank(a.name);
-            const rankB = getRank(b.name);
+            const rankA = getLanguagePriority(a.name);
+            const rankB = getLanguagePriority(b.name);
             if (rankA !== rankB) return rankA - rankB;
             return a.name.localeCompare(b.name);
           });
