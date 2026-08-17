@@ -1112,39 +1112,27 @@ export default function SurahReaderClient({
         </div>
 
         <div className="flex flex-col w-full min-h-[100dvh] px-2 sm:px-4 md:px-6 lg:px-8">
-          {isSwitchingTranslation && Object.keys(loadedAyahs).length === 0 ? (
-            <AlJuthurLoadingProgress
-              title={`Switching to ${currentTranslationOption?.englishName || "Translation"}...`}
-              subtitle={`Language: ${currentTranslationOption?.languageLabel || "Multilingual"} (${translationEdition})`}
-              statusMessages={[
-                "Connecting to verified Quranic translations...",
-                "Aligning footnote annotations & linguistic nuance...",
-                "Preparing verse typography & layout..."
-              ]}
-              minDurationMs={600}
-            />
-          ) : (
-            <Virtuoso
-              ref={virtuosoRef}
-              useWindowScroll
-              totalCount={totalAyahs}
-              rangeChanged={({ startIndex, endIndex }) => {
-                // Update the visible ayah tracker
-                if (typeof startIndex === "number" && startIndex >= 0) {
-                  setVisibleAyahNumber(startIndex + 1);
-                }
-                // Pre-fetch pages that overlap with the visible range + a buffer of 15 items
-                const BUFFER = 15;
-                const firstNeeded = Math.max(0, startIndex - BUFFER);
-                const lastNeeded = Math.min(totalAyahs - 1, endIndex + BUFFER);
-                const firstPage = Math.floor(firstNeeded / PAGE_SIZE);
-                const lastPage = Math.floor(lastNeeded / PAGE_SIZE);
-                for (let p = firstPage; p <= lastPage; p++) {
-                  fetchPage(p, translationEdition);
-                }
-              }}
-              itemContent={(index) => {
-                const ayah = loadedAyahs[index];
+          <Virtuoso
+            ref={virtuosoRef}
+            useWindowScroll
+            totalCount={totalAyahs}
+            rangeChanged={({ startIndex, endIndex }) => {
+              // Update the visible ayah tracker
+              if (typeof startIndex === "number" && startIndex >= 0) {
+                setVisibleAyahNumber(startIndex + 1);
+              }
+              // Pre-fetch pages that overlap with the visible range + a buffer of 15 items
+              const BUFFER = 15;
+              const firstNeeded = Math.max(0, startIndex - BUFFER);
+              const lastNeeded = Math.min(totalAyahs - 1, endIndex + BUFFER);
+              const firstPage = Math.floor(firstNeeded / PAGE_SIZE);
+              const lastPage = Math.floor(lastNeeded / PAGE_SIZE);
+              for (let p = firstPage; p <= lastPage; p++) {
+                fetchPage(p, translationEdition);
+              }
+            }}
+            itemContent={(index) => {
+              const ayah = loadedAyahs[index];
               if (!ayah) {
                 // Show a height-matched skeleton so Virtuoso never needs to correct
                 // the scroll position when real content arrives.
@@ -1181,7 +1169,6 @@ export default function SurahReaderClient({
               );
             }}
           />
-        )}
 
           <div className="mb-32 md:mb-12 w-full flex justify-center items-center pb-12">
             <div className="flex gap-4 w-full max-w-md px-2 justify-center mt-8 sm:mt-10 pt-2">

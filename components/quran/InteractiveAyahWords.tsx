@@ -208,8 +208,17 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
 
         const data = wordDataMap[wordIdx];
         const meaning = wbwTranslation?.[`${ayahNumber}:${wordIdx}`];
-        // Normalize redundant double-vowel markings (e.g. Fatha + Dagger Alif) to single authentic Dagger Alif
-        const displayWord = word.replace(/\u064E\u0670/g, '\u0670').replace(/\u0670\u064E/g, '\u0670');
+
+        // 1. Normalize redundant double-vowel markings (e.g. Fatha + Dagger Alif) to single authentic Dagger Alif
+        let displayWord = word
+          .replace(/\u064E\u0670/g, '\u0670')
+          .replace(/\u0670\u064E/g, '\u0670');
+
+        // 2. Prevent OpenType dotted circle (U+25CC) bug on Sifr marks (U+06DF, U+06E0) like in يَبْدَؤُا۟
+        displayWord = displayWord.replace(/([^\s\u06DF\u06E0])?([\u06DF\u06E0])/g, '<span style="font-family: \'Amiri\', serif;">$1$2</span>');
+
+        // 3. Ensure Small Low Meem (U+06ED) renders cleanly below the letter rather than colliding with the body (e.g. سُلْطٰنًۭا, مَثَلًۭا)
+        displayWord = displayWord.replace(/([\u06ED])/g, '<span style="display: inline-block; vertical-align: -0.22em; font-family: \'Amiri\', serif;">$1</span>');
 
         return (
           <Dialog key={idx} onOpenChange={(open) => { 
