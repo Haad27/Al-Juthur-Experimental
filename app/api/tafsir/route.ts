@@ -110,7 +110,7 @@ const getTafsirLibrary = unstable_cache(
       authors: authorsByLang[l.id] || []
     }));
   },
-  ['tafsir-library-v6'],
+  ['tafsir-library-v7'],
   { revalidate: 2592000 } // 30 days
 );
 

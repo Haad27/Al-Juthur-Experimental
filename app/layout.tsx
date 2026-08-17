@@ -7,12 +7,67 @@ import BottomNav from "@/components/BottomNav";
 import NextTopLoader from "nextjs-toploader";
 
 export const metadata = {
-  title: "Al-Juthur",
-  description: "Read and listen to quran for free - forever.",
+  metadataBase: new URL("https://aljuthur.vercel.app"),
+  title: {
+    default: "Al-Juthur | Classical Arabic Roots, 130+ Tafsirs & AI Scholar",
+    template: "%s | Al-Juthur",
+  },
+  description:
+    "Explore classical Arabic root morphology, 130+ Tafsirs in 33 languages, 8+ historical Lexicons, and a 6-mode Academic AI RAG engine—all unified in a high-performance modern workspace.",
+  applicationName: "Al-Juthur",
+  keywords: [
+    "Quran",
+    "Tafsir",
+    "Arabic Roots",
+    "Morphology",
+    "Classical Lexicons",
+    "Islamic Scholarship",
+    "AI Scholar",
+    "Al-Juthur",
+  ],
+  authors: [{ name: "Al-Juthur Research Team" }],
+  creator: "Al-Juthur",
+  publisher: "Al-Juthur",
   icons: {
-    icon: "/assets/favicon/apple-touch-icon.png",
-    shortcut: "/assets/favicon/apple-touch-icon.png",
-    apple: "/assets/favicon/apple-touch-icon.png",
+    icon: [
+      { url: "/assets/favicon/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/assets/favicon/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+    ],
+    shortcut: "/assets/favicon/favicon.ico",
+    apple: [
+      { url: "/assets/favicon/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  manifest: "/site.webmanifest",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://aljuthur.vercel.app",
+    siteName: "Al-Juthur",
+    title: "Al-Juthur | Classical Arabic Roots, 130+ Tafsirs & AI Scholar",
+    description:
+      "Explore classical Arabic root morphology, 130+ Tafsirs in 33 languages, 8+ historical Lexicons, and a 6-mode Academic AI RAG engine.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Al-Juthur - Classical Qur'anic Morphology, Tafsir & AI Scholar",
+      },
+      {
+        url: "/assets/favicon/android-chrome-512x512.png",
+        width: 512,
+        height: 512,
+        alt: "Al-Juthur Emblem",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Al-Juthur | Classical Arabic Roots, 130+ Tafsirs & AI Scholar",
+    description:
+      "Explore classical Arabic root morphology, 130+ Tafsirs in 33 languages, 8+ historical Lexicons, and a 6-mode Academic AI RAG engine.",
+    images: ["/og-image.png"],
   },
 };
 
