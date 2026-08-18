@@ -14,11 +14,11 @@ interface AIModelConfig {
 export const AVAILABLE_MODELS: Record<string, AIModelConfig> = {
   'gemini-3.1-flash-lite': { name: 'gemini-3.1-flash-lite', apiName: 'gemini-3.1-flash-lite', maxRpm: 15, maxWeeklyTokens: 10000000 },
   'gemini-3.5-flash-lite': { name: 'gemini-3.5-flash-lite', apiName: 'gemini-3.5-flash-lite', maxRpm: 15, maxWeeklyTokens: 10000000 },
-  'gemini-2.5-flash-lite': { name: 'gemini-2.5-flash-lite', apiName: 'gemini-2.5-flash-lite', maxRpm: 10, maxWeeklyTokens: 10000000 },
+  'gemini-3.7-flash': { name: 'gemini-3.7-flash', apiName: 'gemini-3.7-flash', maxRpm: 5, maxWeeklyTokens: 10000000 },
   'gemini-3.0-flash': { name: 'gemini-3.0-flash', apiName: 'gemini-3-flash-preview', maxRpm: 5, maxWeeklyTokens: 10000000 },
-  'gemini-2.5-flash': { name: 'gemini-2.5-flash', apiName: 'gemini-2.5-flash', maxRpm: 5, maxWeeklyTokens: 10000000 },
   'gemini-3.5-flash': { name: 'gemini-3.5-flash', apiName: 'gemini-3.5-flash', maxRpm: 5, maxWeeklyTokens: 10000000 },
   'gemini-3.6-flash': { name: 'gemini-3.6-flash', apiName: 'gemini-3.6-flash', maxRpm: 5, maxWeeklyTokens: 10000000 },
+  'gemini-2.5-flash': { name: 'gemini-2.5-flash', apiName: 'gemini-2.5-flash', maxRpm: 5, maxWeeklyTokens: 10000000 },
   'gemma-4-26b': { name: 'gemma-4-26b', apiName: 'gemma-4-26b-a4b-it', maxRpm: 30, maxWeeklyTokens: 10000000 },
   'gemma-4-31b': { name: 'gemma-4-31b', apiName: 'gemma-4-31b-it', maxRpm: 30, maxWeeklyTokens: 10000000 },
 };
@@ -27,14 +27,14 @@ export const AVAILABLE_MODELS: Record<string, AIModelConfig> = {
 // MODE-SPECIFIC ROUTING CHAINS
 // ----------------------------------------------------
 export const ROUTING_CHAINS: Record<string, string[]> = {
-  'default': ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-2.5-flash-lite'],
-  'lexicon': ['gemini-3.5-flash-lite', 'gemma-4-26b', 'gemini-2.5-flash-lite'],
-  'modern': ['gemini-2.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.0-flash'],
-  'grammar': ['gemini-3.0-flash', 'gemini-2.5-flash', 'gemma-4-31b'],
-  'classical': ['gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-3.0-flash'],
-  'philosophical': ['gemini-2.5-flash', 'gemini-3.6-flash', 'gemini-3.1-flash-lite'],
-  'translate_short': ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-2.5-flash-lite', 'gemini-3.5-flash', 'gemma-4-31b', 'gemma-4-26b'],
-  'translate_long': ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-3.6-flash', 'gemma-4-31b', 'gemma-4-26b'],
+  'default': ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-3.7-flash', 'gemini-3.5-flash', 'gemini-3.6-flash'],
+  'lexicon': ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemma-4-26b', 'gemini-3.7-flash'],
+  'modern': ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-3.7-flash', 'gemini-3.0-flash'],
+  'grammar': ['gemini-3.7-flash', 'gemini-3.0-flash', 'gemini-2.5-flash', 'gemma-4-31b'],
+  'classical': ['gemini-3.6-flash', 'gemini-3.7-flash', 'gemini-2.5-flash', 'gemini-3.0-flash'],
+  'philosophical': ['gemini-2.5-flash', 'gemini-3.6-flash', 'gemini-3.7-flash', 'gemini-3.1-flash-lite'],
+  'translate_short': ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-3.7-flash', 'gemma-4-31b', 'gemma-4-26b'],
+  'translate_long': ['gemini-3.5-flash', 'gemini-3.7-flash', 'gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-3.6-flash', 'gemma-4-31b', 'gemma-4-26b'],
 };
 
 interface ExecutionResult {

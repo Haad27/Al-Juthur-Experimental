@@ -225,14 +225,17 @@ function RagChatContent() {
       setMessages((prev) => [...prev, assistantMessage]);
 
       let lastUpdateTime = Date.now();
+      let streamBuffer = "";
       
       while (!done) {
         const { value, done: readerDone } = await reader.read();
         done = readerDone;
         
         if (value) {
-          const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split("\n");
+          streamBuffer += decoder.decode(value, { stream: true });
+          const lines = streamBuffer.split("\n");
+          // Keep the last incomplete fragment in the buffer until the next chunk arrives
+          streamBuffer = lines.pop() || "";
           
           for (const line of lines) {
             if (line.startsWith("data: ")) {
