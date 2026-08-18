@@ -37,6 +37,7 @@ const LOCAL_TAFSIR_MAP: Record<number, { folder: string; isUrdu?: boolean; isPas
   128: { folder: "en-al-qushairi-tafsir", authorName: "Imam Abu al-Qasim al-Qushayri", name: "Lata'if al-Isharat" },
   129: { folder: "en-asbab-al-nuzul-by-al-wahidi", authorName: "Imam Ali ibn Ahmad al-Wahidi", name: "Asbab al-Nuzul" },
   131: { folder: "en-tafsir-ibn-abbas", authorName: "Attributed to Abdullah ibn Abbas", name: "Tanwir al-Miqbas" },
+  140: { folder: "en-tafsir-fe-zalul-quran-syed-qatab", authorName: "Sayyid Qutb", name: "Fi Zilal al-Quran" },
   158: { folder: "ur-tafsir-bayan-ul-quran", isUrdu: true, authorName: "Dr. Israr Ahmad", name: "Bayan-ul-Quran (بیان القرآن)" },
   100158: { folder: "ur-tafsir-bayan-ul-quran", isUrdu: true, authorName: "Dr. Israr Ahmad", name: "Bayan-ul-Quran (بیان القرآن)" },
 };
