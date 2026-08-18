@@ -251,8 +251,9 @@ export function getDictionaries(): DictionaryInfo[] {
     { id: 7, ident: 'quran', name: 'Quran Dictionary', info: '', is_hi_capable: true, ar_en: false, link: '' },
     { id: 8, ident: 'ghoribulquran', name: 'Gharib al-Quran', info: '', is_hi_capable: true, ar_en: false, link: '' },
     { id: 9, ident: 'mujamul_shihah', name: "Mu'jam al-Shihah", info: '', is_hi_capable: true, ar_en: false, link: '' },
-    { id: 10, ident: 'mufradat_alfajul_quran', name: 'Mufradat Alfaz al-Quran', info: '', is_hi_capable: true, ar_en: false, link: '' },
-    { id: 11, ident: 'maqayeesul_luga', name: 'Maqayis al-Lughah', info: '', is_hi_capable: true, ar_en: false, link: '' }
+    { id: 10, ident: 'mufradat_alfajul_quran', name: 'Mufradat Alfaz al-Quran', info: 'Al-Raghib al-Isfahani', is_hi_capable: true, ar_en: false, link: '' },
+    { id: 11, ident: 'maqayeesul_luga', name: 'Maqayis al-Lughah', info: 'Ibn Faris', is_hi_capable: true, ar_en: false, link: '' },
+    { id: 12, ident: 'hanswehr', name: "Hans Wehr (Arabic-English)", info: 'Dictionary of Modern Written Arabic', is_hi_capable: true, ar_en: true, link: '' }
   ];
 }
 
@@ -386,16 +387,22 @@ export async function searchRoots(query: string, limit = 50): Promise<string[]> 
     }
   }
 
-  // Also search lanelexcon in Turso
+  // Also search lanelexcon & hanswehr in Turso
   try {
     const turso = getTursoClient();
     const compactPattern = `%${compact}%`;
-    const res = await turso.execute({
-      sql: `SELECT word FROM lanelexcon WHERE is_root = 1 AND word LIKE ? LIMIT ?`,
-      args: [compactPattern, limit]
-    });
+    const [res, hwRes] = await Promise.all([
+      turso.execute({
+        sql: `SELECT word FROM lanelexcon WHERE is_root = 1 AND word LIKE ? LIMIT ?`,
+        args: [compactPattern, limit]
+      }),
+      turso.execute({
+        sql: `SELECT word FROM hanswehr WHERE word LIKE ? LIMIT ?`,
+        args: [compactPattern, limit]
+      }).catch(() => ({ rows: [] }))
+    ]);
 
-    for (const r of res.rows) {
+    for (const r of [...res.rows, ...hwRes.rows]) {
       const cleanRoot = (r.word as string).replace(/\s+/g, '');
       matchedSet.add(cleanRoot);
     }
@@ -484,10 +491,10 @@ export async function getLexiconEntriesForRoot(rootQuery: string): Promise<RootL
   );
   const entries: LexiconEntry[] = results.filter((e): e is LexiconEntry => e !== null);
 
-  // Sort entries so English / Lane's appear first, then Arabic Classical
+  // Sort entries so English (Lane's & Hans Wehr) appear first, then Classical Arabic
   entries.sort((a, b) => {
-    if (a.dictId === 1) return -1;
-    if (b.dictId === 1) return 1;
+    if (a.isEnglish && !b.isEnglish) return -1;
+    if (!a.isEnglish && b.isEnglish) return 1;
     return a.dictId - b.dictId;
   });
 

@@ -154,24 +154,24 @@ export default function TafsirTextRenderer({
   }
 
   const getFontFamily = () => {
-    if (isUrdu) return "'Noto Nastaliq Urdu', 'IndoPakNastaleeq', serif";
-    if (isPashto) return "'Noto Naskh Arabic', 'Noto Sans Arabic', 'Scheherazade New', 'Amiri', serif";
-    if (isPersian) return "'Noto Naskh Arabic', 'Noto Sans Arabic', 'Amiri', serif";
-    if (isArabic) return "Amiri, 'Noto Naskh Arabic', serif";
+    if (isUrdu) return "'IndoPakNastaleeq', 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Scheherazade New', 'Lateef', serif";
+    if (isPashto) return "'Noto Sans Arabic', 'Noto Naskh Arabic', 'Scheherazade New', 'Amiri', serif";
+    if (isPersian) return "'Noto Sans Arabic', 'Noto Naskh Arabic', 'Amiri', serif";
+    if (isArabic) return "'UthmanicHafs', 'Amiri', 'Noto Naskh Arabic', serif";
     return undefined;
   };
 
   const getLineHeight = () => {
     if (isUrdu) return "2.6";
     if (isPashto) return "2.2";
-    if (isPersian || isArabic) return "2.0";
+    if (isPersian || isArabic) return "2.1";
     return "1.65";
   };
 
   const getFontSize = () => {
     if (isUrdu) return "1.25rem";
-    if (isPashto) return "1.15rem";
-    if (isArabic || isPersian) return "1.15rem";
+    if (isPashto) return "1.2rem";
+    if (isArabic || isPersian) return "1.2rem";
     return undefined;
   };
 

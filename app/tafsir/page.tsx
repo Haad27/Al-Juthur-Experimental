@@ -174,27 +174,28 @@ const TafsirFootnotesLoader = ({
   }
 
   return (
-    <div className="space-y-3 mt-2">
+    <div className="space-y-6 mt-3">
       {footnoteIds.map((fId, idx) => (
-        <div 
-          key={fId} 
-          className="leading-relaxed text-sm md:text-base text-zinc-200 bg-zinc-900/70 p-4 rounded-xl border border-zinc-800/80 shadow-sm" 
-          dir={isUrdu ? "rtl" : "auto"}
-          style={{
-            fontFamily: isUrdu ? "'Noto Nastaliq Urdu', 'IndoPakNastaleeq', serif" : undefined,
-            lineHeight: isUrdu ? "2.6" : "1.75",
-            fontSize: isUrdu ? "1.18rem" : undefined
-          }}
-        >
-          <div className="flex items-start gap-2.5">
-            <span className="text-emerald-400 font-bold px-2 py-0.5 bg-emerald-950/60 rounded border border-emerald-500/30 text-xs shrink-0 inline-block font-mono" dir="ltr">
+        <div key={fId} className="w-full">
+          <div className="flex items-center justify-between pb-2 border-b border-emerald-500/20 mb-3">
+            <div className="flex items-center gap-2 font-bold text-emerald-400 text-xs md:text-sm tracking-wider uppercase">
+              <BookOpenText className="size-4 text-emerald-400" />
+              <span>{isUrdu ? "تفسیر (TAFSIR)" : "TAFSIR"}</span>
+            </div>
+            <span className="text-emerald-400 font-bold px-2.5 py-0.5 bg-emerald-950/70 rounded-full border border-emerald-500/30 text-xs font-mono" dir="ltr">
               [{idx + 1}]
             </span>
-            <div 
-              className="flex-1"
-              dangerouslySetInnerHTML={{ __html: fetchedFootnotes[fId] || "Explanation loading..." }} 
-            />
           </div>
+          <div 
+            className="w-full text-zinc-100 leading-relaxed text-sm md:text-base" 
+            dir={isUrdu ? "rtl" : "auto"}
+            style={{
+              fontFamily: isUrdu ? "'IndoPakNastaleeq', 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Scheherazade New', 'Lateef', serif" : undefined,
+              lineHeight: isUrdu ? "2.6" : "1.8",
+              fontSize: isUrdu ? "1.22rem" : undefined
+            }}
+            dangerouslySetInnerHTML={{ __html: fetchedFootnotes[fId] || "Explanation loading..." }} 
+          />
         </div>
       ))}
     </div>
@@ -322,6 +323,7 @@ function TafsirContent() {
 
   const parsedUrlAuthorId = urlAuthor && !isNaN(parseInt(urlAuthor)) ? parseInt(urlAuthor) : null;
   const parsedUrlSurahId = urlSurah && !isNaN(parseInt(urlSurah)) ? parseInt(urlSurah) : 1;
+  const parsedUrlAyah = urlAyah && !isNaN(parseInt(urlAyah)) ? parseInt(urlAyah) : null;
 
   // Reading Mode State
   const [activeAuthor, setActiveAuthor] = useState<Author | null>(() => {
@@ -344,11 +346,35 @@ function TafsirContent() {
 
   const [aiChatContext, setAiChatContext] = useState<{ surah: number; ayah: number } | null>(null);
 
-  // Ayah Wheel Picker Modal State
+  // Surah Context & Theme State
+  const [showSurahContext, setShowSurahContext] = useState<boolean>(false);
+  const [surahInfo, setSurahInfo] = useState<any>(null);
+
+  // Ayah Wheel Picker Modal & Scroll Target State
   const [wheelModalOpen, setWheelModalOpen] = useState<boolean>(false);
   const [selectedAuthorForWheel, setSelectedAuthorForWheel] = useState<Author | null>(null);
   const [selectedLangForWheel, setSelectedLangForWheel] = useState<string>("");
-  const [targetAyahToScroll, setTargetAyahToScroll] = useState<{ surah: number; ayah: number } | null>(null);
+  const [targetAyahToScroll, setTargetAyahToScroll] = useState<{ surah: number; ayah: number } | null>(() => {
+    if (parsedUrlAyah && parsedUrlAyah > 0) {
+      return { surah: parsedUrlSurahId, ayah: parsedUrlAyah };
+    }
+    return null;
+  });
+  const pendingScrollAyahRef = useRef<number | null>(parsedUrlAyah && parsedUrlAyah > 0 ? parsedUrlAyah : null);
+
+  // Fetch Surah context & theme when surah or author changes
+  useEffect(() => {
+    if (activeAuthor && activeSurah > 0) {
+      fetch(`/api/surah-info?surahId=${activeSurah}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.data) {
+            setSurahInfo(data.data);
+          }
+        })
+        .catch((e) => console.error("Failed to load surah context:", e));
+    }
+  }, [activeAuthor?.id, activeSurah]);
 
   // Fetch all languages & authors on mount
   useEffect(() => {
@@ -518,15 +544,6 @@ function TafsirContent() {
     }
   }, []);
 
-  // Auto-scroll to target ayah from URL param
-  useEffect(() => {
-    if (!urlAyah || !activeAuthor) return;
-    const n = parseInt(urlAyah, 10);
-    if (isNaN(n) || n < 1) return;
-    
-    scrollToAyah(n);
-  }, [urlAyah, activeAuthor, scrollToAyah]);
-
   const { setImmersiveMode } = useGlobalState();
 
   // Hide mobile bottom nav when in Tafsir reading mode
@@ -541,26 +558,58 @@ function TafsirContent() {
     };
   }, [activeAuthor, setImmersiveMode]);
 
-  // Auto scroll to target ayah set by Ayah Picker
+  // When async loading completes, execute pending scroll to target ayah
   useEffect(() => {
-    if (targetAyahToScroll && targetAyahToScroll.surah === activeSurah) {
-      scrollToAyah(targetAyahToScroll.ayah);
-      setTargetAyahToScroll(null);
-    }
-  }, [targetAyahToScroll, activeSurah, scrollToAyah]);
-
-  // Reset to Verse 1 at the top of the page when changing Surah (unless a target ayah was selected)
-  useEffect(() => {
-    if (!targetAyahToScroll) {
-      setCurrentAyahIndex(0);
-      virtuosoRef.current?.scrollToIndex({ index: 0, align: "start" });
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      const trackerEl = document.getElementById(`ayah-tracker-1`);
-      if (trackerEl) {
-        trackerEl.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (!loadingEntries && Object.keys(loadedTafsir).length > 0) {
+      const targetAyah = targetAyahToScroll?.ayah || pendingScrollAyahRef.current;
+      if (targetAyah && targetAyah > 0) {
+        scrollToAyah(targetAyah);
+        const t1 = setTimeout(() => {
+          scrollToAyah(targetAyah);
+        }, 100);
+        const t2 = setTimeout(() => {
+          scrollToAyah(targetAyah);
+          setTargetAyahToScroll(null);
+          pendingScrollAyahRef.current = null;
+        }, 300);
+        return () => {
+          clearTimeout(t1);
+          clearTimeout(t2);
+        };
       }
     }
-  }, [activeSurah]);
+  }, [loadingEntries, loadedTafsir, targetAyahToScroll, scrollToAyah]);
+
+  // Auto scroll to target ayah when set by Ayah Picker if already loaded
+  useEffect(() => {
+    if (targetAyahToScroll && targetAyahToScroll.surah === activeSurah && !loadingEntries && Object.keys(loadedTafsir).length > 0) {
+      scrollToAyah(targetAyahToScroll.ayah);
+      const timer = setTimeout(() => {
+        scrollToAyah(targetAyahToScroll.ayah);
+        setTargetAyahToScroll(null);
+        pendingScrollAyahRef.current = null;
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [targetAyahToScroll, activeSurah, loadingEntries, loadedTafsir, scrollToAyah]);
+
+  const prevSurahRef = useRef<number>(activeSurah);
+  // Reset to Verse 1 at the top of the page when changing Surah (unless a target ayah was selected)
+  useEffect(() => {
+    if (prevSurahRef.current !== activeSurah) {
+      prevSurahRef.current = activeSurah;
+      setShowSurahContext(false);
+      if (!targetAyahToScroll && !pendingScrollAyahRef.current) {
+        setCurrentAyahIndex(0);
+        virtuosoRef.current?.scrollToIndex({ index: 0, align: "start" });
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        const trackerEl = document.getElementById(`ayah-tracker-1`);
+        if (trackerEl) {
+          trackerEl.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
+    }
+  }, [activeSurah, targetAyahToScroll]);
 
   // Auto-scroll the left sidebar Surah selector to the active Surah
   useEffect(() => {
@@ -839,6 +888,53 @@ function TafsirContent() {
                   </p>
                 </div>
               )}
+
+              {/* Context & Theme Button */}
+              <div className="mt-3 flex flex-col items-center w-full max-w-3xl mx-auto">
+                <button
+                  onClick={() => setShowSurahContext(!showSurahContext)}
+                  className="group relative inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/50 hover:bg-emerald-500/20 hover:border-emerald-400 cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)] transition-all duration-300"
+                  title={showSurahContext ? "Hide Context" : "Read Surah Context and Theme"}
+                >
+                  <div className="absolute inset-0 rounded-full bg-emerald-400/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <Compass size={14} className="text-emerald-400 group-hover:text-emerald-300 transition-colors relative z-10 animate-[spin_4s_linear_infinite]" />
+                  <span className="text-[11px] md:text-[12px] font-bold tracking-widest text-emerald-300 group-hover:text-white transition-colors uppercase relative z-10">
+                    {showSurahContext ? "Close Context" : "Context & Theme"}
+                  </span>
+                </button>
+
+                {showSurahContext && surahInfo && (
+                  <div className="mt-4 p-5 sm:p-6 w-full rounded-2xl bg-zinc-950/95 border border-emerald-500/40 text-sm text-zinc-100 shadow-[0_10px_40px_rgba(16,185,129,0.15)] relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500 text-left">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent"></div>
+                    
+                    <div className="font-semibold text-emerald-400 uppercase tracking-wider text-[11px] mb-5 border-b border-emerald-500/20 pb-3 flex items-center justify-between">
+                      <span className="text-emerald-400 font-bold uppercase tracking-wider text-[12px] flex items-center gap-2">
+                        <Compass size={15} />
+                        CONTEXT & THEME OF {currentSurahMeta.englishName.toUpperCase()} ({currentSurahMeta.name})
+                      </span>
+                      <button 
+                        onClick={() => setShowSurahContext(false)} 
+                        className="hover:bg-zinc-800 p-1.5 rounded-full transition-colors text-zinc-400 hover:text-white cursor-pointer"
+                      >
+                        <span className="sr-only">Close</span>
+                        <X size={16} />
+                      </button>
+                    </div>
+                    
+                    <div className="space-y-4 leading-relaxed text-zinc-300">
+                      {surahInfo.bismillah_pre_ayah && (
+                        <p className="text-xs text-emerald-400/90 italic font-mono bg-emerald-500/5 p-2 rounded-lg border border-emerald-500/10 mb-3">
+                          Note: Bismillah is included as part of this Surah.
+                        </p>
+                      )}
+                      <div 
+                        className="text-zinc-200 leading-relaxed max-w-none text-xs sm:text-sm [&>h2]:text-emerald-400 [&>h2]:font-bold [&>h2]:text-sm sm:[&>h2]:text-base [&>h2]:mt-4 [&>h2]:mb-1.5 [&>h2:first-child]:mt-0 [&>h3]:text-emerald-300 [&>h3]:font-bold [&>h3]:text-xs sm:[&>h3]:text-sm [&>h3]:mt-3 [&>h3]:mb-1 [&>p]:mb-2.5 [&>ol]:list-decimal [&>ol]:ml-5 [&>ol]:mb-2.5 [&>ul]:list-disc [&>ul]:ml-5 [&>ul]:mb-2.5 [&>li]:mb-1 [&>a]:text-emerald-400 [&>a:hover]:underline [&>strong]:text-zinc-100"
+                        dangerouslySetInnerHTML={{ __html: surahInfo.heading || surahInfo.text }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="flex-1 w-full min-h-0">
@@ -858,6 +954,7 @@ function TafsirContent() {
                   ref={virtuosoRef}
                   useWindowScroll
                   totalCount={currentSurahMeta.numberOfAyahs}
+                  initialTopMostItemIndex={parsedUrlAyah && parsedUrlAyah > 0 ? Math.max(0, parsedUrlAyah - 1) : 0}
                   rangeChanged={({ startIndex }) => {
                     if (typeof startIndex === "number" && startIndex >= 0) {
                       setCurrentAyahIndex(startIndex);
@@ -954,6 +1051,7 @@ function TafsirContent() {
             }
             setActiveSurah(surahNum);
             setTargetAyahToScroll({ surah: surahNum, ayah: ayahNum });
+            pendingScrollAyahRef.current = ayahNum;
           }}
         />
       </div>
@@ -1365,6 +1463,7 @@ function TafsirContent() {
           }
           setActiveSurah(surahNum);
           setTargetAyahToScroll({ surah: surahNum, ayah: ayahNum });
+          pendingScrollAyahRef.current = ayahNum;
         }}
       />
     </div>
@@ -1466,10 +1565,6 @@ function TafsirCard({
         {/* Tafsir (Commentary / Footnotes) */}
         {entry.footnoteIds && entry.footnoteIds.length > 0 && (
           <div className="mt-6 pt-4 border-t border-emerald-900/30">
-            <div className="flex items-center gap-2 font-bold text-emerald-400 text-xs md:text-sm tracking-wider uppercase mb-3">
-              <BookOpenText className="size-4 text-emerald-400" />
-              <span>{isUrduText ? "تفسیر (TAFSIR)" : "TAFSIR"}</span>
-            </div>
             <TafsirFootnotesLoader 
               footnoteIds={entry.footnoteIds} 
               initialFootnotes={entry.footnotes}

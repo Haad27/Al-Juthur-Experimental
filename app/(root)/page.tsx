@@ -22,15 +22,19 @@ const ScrollSections = dynamic(() => import("@/components/landing3d/ScrollSectio
 const APP_IMAGES = [
   "/images/landing/image1.png",
   "/images/landing/image3.png",
-  "/images/landing/image2.png",
-  "/images/landing/image4.png",
+  "/images/landing/image5.png",
+  "/images/landing/image8.png",
+  "/images/landing/image11.png",
+  "/images/landing/image13.png",
 ];
 
 const APP_CAPTIONS = [
-  "Comprehensive Lexicons",
-  "Thematic Tafsir Insights",
-  "Word-by-Word Analysis",
-  "Contextual Discovery",
+  "Modern Interface",
+  "Quran Reader",
+  "130+ Tafsirs",
+  "12 Classical Lexicons",
+  "AI Translation",
+  "6 RAG Modes",
 ];
 
 export default function LandingPage() {

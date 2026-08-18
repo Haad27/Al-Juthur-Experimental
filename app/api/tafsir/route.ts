@@ -53,16 +53,43 @@ const getTafsirLibrary = unstable_cache(
       }),
     ]);
 
-    const authors = rawAuthors.map(a => {
-      if (a.id === 104) {
-        return {
-          ...a,
-          name: "Bayan-ul-Quran (بیان القرآن)",
-          authorName: "Dr. Israr Ahmad",
-        };
-      }
-      return a;
-    });
+    // Exclude redundant duplicate IDs where canonical/higher-quality editions exist
+    const EXCLUDED_AUTHOR_IDS = new Set([
+      138, // duplicate of 100097 (Tafheem-ul-Quran with full footnotes)
+      139, // duplicate of 100151 (Aasan Tarjuma Quran with full footnotes)
+      113, // duplicate of 63 (Tafsir al-Jalalayn En)
+      108, // duplicate of 128 (Lata'if al-Isharat En)
+      111, // duplicate of 129 (Asbab al-Nuzul En)
+      112, // duplicate of 131 (Tanwir al-Miqbas En)
+      98,  // duplicate of 95 (Tafsir as-Sa'di Ru)
+    ]);
+
+    const authors = rawAuthors
+      .filter(a => !EXCLUDED_AUTHOR_IDS.has(a.id))
+      .map(a => {
+        if (a.id === 104) {
+          return {
+            ...a,
+            name: "Bayan-ul-Quran (بیان القرآن)",
+            authorName: "Dr. Israr Ahmad",
+          };
+        }
+        if (a.id === 105) {
+          return {
+            ...a,
+            name: "Fi Zilal al-Qur'an (فی ظلال القرآن)",
+            authorName: "Sayyid Qutb",
+          };
+        }
+        if (a.id === 106) {
+          return {
+            ...a,
+            name: "Tazkirul Quran (تذکیر القرآن)",
+            authorName: "Maulana Wahiduddin Khan",
+          };
+        }
+        return a;
+      });
 
     // Virtual Authors (Translations with rich footnotes / commentary serving as Tafsir)
     const virtualAuthors: any[] = [
@@ -76,10 +103,8 @@ const getTafsirLibrary = unstable_cache(
       
       // Urdu (languageId: 10)
       { id: 100097, name: "Tafheem-ul-Quran (تفہیم القرآن)", authorName: "Syed Abul A'la Maududi", languageId: 10, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
-      { id: 100151, name: "Aasan Tarjuma Quran (آسان ترجمہ قرآن مع تفسیری حواشی)", authorName: "Mufti Muhammad Taqi Usmani", languageId: 10, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
-      { id: 100156, name: "Fi Zilal al-Qur'an (فی ظلال القرآن)", authorName: "Sayyid Ibrahim Qutb", languageId: 10, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
-      { id: 100819, name: "Tazkirul Quran (تذکیر القرآن)", authorName: "Maulana Wahiduddin Khan", languageId: 10, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
       { id: 100831, name: "Tafheem-ul-Quran (Roman Urdu)", authorName: "Sayyid Abul Ala Maududi", languageId: 10, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
+      { id: 100151, name: "Aasan Tarjuma Quran (آسان ترجمہ قرآن مع تفسیری حواشی)", authorName: "Mufti Muhammad Taqi Usmani", languageId: 10, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
 
       // Pashto (languageId: 11)
       { id: 100118, name: "Pashto Translation & Commentary (د قرآن پښتو تفسیر)", authorName: "Zakaria Abulsalam", languageId: 11, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
@@ -112,7 +137,7 @@ const getTafsirLibrary = unstable_cache(
       authors: authorsByLang[l.id] || []
     }));
   },
-  ['tafsir-library-v7'],
+  ['tafsir-library-v8'],
   { revalidate: 2592000 } // 30 days
 );
 

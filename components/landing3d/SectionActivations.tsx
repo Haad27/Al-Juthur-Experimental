@@ -58,8 +58,10 @@ function ArabicOverlay({
         style={{
           opacity: 0,
           color: "#6df4ce",
-          fontSize: "1.6rem",
+          fontSize: "clamp(0.95rem, 4vw, 1.6rem)",
           fontWeight: 700,
+          maxWidth: "92vw",
+          textAlign: "center",
           textShadow:
             "0 0 20px #6df4ce, 0 0 40px #6df4ce60, 0 0 80px #6df4ce30",
           whiteSpace: "nowrap",
@@ -100,13 +102,15 @@ function EnglishOverlay({
         style={{
           opacity: 0,
           color: "#a7f3d0",
-          fontSize: "1.1rem",
+          fontSize: "clamp(0.65rem, 3.1vw, 1.1rem)",
           fontWeight: 600,
+          maxWidth: "94vw",
+          textAlign: "center",
           textShadow:
             "0 0 15px #a7f3d060, 0 0 30px #a7f3d030",
           whiteSpace: "nowrap",
           fontFamily: "'Inter', sans-serif",
-          letterSpacing: "0.03em",
+          letterSpacing: "0.02em",
           userSelect: "none",
           pointerEvents: "none",
           transition: "transform 0.3s ease",
