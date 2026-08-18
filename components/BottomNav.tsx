@@ -77,7 +77,7 @@ const BottomNav = () => {
       className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] inset-x-0 mx-auto w-[calc(100%-2rem)] max-w-md z-50 md:hidden pointer-events-none"
       style={{ transform: "none", WebkitTransform: "none" }}
     >
-      <nav className="pointer-events-auto rounded-full border border-zinc-700/50 border-t-zinc-600/50 bg-zinc-950/80 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] px-2 py-1.5">
+      <nav className="pointer-events-auto rounded-full border border-zinc-700/50 border-t-zinc-600/50 bg-zinc-950/50 backdrop-blur-2xl backdrop-saturate-150 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] px-2 py-1.5">
         <div className="flex justify-around items-center h-14 relative">
           {navItems.map((item) => {
             const isActive = 
