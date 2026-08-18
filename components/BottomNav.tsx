@@ -74,11 +74,11 @@ const BottomNav = () => {
   return (
     <div 
       suppressHydrationWarning 
-      className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] inset-x-0 mx-auto w-[calc(100%-2rem)] max-w-md z-50 md:hidden pointer-events-none"
+      className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] inset-x-0 mx-auto w-fit max-w-[95vw] z-50 md:hidden pointer-events-none flex justify-center"
       style={{ transform: "none", WebkitTransform: "none" }}
     >
-      <nav className="pointer-events-auto rounded-full border border-zinc-700/50 border-t-zinc-600/50 bg-zinc-950/50 backdrop-blur-2xl backdrop-saturate-150 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] px-2 py-1.5">
-        <div className="flex justify-around items-center h-14 relative">
+      <nav className="pointer-events-auto rounded-full border border-white/10 bg-zinc-950/70 backdrop-blur-2xl backdrop-saturate-150 shadow-[0_12px_40px_rgba(0,0,0,0.6)] px-2 py-1.5 flex items-center gap-0.5">
+        <div className="flex items-center gap-0.5 relative">
           {navItems.map((item) => {
             const isActive = 
               (item.label === "Home" && pathname === "/home") ||
@@ -94,15 +94,15 @@ const BottomNav = () => {
                 key={item.label}
                 href={item.href}
                 onClick={() => setImmersiveMode(false)}
-                className="relative flex flex-col items-center justify-center w-full h-full rounded-full transition-colors duration-300"
+                className="relative flex flex-col items-center justify-center px-2.5 sm:px-3 py-1 min-w-[54px] h-12 rounded-full transition-colors duration-300"
               >
                 {isActive && (
                   <motion.div
                     layoutId="active-pill"
-                    className={`absolute inset-x-1 inset-y-1 rounded-2xl z-0 ${
+                    className={`absolute inset-0 rounded-full z-0 ${
                       isImmersive 
-                        ? "bg-amber-500/15 border border-amber-500/30" 
-                        : "bg-white/[0.08] border border-white/[0.04]"
+                        ? "bg-amber-500/20 border border-amber-500/40" 
+                        : "bg-white/[0.12] border border-white/10"
                     }`}
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
@@ -110,7 +110,7 @@ const BottomNav = () => {
                 
                 <motion.div
                   animate={{
-                    y: isActive ? -2 : 0,
+                    y: isActive ? -1 : 0,
                     scale: isActive ? 1.05 : 1,
                   }}
                   transition={{ type: "spring", stiffness: 400, damping: 25 }}
@@ -122,7 +122,7 @@ const BottomNav = () => {
                 </motion.div>
                 
                 <span 
-                  className={`relative z-10 text-[9px] tracking-wide mt-1 transition-all duration-300 ${
+                  className={`relative z-10 text-[9px] tracking-tight mt-0.5 transition-all duration-300 ${
                     isActive 
                       ? (isImmersive ? "text-amber-400 font-bold" : "text-emerald-400 font-bold")
                       : "text-zinc-500 font-medium hover:text-zinc-300"
