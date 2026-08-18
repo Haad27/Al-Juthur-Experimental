@@ -49,6 +49,7 @@ export interface LexiconEntry {
   dictIdent: string;
   isEnglish: boolean;
   definitions: string[];
+  isModern?: boolean;
 }
 
 export interface RootLexiconResult {
@@ -447,7 +448,7 @@ export async function getLexiconEntriesForRoot(rootQuery: string): Promise<RootL
         });
       }
       if (res.rows.length > 0 && res.rows[0].meanings) {
-        return { dictId: dict.id, dictName: dict.name, dictIdent: dict.ident, isEnglish: dict.ar_en, definitions: [res.rows[0].meanings as string] };
+        return { dictId: dict.id, dictName: dict.name, dictIdent: dict.ident, isEnglish: dict.ar_en, definitions: [res.rows[0].meanings as string], isModern: dict.ident === 'hanswehr' };
       }
     } catch (e) {
       // Table might not exist, silently skip
@@ -493,6 +494,8 @@ export async function getLexiconEntriesForRoot(rootQuery: string): Promise<RootL
 
   // Sort entries so English (Lane's & Hans Wehr) appear first, then Classical Arabic
   entries.sort((a, b) => {
+    if (a.dictIdent === 'hanswehr' && b.dictIdent !== 'hanswehr') return 1;
+    if (b.dictIdent === 'hanswehr' && a.dictIdent !== 'hanswehr') return -1;
     if (a.isEnglish && !b.isEnglish) return -1;
     if (!a.isEnglish && b.isEnglish) return 1;
     return a.dictId - b.dictId;

@@ -19,6 +19,7 @@ import {
   ChevronDown,
   Languages,
   Bot,
+  AlertTriangle,
 } from 'lucide-react';
 import InlineTranslation from '@/components/shared/InlineTranslation';
 import { toast } from 'sonner';
@@ -73,6 +74,7 @@ interface LexiconEntry {
   dictIdent: string;
   isEnglish: boolean;
   definitions: string[];
+  isModern?: boolean;
 }
 
 interface RootLexiconResult {
@@ -600,6 +602,11 @@ function LexiconPageContent() {
                             English
                           </span>
                         )}
+                        {entry.isModern && (
+                          <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                            Modern (MSA)
+                          </span>
+                        )}
                       </div>
 
                       <div className="flex items-center gap-2">
@@ -613,6 +620,15 @@ function LexiconPageContent() {
                         </button>
                       </div>
                     </div>
+
+                    {entry.isModern && (
+                      <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 flex gap-3 text-xs md:text-sm text-amber-200/90 leading-relaxed mb-4">
+                        <AlertTriangle className="size-4 md:size-5 shrink-0 text-amber-400 mt-0.5" />
+                        <p>
+                          <strong>Important Note:</strong> This is a modern lexicon (Modern Standard Arabic). It is provided here only for learning purposes and recognizing basic verb forms. <strong>Do not use it</strong> for determining the root meaning of classical Quranic words, as modern usage often differs entirely from 7th-century usage.
+                        </p>
+                      </div>
+                    )}
 
                     <div className="space-y-5">
                       {entry.definitions.map((def, dIdx) => (
