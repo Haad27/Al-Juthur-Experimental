@@ -267,11 +267,23 @@ function RagChatContent() {
         }
       }
     } catch (err: any) {
-      toast.error(err.message);
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: "Sorry, I encountered an error while retrieving classical texts. Please try again or switch modes." }
-      ]);
+      toast.error(err.message || "Connection interrupted");
+      setMessages((prev) => {
+        const lastMsg = prev[prev.length - 1];
+        if (lastMsg && lastMsg.role === "assistant" && lastMsg.content.trim().length > 0) {
+          return [
+            ...prev.slice(0, -1),
+            {
+              ...lastMsg,
+              content: lastMsg.content + "\n\n*(Generation interrupted. You can ask to continue.)*"
+            }
+          ];
+        }
+        return [
+          ...prev,
+          { role: "assistant", content: "Sorry, I encountered an error while retrieving classical texts. Please try again or switch modes." }
+        ];
+      });
     } finally {
       setIsLoading(false);
     }

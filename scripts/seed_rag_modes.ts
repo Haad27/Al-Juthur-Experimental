@@ -95,6 +95,9 @@ export async function seedAllModesRagIndex(options?: {
   }
 
   const ragDb = getRagDb();
+  if (!ragDb) {
+    throw new Error('RAG Database is not initialized.');
+  }
   const checkDocStmt = ragDb.prepare('SELECT id FROM rag_parent_documents WHERE id = ?');
 
   let tafsirCount = 0;

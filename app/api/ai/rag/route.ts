@@ -6,6 +6,9 @@ import { prepareRagQuery, RagMode } from '@/lib/ai/rag/query-router';
 import { searchHybrid, ScoredParentDocument } from '@/lib/ai/rag/hybrid-search';
 import { getLexiconEntriesForRoot, getAyahWords } from '@/lib/lexicon/service';
 
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -310,7 +313,7 @@ ${contextText}`;
     return new Response(customStream, {
       headers: {
         'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
+        'Cache-Control': 'no-cache, no-transform',
         'Connection': 'keep-alive',
       }
     });

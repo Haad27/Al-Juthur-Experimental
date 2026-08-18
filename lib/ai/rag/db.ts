@@ -33,15 +33,17 @@ const globalForRag = globalThis as unknown as {
   ragDb: Database.Database | undefined;
 };
 
-export function getRagDb(): Database.Database {
+export function getRagDb(): Database.Database | undefined {
   if (!globalForRag.ragDb) {
     try {
       const dbDir = path.join(process.cwd(), 'database', 'rag');
-      if (!fs.existsSync(dbDir)) {
-        fs.mkdirSync(dbDir, { recursive: true });
-      }
       const dbPath = path.join(dbDir, 'ai_scholar_rag.sqlite');
-      const db = new Database(dbPath);
+      
+      if (!fs.existsSync(dbPath)) {
+        return undefined;
+      }
+      
+      const db = new Database(dbPath, { readonly: true });
 
     // Optimize SQLite settings
     db.pragma('journal_mode = WAL');
@@ -108,6 +110,7 @@ export function getRagDb(): Database.Database {
 
 export function insertParentDocument(doc: RagParentDocument) {
   const db = getRagDb();
+  if (!db) return;
   const stmt = db.prepare(`
     INSERT OR REPLACE INTO rag_parent_documents
     (id, workType, authorId, authorName, workTitle, language, surahId, ayahId, rootWord, content)
@@ -129,6 +132,7 @@ export function insertParentDocument(doc: RagParentDocument) {
 
 export function insertChildChunk(chunk: RagChildChunk) {
   const db = getRagDb();
+  if (!db) return;
   const embeddingJson = chunk.embedding ? JSON.stringify(chunk.embedding) : null;
 
   const stmt = db.prepare(`
@@ -165,6 +169,7 @@ export function insertChildChunk(chunk: RagChildChunk) {
 
 export function clearRagIndex() {
   const db = getRagDb();
+  if (!db) return;
   db.exec(`
     DELETE FROM rag_fts;
     DELETE FROM rag_child_chunks;

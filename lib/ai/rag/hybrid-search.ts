@@ -2,8 +2,7 @@ import { getRagDb, RagParentDocument } from './db';
 import { generateEmbedding, cosineSimilarity } from './embeddings';
 import { RagMode } from './query-router';
 import { MODE_AUTHORS } from '../../../scripts/seed_rag_modes';
-import Database from 'better-sqlite3';
-import path from 'path';
+import prisma from '@/lib/prisma';
 
 export interface HybridSearchFilters {
   surahId?: number;
@@ -34,10 +33,6 @@ export async function searchHybrid(
   topK = 6
 ): Promise<ScoredParentDocument[]> {
   const db = getRagDb();
-  if (!db) {
-    console.warn('[HYBRID-SEARCH] RAG DB is disabled or failed to load. Returning empty results.');
-    return [];
-  }
   if (!query || query.trim().length === 0) return [];
 
   const cleanQuery = query.trim();
@@ -87,93 +82,99 @@ export async function searchHybrid(
 
   // 1. BM25 / FTS5 Search on child chunks (using expanded terms from LLM 1)
   const bm25Matches = new Map<string, { rank: number; snippet: string }>();
-  try {
-    const searchTokens = new Set<string>();
-    cleanQuery.replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).forEach((t) => { if (t.length > 2) searchTokens.add(t); });
+  if (db) {
+    try {
+      const searchTokens = new Set<string>();
+      cleanQuery.replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).forEach((t) => { if (t.length > 2) searchTokens.add(t); });
 
-    if (filters.expandedQueryAr) {
-      filters.expandedQueryAr.replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).forEach((t) => { if (t.length > 2) searchTokens.add(t); });
-    }
-    if (filters.keywords) {
-      filters.keywords.forEach((k) => {
-        k.replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).forEach((t) => { if (t.length > 2) searchTokens.add(t); });
-      });
-    }
-    if (filters.rootWord && filters.rootWord.length >= 3) {
-      searchTokens.add(filters.rootWord);
-    }
+      if (filters.expandedQueryAr) {
+        filters.expandedQueryAr.replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).forEach((t) => { if (t.length > 2) searchTokens.add(t); });
+      }
+      if (filters.keywords) {
+        filters.keywords.forEach((k) => {
+          k.replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).forEach((t) => { if (t.length > 2) searchTokens.add(t); });
+        });
+      }
+      if (filters.rootWord && filters.rootWord.length >= 3) {
+        searchTokens.add(filters.rootWord);
+      }
 
-    const ftsQuery = Array.from(searchTokens).slice(0, 15).join(' OR ');
+      const ftsQuery = Array.from(searchTokens).slice(0, 15).join(' OR ');
 
-    if (ftsQuery.length > 0) {
-      const ftsRows = db
-        .prepare(
+      if (ftsQuery.length > 0) {
+        const ftsRows = db
+          .prepare(
+            `
+            SELECT c.id, c.parentId, c.content
+            FROM rag_fts f
+            JOIN rag_child_chunks c ON f.id = c.id
+            WHERE rag_fts MATCH ? AND ${whereClause}
+            LIMIT 50
           `
-          SELECT c.id, c.parentId, c.content
-          FROM rag_fts f
-          JOIN rag_child_chunks c ON f.id = c.id
-          WHERE rag_fts MATCH ? AND ${whereClause}
-          LIMIT 50
-        `
-        )
-        .all(ftsQuery, ...sqlParams) as { id: string; parentId: string; content: string }[];
+          )
+          .all(ftsQuery, ...sqlParams) as { id: string; parentId: string; content: string }[];
 
-      ftsRows.forEach((row, idx) => {
-        if (!bm25Matches.has(row.parentId)) {
-          bm25Matches.set(row.parentId, { rank: idx + 1, snippet: row.content });
-        }
-      });
+        ftsRows.forEach((row, idx) => {
+          if (!bm25Matches.has(row.parentId)) {
+            bm25Matches.set(row.parentId, { rank: idx + 1, snippet: row.content });
+          }
+        });
+      }
+    } catch (err) {
+      // FTS query fallback if syntax error
     }
-  } catch (err) {
-    // FTS query fallback if syntax error
   }
 
   // 2. Vector Semantic Search on child chunks (using combined semantic text)
-  const vectorSearchInput = [cleanQuery, filters.expandedQueryAr, ...(filters.keywords || [])].filter(Boolean).join(' ');
-  const queryVec = await generateEmbedding(vectorSearchInput);
-  const candidateRows = db
-    .prepare(
-      `
-      SELECT id, parentId, content, embedding
-      FROM rag_child_chunks
-      WHERE ${whereClause}
-      LIMIT 600
-    `
-    )
-    .all(...sqlParams) as { id: string; parentId: string; content: string; embedding: string | null }[];
-
-  const scoredVectorChunks = candidateRows
-    .map((row) => {
-      let score = 0;
-      if (row.embedding) {
-        try {
-          const vec = JSON.parse(row.embedding);
-          score = cosineSimilarity(queryVec, vec);
-        } catch (e) {}
-      }
-      return { ...row, score };
-    })
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 50);
-
   const vectorMatches = new Map<string, { rank: number; snippet: string }>();
-  scoredVectorChunks.forEach((row, idx) => {
-    if (!vectorMatches.has(row.parentId)) {
-      vectorMatches.set(row.parentId, { rank: idx + 1, snippet: row.content });
+  if (db) {
+    try {
+      const vectorSearchInput = [cleanQuery, filters.expandedQueryAr, ...(filters.keywords || [])].filter(Boolean).join(' ');
+      const queryVec = await generateEmbedding(vectorSearchInput);
+      const candidateRows = db
+        .prepare(
+          `
+          SELECT id, parentId, content, embedding
+          FROM rag_child_chunks
+          WHERE ${whereClause}
+          LIMIT 600
+        `
+        )
+        .all(...sqlParams) as { id: string; parentId: string; content: string; embedding: string | null }[];
+
+      const scoredVectorChunks = candidateRows
+        .map((row) => {
+          let score = 0;
+          if (row.embedding) {
+            try {
+              const vec = JSON.parse(row.embedding);
+              score = cosineSimilarity(queryVec, vec);
+            } catch (e) {}
+          }
+          return { ...row, score };
+        })
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 50);
+
+      scoredVectorChunks.forEach((row, idx) => {
+        if (!vectorMatches.has(row.parentId)) {
+          vectorMatches.set(row.parentId, { rank: idx + 1, snippet: row.content });
+        }
+      });
+    } catch (e) {
+      console.warn('[HYBRID-SEARCH] Vector search error:', e);
     }
-  });
+  }
 
   // 3. Reciprocal Rank Fusion (RRF) across Parent Documents
   const allParentIds = new Set<string>([...bm25Matches.keys(), ...vectorMatches.keys()]);
 
-  // --- NEW: LLM Verse Suggestion Structural Fetch ---
+  // --- LLM Verse Suggestion Structural Fetch via Prisma (Works on local dev & Turso production) ---
   let suggestedVerseResults: ScoredParentDocument[] = [];
   console.log('[HYBRID-SEARCH] suggestedVerses received:', filters.suggestedVerses, '| mode:', filters.mode);
   
   if (filters.suggestedVerses && filters.suggestedVerses.length > 0 && filters.mode && filters.mode !== 'lexicon' && filters.mode !== 'dream') {
     try {
-      const devDbPath = path.join(process.cwd(), 'prisma', 'dev.db');
-      const devDb = new Database(devDbPath, { readonly: true });
       const allowedAuthorIds = MODE_AUTHORS[filters.mode] || MODE_AUTHORS.default;
       
       console.log('[HYBRID-SEARCH] Fetching tafsir for', filters.suggestedVerses.length, 'suggested verses from authors:', allowedAuthorIds);
@@ -181,36 +182,34 @@ export async function searchHybrid(
       const numVerses = filters.suggestedVerses.length;
       let verseResults: any[] = [];
       
-      // Calculate how many authors to fetch per verse to keep total tokens reasonable
-      // e.g. 5 authors across 5 verses = 1 per verse
-      // e.g. 5 authors across 2 verses = 3 per verse
       const authorsPerVerse = Math.max(1, Math.ceil(allowedAuthorIds.length / Math.max(1, numVerses)));
-      
       let currentAuthorIdx = 0;
       
       for (let i = 0; i < numVerses; i++) {
         const verse = filters.suggestedVerses[i];
         
-        // Pick the next `authorsPerVerse` authors in a round-robin fashion
         const selectedAuthorsForThisVerse = [];
         for (let j = 0; j < authorsPerVerse; j++) {
           selectedAuthorsForThisVerse.push(allowedAuthorIds[currentAuthorIdx % allowedAuthorIds.length]);
           currentAuthorIdx++;
         }
         
-        // Ensure no duplicate authors for a single verse
         const uniqueSelectedAuthors = Array.from(new Set(selectedAuthorsForThisVerse));
         
-        const querySql = `
-          SELECT t.id, t.authorId, t.surahId, a.numberInSurah as ayahNo, t.text, au.name as authorName
-          FROM TafsirEntry t
-          JOIN Ayah a ON t.ayahId = a.id
-          JOIN Author au ON t.authorId = au.id
-          WHERE t.authorId IN (${uniqueSelectedAuthors.join(',')})
-            AND t.surahId = ? AND a.numberInSurah = ?
-        `;
-        
-        const rows = devDb.prepare(querySql).all(verse.surah, verse.ayah) as any[];
+        const rows = await prisma.tafsirEntry.findMany({
+          where: {
+            authorId: { in: uniqueSelectedAuthors },
+            surahId: verse.surah,
+            ayah: {
+              numberInSurah: verse.ayah
+            }
+          },
+          include: {
+            author: true,
+            ayah: true
+          }
+        });
+
         console.log(`[HYBRID-SEARCH] Verse ${verse.surah}:${verse.ayah} → ${rows.length} tafsir entries (${uniqueSelectedAuthors.length} authors allowed: ${uniqueSelectedAuthors.join(',')})`);
         verseResults.push(...rows);
       }
@@ -219,19 +218,19 @@ export async function searchHybrid(
       
       if (verseResults.length > 0) {
         suggestedVerseResults = verseResults.map((row) => ({
-          id: `tafsir-${row.authorId}-${row.surahId}-${row.ayahNo}`,
+          id: `tafsir-${row.authorId}-${row.surahId}-${row.ayah.numberInSurah}`,
           workType: 'tafsir' as const,
           authorId: row.authorId,
-          authorName: row.authorName,
-          workTitle: row.authorName,
+          authorName: row.author?.name || `Author ${row.authorId}`,
+          workTitle: row.author?.name || `Author ${row.authorId}`,
           language: row.authorId === 61 ? 'en' : 'ar',
           surahId: row.surahId,
-          ayahId: row.ayahNo,
+          ayahId: row.ayah.numberInSurah,
           rootWord: null,
           content: row.text,
           rrfScore: 0.95,
           matchedChildSnippets: [row.text.substring(0, 300)],
-          relevanceExplanation: `LLM-suggested verse from ${row.authorName} (${row.surahId}:${row.ayahNo})`
+          relevanceExplanation: `LLM-suggested verse from ${row.author?.name || `Author ${row.authorId}`} (${row.surahId}:${row.ayah.numberInSurah})`
         }));
       }
     } catch (e) {
@@ -241,85 +240,76 @@ export async function searchHybrid(
     console.log('[HYBRID-SEARCH] No suggested verses to fetch (empty/undefined or lexicon mode)');
   }
 
-
-  // Direct structural fallback: If local vector/BM25 matches are empty OR if we have explicit Surah coordinate (e.g. Surah 1) to guarantee exact verse boundaries
+  // Direct structural fallback: If local vector/BM25 matches are empty OR if we have explicit Surah coordinate (e.g. Surah 1)
   if ((allParentIds.size === 0 || typeof filters.surahId === 'number') && filters.mode && filters.mode !== 'lexicon' && filters.mode !== 'dream') {
-    // Check if we have exact surahId and/or ayahId
     if (typeof filters.surahId === 'number') {
       try {
-        const devDbPath = path.join(process.cwd(), 'prisma', 'dev.db');
-        const devDb = new Database(devDbPath, { readonly: true });
         const allowedAuthorIds = MODE_AUTHORS[filters.mode] || MODE_AUTHORS.default;
         
-        let querySql = `
-          SELECT t.id, t.authorId, t.surahId, a.numberInSurah as ayahNo, t.text, au.name as authorName
-          FROM TafsirEntry t
-          JOIN Ayah a ON t.ayahId = a.id
-          JOIN Author au ON t.authorId = au.id
-          WHERE t.authorId IN (${allowedAuthorIds.join(',')})
-            AND t.surahId = ?
-        `;
-        const queryParams: any[] = [filters.surahId];
-
-        if (typeof filters.ayahId === 'number') {
-          querySql += ' AND a.numberInSurah = ?';
-          queryParams.push(filters.ayahId);
-        }
-
-        querySql += ' ORDER BY a.numberInSurah ASC, t.authorId ASC LIMIT ?';
-        queryParams.push(topK * 2);
-
-        const devRows = devDb.prepare(querySql).all(...queryParams) as any[];
+        const devRows = await prisma.tafsirEntry.findMany({
+          where: {
+            authorId: { in: allowedAuthorIds },
+            surahId: filters.surahId,
+            ...(typeof filters.ayahId === 'number' ? { ayah: { numberInSurah: filters.ayahId } } : {})
+          },
+          include: {
+            author: true,
+            ayah: true
+          },
+          orderBy: [
+            { ayah: { numberInSurah: 'asc' } },
+            { authorId: 'asc' }
+          ],
+          take: topK * 2
+        });
 
         if (devRows && devRows.length > 0) {
-          // If we had no vector/bm25 hits OR if the hits don't cover the requested surah cleanly, return these direct passages
-          if (allParentIds.size === 0 || typeof filters.surahId === 'number') {
-            const directResults = devRows.map((row) => ({
-              id: `tafsir-${row.authorId}-${row.surahId}-${row.ayahNo}`,
-              workType: 'tafsir' as const,
-              authorId: row.authorId,
-              authorName: row.authorName,
-              workTitle: row.authorName,
-              language: row.authorId === 61 ? 'en' : 'ar',
-              surahId: row.surahId,
-              ayahId: row.ayahNo,
-              rootWord: null,
-              content: row.text,
-              rrfScore: 1.0,
-              matchedChildSnippets: [row.text.substring(0, 300)],
-              relevanceExplanation: `Exact Surah/Ayah passage from ${row.authorName} (${row.surahId}:${row.ayahNo})`
-            }));
-            
-            // If explicit surahId filter was provided (like summarizing Surah 1), return ONLY verses of that surah
-            if (typeof filters.surahId === 'number') {
-              return directResults.slice(0, topK + 4);
-            }
+          const directResults = devRows.map((row) => ({
+            id: `tafsir-${row.authorId}-${row.surahId}-${row.ayah.numberInSurah}`,
+            workType: 'tafsir' as const,
+            authorId: row.authorId,
+            authorName: row.author?.name || `Author ${row.authorId}`,
+            workTitle: row.author?.name || `Author ${row.authorId}`,
+            language: row.authorId === 61 ? 'en' : 'ar',
+            surahId: row.surahId,
+            ayahId: row.ayah.numberInSurah,
+            rootWord: null,
+            content: row.text,
+            rrfScore: 1.0,
+            matchedChildSnippets: [row.text.substring(0, 300)],
+            relevanceExplanation: `Exact Surah/Ayah passage from ${row.author?.name || `Author ${row.authorId}`} (${row.surahId}:${row.ayah.numberInSurah})`
+          }));
+          
+          if (typeof filters.surahId === 'number') {
+            return directResults.slice(0, topK + 4);
           }
         }
       } catch (e) {
-        console.warn('Direct dev.db structural query failed:', e);
+        console.warn('Direct structural query via prisma failed:', e);
       }
     }
 
-    if (allParentIds.size === 0) {
-      const directParents = db
-        .prepare(
+    if (allParentIds.size === 0 && db) {
+      try {
+        const directParents = db
+          .prepare(
+            `
+            SELECT * FROM rag_parent_documents
+            WHERE ${whereClause}
+            LIMIT ?
           `
-          SELECT * FROM rag_parent_documents
-          WHERE ${whereClause}
-          LIMIT ?
-        `
-        )
-        .all(...sqlParams, topK) as RagParentDocument[];
+          )
+          .all(...sqlParams, topK) as RagParentDocument[];
 
-      if (directParents.length > 0) {
-        return directParents.map((p) => ({
-          ...p,
-          rrfScore: 1.0,
-          matchedChildSnippets: [p.content.substring(0, 300)],
-          relevanceExplanation: `Direct structural match for ${p.workTitle}`,
-        }));
-      }
+        if (directParents.length > 0) {
+          return directParents.map((p) => ({
+            ...p,
+            rrfScore: 1.0,
+            matchedChildSnippets: [p.content.substring(0, 300)],
+            relevanceExplanation: `Direct structural match for ${p.workTitle}`,
+          }));
+        }
+      } catch (e) {}
     }
   }
 
@@ -351,20 +341,24 @@ export async function searchHybrid(
 
   // 4. Retrieve Full Parent Blocks from SQLite
   let results: ScoredParentDocument[] = [];
-  for (const item of topParents) {
-    const parentRow = db
-      .prepare('SELECT * FROM rag_parent_documents WHERE id = ?')
-      .get(item.parentId) as RagParentDocument | undefined;
+  if (db) {
+    for (const item of topParents) {
+      try {
+        const parentRow = db
+          .prepare('SELECT * FROM rag_parent_documents WHERE id = ?')
+          .get(item.parentId) as RagParentDocument | undefined;
 
-    if (parentRow) {
-      results.push({
-        ...parentRow,
-        rrfScore: item.score,
-        matchedChildSnippets: item.snippets,
-        relevanceExplanation: `Matched via ${bm25Matches.has(item.parentId) ? 'Keyword (BM25)' : ''} ${
-          bm25Matches.has(item.parentId) && vectorMatches.has(item.parentId) ? '+' : ''
-        } ${vectorMatches.has(item.parentId) ? 'Semantic Vector' : ''}`.trim(),
-      });
+        if (parentRow) {
+          results.push({
+            ...parentRow,
+            rrfScore: item.score,
+            matchedChildSnippets: item.snippets,
+            relevanceExplanation: `Matched via ${bm25Matches.has(item.parentId) ? 'Keyword (BM25)' : ''} ${
+              bm25Matches.has(item.parentId) && vectorMatches.has(item.parentId) ? '+' : ''
+            } ${vectorMatches.has(item.parentId) ? 'Semantic Vector' : ''}`.trim(),
+          });
+        }
+      } catch (e) {}
     }
   }
 
