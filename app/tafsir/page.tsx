@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo, useRef, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
-import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check } from "lucide-react";
+import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, ChevronLeft, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check } from "lucide-react";
 import LogoIcon from "@/components/svg/icons/LogoIcon";
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
 import TafsirTextRenderer from "@/components/tafsir/TafsirTextRenderer";
@@ -212,6 +212,88 @@ function TafsirContent() {
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
+  const langScrollRef = useRef<HTMLDivElement>(null);
+  const [isDraggingLang, setIsDraggingLang] = useState(false);
+  const [canScrollLangLeft, setCanScrollLangLeft] = useState(false);
+  const [canScrollLangRight, setCanScrollLangRight] = useState(false);
+  const dragStartRef = useRef({
+    isDown: false,
+    startX: 0,
+    scrollLeft: 0,
+    hasMoved: false,
+  });
+
+  const checkLangScrollability = useCallback(() => {
+    const el = langScrollRef.current;
+    if (!el) return;
+    setCanScrollLangLeft(el.scrollLeft > 4);
+    setCanScrollLangRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    const el = langScrollRef.current;
+    if (!el) return;
+    checkLangScrollability();
+    el.addEventListener("scroll", checkLangScrollability, { passive: true });
+    window.addEventListener("resize", checkLangScrollability);
+    return () => {
+      el.removeEventListener("scroll", checkLangScrollability);
+      window.removeEventListener("resize", checkLangScrollability);
+    };
+  }, [checkLangScrollability, languages]);
+
+  const handleLangPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0 || e.pointerType === "touch") return;
+    const el = langScrollRef.current;
+    if (!el) return;
+
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {}
+
+    dragStartRef.current = {
+      isDown: true,
+      startX: e.clientX,
+      scrollLeft: el.scrollLeft,
+      hasMoved: false,
+    };
+    setIsDraggingLang(true);
+  };
+
+  const handleLangPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragStartRef.current.isDown || e.pointerType === "touch") return;
+    const el = langScrollRef.current;
+    if (!el) return;
+
+    const delta = e.clientX - dragStartRef.current.startX;
+    if (Math.abs(delta) > 4) {
+      dragStartRef.current.hasMoved = true;
+    }
+    el.scrollLeft = dragStartRef.current.scrollLeft - delta;
+    checkLangScrollability();
+  };
+
+  const handleLangPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (dragStartRef.current.isDown) {
+      try {
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+          e.currentTarget.releasePointerCapture(e.pointerId);
+        }
+      } catch {}
+      dragStartRef.current.isDown = false;
+      setIsDraggingLang(false);
+      setTimeout(() => {
+        dragStartRef.current.hasMoved = false;
+      }, 60);
+    }
+  };
+
+  const scrollLangHorizontally = (direction: "left" | "right") => {
+    const el = langScrollRef.current;
+    if (!el) return;
+    const scrollAmount = direction === "left" ? -280 : 280;
+    el.scrollBy({ left: scrollAmount, behavior: "smooth" });
+  };
 
   // Click outside to close search dropdown
   useEffect(() => {
@@ -1103,40 +1185,91 @@ function TafsirContent() {
           </div>
 
           {/* Language Filter Tabs */}
-          <div 
-            onWheel={(e) => {
-              if (e.deltaY !== 0) {
-                e.currentTarget.scrollLeft += e.deltaY;
-              }
-            }}
-            className="flex items-center gap-2 overflow-x-auto mt-3 pt-3 border-t border-zinc-800/60 no-scrollbar w-full scroll-smooth select-none cursor-grab active:cursor-grabbing"
-          >
-            <span className="text-xs font-semibold text-zinc-400 pr-2 whitespace-nowrap flex items-center gap-1.5 shrink-0">
-              <Languages className="size-3.5 text-emerald-400" /> Language:
-            </span>
-            <button
-              onClick={() => setSelectedLanguage("All")}
-              className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
-                selectedLanguage === "All"
-                  ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
-                  : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+          <div className="relative flex items-center w-full mt-3 pt-3 border-t border-zinc-800/60 group">
+            {/* Scroll Left Button (Desktop) */}
+            {canScrollLangLeft && (
+              <button
+                type="button"
+                onClick={() => scrollLangHorizontally("left")}
+                className="hidden md:flex absolute left-0 z-20 items-center justify-center size-7 rounded-full bg-zinc-900/95 border border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800 shadow-xl backdrop-blur transition-all"
+                aria-label="Scroll left"
+              >
+                <ChevronLeft className="size-4" />
+              </button>
+            )}
+
+            {/* Left fade gradient when scrollable */}
+            {canScrollLangLeft && (
+              <div className="hidden md:block absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-zinc-950 to-transparent pointer-events-none z-10" />
+            )}
+
+            {/* Horizontal Scrollable Tabs */}
+            <div 
+              ref={langScrollRef}
+              onPointerDown={handleLangPointerDown}
+              onPointerMove={handleLangPointerMove}
+              onPointerUp={handleLangPointerUp}
+              onPointerCancel={handleLangPointerUp}
+              onWheel={(e) => {
+                if (e.deltaY !== 0 && e.deltaX === 0) {
+                  e.currentTarget.scrollLeft += e.deltaY;
+                  checkLangScrollability();
+                }
+              }}
+              onClickCapture={(e) => {
+                if (dragStartRef.current.hasMoved) {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }
+              }}
+              className={`flex items-center gap-2 overflow-x-auto no-scrollbar w-full select-none ${
+                isDraggingLang ? "cursor-grabbing" : "cursor-grab"
               }`}
             >
-              All ({allAuthorsWithLang.length})
-            </button>
-            {languages.map((lang) => (
+              <span className="text-xs font-semibold text-zinc-400 pr-2 whitespace-nowrap flex items-center gap-1.5 shrink-0 pointer-events-none">
+                <Languages className="size-3.5 text-emerald-400" /> Language:
+              </span>
               <button
-                key={lang.id}
-                onClick={() => setSelectedLanguage(lang.name)}
+                onClick={() => setSelectedLanguage("All")}
                 className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
-                  selectedLanguage === lang.name
+                  selectedLanguage === "All"
                     ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
                     : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
                 }`}
               >
-                {lang.name} ({lang.authors?.length || 0})
+                All ({allAuthorsWithLang.length})
               </button>
-            ))}
+              {languages.map((lang) => (
+                <button
+                  key={lang.id}
+                  onClick={() => setSelectedLanguage(lang.name)}
+                  className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
+                    selectedLanguage === lang.name
+                      ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
+                      : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+                  }`}
+                >
+                  {lang.name} ({lang.authors?.length || 0})
+                </button>
+              ))}
+            </div>
+
+            {/* Right fade gradient when scrollable */}
+            {canScrollLangRight && (
+              <div className="hidden md:block absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-zinc-950 to-transparent pointer-events-none z-10" />
+            )}
+
+            {/* Scroll Right Button (Desktop) */}
+            {canScrollLangRight && (
+              <button
+                type="button"
+                onClick={() => scrollLangHorizontally("right")}
+                className="hidden md:flex absolute right-0 z-20 items-center justify-center size-7 rounded-full bg-zinc-900/95 border border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800 shadow-xl backdrop-blur transition-all"
+                aria-label="Scroll right"
+              >
+                <ChevronRight className="size-4" />
+              </button>
+            )}
           </div>
 
         </div>

@@ -16,6 +16,8 @@ function cachedJson(data: unknown, maxAge: number, staleWhileRevalidate = Math.f
 // Map of Authors with 100% pre-downloaded local JSON files for lightning-fast 0ms file reads
 const LOCAL_TAFSIR_MAP: Record<number, { folder: string; isUrdu?: boolean; isPashto?: boolean; authorName: string; name: string }> = {
   60: { folder: "en-tafsir-al-mukhtasar", authorName: "Center for Quranic Interpretation", name: "Abridged Explanation of the Quran" },
+  61: { folder: "en-tafisr-ibn-kathir", authorName: "Hafiz Ibn Kathir", name: "Tafsir Ibn Kathir" },
+  62: { folder: "en-tafsir-maarif-ul-quran", authorName: "Mufti Muhammad Shafi", name: "Ma'arif-ul-Quran" },
   63: { folder: "en-al-jalalayn", authorName: "Jalal al-Din al-Mahalli & Jalal al-Din al-Suyuti", name: "Tafsir al-Jalalayn" },
   64: { folder: "en-tazkirul-quran", authorName: "Maulana Wahiduddin Khan", name: "Tazkirul Quran" },
   102: { folder: "ur-tafseer-ibn-e-kaseer", isUrdu: true, authorName: "Hafiz Ibn Kathir", name: "Tafsir Ibn Kathir" },
