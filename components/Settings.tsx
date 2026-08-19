@@ -210,8 +210,8 @@ const Settings = () => {
               </span>
             </div>
 
-            {/* Responsive grid of layout options */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 w-full min-w-0">
+            {/* 3-column grid of layout options */}
+            <div className="grid grid-cols-3 gap-1.5">
               {MUSHAF_LAYOUTS.map((layout) => {
                 const isSelected =
                   currentStyle === layout.id ||
