@@ -104,18 +104,36 @@ const SurahsList = () => {
         setSearchQuery={setSearchQuery}
         surahs={surahs}
       />
-      <div className="h-16 w-full lg:hidden flex"></div>
+      {/* Mobile Top Header */}
+      <div className="sticky top-0 z-40 h-16 w-full backdrop-blur-3xl bg-zinc-950/80 border-b border-zinc-800/60 shadow-sm lg:hidden flex items-center justify-between px-4">
+        <div className="flex items-center gap-2.5 text-white">
+          <LogoIcon className="w-7 h-7 rounded-[20%]" />
+          <p className="font-bold text-xl">Al-Juthur</p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Link
+            href="/saved"
+            className="flex items-center justify-center p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-emerald-400 hover:border-emerald-500/50 transition"
+            title="Saved Library"
+          >
+            <Bookmark className="size-4 text-emerald-400" />
+          </Link>
+          <button
+            onClick={() => setIsOpen((prev) => !prev)}
+            className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white transition cursor-pointer"
+            aria-label="Open menu"
+          >
+            <MenuIcon className="size-5 text-zinc-200" />
+          </button>
+        </div>
+      </div>
+
+      {/* Desktop Top Header */}
       <div className="sticky top-0 z-50 h-20 w-full backdrop-blur-3xl bg-zinc-950/50 border-b border-zinc-800/40 shadow-sm hidden lg:flex items-center justify-between xl:px-20 lg:px-8 px-4">
         <div className="flex items-center gap-3 text-white">
           <LogoIcon className="hidden lg:block w-8 h-8 rounded-[20%]" />
           <p className="font-bold text-2xl">Al-Juthur</p>
-
-          <div className="sm:hidden ml-auto">
-            <MenuIcon
-              className="dark:text-white text-black"
-              onClick={() => setIsOpen((prev) => !prev)}
-            />
-          </div>
         </div>
 
         <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 gap-6 text-zinc-400 lg:text-base text-sm">

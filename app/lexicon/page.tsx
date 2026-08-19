@@ -269,15 +269,24 @@ function LexiconPageContent() {
               )}
             </div>
 
-            {/* Mobile Only: Current Selected Word Badge (Top Right) */}
-            {(activeRoot || result?.normalizedRoot) && (
-              <div className="md:hidden flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-950/60 border border-emerald-500/40 shadow-sm shrink-0">
-                <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Root:</span>
-                <span className="text-sm font-bold font-arabic text-white">
-                  {result?.normalizedRoot || activeRoot}
-                </span>
-              </div>
-            )}
+            {/* Mobile Only: Current Selected Word Badge + Saved Library Button (Top Right) */}
+            <div className="md:hidden flex items-center gap-2 shrink-0">
+              {(activeRoot || result?.normalizedRoot) && (
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-950/60 border border-emerald-500/40 shadow-sm shrink-0">
+                  <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Root:</span>
+                  <span className="text-sm font-bold font-arabic text-white">
+                    {result?.normalizedRoot || activeRoot}
+                  </span>
+                </div>
+              )}
+              <Link
+                href="/saved"
+                className="flex items-center justify-center p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-emerald-400 hover:bg-zinc-800 transition"
+                title="Saved Library"
+              >
+                <Bookmark className="size-4" />
+              </Link>
+            </div>
           </div>
 
           {/* Desktop Navigation Links */}

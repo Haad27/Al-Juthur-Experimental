@@ -148,13 +148,13 @@ function AiTranslatorContent() {
       {/* Subtle ambient light background */}
       <div className="absolute top-0 inset-x-0 h-[500px] bg-gradient-to-b from-emerald-900/10 to-transparent pointer-events-none" />
       {/* Top Navigation Bar */}
-      <div className="hidden md:block sticky top-0 z-40 bg-zinc-950/50 backdrop-blur-3xl border-b border-zinc-800/80 px-4 md:px-8 py-3 shadow-sm">
-        <div className="max-w-[1700px] mx-auto relative flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="sticky top-0 z-40 bg-zinc-950/50 backdrop-blur-3xl border-b border-zinc-800/80 px-4 md:px-8 py-3 shadow-sm">
+        <div className="max-w-[1700px] mx-auto relative flex items-center justify-between gap-4">
           {/* Logo and App Name */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Link href="/home" className="flex items-center gap-2">
-              <LogoIcon className="w-8 h-8 rounded-[20%] hidden md:block" />
-              <span className="font-bold text-xl tracking-tight text-white hidden md:block">Al-Juthur</span>
+              <LogoIcon className="w-8 h-8 rounded-[20%]" />
+              <span className="font-bold text-xl tracking-tight text-white">Al-Juthur</span>
             </Link>
           </div>
 
@@ -177,14 +177,14 @@ function AiTranslatorContent() {
             </Link>
           </nav>
 
-          <div className="hidden md:flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-3 shrink-0">
             <Link 
               href="/saved" 
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-emerald-500/50 text-xs font-semibold text-zinc-300 hover:text-emerald-400 transition shadow-sm"
+              className="flex items-center gap-1.5 p-2 md:px-3 md:py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-emerald-500/50 text-xs font-semibold text-zinc-300 hover:text-emerald-400 transition shadow-sm shrink-0"
               title="Saved Verses, Tafsirs & Scholar Notes"
             >
-              <Bookmark className="size-3.5 text-emerald-400" />
-              <span>Saved Library</span>
+              <Bookmark className="size-4 md:size-3.5 text-emerald-400" />
+              <span className="hidden md:inline">Saved Library</span>
             </Link>
           </div>
         </div>

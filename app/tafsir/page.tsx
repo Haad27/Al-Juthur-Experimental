@@ -708,18 +708,28 @@ function TafsirContent() {
                 </div>
               </div>
 
-              {/* Right Side: Ayah Picker Button */}
-              <button
-                onClick={() => {
-                  setSelectedAuthorForWheel(activeAuthor);
-                  setSelectedLangForWheel(activeLangName);
-                  setWheelModalOpen(true);
-                }}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-xs font-semibold text-emerald-400 transition-all shrink-0 cursor-pointer"
-              >
-                <Compass className="size-3.5" />
-                <span>Ayah Picker</span>
-              </button>
+              {/* Right Side: Saved Library + Ayah Picker Button */}
+              <div className="flex items-center gap-1.5 shrink-0">
+                <Link
+                  href="/saved"
+                  className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-emerald-400 transition-all flex items-center justify-center cursor-pointer"
+                  title="Saved Library"
+                >
+                  <Bookmark className="size-3.5" />
+                </Link>
+
+                <button
+                  onClick={() => {
+                    setSelectedAuthorForWheel(activeAuthor);
+                    setSelectedLangForWheel(activeLangName);
+                    setWheelModalOpen(true);
+                  }}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-xs font-semibold text-emerald-400 transition-all shrink-0 cursor-pointer"
+                >
+                  <Compass className="size-3.5" />
+                  <span>Ayah Picker</span>
+                </button>
+              </div>
             </div>
 
             {/* Bottom Row (Mobile Only): Surah & Ayah Dropdowns */}
@@ -1215,95 +1225,105 @@ function TafsirContent() {
                 )}
               </div>
               
-              <div className="relative shrink-0">
-                <button
-                  onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
-                  className={`flex items-center justify-center gap-2 px-3 py-2 rounded-xl border transition-all ${
-                    isFilterPanelOpen || selectedEra !== "All Eras" || selectedDifficulty !== "All Levels"
-                      ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400"
-                      : "bg-zinc-900/80 border-emerald-500/30 text-zinc-400 hover:text-emerald-400 hover:border-emerald-500/50"
-                  }`}
+              <div className="flex items-center gap-2 shrink-0">
+                <Link
+                  href="/saved"
+                  className="md:hidden flex items-center justify-center p-2 rounded-xl bg-zinc-900/80 border border-emerald-500/30 text-emerald-400 hover:bg-zinc-800 transition"
+                  title="Saved Library"
                 >
-                  <Filter className="size-4" />
-                  <span className="text-sm font-semibold hidden sm:inline">Refine</span>
-                  {(selectedEra !== "All Eras" || selectedDifficulty !== "All Levels") && (
-                    <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-                    </span>
-                  )}
-                </button>
-                
-                {/* Filter Popover Panel */}
-                {isFilterPanelOpen && (
-                  <>
-                    <div className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm transition-opacity" onClick={() => setIsFilterPanelOpen(false)}></div>
-                    <div className="fixed md:absolute inset-x-0 bottom-0 md:inset-auto md:right-0 md:top-full mt-2 w-full md:w-[420px] bg-zinc-950 md:bg-zinc-900 border-t md:border border-emerald-500/30 md:border-zinc-800/80 shadow-2xl z-[80] overflow-hidden rounded-t-3xl md:rounded-2xl p-5 md:p-6 flex flex-col gap-5 max-h-[80vh] overflow-y-auto custom-scrollbar pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))] md:pb-6 animate-in slide-in-from-bottom-4 md:slide-in-from-top-2 duration-200">
-                      <div className="flex items-center justify-between pb-3 border-b border-zinc-800 sticky top-0 bg-zinc-950 md:bg-zinc-900 z-10">
-                        <h3 className="font-bold text-white text-base sm:text-lg flex items-center gap-2">
-                          <Filter className="size-4 text-emerald-400" /> Filter Tafsirs
-                        </h3>
-                        <button onClick={() => setIsFilterPanelOpen(false)} className="p-1.5 rounded-full bg-zinc-900 text-zinc-400 hover:text-white transition-colors">
-                          <X className="size-5" />
-                        </button>
-                      </div>
-                      
-                      {/* Era Selection inside Panel */}
-                      <div className="flex flex-col gap-3">
-                        <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5 uppercase tracking-wider">
-                          <BookOpen className="size-3.5 text-emerald-400" /> Era
-                        </span>
-                        <div className="flex flex-wrap gap-2">
-                          {ERAS.map((eraName) => {
-                            const count = eraName === "All Eras" 
-                              ? allAuthorsWithLang.length 
-                              : allAuthorsWithLang.filter(a => a.author.era === eraName).length;
-                            return (
-                              <button
-                                key={eraName}
-                                onClick={() => setSelectedEra(eraName)}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                                  selectedEra === eraName
-                                    ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
-                                    : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
-                                }`}
-                              >
-                                {eraName.replace(" & Contemporary", "")} <span className="opacity-60 ml-0.5">({count})</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
+                  <Bookmark className="size-4" />
+                </Link>
 
-                      {/* Difficulty Selection inside Panel */}
-                      <div className="flex flex-col gap-3 pb-4 md:pb-0">
-                        <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5 uppercase tracking-wider">
-                          <Sparkles className="size-3.5 text-emerald-400" /> Difficulty
-                        </span>
-                        <div className="flex flex-wrap gap-2">
-                          {["All Levels", "Beginner", "Intermediate", "Advanced"].map((level) => {
-                            const count = level === "All Levels" 
-                              ? allAuthorsWithLang.length 
-                              : allAuthorsWithLang.filter(a => a.author.difficulty === level).length;
-                            return (
-                              <button
-                                key={level}
-                                onClick={() => setSelectedDifficulty(level)}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                                  selectedDifficulty === level
-                                    ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
-                                    : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
-                                }`}
-                              >
-                                {level} <span className="opacity-60 ml-0.5">({count})</span>
-                              </button>
-                            );
-                          })}
+                <div className="relative shrink-0">
+                  <button
+                    onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
+                    className={`flex items-center justify-center gap-2 px-3 py-2 rounded-xl border transition-all ${
+                      isFilterPanelOpen || selectedEra !== "All Eras" || selectedDifficulty !== "All Levels"
+                        ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400"
+                        : "bg-zinc-900/80 border-emerald-500/30 text-zinc-400 hover:text-emerald-400 hover:border-emerald-500/50"
+                    }`}
+                  >
+                    <Filter className="size-4" />
+                    <span className="text-sm font-semibold hidden sm:inline">Refine</span>
+                    {(selectedEra !== "All Eras" || selectedDifficulty !== "All Levels") && (
+                      <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                      </span>
+                    )}
+                  </button>
+                  
+                  {/* Filter Popover Panel */}
+                  {isFilterPanelOpen && (
+                    <>
+                      <div className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm transition-opacity" onClick={() => setIsFilterPanelOpen(false)}></div>
+                      <div className="fixed md:absolute inset-x-0 bottom-0 md:inset-auto md:right-0 md:top-full mt-2 w-full md:w-[420px] bg-zinc-950 md:bg-zinc-900 border-t md:border border-emerald-500/30 md:border-zinc-800/80 shadow-2xl z-[80] overflow-hidden rounded-t-3xl md:rounded-2xl p-5 md:p-6 flex flex-col gap-5 max-h-[80vh] overflow-y-auto custom-scrollbar pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))] md:pb-6 animate-in slide-in-from-bottom-4 md:slide-in-from-top-2 duration-200">
+                        <div className="flex items-center justify-between pb-3 border-b border-zinc-800 sticky top-0 bg-zinc-950 md:bg-zinc-900 z-10">
+                          <h3 className="font-bold text-white text-base sm:text-lg flex items-center gap-2">
+                            <Filter className="size-4 text-emerald-400" /> Filter Tafsirs
+                          </h3>
+                          <button onClick={() => setIsFilterPanelOpen(false)} className="p-1.5 rounded-full bg-zinc-900 text-zinc-400 hover:text-white transition-colors">
+                            <X className="size-5" />
+                          </button>
+                        </div>
+                        
+                        {/* Era Selection inside Panel */}
+                        <div className="flex flex-col gap-3">
+                          <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5 uppercase tracking-wider">
+                            <BookOpen className="size-3.5 text-emerald-400" /> Era
+                          </span>
+                          <div className="flex flex-wrap gap-2">
+                            {ERAS.map((eraName) => {
+                              const count = eraName === "All Eras" 
+                                ? allAuthorsWithLang.length 
+                                : allAuthorsWithLang.filter(a => a.author.era === eraName).length;
+                              return (
+                                <button
+                                  key={eraName}
+                                  onClick={() => setSelectedEra(eraName)}
+                                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                                    selectedEra === eraName
+                                      ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
+                                      : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+                                  }`}
+                                >
+                                  {eraName.replace(" & Contemporary", "")} <span className="opacity-60 ml-0.5">({count})</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Difficulty Selection inside Panel */}
+                        <div className="flex flex-col gap-3 pb-4 md:pb-0">
+                          <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5 uppercase tracking-wider">
+                            <Sparkles className="size-3.5 text-emerald-400" /> Difficulty
+                          </span>
+                          <div className="flex flex-wrap gap-2">
+                            {["All Levels", "Beginner", "Intermediate", "Advanced"].map((level) => {
+                              const count = level === "All Levels" 
+                                ? allAuthorsWithLang.length 
+                                : allAuthorsWithLang.filter(a => a.author.difficulty === level).length;
+                              return (
+                                <button
+                                  key={level}
+                                  onClick={() => setSelectedDifficulty(level)}
+                                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                                    selectedDifficulty === level
+                                      ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
+                                      : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+                                  }`}
+                                >
+                                  {level} <span className="opacity-60 ml-0.5">({count})</span>
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </>
-                )}
+                    </>
+                  )}
+                </div>
               </div>
             </div>
             
