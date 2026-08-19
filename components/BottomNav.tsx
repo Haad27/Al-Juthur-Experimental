@@ -10,10 +10,7 @@ import {
   Languages, 
   Bot, 
   Bookmark, 
-  Sparkles, 
-  X, 
-  ArrowRight,
-  ChevronRight
+  Sparkles 
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
@@ -31,7 +28,7 @@ const BottomNav = () => {
     setMounted(true);
   }, []);
 
-  // Close AI sheet on route change
+  // Close mini AI bar on route change
   React.useEffect(() => {
     setIsAiSheetOpen(false);
   }, [pathname]);
@@ -97,90 +94,63 @@ const BottomNav = () => {
 
   return (
     <>
-      {/* AI Studio Bottom Sheet Modal */}
+      {/* Floating Mini AI Studio Bar (Appears vertically directly above bottom nav) */}
       <AnimatePresence>
         {isAiSheetOpen && (
           <>
-            {/* Backdrop */}
+            {/* Backdrop to tap-outside and dismiss */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsAiSheetOpen(false)}
-              className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm md:hidden"
+              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px] md:hidden"
             />
 
-            {/* Bottom Sheet Drawer */}
+            {/* Mini Floating Navbar Pill with 2 AI Buttons */}
             <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 28, stiffness: 300 }}
-              className="fixed bottom-0 inset-x-0 z-50 bg-zinc-950 border-t border-emerald-500/30 rounded-t-3xl p-5 pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))] shadow-[0_-20px_50px_rgba(0,0,0,0.8)] md:hidden flex flex-col gap-4"
+              initial={{ opacity: 0, y: 14, scale: 0.92 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 14, scale: 0.92 }}
+              transition={{ type: "spring", stiffness: 450, damping: 28 }}
+              className="fixed bottom-[calc(5.1rem+env(safe-area-inset-bottom,0px))] inset-x-0 mx-auto w-fit z-50 md:hidden flex justify-center pointer-events-auto"
             >
-              {/* Header Handle & Title */}
-              <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
-                <div className="flex items-center gap-2">
-                  <div className="size-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-                    <Sparkles className="size-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-white leading-tight">Al-Juthur AI Studio</h3>
-                    <p className="text-[11px] text-zinc-400">Select an intelligent research assistant</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setIsAiSheetOpen(false)}
-                  className="p-1.5 rounded-full bg-zinc-900 text-zinc-400 hover:text-white"
-                >
-                  <X className="size-4" />
-                </button>
-              </div>
-
-              {/* Tools Options */}
-              <div className="grid grid-cols-1 gap-3">
-                {/* 1. AI Translator */}
+              <div className="rounded-full border border-emerald-500/40 bg-zinc-950/90 backdrop-blur-2xl backdrop-saturate-150 shadow-[0_16px_40px_rgba(0,0,0,0.8),0_0_20px_rgba(16,185,129,0.2)] px-2 py-1.5 flex items-center gap-1">
+                {/* 1. Translator */}
                 <Link
                   href="/ai"
-                  onClick={() => setIsAiSheetOpen(false)}
-                  className="flex items-center justify-between p-3.5 rounded-2xl bg-zinc-900/80 border border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-800 transition-all group"
+                  onClick={() => {
+                    setIsAiSheetOpen(false);
+                    setImmersiveMode(false);
+                  }}
+                  className={`relative flex flex-col items-center justify-center px-3.5 py-1 min-w-[62px] h-12 rounded-full transition-colors duration-200 ${
+                    pathname?.startsWith("/ai")
+                      ? "text-emerald-400 font-bold bg-white/[0.12] border border-white/10"
+                      : "text-zinc-400 hover:text-white"
+                  }`}
                 >
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="size-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition-transform shrink-0">
-                      <Languages className="size-5" />
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors">
-                        AI Classical Translator
-                      </span>
-                      <span className="text-[11px] text-zinc-400 leading-tight truncate">
-                        Translate complex Arabic tafsirs & texts into structured formats
-                      </span>
-                    </div>
-                  </div>
-                  <ChevronRight className="size-4 text-zinc-500 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all shrink-0" />
+                  <Languages className="w-5 h-5 mb-0.5" />
+                  <span className="text-[9px] tracking-tight">Translator</span>
                 </Link>
+
+                {/* Divider */}
+                <div className="h-6 w-px bg-zinc-800 shrink-0" />
 
                 {/* 2. RAG Bot */}
                 <Link
                   href="/rag"
-                  onClick={() => setIsAiSheetOpen(false)}
-                  className="flex items-center justify-between p-3.5 rounded-2xl bg-zinc-900/80 border border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-800 transition-all group"
+                  onClick={() => {
+                    setIsAiSheetOpen(false);
+                    setImmersiveMode(false);
+                  }}
+                  className={`relative flex flex-col items-center justify-center px-3.5 py-1 min-w-[62px] h-12 rounded-full transition-colors duration-200 ${
+                    pathname?.startsWith("/rag")
+                      ? "text-emerald-400 font-bold bg-white/[0.12] border border-white/10"
+                      : "text-zinc-400 hover:text-white"
+                  }`}
                 >
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="size-10 rounded-xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400 group-hover:scale-105 transition-transform shrink-0">
-                      <Bot className="size-5" />
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">
-                        Academic RAG Bot
-                      </span>
-                      <span className="text-[11px] text-zinc-400 leading-tight truncate">
-                        Multi-modal hybrid retrieval across 6 scholarly modes
-                      </span>
-                    </div>
-                  </div>
-                  <ChevronRight className="size-4 text-zinc-500 group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all shrink-0" />
+                  <Bot className="w-5 h-5 mb-0.5" />
+                  <span className="text-[9px] tracking-tight">RAG Bot</span>
                 </Link>
               </div>
             </motion.div>
@@ -188,7 +158,7 @@ const BottomNav = () => {
         )}
       </AnimatePresence>
 
-      {/* Floating Bottom Nav Bar */}
+      {/* Primary Floating Bottom Nav Bar */}
       <div 
         suppressHydrationWarning 
         className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] inset-x-0 mx-auto w-fit max-w-[95vw] z-50 md:hidden pointer-events-none flex justify-center"
