@@ -18,7 +18,8 @@ import {
   CheckCircle2,
   ShieldAlert,
   Info,
-  Copy
+  Copy,
+  Bookmark
 } from "lucide-react";
 import { inter, amiri } from "@/app/fonts";
 import { toast } from "sonner";
@@ -27,6 +28,7 @@ import remarkGfm from "remark-gfm";
 import { useVisualViewportOffset } from '@/hooks/useVisualViewport';
 import { RAG_MODES, RagModeInfo } from "@/lib/ai/rag/modes-config";
 import { copyToClipboard } from "@/lib/utils";
+import { saveScholarAnswer } from "@/lib/readerStorage";
 
 interface SourceItem {
   id: string;
@@ -427,13 +429,50 @@ function RagChatContent() {
                     : "bg-zinc-900/80 border border-zinc-800/90 rounded-tl-sm text-zinc-200"
                 }`}
               >
-                <button
-                  onClick={() => copyToClipboard(msg.content, msg.role === "user" ? "Message copied to clipboard!" : "Response copied to clipboard!")}
-                  className="absolute top-2.5 right-2.5 p-1.5 rounded-lg text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800/80 transition opacity-60 hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 cursor-pointer"
-                  title="Copy message"
-                >
-                  <Copy className="size-3.5" />
-                </button>
+                {msg.role === "assistant" && idx > 0 && (
+                  <div className="absolute top-2.5 right-2.5 flex items-center gap-1 opacity-80 sm:opacity-0 sm:group-hover:opacity-100 focus-within:opacity-100 transition">
+                    <button
+                      onClick={() => {
+                        const previousUserMsg = messages.slice(0, idx).reverse().find(m => m.role === "user");
+                        const questionText = previousUserMsg?.content || "Quranic RAG Inquiry";
+                        saveScholarAnswer({
+                          id: `scholar_${Date.now()}_${idx}`,
+                          question: questionText,
+                          answer: msg.content,
+                          modeName: currentModeInfo.name,
+                          sources: msg.sources?.map(s => ({
+                            book: s.book,
+                            authorName: s.authorName,
+                            snippet: s.snippet
+                          })),
+                          timestamp: Date.now()
+                        });
+                        toast.success("Saved Scholar research answer to Profile!");
+                      }}
+                      className="p-1.5 rounded-lg text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800/80 transition cursor-pointer"
+                      title="Save Answer to Profile"
+                    >
+                      <Bookmark className="size-3.5" />
+                    </button>
+                    <button
+                      onClick={() => copyToClipboard(msg.content, "Response copied to clipboard!")}
+                      className="p-1.5 rounded-lg text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800/80 transition cursor-pointer"
+                      title="Copy response"
+                    >
+                      <Copy className="size-3.5" />
+                    </button>
+                  </div>
+                )}
+
+                {msg.role === "user" && (
+                  <button
+                    onClick={() => copyToClipboard(msg.content, "Message copied to clipboard!")}
+                    className="absolute top-2.5 right-2.5 p-1.5 rounded-lg text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800/80 transition opacity-60 hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 cursor-pointer"
+                    title="Copy message"
+                  >
+                    <Copy className="size-3.5" />
+                  </button>
+                )}
                 {msg.isScopeInvalid && (
                   <div className="flex items-center gap-2 pb-2 mb-3 border-b border-amber-500/30 text-xs font-bold text-amber-300 uppercase tracking-wider">
                     <ShieldAlert className="size-4" />

@@ -11,7 +11,7 @@ const SettingSection = ({
   control: any;
   icon?: React.ReactNode;
 }) => (
-  <section className="p-4 bg-zinc-900/60 backdrop-blur-xl border border-zinc-800/80 rounded-2xl space-y-3 shadow-lg hover:border-zinc-700/60 transition-all duration-200 group">
+  <section className="p-3.5 sm:p-4 bg-zinc-900/60 backdrop-blur-xl border border-zinc-800/80 rounded-2xl space-y-3 shadow-lg hover:border-zinc-700/60 transition-all duration-200 group w-full min-w-0 max-w-full overflow-x-hidden">
     <div className="flex items-center justify-between gap-3">
       <div className="flex items-center gap-2">
         {icon && <div className="text-emerald-400 shrink-0">{icon}</div>}

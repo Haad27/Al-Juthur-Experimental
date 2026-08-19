@@ -592,7 +592,7 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                       ? "bg-amber-950/30 border border-amber-500/40 rounded-tl-sm text-amber-100"
                       : "bg-zinc-900/90 border border-zinc-800 rounded-tl-sm text-zinc-200"
                   )}>
-                    {msg.role === "assistant" && (
+                    {msg.role === "assistant" && idx > 0 && (
                       <div className="absolute top-2 right-2 flex items-center gap-1 opacity-80 sm:opacity-0 sm:group-hover:opacity-100 focus-within:opacity-100 transition">
                         <button
                           onClick={() => {

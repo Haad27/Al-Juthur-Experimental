@@ -172,7 +172,7 @@ const MobileSheet = ({
       ) : null}
       <SheetContent
         side="right"
-        className="z-[99999] dark:bg-zinc-900 bg-[var(--sephia-200)] dark:text-white text-black px-4 border-l dark:border-[#262629ff] border-black sm:min-w-[25%] min-w-[90%]" // maybe make transparent and add backdrop MAYBE REVERT BACK TO NOT  bg-transparent backdrop-blur-md
+        className="z-[99999] dark:bg-zinc-900 bg-[var(--sephia-200)] dark:text-white text-black px-3 sm:px-4 border-l dark:border-[#262629ff] border-black sm:min-w-[25%] min-w-[90%] w-full max-w-[92vw] sm:max-w-md overflow-x-hidden overflow-y-auto touch-pan-y"
       >
         <VisuallyHidden>
           <SheetTitle>Menu</SheetTitle>
