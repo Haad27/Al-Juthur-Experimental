@@ -118,18 +118,12 @@ interface AyahRowProps {
 function cleanUrduFootnoteText(html: string) {
   if (!html) return "";
   
-  // If the footnote contains both a Translation section and a Tafsir section, remove the Translation section
-  // It usually looks like: <b class="text-emerald-400">ترجمہ (تفہیم القرآن):</b> ... <b class="text-amber-400">تفسیر:</b>
-  const tafsirMarkerRegex = /<b[^>]*>تفسیر:<\/b>/i;
-  const match = html.match(tafsirMarkerRegex);
-  if (match && match.index !== undefined) {
-    html = html.substring(match.index);
-  } else {
-    // fallback if no tags
-    const fallbackTafsirRegex = /تفسیر:/i;
-    const fbMatch = html.match(fallbackTafsirRegex);
-    if (fbMatch && fbMatch.index !== undefined) {
-      html = html.substring(fbMatch.index);
+  // If the footnote explicitly contains the Tafheem Translation section header, strip that header to leave the Tafsir section
+  if (html.includes("ترجمہ (تفہیم القرآن)")) {
+    const tafsirMarkerRegex = /<b[^>]*>تفسیر:<\/b>/i;
+    const match = html.match(tafsirMarkerRegex);
+    if (match && match.index !== undefined) {
+      html = html.substring(match.index);
     }
   }
 

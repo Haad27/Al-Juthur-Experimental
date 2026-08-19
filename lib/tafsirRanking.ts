@@ -84,13 +84,13 @@ export function getTafsirFameRank(name: string, authorName?: string | null): num
 
 /**
  * Utility to get language priority ranking.
- * English comes first (1), followed by Arabic (2), Urdu (3), and then all other languages (4).
+ * English comes first (1), followed by Urdu (2), Arabic (3), Pashto (4), and then all other languages.
  */
 export function getLanguagePriority(langName: string): number {
   const lower = (langName || "").toLowerCase();
   if (lower.includes("english")) return 1;
-  if (lower.includes("arabic")) return 2;
-  if (lower.includes("urdu")) return 3;
+  if (lower.includes("urdu")) return 2;
+  if (lower.includes("arabic")) return 3;
   if (lower.includes("pashto")) return 4;
   return 5;
 }

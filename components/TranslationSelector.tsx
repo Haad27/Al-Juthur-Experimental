@@ -81,6 +81,15 @@ export default function TranslationSelector() {
     return list;
   }, [search, activeLangPill]);
 
+  // Helper to get priority rank for languages
+  const getLangPriorityRank = (lang: string) => {
+    const lower = (lang || "").toLowerCase();
+    if (lower === "english" || lower.startsWith("english")) return 1;
+    if (lower === "urdu" || lower.startsWith("urdu")) return 2;
+    if (lower === "arabic" || lower.startsWith("arabic")) return 3;
+    return 100;
+  };
+
   // Group filtered options by language
   const groupedOptions = useMemo(() => {
     const groups: Record<string, TranslationOption[]> = {};
@@ -90,7 +99,22 @@ export default function TranslationSelector() {
       }
       groups[opt.languageLabel].push(opt);
     }
-    return groups;
+
+    const sortedEntries = Object.entries(groups).sort(([langA, optsA], [langB, optsB]) => {
+      const rankA = getLangPriorityRank(langA);
+      const rankB = getLangPriorityRank(langB);
+      if (rankA <= 3 || rankB <= 3) {
+        if (rankA !== rankB) return rankA - rankB;
+      }
+      if (optsB.length !== optsA.length) return optsB.length - optsA.length;
+      return langA.localeCompare(langB);
+    });
+
+    const sortedGroups: Record<string, TranslationOption[]> = {};
+    for (const [lang, opts] of sortedEntries) {
+      sortedGroups[lang] = opts;
+    }
+    return sortedGroups;
   }, [filteredOptions]);
 
   const allGroupedByLanguage = useMemo(() => {
@@ -99,7 +123,22 @@ export default function TranslationSelector() {
       if (!map[opt.languageLabel]) map[opt.languageLabel] = [];
       map[opt.languageLabel].push(opt);
     }
-    return map;
+
+    const sortedEntries = Object.entries(map).sort(([langA, optsA], [langB, optsB]) => {
+      const rankA = getLangPriorityRank(langA);
+      const rankB = getLangPriorityRank(langB);
+      if (rankA <= 3 || rankB <= 3) {
+        if (rankA !== rankB) return rankA - rankB;
+      }
+      if (optsB.length !== optsA.length) return optsB.length - optsA.length;
+      return langA.localeCompare(langB);
+    });
+
+    const sortedMap: Record<string, TranslationOption[]> = {};
+    for (const [lang, opts] of sortedEntries) {
+      sortedMap[lang] = opts;
+    }
+    return sortedMap;
   }, []);
 
   const handleSelect = (identifier: string) => {
