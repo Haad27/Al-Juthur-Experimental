@@ -38,17 +38,17 @@ const SECTIONS: SectionData[] = [
   {
     id: "tafsirs",
     icon: <Library className="w-6 h-6" />,
-    title: "130+ Tafsirs",
+    title: "120+ Tafsirs",
     subtitle: "Classical & Contemporary",
     description:
-      "Access over 130 tafsir sources organized by era and methodology. From the classical works of Ibn Kathir to modern scholarly interpretations.",
+      "Access over 120 tafsir sources organized by era and methodology. From the classical works of Ibn Kathir to modern scholarly interpretations.",
     accentColor: "#6df4ce",
     align: "right",
   },
   {
     id: "lexicon",
     icon: <BookText className="w-6 h-6" />,
-    title: "12 Classical Lexicons",
+    title: "13 Classical Lexicons",
     subtitle: "Root Word Morphology",
     description:
       "Dive into root word morphology and meaning sourced from Lisan al Arab, Mufradat al Raghib and more. Understand every word at its deepest level.",
@@ -201,7 +201,7 @@ function FinalCTA() {
           Start Your Journey
         </h2>
         <p className="text-base md:text-lg text-zinc-400 max-w-lg mx-auto font-light leading-relaxed">
-          The most comprehensive Qur'anic study platform. 130+ Tafsirs in 33 languages, 12 Lexicons, 127 Translations, and AI-powered insights.
+          The most comprehensive Qur'anic study platform. 120+ Tafsirs in 33 languages, 13 Lexicons, 127 Translations, and AI-powered insights.
         </p>
       </div>
 

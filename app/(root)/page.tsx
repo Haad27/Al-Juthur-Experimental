@@ -33,24 +33,10 @@ const APP_CAPTIONS = [
   "Modern Interface",
   "Word-by-Word Mushaf",
   "120+ Tafsirs",
-  "13+ Arabic Dictionaries",
+  "13 Classical Lexicons",
   "AI Arabic Translation",
   "6 RAG Modes",
   "Deep Word Analysis",
-];
-
-const LOGOS = [
-  "/assets/favicon/apple-touch-icon.png",
-  "/images/logos/1.jpeg",
-  "/images/logos/2.jpeg",
-  "/images/logos/3.png",
-  "/images/logos/4.jpeg",
-  "/images/logos/5.jpeg",
-  "/images/logos/6.jpeg",
-  "/images/logos/7.jpeg",
-  "/images/logos/8.jpeg",
-  "/images/logos/9.jpeg",
-  "/images/logos/10.jpeg",
 ];
 
 export default function LandingPage() {
@@ -58,7 +44,6 @@ export default function LandingPage() {
   const mainRef = useRef<HTMLDivElement>(null);
   const heroContentRef = useRef<HTMLDivElement>(null);
   const scrollProgress = useRef<number>(0);
-  const [logoIndex, setLogoIndex] = useState(0);
 
   useEffect(() => {
     // Lock scroll briefly while 3D assets load
@@ -134,26 +119,17 @@ export default function LandingPage() {
         {/* Header / Hook */}
         <div className="max-w-md pointer-events-auto animate-fade-in-left">
           <div className="flex items-center gap-3 mb-4">
-            <div 
-              className="relative group/logo cursor-pointer pointer-events-auto" 
-              onClick={() => setLogoIndex((prev) => (prev + 1) % LOGOS.length)}
-              title="Click to swap logo style"
-            >
-              <img
-                src={LOGOS[logoIndex]}
-                alt="Al Juthur Logo"
-                className="w-8 h-8 md:w-12 md:h-12 object-contain drop-shadow-[0_0_8px_rgba(16,185,129,0.5)] transition-all duration-200 active:scale-90 hover:brightness-110"
-              />
-              <span className="absolute -bottom-5 left-0 text-[9px] text-emerald-400 font-mono opacity-0 group-hover/logo:opacity-100 transition-opacity whitespace-nowrap">
-                Logo: {logoIndex === 0 ? "Default" : `Option ${logoIndex}`} (Click to swap)
-              </span>
-            </div>
+            <img
+              src="/assets/favicon/apple-touch-icon.png"
+              alt="Al Juthur Logo"
+              className="w-8 h-8 md:w-12 md:h-12 object-contain drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+            />
             <h1 className="text-3xl md:text-5xl font-bold text-white tracking-widest uppercase drop-shadow-md">
               Al Juthur
             </h1>
           </div>
           <p className="text-sm md:text-lg text-zinc-300 font-light leading-relaxed">
-            The most comprehensive platform featuring 130+ Tafsirs in 33 languages, 127 Translations, 12 Lexicons, RAG technology, and AI Translation with a Clean Modern UI.
+            The most comprehensive platform featuring 120+ Tafsirs in 33 languages, 127 Translations, 13 Lexicons, RAG technology, and AI Translation with a Clean Modern UI.
           </p>
         </div>
 

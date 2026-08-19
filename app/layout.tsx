@@ -9,11 +9,11 @@ import NextTopLoader from "nextjs-toploader";
 export const metadata = {
   metadataBase: new URL("https://aljuthur.vercel.app"),
   title: {
-    default: "Al-Juthur | Classical Arabic Roots, 130+ Tafsirs & AI Scholar",
+    default: "Al-Juthur | Classical Arabic Roots, 120+ Tafsirs & AI Scholar",
     template: "%s | Al-Juthur",
   },
   description:
-    "A modern Quran study platform featuring clean reading views, Surah contexts, root word analysis, 130+ Tafsirs across 33 languages, 127 translations, 12 historical lexicons, and specialized AI for accurate classical Arabic translation.",
+    "A modern Quran study platform featuring clean reading views, Surah contexts, root word analysis, 120+ Tafsirs across 33 languages, 127 translations, 13 historical lexicons, and specialized AI for accurate classical Arabic translation.",
   applicationName: "Al-Juthur",
   keywords: [
     "Quran",
@@ -46,7 +46,7 @@ export const metadata = {
     siteName: "Al-Juthur",
     title: "Al-Juthur",
     description:
-      "A modern Quran study platform featuring clean reading views, Surah contexts, root word analysis, 130+ Tafsirs across 33 languages, 127 translations, 12 historical lexicons, and specialized AI for accurate classical Arabic translation.",
+      "A modern Quran study platform featuring clean reading views, Surah contexts, root word analysis, 120+ Tafsirs across 33 languages, 127 translations, 13 historical lexicons, and specialized AI for accurate classical Arabic translation.",
     images: [
       {
         url: "/og-share-icon.png",
@@ -66,7 +66,7 @@ export const metadata = {
     card: "summary",
     title: "Al-Juthur",
     description:
-      "A modern Quran study platform featuring clean reading views, Surah contexts, root word analysis, 130+ Tafsirs across 33 languages, 127 translations, 12 historical lexicons, and specialized AI for accurate classical Arabic translation.",
+      "A modern Quran study platform featuring clean reading views, Surah contexts, root word analysis, 120+ Tafsirs across 33 languages, 127 translations, 13 historical lexicons, and specialized AI for accurate classical Arabic translation.",
     images: ["/og-share-icon.png"],
   },
 };
