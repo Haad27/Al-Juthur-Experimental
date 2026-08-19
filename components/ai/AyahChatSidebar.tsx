@@ -93,6 +93,7 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedModeId, setSelectedModeId] = useState(initialModeId || "default");
+  const [scopeChoice, setScopeChoice] = useState<'verse' | 'general' | null>(rootWord ? 'verse' : null);
   const [isContentReady, setIsContentReady] = useState(false);
   useVisualViewportOffset();
 
@@ -168,29 +169,24 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
         setSelectedModeId(initialModeId);
       }
       
-      const contextStr = rootWord 
-        ? `I see you are exploring the root word **${rootWord}**. How can I help you?`
-        : `I see you are reading **Surah ${surahNumber}, Ayah ${ayahNumber}**. How can I help you?`;
-
       const isSameContext = prevContextRef.current?.surah === surahNumber && 
                             prevContextRef.current?.ayah === ayahNumber && 
                             prevContextRef.current?.rootWord === rootWord;
 
       if (!isSameContext) {
-        setMessages([
-          { 
-            role: "assistant", 
-            content: `As-salamu alaykum! I am **Sheikh Juthur**. Switched to **${currentModeInfo.name}**.\n\nSearching strictly within:\n${currentModeInfo.sources.map(s => `- *${s}*`).join("\n")}\n\n${contextStr}` 
-          }
-        ]);
+        if (rootWord) {
+          setScopeChoice('verse');
+          setMessages([
+            { 
+              role: "assistant", 
+              content: `As-salamu alaykum! I am **Sheikh Juthur**. Switched to **${currentModeInfo.name}**.\n\nSearching strictly within:\n${currentModeInfo.sources.map(s => `- *${s}*`).join("\n")}\n\nI see you are exploring the root word **${rootWord}**. How can I help you?` 
+            }
+          ]);
+        } else {
+          setScopeChoice(null);
+          setMessages([]);
+        }
         prevContextRef.current = { surah: surahNumber, ayah: ayahNumber, rootWord: rootWord, mode: initialModeId };
-      } else if (messages.length === 0) {
-        setMessages([
-          { 
-            role: "assistant", 
-            content: `As-salamu alaykum! I am **Sheikh Juthur**. Switched to **${currentModeInfo.name}**.\n\nSearching strictly within:\n${currentModeInfo.sources.map(s => `- *${s}*`).join("\n")}\n\n${contextStr}` 
-          }
-        ]);
       }
     }
   }, [isOpen, surahNumber, ayahNumber, selectedModeId, initialModeId, rootWord, currentModeInfo]);
@@ -208,18 +204,31 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
     setInput("");
     setIsLoading(true);
 
+    const activeScope = scopeChoice || (rootWord ? 'verse' : 'verse');
+    if (scopeChoice === null && !rootWord) {
+      setScopeChoice('verse');
+    }
+
     try {
-      // Inject the selected verse context explicitly so the RAG knows what the user is talking about
-      const contextPrefix = rootWord 
-        ? `[System Context: The user is currently exploring the root word "${rootWord}" in Lexicon mode. They are asking a question about this specific root.]`
-        : `[System Context: The user is currently viewing Surah ${surahNumber}, Ayah ${ayahNumber}. They are asking a question about this specific verse.]`;
-      
-      const enrichedQuery = `${contextPrefix}\n\nUser Question: ${userText}`;
+      let reqBody: any = { message: userText, mode: selectedModeId };
+
+      if (rootWord) {
+        const contextPrefix = `[System Context: The user is currently exploring the root word "${rootWord}" in Lexicon mode. They are asking a question about this specific root.]`;
+        reqBody.message = `${contextPrefix}\n\nUser Question: ${userText}`;
+      } else if (activeScope === 'verse') {
+        const contextPrefix = `[System Context: The user is currently viewing Surah ${surahNumber}, Ayah ${ayahNumber}. They are asking a question specifically about Surah ${surahNumber}, Ayah ${ayahNumber}. You must focus solely on this verse and its classical commentaries.]`;
+        reqBody.message = `${contextPrefix}\n\nUser Question: ${userText}`;
+        reqBody.targetSurah = surahNumber;
+        reqBody.targetAyah = ayahNumber;
+      } else {
+        // General whole Quran mode
+        reqBody.message = userText;
+      }
 
       const res = await fetch("/api/ai/rag", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: enrichedQuery, mode: selectedModeId })
+        body: JSON.stringify(reqBody)
       });
 
       const contentType = res.headers.get("content-type");
@@ -385,20 +394,62 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                       </div>
                     )}
                   </div>
-                  <div className="relative inline-flex items-center bg-emerald-950/20 border border-emerald-500/40 rounded-md hover:bg-emerald-900/40 transition-colors mt-1 cursor-pointer">
-                    <span className="text-[11px] text-emerald-400 font-medium py-1 pl-2 pr-6 truncate pointer-events-none">
-                      {RAG_MODES.find(m => m.id === selectedModeId)?.shortName || "Select Mode"}
-                    </span>
-                    <select 
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                      value={selectedModeId}
-                      onChange={(e) => setSelectedModeId(e.target.value)}
-                    >
-                      {RAG_MODES.map(m => (
-                        <option key={m.id} value={m.id} className="bg-zinc-900 text-zinc-300">{m.shortName}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 size-3.5 text-emerald-400 pointer-events-none" />
+                  <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                    <div className="relative inline-flex items-center bg-emerald-950/20 border border-emerald-500/40 rounded-md hover:bg-emerald-900/40 transition-colors cursor-pointer">
+                      <span className="text-[11px] text-emerald-400 font-medium py-1 pl-2 pr-6 truncate pointer-events-none">
+                        {RAG_MODES.find(m => m.id === selectedModeId)?.shortName || "Select Mode"}
+                      </span>
+                      <select 
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        value={selectedModeId}
+                        onChange={(e) => setSelectedModeId(e.target.value)}
+                      >
+                        {RAG_MODES.map(m => (
+                          <option key={m.id} value={m.id} className="bg-zinc-900 text-zinc-300">{m.shortName}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 size-3.5 text-emerald-400 pointer-events-none" />
+                    </div>
+
+                    {!rootWord && scopeChoice !== null && (
+                      <button
+                        onClick={() => {
+                          const newScope = scopeChoice === 'verse' ? 'general' : 'verse';
+                          setScopeChoice(newScope);
+                          if (newScope === 'verse') {
+                            setMessages(prev => [
+                              ...prev,
+                              {
+                                role: "assistant",
+                                content: `I see you are reading **Surah ${surahNumber}, Ayah ${ayahNumber}**. How can I help you?`
+                              }
+                            ]);
+                          } else {
+                            setMessages(prev => [
+                              ...prev,
+                              {
+                                role: "assistant",
+                                content: `As-salamu alaykum! Operating in **${currentModeInfo.name}** across the whole Quran.\n\nSearching strictly within:\n${currentModeInfo.sources.map(s => `- *${s}*`).join("\n")}\n\nAsk me your inquiry below!`
+                              }
+                            ]);
+                          }
+                        }}
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold border transition-all cursor-pointer bg-emerald-950/30 border-emerald-500/30 text-emerald-300 hover:bg-emerald-900/50"
+                        title="Click to toggle between this verse and whole Quran"
+                      >
+                        {scopeChoice === 'verse' ? (
+                          <>
+                            <BookOpen className="size-3 text-emerald-400" />
+                            <span>Surah {surahNumber}:{ayahNumber}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="size-3 text-emerald-400" />
+                            <span>Whole Quran</span>
+                          </>
+                        )}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -425,6 +476,80 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                   ref={scrollContainerRef}
                   className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y w-full p-3 sm:p-4 space-y-4 sm:space-y-6 custom-scrollbar"
                 >
+                  {/* Scope Selection Card for Quran & Tafsir Sidebars */}
+                  {!rootWord && scopeChoice === null && messages.length === 0 && (
+                    <div className="p-4 sm:p-5 rounded-2xl bg-zinc-900/90 border border-emerald-500/40 shadow-xl space-y-3.5 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                        <Sparkles className="size-4 text-emerald-400" />
+                        <span>Select Inquiring Scope</span>
+                      </div>
+                      <p className="text-xs text-zinc-300 leading-relaxed">
+                        For best results, please choose from these 2 options:
+                      </p>
+                      <div className="flex flex-col gap-2.5 pt-1">
+                        <button
+                          onClick={() => {
+                            setScopeChoice('verse');
+                            setMessages([
+                              {
+                                role: "assistant",
+                                content: `I see you are reading **Surah ${surahNumber}, Ayah ${ayahNumber}**. How can I help you?`
+                              }
+                            ]);
+                          }}
+                          className="w-full text-left p-3.5 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/50 hover:border-emerald-400 transition-all flex items-start gap-3 group cursor-pointer"
+                        >
+                          <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400 shrink-0 group-hover:scale-105 transition-transform">
+                            <BookOpen className="size-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold text-emerald-300 group-hover:text-emerald-200">
+                                Ask about this Verse (Surah {surahNumber}:{ayahNumber})
+                              </span>
+                              <span className="text-[10px] uppercase font-semibold text-emerald-400/90 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                                Targeted
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-zinc-400 mt-1">
+                              Focus insights, classical tafsir, and gems specifically on Surah {surahNumber}, Ayah {ayahNumber}.
+                            </p>
+                          </div>
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setScopeChoice('general');
+                            setMessages([
+                              {
+                                role: "assistant",
+                                content: `As-salamu alaykum! I am **Sheikh Juthur**, operating in **${currentModeInfo.name}** across the whole Quran.\n\nSearching strictly within:\n${currentModeInfo.sources.map(s => `- *${s}*`).join("\n")}\n\nAsk me your inquiry below!`
+                              }
+                            ]);
+                          }}
+                          className="w-full text-left p-3.5 rounded-xl bg-zinc-900/60 hover:bg-zinc-800/80 border border-zinc-700/60 hover:border-zinc-500 transition-all flex items-start gap-3 group cursor-pointer"
+                        >
+                          <div className="p-2 rounded-lg bg-zinc-800 text-zinc-300 shrink-0 group-hover:scale-105 transition-transform">
+                            <Sparkles className="size-4 text-emerald-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold text-zinc-200 group-hover:text-white">
+                                General Question from the Whole Quran
+                              </span>
+                              <span className="text-[10px] uppercase font-semibold text-zinc-400 bg-zinc-800 px-2 py-0.5 rounded-full border border-zinc-700">
+                                Whole Quran
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-zinc-400 mt-1">
+                              Retrieve concepts, themes, and cross-surah connections across all classical texts.
+                            </p>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
               {messages.map((msg, idx) => (
                 <div 
                   key={idx} 
@@ -439,7 +564,7 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                     msg.role === "user" 
                       ? "bg-zinc-800 border-zinc-700 text-zinc-300" 
                       : msg.isScopeInvalid
-                      ? "bg-amber-500/20 border-amber-500/40 text-amber-400"
+                      ? "bg-amber-500/20 border-amber-500/40 text-amber-400" 
                       : "bg-emerald-500/20 border-emerald-500/40 text-emerald-400"
                   )}>
                     {msg.role === "user" ? <User size={14} /> : msg.isScopeInvalid ? <ShieldAlert size={14} /> : <Bot size={14} />}
@@ -454,15 +579,13 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                       ? "bg-amber-950/30 border border-amber-500/40 rounded-tl-sm text-amber-100"
                       : "bg-zinc-900/90 border border-zinc-800 rounded-tl-sm text-zinc-200"
                   )}>
-                    {msg.role === "assistant" && (
-                      <button
-                        onClick={() => copyToClipboard(msg.content, "Response copied to clipboard!")}
-                        className="absolute top-2 right-2 p-1.5 rounded-lg text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800/80 transition opacity-60 hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 cursor-pointer"
-                        title="Copy response"
-                      >
-                        <Copy className="size-3.5" />
-                      </button>
-                    )}
+                    <button
+                      onClick={() => copyToClipboard(msg.content, msg.role === "user" ? "Message copied to clipboard!" : "Response copied to clipboard!")}
+                      className="absolute top-2 right-2 p-1.5 rounded-lg text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800/80 transition opacity-60 hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 cursor-pointer"
+                      title="Copy to clipboard"
+                    >
+                      <Copy className="size-3.5" />
+                    </button>
                     {msg.isScopeInvalid && (
                       <div className="flex items-center gap-1.5 pb-2 mb-2 border-b border-amber-500/30 text-[11px] font-bold text-amber-300 uppercase tracking-wider">
                         <ShieldAlert className="size-3.5" />

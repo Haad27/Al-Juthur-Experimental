@@ -14,6 +14,8 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const message: string = body.message;
     const mode: RagMode = body.mode || 'default';
+    const targetSurah = body.targetSurah ? Number(body.targetSurah) : undefined;
+    const targetAyah = body.targetAyah ? Number(body.targetAyah) : undefined;
 
     const ip = req.headers.get('x-forwarded-for') || '127.0.0.1';
     
@@ -41,7 +43,13 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Run LLM 1 Query Rewriter & Scope Guardrail Check
-    const preparedQuery = await prepareRagQuery(message, mode);
+    const preparedQuery = await prepareRagQuery(message, mode, { targetSurah, targetAyah });
+
+    if (targetSurah && targetAyah) {
+      preparedQuery.targetSurahAyah = { surah: targetSurah, ayah: targetAyah };
+      preparedQuery.queryType = 'specific';
+      preparedQuery.suggestedVerses = [{ surah: targetSurah, ayah: targetAyah }];
+    }
 
     console.log('[RAG-ROUTE] LLM1 Result:', {
       isScopeValid: preparedQuery.isScopeValid,
@@ -125,17 +133,17 @@ export async function POST(req: NextRequest) {
       }
     } else {
       // 2. Perform Hybrid Search (BM25 + Vector + Mode & exact Surah filtering)
-      const isThematic = preparedQuery.queryType === 'thematic' || preparedQuery.queryType === 'specific_multiple';
+      const isThematic = !targetSurah && (preparedQuery.queryType === 'thematic' || preparedQuery.queryType === 'specific_multiple');
       documents = await searchHybrid(
         message,
         {
           mode,
-          surahId: isThematic ? undefined : preparedQuery.targetSurahAyah?.surah,
-          ayahId: isThematic ? undefined : preparedQuery.targetSurahAyah?.ayah,
+          surahId: targetSurah || (isThematic ? undefined : preparedQuery.targetSurahAyah?.surah),
+          ayahId: targetAyah || (isThematic ? undefined : preparedQuery.targetSurahAyah?.ayah),
           keywords: preparedQuery.keywords,
           expandedQueryAr: preparedQuery.expandedQueryAr,
           rootWord: preparedQuery.rootWords?.[0],
-          suggestedVerses: preparedQuery.suggestedVerses
+          suggestedVerses: targetSurah && targetAyah ? [{ surah: targetSurah, ayah: targetAyah }] : preparedQuery.suggestedVerses
         },
         8 // Top 8 relevant rule blocks
       );
@@ -233,6 +241,7 @@ export async function POST(req: NextRequest) {
     const systemPrompt = `You are Sheikh Juthur, an expert, compassionate Islamic scholar and teacher (Murabbi). You treat the user as your dedicated student seeking sacred knowledge. 
 Your tone must be polite, deeply scholarly, nurturing, and academically rigorous. Your answers should be profound and explore the deep intricacies of the subject matter—do not settle for simple or surface-level explanations; go into great depth. When explaining complex concepts, you should strive to provide at least one clear example or analogy to help your student understand. 
 Every claim or answer you provide MUST be firmly grounded in and explicitly referenced from the provided retrieved classical texts. Do NOT hallucinate.
+${targetSurah && targetAyah ? `\nTARGET VERSE MANDATE: The student is specifically inquiring about Surah ${targetSurah}, Ayah ${targetAyah}. You must ground your explanation and your 'Gem from this Ayat' specifically in Surah ${targetSurah}, Ayah ${targetAyah} using the provided classical commentaries.\n` : ''}
 
 GREETING RULE: Keep your opening greeting extremely brief (at most 1 short sentence, e.g., "As-salamu alaykum, seeker of knowledge." or "Bismillah, student of knowledge."). Do NOT write long introductory paragraphs, elaborate salutations, or multiple sentences of greeting—jump straight into the core classical tafsir and analysis!
 

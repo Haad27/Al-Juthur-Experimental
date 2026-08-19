@@ -148,7 +148,7 @@ function AiTranslatorContent() {
       {/* Subtle ambient light background */}
       <div className="absolute top-0 inset-x-0 h-[500px] bg-gradient-to-b from-emerald-900/10 to-transparent pointer-events-none" />
       {/* Top Navigation Bar */}
-      <div className="sticky top-0 z-40 bg-zinc-950/50 backdrop-blur-3xl border-b border-zinc-800/80 px-4 md:px-8 py-3 shadow-sm">
+      <div className="hidden md:block sticky top-0 z-40 bg-zinc-950/50 backdrop-blur-3xl border-b border-zinc-800/80 px-4 md:px-8 py-3 shadow-sm">
         <div className="max-w-[1700px] mx-auto relative flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Logo and App Name */}
           <div className="flex items-center gap-4">
@@ -310,8 +310,8 @@ function AiTranslatorContent() {
               </div>
             )}
 
-            {/* Action Bar (Sticky Top - Snaps flush directly underneath top navbar) */}
-            <div className="sticky top-[48px] md:top-[49px] z-30 flex flex-col sm:flex-row sm:items-center justify-between bg-zinc-950/95 sm:bg-zinc-950/80 backdrop-blur-xl border border-zinc-800/80 rounded-2xl p-2.5 sm:p-3 shadow-2xl gap-2.5 sm:gap-4">
+            {/* Action Bar (Sticky Top - Snaps flush directly to top on mobile, and underneath navbar on desktop) */}
+            <div className="sticky top-0 md:top-[49px] z-30 flex flex-col sm:flex-row sm:items-center justify-between bg-zinc-950/95 sm:bg-zinc-950/80 backdrop-blur-xl border border-zinc-800/80 rounded-2xl p-2.5 sm:p-3 shadow-2xl gap-2.5 sm:gap-4">
               <div className="flex items-center justify-between w-full sm:w-auto gap-2">
                 <h2 className="text-xs sm:text-xl font-bold text-white flex items-center gap-1.5 sm:gap-2 flex-wrap">
                   <Sparkles className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-emerald-400 shrink-0" />
@@ -324,7 +324,7 @@ function AiTranslatorContent() {
                   )}
                   <span className="inline-flex items-center gap-1 bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-500/40 text-emerald-300 text-[10px] sm:text-xs font-semibold shadow-sm backdrop-blur-sm ml-1.5">
                     <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-400 shrink-0" />
-                    <span><strong className="text-emerald-200">{(remainingTokens ?? 250000).toLocaleString()}</strong> tokens left</span>
+                    <span><strong className="text-emerald-200">{(tokenLimit - (remainingTokens ?? tokenLimit)).toLocaleString()}</strong> / {tokenLimit.toLocaleString()} used</span>
                   </span>
                 </h2>
               </div>

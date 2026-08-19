@@ -20,21 +20,23 @@ const ScrollSections = dynamic(() => import("@/components/landing3d/ScrollSectio
 });
 
 const APP_IMAGES = [
-  "/images/landing/image1.png",
-  "/images/landing/image3.png",
-  "/images/landing/image5.png",
-  "/images/landing/image8.png",
-  "/images/landing/image11.png",
-  "/images/landing/image13.png",
+  "/images/landing page final/modern_ui.png",
+  "/images/landing page final/word_to_word_mushaf.png",
+  "/images/landing page final/120_plus_tafsirs.png",
+  "/images/landing page final/13_plus_lexicons.png",
+  "/images/landing page final/ai_translation.png",
+  "/images/landing page final/6_rag_modes.png",
+  "/images/landing page final/word_to_word_analysis.png",
 ];
 
 const APP_CAPTIONS = [
   "Modern Interface",
-  "Quran Reader",
-  "130+ Tafsirs",
-  "12 Classical Lexicons",
-  "AI Translation",
+  "Word-by-Word Mushaf",
+  "120+ Quran Commentaries",
+  "13+ Arabic Dictionaries",
+  "AI Arabic Translation",
   "6 RAG Modes",
+  "Deep Word Analysis",
 ];
 
 export default function LandingPage() {

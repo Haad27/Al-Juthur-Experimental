@@ -132,10 +132,16 @@ export function parseSurahAyah(text: string): { surah?: number; ayah?: number } 
  * LLM 1: Query Rewriter, Scope Guardrail Check, and Arabic Vocabulary Expansion.
  * Prioritizes Gemini Flash / Flash-Lite models per user instruction.
  */
-export async function prepareRagQuery(userMessage: string, mode: RagMode = 'default'): Promise<PreparedQueryInfo> {
+export async function prepareRagQuery(
+  userMessage: string, 
+  mode: RagMode = 'default',
+  options?: { targetSurah?: number; targetAyah?: number; rootWord?: string }
+): Promise<PreparedQueryInfo> {
   const cleanMessage = (userMessage || '').trim();
   const lowerMsg = cleanMessage.toLowerCase();
-  const parsedRef = parseSurahAyah(cleanMessage);
+  const parsedRef = options?.targetSurah && options?.targetAyah 
+    ? { surah: options.targetSurah, ayah: options.targetAyah }
+    : (options?.targetSurah ? { surah: options.targetSurah } : parseSurahAyah(cleanMessage));
 
   // 1. Deterministic baseline analysis
   const baseKeywords: string[] = [];
@@ -225,7 +231,7 @@ OUTPUT JSON FORMAT ONLY:
 Your task is to analyze the user's prompt in the context of the selected mode and return a strict JSON object.
 
 ACTIVE MODE: "${mode}"
-
+${options?.targetSurah && options?.targetAyah ? `\nCONTEXT OVERRIDE: The user is specifically inquiring about Surah ${options.targetSurah}, Ayah ${options.targetAyah}. You MUST set targetSurah: ${options.targetSurah}, targetAyah: ${options.targetAyah}, queryType: "specific", and leave suggestedVerses empty.\n` : ''}
 CRITICAL INSTRUCTIONS:
 1. **Arabic Translation for Vector Search**: You must extract the core concepts from the user's English query and translate them into classical Arabic keywords ("expandedQueryAr"). This is critical because our databases are primarily in Arabic. The translation depth depends on the mode (e.g., Classical and Lexicon require heavy, precise Arabic root extraction).
 2. **Aqeedah & Fiqh Guardrail**: If the ACTIVE MODE is "grammar", strictly refuse theological (Aqeedah), sectarian, or Fiqh questions. Set isScopeValid to false. If the mode is "default" or "philosophical", these are allowed.

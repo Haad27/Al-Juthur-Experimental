@@ -68,6 +68,11 @@ export default function TafsirTextRenderer({
     .replace(/<\/div>/gi, "")
     .trim();
 
+  // Strip classical decorative circles / rosettes (۞, ۝, ֎, etc.)
+  content = content
+    .replace(/[\u06DE\u06DD\u058E\u25CB\u25CF\u25CE\u29BF\u29BE\u2735\u2736\u2742\u2740\u273F\u2741\u2055\u2737\u2738\u2739\u273A\u25C8\u25C9\u2743\u273D\u2734]/g, " ")
+    .replace(/\s{2,}/g, " ");
+
   // 2. Parse blocks by splitting on double newlines or block tags (<p>, <h2>, <h3>)
   content = content.replace(/<br\s*\/?>/gi, "\n");
 

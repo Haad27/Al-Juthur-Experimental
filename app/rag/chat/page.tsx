@@ -17,7 +17,8 @@ import {
   AlertTriangle,
   CheckCircle2,
   ShieldAlert,
-  Info
+  Info,
+  Copy
 } from "lucide-react";
 import { inter, amiri } from "@/app/fonts";
 import { toast } from "sonner";
@@ -25,6 +26,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useVisualViewportOffset } from '@/hooks/useVisualViewport';
 import { RAG_MODES, RagModeInfo } from "@/lib/ai/rag/modes-config";
+import { copyToClipboard } from "@/lib/utils";
 
 interface SourceItem {
   id: string;
@@ -361,14 +363,14 @@ function RagChatContent() {
             )}
           </div>
 
-          <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-900/60 border border-zinc-800 text-xs text-zinc-400 font-medium shadow-sm">
-            <Sparkles className="size-3.5 text-emerald-500" />
+          <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-zinc-900/60 border border-zinc-800 text-[10px] sm:text-xs text-zinc-400 font-medium shadow-sm shrink-0">
+            <Sparkles className="size-3 sm:size-3.5 text-emerald-500 shrink-0" />
             {remainingTokens !== null ? (
               <span>
-                <strong className="text-emerald-400">{remainingTokens.toLocaleString()}</strong> / {tokenLimit.toLocaleString()} Tokens Left
+                <strong className="text-emerald-400">{(tokenLimit - remainingTokens).toLocaleString()}</strong> / {tokenLimit.toLocaleString()} <span className="hidden xs:inline">Tokens</span> Used
               </span>
             ) : (
-              <span>Free Tier Hybrid RAG</span>
+              <span>Free Tier RAG</span>
             )}
           </div>
         </div>
@@ -417,7 +419,7 @@ function RagChatContent() {
 
               {/* Message Bubble */}
               <div
-                className={`max-w-[90%] sm:max-w-[80%] rounded-2xl px-4 py-3 sm:px-5 sm:py-4 shadow-sm ${
+                className={`max-w-[90%] sm:max-w-[80%] rounded-2xl px-4 py-3 sm:px-5 sm:py-4 shadow-sm relative group ${
                   msg.role === "user"
                     ? "bg-zinc-800/90 border border-zinc-700/60 rounded-tr-sm text-zinc-200"
                     : msg.isScopeInvalid
@@ -425,6 +427,13 @@ function RagChatContent() {
                     : "bg-zinc-900/80 border border-zinc-800/90 rounded-tl-sm text-zinc-200"
                 }`}
               >
+                <button
+                  onClick={() => copyToClipboard(msg.content, msg.role === "user" ? "Message copied to clipboard!" : "Response copied to clipboard!")}
+                  className="absolute top-2.5 right-2.5 p-1.5 rounded-lg text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800/80 transition opacity-60 hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 cursor-pointer"
+                  title="Copy message"
+                >
+                  <Copy className="size-3.5" />
+                </button>
                 {msg.isScopeInvalid && (
                   <div className="flex items-center gap-2 pb-2 mb-3 border-b border-amber-500/30 text-xs font-bold text-amber-300 uppercase tracking-wider">
                     <ShieldAlert className="size-4" />

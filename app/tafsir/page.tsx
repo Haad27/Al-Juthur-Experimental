@@ -248,17 +248,12 @@ function TafsirContent() {
     const el = langScrollRef.current;
     if (!el) return;
 
-    try {
-      e.currentTarget.setPointerCapture(e.pointerId);
-    } catch {}
-
     dragStartRef.current = {
       isDown: true,
       startX: e.clientX,
       scrollLeft: el.scrollLeft,
       hasMoved: false,
     };
-    setIsDraggingLang(true);
   };
 
   const handleLangPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -267,20 +262,16 @@ function TafsirContent() {
     if (!el) return;
 
     const delta = e.clientX - dragStartRef.current.startX;
-    if (Math.abs(delta) > 4) {
+    if (Math.abs(delta) > 8) {
       dragStartRef.current.hasMoved = true;
+      setIsDraggingLang(true);
+      el.scrollLeft = dragStartRef.current.scrollLeft - delta;
+      checkLangScrollability();
     }
-    el.scrollLeft = dragStartRef.current.scrollLeft - delta;
-    checkLangScrollability();
   };
 
-  const handleLangPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handleLangPointerUp = () => {
     if (dragStartRef.current.isDown) {
-      try {
-        if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-          e.currentTarget.releasePointerCapture(e.pointerId);
-        }
-      } catch {}
       dragStartRef.current.isDown = false;
       setIsDraggingLang(false);
       setTimeout(() => {
@@ -877,17 +868,6 @@ function TafsirContent() {
                   </h3>
                 </div>
               </div>
-
-              {currentSurahMeta.number !== 9 && (
-                <div className="mt-4 pt-4 border-t border-zinc-800/60 text-center">
-                  <p className={cn(
-                    "font-mushaf-indopak-16 text-amber-100/90 tracking-wide leading-loose transition-all",
-                    aiChatContext ? "text-lg sm:text-xl" : "text-[1.65rem] md:text-4xl"
-                  )}>
-                    بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
-                  </p>
-                </div>
-              )}
 
               {/* Context & Theme Button */}
               <div className="mt-3 flex flex-col items-center w-full max-w-3xl mx-auto">

@@ -1,4 +1,4 @@
-import { clsx, type ClassValue } from "clsx";
+﻿import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { toast } from "sonner";
 
@@ -6,11 +6,34 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function stripHtml(html: string): string {
+  if (!html) return "";
+  return html
+    .replace(/<br\s*[\/]?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n\n")
+    .replace(/<\/div>/gi, "\n")
+    .replace(/<\/h[1-6]>/gi, "\n\n")
+    .replace(/<li[^>]*>/gi, "• ")
+    .replace(/<\/li>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/[\u06DE\u06DD\u058E\u25CB\u25CF\u25CE\u29BF\u29BE\u2735\u2736\u2742\u2740\u273F\u2741\u2055\u2737\u2738\u2739\u273A\u25C8\u25C9\u2743\u273D\u2734]/g, " ")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 export async function copyToClipboard(text: string, successMessage = "Copied to clipboard!") {
   if (!text) return;
+  const cleanText = stripHtml(text);
   try {
     if (typeof navigator !== "undefined" && navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(cleanText);
       toast.success(successMessage);
       return;
     }
@@ -20,7 +43,7 @@ export async function copyToClipboard(text: string, successMessage = "Copied to 
 
   try {
     const textArea = document.createElement("textarea");
-    textArea.value = text;
+    textArea.value = cleanText;
     textArea.style.position = "fixed";
     textArea.style.left = "-999999px";
     textArea.style.top = "-999999px";
