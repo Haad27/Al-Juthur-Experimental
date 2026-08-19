@@ -25,7 +25,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import useScrollDirection from "@/hooks/useScrollDirection";
 import { motion } from "framer-motion";
-import { Search, SlidersHorizontal, ChevronRight } from "lucide-react";
+import { Search, SlidersHorizontal, ChevronRight, ArrowLeft } from "lucide-react";
 import { SURAHS_DATA } from "@/lib/surahsData";
 import { useAudioStore } from "@/lib/stores/audioStore";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
@@ -85,23 +85,34 @@ const MobileSheet = ({
             const currentSurahObj = SURAHS_DATA.find((s) => s.number === surahNumber);
             return (
               <div className="flex items-center justify-between w-full min-w-0 pr-1">
-                <div className="flex flex-col min-w-0 flex-1 mr-2 justify-center">
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="text-emerald-400 font-extrabold text-base sm:text-lg tracking-tight truncate drop-shadow-[0_0_8px_rgba(16,185,129,0.25)]">
-                      {currentSurahObj?.englishName}
-                    </span>
+                <div className="flex items-center gap-2 min-w-0 flex-1 mr-2">
+                  <Link
+                    href="/home#start_reading"
+                    className="p-1.5 -ml-1 rounded-lg bg-zinc-900/80 border border-zinc-800 text-zinc-400 hover:text-emerald-400 hover:border-emerald-500/50 transition-all flex items-center justify-center shrink-0 cursor-pointer shadow-sm"
+                    title="Back to All Surahs"
+                  >
+                    <ArrowLeft className="size-4" />
+                  </Link>
+
+                  <div className="flex flex-col min-w-0 justify-center">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="text-emerald-400 font-extrabold text-base sm:text-lg tracking-tight truncate drop-shadow-[0_0_8px_rgba(16,185,129,0.25)]">
+                        {currentSurahObj?.englishName}
+                      </span>
+                      {currentSurahObj?.englishNameTranslation && (
+                        <span className="text-zinc-400 text-[11px] font-medium truncate max-w-[140px] hidden sm:inline">
+                          ({currentSurahObj.englishNameTranslation})
+                        </span>
+                      )}
+                    </div>
                     {currentSurahObj?.englishNameTranslation && (
-                      <span className="text-zinc-400 text-[11px] font-medium truncate max-w-[140px] hidden sm:inline">
-                        ({currentSurahObj.englishNameTranslation})
+                      <span className="text-zinc-400 text-[10px] font-medium truncate sm:hidden">
+                        {currentSurahObj.englishNameTranslation}
                       </span>
                     )}
                   </div>
-                  {currentSurahObj?.englishNameTranslation && (
-                    <span className="text-zinc-400 text-[10px] font-medium truncate sm:hidden">
-                      {currentSurahObj.englishNameTranslation}
-                    </span>
-                  )}
                 </div>
+
                 <div className="flex items-center gap-2 shrink-0">
                   {currentSurahObj?.revelationType && (
                     <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-semibold tracking-wider uppercase">
