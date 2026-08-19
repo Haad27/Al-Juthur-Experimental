@@ -384,7 +384,18 @@ function TafsirContent() {
           const sorted = [...data.data].sort((a, b) => {
             const rankA = getLanguagePriority(a.name);
             const rankB = getLanguagePriority(b.name);
-            if (rankA !== rankB) return rankA - rankB;
+            
+            // If either language is one of the top 3 (English: 1, Arabic: 2, Urdu: 3), sort by priority rank
+            if (rankA <= 3 || rankB <= 3) {
+              if (rankA !== rankB) return rankA - rankB;
+            }
+            
+            // Otherwise, sort descending by the number of Tafsir entries (authors count)
+            const countA = Array.isArray(a.authors) ? a.authors.length : 0;
+            const countB = Array.isArray(b.authors) ? b.authors.length : 0;
+            if (countA !== countB) return countB - countA;
+            
+            // Final alphabetical sort if counts are equal
             return a.name.localeCompare(b.name);
           });
           setLanguages(sorted);
