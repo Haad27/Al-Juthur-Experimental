@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, Bot, User, Loader2, BookOpen, Layers, ShieldAlert, Sparkles, AlertTriangle, CheckCircle2, ChevronDown, Copy } from "lucide-react";
+import { X, Send, Bot, User, Loader2, BookOpen, Layers, ShieldAlert, Sparkles, AlertTriangle, CheckCircle2, ChevronDown, Copy, Bookmark, BookmarkCheck } from "lucide-react";
 import { cn, copyToClipboard } from "@/lib/utils";
 import { RAG_MODES, RagModeInfo } from "@/lib/ai/rag/modes-config";
+import { saveScholarAnswer } from "@/lib/readerStorage";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { amiri } from "@/app/fonts";
@@ -591,13 +592,52 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                       ? "bg-amber-950/30 border border-amber-500/40 rounded-tl-sm text-amber-100"
                       : "bg-zinc-900/90 border border-zinc-800 rounded-tl-sm text-zinc-200"
                   )}>
-                    <button
-                      onClick={() => copyToClipboard(msg.content, msg.role === "user" ? "Message copied to clipboard!" : "Response copied to clipboard!")}
-                      className="absolute top-2 right-2 p-1.5 rounded-lg text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800/80 transition opacity-60 hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 cursor-pointer"
-                      title="Copy to clipboard"
-                    >
-                      <Copy className="size-3.5" />
-                    </button>
+                    {msg.role === "assistant" && (
+                      <div className="absolute top-2 right-2 flex items-center gap-1 opacity-80 sm:opacity-0 sm:group-hover:opacity-100 focus-within:opacity-100 transition">
+                        <button
+                          onClick={() => {
+                            const previousUserMsg = messages.slice(0, idx).reverse().find(m => m.role === "user");
+                            const questionText = previousUserMsg?.content || (rootWord ? `Root [${rootWord}] Query` : `Surah ${surahNumber}:${ayahNumber} Inquiry`);
+                            saveScholarAnswer({
+                              id: `scholar_${Date.now()}_${idx}`,
+                              question: questionText,
+                              answer: msg.content,
+                              modeName: currentModeInfo.name,
+                              surahNumber: surahNumber > 0 ? surahNumber : undefined,
+                              ayahNumber: ayahNumber > 0 ? ayahNumber : undefined,
+                              rootWord: rootWord || undefined,
+                              sources: msg.sources?.map(s => ({
+                                book: s.book,
+                                authorName: s.authorName,
+                                snippet: s.snippet
+                              })),
+                              timestamp: Date.now()
+                            });
+                            toast.success("Saved Scholar research answer to Profile!");
+                          }}
+                          className="p-1.5 rounded-lg text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800/80 transition cursor-pointer"
+                          title="Save Answer to Profile"
+                        >
+                          <Bookmark className="size-3.5" />
+                        </button>
+                        <button
+                          onClick={() => copyToClipboard(msg.content, "Response copied to clipboard!")}
+                          className="p-1.5 rounded-lg text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800/80 transition cursor-pointer"
+                          title="Copy to clipboard"
+                        >
+                          <Copy className="size-3.5" />
+                        </button>
+                      </div>
+                    )}
+                    {msg.role === "user" && (
+                      <button
+                        onClick={() => copyToClipboard(msg.content, "Message copied to clipboard!")}
+                        className="absolute top-2 right-2 p-1.5 rounded-lg text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800/80 transition opacity-60 hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 cursor-pointer"
+                        title="Copy to clipboard"
+                      >
+                        <Copy className="size-3.5" />
+                      </button>
+                    )}
                     {msg.isScopeInvalid && (
                       <div className="flex items-center gap-1.5 pb-2 mb-2 border-b border-amber-500/30 text-[11px] font-bold text-amber-300 uppercase tracking-wider">
                         <ShieldAlert className="size-3.5" />

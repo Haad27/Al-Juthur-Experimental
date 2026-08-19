@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo, useRef, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
-import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, ChevronLeft, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check } from "lucide-react";
+import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, ChevronLeft, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check, Bookmark, BookmarkCheck } from "lucide-react";
 import LogoIcon from "@/components/svg/icons/LogoIcon";
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
 import TafsirTextRenderer from "@/components/tafsir/TafsirTextRenderer";
@@ -11,6 +11,14 @@ import { amiriquran, inter } from "@/app/fonts";
 import AyahChatSidebar from "@/components/ai/AyahChatSidebar";
 import FloatingAskScholarButton from "@/components/ai/FloatingAskScholarButton";
 import AyahWheelPickerModal from "@/components/tafsir/AyahWheelPickerModal";
+import ContinueReadingBanner from "@/components/tafsir/ContinueReadingBanner";
+import { 
+  getLastReadTafsir, 
+  setLastReadTafsir, 
+  saveTafsirItem, 
+  isTafsirSaved, 
+  LastReadTafsir 
+} from "@/lib/readerStorage";
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -615,6 +623,22 @@ function TafsirContent() {
     }
   }, [activeSurah, activeAuthor]);
 
+  // Save Last Read tracking whenever reading position changes
+  useEffect(() => {
+    if (activeAuthor && activeSurah > 0) {
+      const ayahNum = currentAyahIndex + 1;
+      setLastReadTafsir({
+        surahId: activeSurah,
+        surahName: currentSurahMeta.englishName,
+        ayahNumber: ayahNum,
+        authorId: activeAuthor.id,
+        authorName: activeAuthor.name,
+        langName: activeLangName,
+        timestamp: Date.now(),
+      });
+    }
+  }, [activeAuthor, activeSurah, currentAyahIndex, currentSurahMeta.englishName, activeLangName]);
+
   const navigateAyah = useCallback((delta: number) => {
     const nextIdx = Math.max(0, Math.min(currentSurahMeta.numberOfAyahs - 1, currentAyahIndex + delta));
     scrollToAyah(nextIdx + 1);
@@ -965,6 +989,7 @@ function TafsirContent() {
                         idx={idx}
                         activeSurah={activeSurah}
                         activeLangName={activeLangName}
+                        activeAuthor={activeAuthor}
                         aiChatContext={aiChatContext}
                         scrollToAyah={scrollToAyah}
                       />
@@ -1072,7 +1097,22 @@ function TafsirContent() {
             <Link href="/rag" className="cursor-pointer hover:text-gray-300 transition">
               RAG Bot
             </Link>
+            <Link href="/saved" className="cursor-pointer hover:text-gray-300 transition flex items-center gap-1">
+              <Bookmark className="size-3.5 text-emerald-400" />
+              <span>Saved</span>
+            </Link>
           </nav>
+          
+          <div className="flex items-center gap-3">
+            <Link 
+              href="/saved" 
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-emerald-500/50 text-xs font-semibold text-zinc-300 hover:text-emerald-400 transition"
+              title="Saved Verses, Tafsirs & Scholar Notes"
+            >
+              <Bookmark className="size-3.5 text-emerald-400" />
+              <span>Saved Library</span>
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -1353,6 +1393,26 @@ function TafsirContent() {
         </div>
       </div>
 
+      {/* Continue Reading Banner (when user has saved reading progress) */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 pb-2">
+        <ContinueReadingBanner
+          onContinue={(item) => {
+            const author = allAuthorsWithLang.find(
+              (a) => a.author.id === item.authorId
+            )?.author || {
+              id: item.authorId,
+              name: item.authorName,
+              languageId: 1,
+            };
+            setActiveAuthor(author);
+            setActiveLangName(item.langName || "");
+            setActiveSurah(item.surahId);
+            setTargetAyahToScroll({ surah: item.surahId, ayah: item.ayahNumber });
+            pendingScrollAyahRef.current = item.ayahNumber;
+          }}
+        />
+      </div>
+
       {/* Grid of Tafsir Containers (1 col -> 2 -> 3 -> 4 cols on laptop view) */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
         {filteredAuthors.length === 0 ? (
@@ -1463,6 +1523,7 @@ function TafsirCard({
   idx, 
   activeSurah, 
   activeLangName, 
+  activeAuthor,
   aiChatContext, 
   scrollToAyah 
 }: {
@@ -1470,6 +1531,7 @@ function TafsirCard({
   idx: number;
   activeSurah: number;
   activeLangName: string;
+  activeAuthor?: Author | null;
   aiChatContext: any;
   scrollToAyah: (num: number) => void;
 }) {
@@ -1479,6 +1541,35 @@ function TafsirCard({
   const isUrduText = activeLangName.toLowerCase().includes('urdu');
   const isArabicOrUrdu = isArabic || isUrduText;
   const cleanText = entry.text.replace(/<[^>]*>?/gm, '');
+
+  const authorId = entry.authorId || activeAuthor?.id || 0;
+  const authorName = entry.author?.name || activeAuthor?.name || `Tafsir #${authorId}`;
+  const savedKey = `tafsir_${authorId}_${activeSurah}_${ayahNumber}`;
+  const [isSaved, setIsSaved] = useState<boolean>(() => isTafsirSaved(savedKey));
+
+  const handleToggleSave = () => {
+    const surahMeta = SURAHS_DATA.find((s) => s.number === activeSurah);
+    const snippet = cleanText.slice(0, 280);
+    const newlySaved = saveTafsirItem({
+      id: savedKey,
+      surahId: activeSurah,
+      surahName: surahMeta?.englishName || `Surah ${activeSurah}`,
+      ayahNumber: ayahNumber,
+      authorId: authorId,
+      authorName: authorName,
+      langName: activeLangName,
+      arabicText: arabicText || undefined,
+      tafsirSnippet: snippet,
+      fullTafsirText: cleanText,
+      timestamp: Date.now(),
+    });
+    setIsSaved(newlySaved);
+    if (newlySaved) {
+      toast.success(`Saved Tafsir for ${surahMeta?.englishName || "Surah " + activeSurah} : ${ayahNumber} to Profile!`);
+    } else {
+      toast.info(`Removed Tafsir for ${surahMeta?.englishName || "Surah " + activeSurah} : ${ayahNumber} from Saved`);
+    }
+  };
 
   return (
     <div className="pb-6">
@@ -1497,11 +1588,32 @@ function TafsirCard({
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
             <button
+              onClick={handleToggleSave}
+              className={cn(
+                "flex items-center rounded-lg transition font-medium whitespace-nowrap gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs cursor-pointer",
+                isSaved 
+                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 hover:bg-emerald-500/30 shadow-sm" 
+                  : "bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300",
+                aiChatContext && "lg:gap-1 lg:px-2 lg:text-[10px]"
+              )}
+              title={isSaved ? "Remove from Saved" : "Save Tafsir to Profile"}
+            >
+              {isSaved ? (
+                <BookmarkCheck className={cn("shrink-0 size-3.5 text-emerald-400", aiChatContext && "lg:size-3")} />
+              ) : (
+                <Bookmark className={cn("shrink-0 size-3.5", aiChatContext && "lg:size-3")} />
+              )}
+              <span className={cn("hidden sm:inline", aiChatContext && "lg:hidden")}>
+                {isSaved ? "Saved" : "Save"}
+              </span>
+            </button>
+
+            <button
               onClick={() => {
                 copyToClipboard(cleanText, "Tafsir explanation copied to clipboard!");
               }}
               className={cn(
-                "flex items-center rounded-lg bg-zinc-800/80 hover:bg-zinc-700 transition font-medium text-zinc-300 whitespace-nowrap gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs",
+                "flex items-center rounded-lg bg-zinc-800/80 hover:bg-zinc-700 transition font-medium text-zinc-300 whitespace-nowrap gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs cursor-pointer",
                 aiChatContext && "lg:gap-1 lg:px-2 lg:text-[10px]"
               )}
               title="Copy Tafsir"
