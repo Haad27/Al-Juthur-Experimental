@@ -17,15 +17,21 @@ import {
 } from "lucide-react";
 import { inter } from "@/app/fonts";
 import { RAG_MODES } from "@/lib/ai/rag/modes-config";
+import useScrollDirection from "@/hooks/useScrollDirection";
 
 export default function RagLandingPage() {
   const router = useRouter();
   const [showDataInfo, setShowDataInfo] = useState(false);
+  const showNav = useScrollDirection();
 
   return (
     <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-slate-100 flex flex-col pb-36 md:pb-16 ${inter.className}`}>
       {/* Global Top Navigation Bar */}
-      <div className="sticky top-0 z-40 bg-zinc-950/50 backdrop-blur-3xl border-b border-zinc-800/80 px-4 md:px-8 py-3 shadow-sm">
+      <div className={`sticky top-0 z-40 bg-zinc-950/80 backdrop-blur-3xl border-b border-zinc-800/80 px-4 md:px-8 py-3 shadow-sm transition-all duration-300 ${
+        showNav 
+          ? "translate-y-0 opacity-100" 
+          : "-translate-y-full opacity-0 pointer-events-none md:translate-y-0 md:opacity-100 md:pointer-events-auto"
+      }`}>
         <div className="max-w-[1700px] mx-auto relative flex items-center justify-between gap-4">
           {/* Left: Logo + How RAG Works button */}
           <div className="flex items-center gap-3">

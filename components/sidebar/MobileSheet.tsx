@@ -169,26 +169,7 @@ const MobileSheet = ({
             </div>
           </div>
         </div>
-      ) : (
-        <SheetTrigger
-          className={cn(
-            "fixed top-0 left-0 right-0 w-full lg:hidden flex justify-between items-center transition-all duration-300 ease-out p-2 px-4 dark:bg-zinc-950/60 bg-zinc-950/60 backdrop-blur-3xl border-b dark:border-zinc-800/60 border-black/10 shadow-md min-h-16 z-[99999]",
-            (show && !isWordDialogVisible)
-              ? "translate-y-0 opacity-100 pointer-events-auto"
-              : "-translate-y-full opacity-0 pointer-events-none"
-          )}
-          id="mobile-menu-trigger"
-        >
-          <LogoIcon
-            onClick={() => router.push("/")}
-            className="dark:text-white text-black"
-          />
-          <MenuIcon
-            onClick={() => setIsOpen(true)}
-            className="dark:text-white text-black"
-          />
-        </SheetTrigger>
-      )}
+      ) : null}
       <SheetContent
         side="right"
         className="z-[99999] dark:bg-zinc-900 bg-[var(--sephia-200)] dark:text-white text-black px-4 border-l dark:border-[#262629ff] border-black sm:min-w-[25%] min-w-[90%]" // maybe make transparent and add backdrop MAYBE REVERT BACK TO NOT  bg-transparent backdrop-blur-md

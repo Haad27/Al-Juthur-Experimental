@@ -1138,7 +1138,7 @@ function TafsirContent() {
       {/* Hero Header removed for cleaner UI consistency */}
 
       {/* Sticky Filters & Search (Action Bar) */}
-      <div className={`sticky z-30 bg-zinc-950/90 backdrop-blur-xl border-y border-zinc-800/60 shadow-sm mb-6 transition-all duration-300 top-0 mt-16 md:mt-20 ${topNavVisible ? 'md:top-[53px]' : ''}`}>
+      <div className={`sticky z-30 bg-zinc-950/90 backdrop-blur-xl border-y border-zinc-800/60 shadow-sm mb-4 transition-all duration-300 top-0 mt-0 md:mt-14 ${topNavVisible ? 'md:top-[53px]' : ''}`}>
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-3">
           
           {/* Action Row: Search, Refine, Active Chips */}
