@@ -708,8 +708,9 @@ function TafsirContent() {
                 </div>
               </div>
 
-              {/* Right Side: Saved Library + Ayah Picker Button */}
+              {/* Right Side: Ayah Picker Button */}
               <div className="flex items-center gap-1.5 shrink-0">
+                {/* Mobile Saved Library button (commented out for Approach 3)
                 <Link
                   href="/saved"
                   className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-emerald-400 transition-all flex items-center justify-center cursor-pointer"
@@ -717,6 +718,7 @@ function TafsirContent() {
                 >
                   <Bookmark className="size-3.5" />
                 </Link>
+                */}
 
                 <button
                   onClick={() => {
@@ -1226,6 +1228,7 @@ function TafsirContent() {
               </div>
               
               <div className="flex items-center gap-2 shrink-0">
+                {/* Mobile Saved Library button (commented out for Approach 3)
                 <Link
                   href="/saved"
                   className="md:hidden flex items-center justify-center p-2 rounded-xl bg-zinc-900/80 border border-emerald-500/30 text-emerald-400 hover:bg-zinc-800 transition"
@@ -1233,6 +1236,7 @@ function TafsirContent() {
                 >
                   <Bookmark className="size-4" />
                 </Link>
+                */}
 
                 <div className="relative shrink-0">
                   <button

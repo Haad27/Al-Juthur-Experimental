@@ -76,11 +76,11 @@ export default function RagLandingPage() {
 
             <Link 
               href="/saved" 
-              className="flex items-center gap-1.5 p-2 md:px-3 md:py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-emerald-500/50 text-xs font-semibold text-zinc-300 hover:text-emerald-400 transition shadow-sm shrink-0"
+              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-emerald-500/50 text-xs font-semibold text-zinc-300 hover:text-emerald-400 transition shadow-sm shrink-0"
               title="Saved Verses, Tafsirs & Scholar Notes"
             >
               <Bookmark className="size-3.5 text-emerald-400" />
-              <span className="hidden md:inline">Saved Library</span>
+              <span>Saved Library</span>
             </Link>
           </div>
         </div>

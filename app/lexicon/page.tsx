@@ -279,6 +279,7 @@ function LexiconPageContent() {
                   </span>
                 </div>
               )}
+              {/* Mobile Saved Library button (commented out for Approach 3)
               <Link
                 href="/saved"
                 className="flex items-center justify-center p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-emerald-400 hover:bg-zinc-800 transition"
@@ -286,6 +287,7 @@ function LexiconPageContent() {
               >
                 <Bookmark className="size-4" />
               </Link>
+              */}
             </div>
           </div>
 

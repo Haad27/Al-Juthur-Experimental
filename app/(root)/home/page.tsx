@@ -112,6 +112,7 @@ const SurahsList = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Mobile Saved Library button (commented out for Approach 3)
           <Link
             href="/saved"
             className="flex items-center justify-center p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-emerald-400 hover:border-emerald-500/50 transition"
@@ -119,6 +120,7 @@ const SurahsList = () => {
           >
             <Bookmark className="size-4 text-emerald-400" />
           </Link>
+          */}
           <button
             onClick={() => setIsOpen((prev) => !prev)}
             className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white transition cursor-pointer"
