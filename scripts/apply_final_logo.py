@@ -31,20 +31,22 @@ def extract_large_arabic_calligraphy(source_path):
     art_png.save('public/assets/favicon/calligraphy-white-clean.png', 'PNG')
     return art_png
 
-def generate_vibrant_icon(art, size, is_solid=True, bg_color=(16, 185, 129), text_tint=(238, 246, 240), icon_ratio=0.83, corner_ratio=0.20):
+def generate_logo_icon(art, size, is_rounded=True, bg_color=(16, 185, 129), text_tint=(238, 246, 240), icon_ratio=0.83, corner_ratio=0.22):
     scale = 4
     high_size = size * scale
     
-    # Solid background eliminates transparent white-corner artifacts on WhatsApp / iOS
-    mode = 'RGB' if is_solid else 'RGBA'
-    canvas = Image.new('RGBA', (high_size, high_size), (0, 0, 0, 0) if not is_solid else (*bg_color, 255))
-    draw = ImageDraw.Draw(canvas)
-    
-    if not is_solid:
+    # If rounded, start with transparent canvas and draw smooth anti-aliased rounded rectangle
+    if is_rounded:
+        canvas = Image.new('RGBA', (high_size, high_size), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(canvas)
         radius = int(high_size * corner_ratio)
         draw.rounded_rectangle([(0, 0), (high_size - 1, high_size - 1)], radius=radius, fill=(*bg_color, 255))
+    else:
+        # Solid full bleed square for OpenGraph share previews (no white corners on WhatsApp)
+        canvas = Image.new('RGB', (high_size, high_size), bg_color)
+        canvas = canvas.convert('RGBA')
     
-    # Place calligraphy with balanced padding
+    # Scale calligraphy with balanced padding
     max_dim = int(high_size * icon_ratio)
     art_ratio = min(max_dim / art.width, max_dim / art.height)
     new_w = int(art.width * art_ratio)
@@ -54,14 +56,14 @@ def generate_vibrant_icon(art, size, is_solid=True, bg_color=(16, 185, 129), tex
     art_arr = np.array(art_scaled)
     alpha = art_arr[:, :, 3]
     
-    # Soft shadow behind calligraphy
+    # Soft ambient shadow
     shadow_mask = Image.fromarray(alpha).filter(ImageFilter.GaussianBlur(radius=scale * 1.5))
     ox = (high_size - new_w) // 2
     oy = (high_size - new_h) // 2
     shadow_color = Image.new('RGBA', (new_w, new_h), (5, 90, 60, 110))
     canvas.paste(shadow_color, (ox + scale, oy + int(scale * 1.2)), shadow_mask)
     
-    # Polished pearl-ivory calligraphy with subtle gradient
+    # Polished pearl-ivory calligraphy
     tinted_art = np.zeros_like(art_arr)
     y_coords = np.linspace(0, 1, new_h).reshape(-1, 1)
     r_grad = 250 - y_coords * (250 - text_tint[0])
@@ -76,7 +78,7 @@ def generate_vibrant_icon(art, size, is_solid=True, bg_color=(16, 185, 129), tex
     text_img = Image.fromarray(tinted_art)
     canvas.paste(text_img, (ox, oy), text_img)
     
-    if is_solid:
+    if not is_rounded:
         return canvas.convert('RGB').resize((size, size), Image.Resampling.LANCZOS)
     return canvas.resize((size, size), Image.Resampling.LANCZOS)
 
@@ -108,40 +110,39 @@ def main():
     
     art = extract_large_arabic_calligraphy(source_path)
 
-    # 1. Solid full-bleed icons (NO WHITE CORNERS on WhatsApp / iOS / Android)
-    solid_icons = [
-        ('public/assets/favicon/apple-touch-icon.png', 180, 0.83),
-        ('public/assets/favicon/android-chrome-192x192.png', 192, 0.83),
-        ('public/assets/favicon/android-chrome-512x512.png', 512, 0.83),
-        ('public/og-share-icon.png', 512, 0.83),
+    # 1. In-app Icons & Favicons: Smooth Rounded Corners + Padding (is_rounded=True)
+    rounded_icons = [
+        ('public/assets/favicon/apple-touch-icon.png', 180, 0.83, 0.22),
+        ('public/assets/favicon/android-chrome-192x192.png', 192, 0.83, 0.22),
+        ('public/assets/favicon/android-chrome-512x512.png', 512, 0.83, 0.22),
+        ('public/assets/favicon/favicon-32x32.png', 32, 0.85, 0.22),
+        ('public/assets/favicon/favicon-16x16.png', 16, 0.85, 0.22),
     ]
 
-    for dest_path, sz, ir in solid_icons:
+    for dest_path, sz, ir, cr in rounded_icons:
         os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-        icon = generate_vibrant_icon(art, sz, is_solid=True, icon_ratio=ir)
+        icon = generate_logo_icon(art, sz, is_rounded=True, icon_ratio=ir, corner_ratio=cr)
         icon.save(dest_path, 'PNG', optimize=True)
-        print(f"Generated solid {dest_path} ({sz}x{sz}) with vibrant emerald green.")
+        print(f"Generated rounded in-app {dest_path} ({sz}x{sz}).")
 
-    # 2. Browser Tab Favicons
-    fav_32 = generate_vibrant_icon(art, 32, is_solid=False, icon_ratio=0.85, corner_ratio=0.20)
-    fav_16 = generate_vibrant_icon(art, 16, is_solid=False, icon_ratio=0.85, corner_ratio=0.20)
-    fav_32.save('public/assets/favicon/favicon-32x32.png', 'PNG')
-    fav_16.save('public/assets/favicon/favicon-16x16.png', 'PNG')
-
-    # Multi-resolution favicon.ico
-    ico_16 = generate_vibrant_icon(art, 16, is_solid=False, icon_ratio=0.85, corner_ratio=0.20)
-    ico_32 = generate_vibrant_icon(art, 32, is_solid=False, icon_ratio=0.85, corner_ratio=0.20)
-    ico_48 = generate_vibrant_icon(art, 48, is_solid=False, icon_ratio=0.85, corner_ratio=0.20)
+    # Multi-resolution favicon.ico with smooth rounded corners
+    ico_16 = generate_logo_icon(art, 16, is_rounded=True, icon_ratio=0.85, corner_ratio=0.22)
+    ico_32 = generate_logo_icon(art, 32, is_rounded=True, icon_ratio=0.85, corner_ratio=0.22)
+    ico_48 = generate_logo_icon(art, 48, is_rounded=True, icon_ratio=0.85, corner_ratio=0.22)
     ico_32.save('public/assets/favicon/favicon.ico', format='ICO', sizes=[(16, 16), (32, 32), (48, 48)])
     ico_32.save('public/assets/favicon.ico', format='ICO', sizes=[(16, 16), (32, 32), (48, 48)])
     ico_32.save('public/favicon.ico', format='ICO', sizes=[(16, 16), (32, 32), (48, 48)])
-    print("Generated favicon.ico in all locations.")
+    print("Generated favicon.ico with smooth rounded corners.")
 
-    # 3. OG banner
+    # 2. Social Share Link Previews (WhatsApp / Telegram / iMessage / Twitter):
+    # Solid full-bleed square with no transparent corners to prevent white border artifacts
+    og_sq = generate_logo_icon(art, 512, is_rounded=False, icon_ratio=0.83)
+    og_sq.save('public/og-share-icon.png', 'PNG', optimize=True)
+
     og_banner = generate_og_share_banner(art, 1200, 630, icon_ratio=0.65)
     og_banner.save('public/og-image.png', 'PNG', optimize=True)
     og_banner.save('public/assets/images/og-image.png', 'PNG', optimize=True)
-    print("Generated solid OG share banner.")
+    print("Generated solid OG share banner & square icon with zero white borders.")
 
 if __name__ == '__main__':
     main()
