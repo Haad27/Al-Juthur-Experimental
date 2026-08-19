@@ -32,7 +32,7 @@ const APP_IMAGES = [
 const APP_CAPTIONS = [
   "Modern Interface",
   "Word-by-Word Mushaf",
-  "120+ Quran Commentaries",
+  "120+ Tafsirs",
   "13+ Arabic Dictionaries",
   "AI Arabic Translation",
   "6 RAG Modes",

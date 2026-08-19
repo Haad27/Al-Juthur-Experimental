@@ -218,8 +218,28 @@ const CylindricalGallery = forwardRef<CylindricalGalleryHandle, CylindricalGalle
   // Static: texture indices
   const textureIndices = useMemo(() => {
     const arr = new Float32Array(NUM_INSTANCES);
+    let seed = 42;
+    // Deterministic pseudo-random number generator
+    const random = () => {
+      const x = Math.sin(seed++) * 10000;
+      return x - Math.floor(x);
+    };
+
     for (let i = 0; i < NUM_INSTANCES; i++) {
-      arr[i] = indexMap[i % uniqueCount] ?? 0;
+      const candidates: number[] = [];
+      for (let c = 0; c < uniqueCount; c++) {
+        const atlasIndex = indexMap[c] ?? 0;
+        // Avoid the same image directly above (one spiral turn, i.e., 7 slots ago) and adjacent
+        const isDuplicateAbove = i >= 7 && arr[i - 7] === atlasIndex;
+        const isDuplicateAdjacent = i > 0 && arr[i - 1] === atlasIndex;
+        if (!isDuplicateAbove && !isDuplicateAdjacent) {
+          candidates.push(c);
+        }
+      }
+      const selected = candidates.length > 0
+        ? candidates[Math.floor(random() * candidates.length)]
+        : i % uniqueCount;
+      arr[i] = indexMap[selected] ?? 0;
     }
     return arr;
   }, [indexMap, uniqueCount]);
