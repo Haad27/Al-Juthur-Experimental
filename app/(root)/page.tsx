@@ -122,7 +122,7 @@ export default function LandingPage() {
             <img
               src="/assets/favicon/apple-touch-icon.png"
               alt="Al Juthur Logo"
-              className="w-8 h-8 md:w-12 md:h-12 object-contain drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+              className="w-10 h-10 md:w-14 md:h-14 object-contain drop-shadow-[0_0_8px_rgba(16,185,129,0.5)] shrink-0"
             />
             <h1 className="text-3xl md:text-5xl font-bold text-white tracking-widest uppercase drop-shadow-md">
               Al Juthur
