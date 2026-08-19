@@ -68,9 +68,9 @@ export default function TafsirTextRenderer({
     .replace(/<\/div>/gi, "")
     .trim();
 
-  // Strip classical decorative circles / rosettes (۞, ۝, ֎, etc.)
+  // Strip classical decorative circles / rosettes (۞, ۝, ◌, ֎, etc.) in Tafsir UI
   content = content
-    .replace(/[\u06DE\u06DD\u058E\u25CB\u25CF\u25CE\u29BF\u29BE\u2735\u2736\u2742\u2740\u273F\u2741\u2055\u2737\u2738\u2739\u273A\u25C8\u25C9\u2743\u273D\u2734]/g, " ")
+    .replace(/[\u06DE\u06DD\u058E\u25CC\u25CD\u20DD\u20DE\u20DF\u25CB\u25CF\u25CE\u25C9\u29BF\u29BE\u2735\u2736\u2742\u2740\u273F\u2741\u2055\u2737\u2738\u2739\u273A\u25C8\u2743\u273D\u2734\u25EF\u2B58\u2B57\u25D9\u25D8\u25C6\u25C7\u25A0\u25A1\u25AA\u25AB]/g, " ")
     .replace(/\s{2,}/g, " ");
 
   // 2. Parse blocks by splitting on double newlines or block tags (<p>, <h2>, <h3>)

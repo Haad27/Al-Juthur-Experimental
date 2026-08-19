@@ -93,7 +93,7 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedModeId, setSelectedModeId] = useState(initialModeId || "default");
-  const [scopeChoice, setScopeChoice] = useState<'verse' | 'general' | null>(rootWord ? 'verse' : null);
+  const [scopeChoice, setScopeChoice] = useState<'verse' | 'general' | null>(null);
   const [isContentReady, setIsContentReady] = useState(false);
   useVisualViewportOffset();
 
@@ -174,18 +174,8 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                             prevContextRef.current?.rootWord === rootWord;
 
       if (!isSameContext) {
-        if (rootWord) {
-          setScopeChoice('verse');
-          setMessages([
-            { 
-              role: "assistant", 
-              content: `As-salamu alaykum! I am **Sheikh Juthur**. Switched to **${currentModeInfo.name}**.\n\nSearching strictly within:\n${currentModeInfo.sources.map(s => `- *${s}*`).join("\n")}\n\nI see you are exploring the root word **${rootWord}**. How can I help you?` 
-            }
-          ]);
-        } else {
-          setScopeChoice(null);
-          setMessages([]);
-        }
+        setScopeChoice(null);
+        setMessages([]);
         prevContextRef.current = { surah: surahNumber, ayah: ayahNumber, rootWord: rootWord, mode: initialModeId };
       }
     }
@@ -204,24 +194,26 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
     setInput("");
     setIsLoading(true);
 
-    const activeScope = scopeChoice || (rootWord ? 'verse' : 'verse');
-    if (scopeChoice === null && !rootWord) {
+    const activeScope = scopeChoice || 'verse';
+    if (scopeChoice === null) {
       setScopeChoice('verse');
     }
 
     try {
       let reqBody: any = { message: userText, mode: selectedModeId };
 
-      if (rootWord) {
-        const contextPrefix = `[System Context: The user is currently exploring the root word "${rootWord}" in Lexicon mode. They are asking a question about this specific root.]`;
-        reqBody.message = `${contextPrefix}\n\nUser Question: ${userText}`;
-      } else if (activeScope === 'verse') {
-        const contextPrefix = `[System Context: The user is currently viewing Surah ${surahNumber}, Ayah ${ayahNumber}. They are asking a question specifically about Surah ${surahNumber}, Ayah ${ayahNumber}. You must focus solely on this verse and its classical commentaries.]`;
-        reqBody.message = `${contextPrefix}\n\nUser Question: ${userText}`;
-        reqBody.targetSurah = surahNumber;
-        reqBody.targetAyah = ayahNumber;
+      if (activeScope === 'verse') {
+        if (rootWord) {
+          const contextPrefix = `[System Context: The user is currently exploring the root word "${rootWord}" in Lexicon mode. They are asking a question about this specific root.]`;
+          reqBody.message = `${contextPrefix}\n\nUser Question: ${userText}`;
+        } else {
+          const contextPrefix = `[System Context: The user is currently viewing Surah ${surahNumber}, Ayah ${ayahNumber}. They are asking a question specifically about Surah ${surahNumber}, Ayah ${ayahNumber}. You must focus solely on this verse and its classical commentaries.]`;
+          reqBody.message = `${contextPrefix}\n\nUser Question: ${userText}`;
+          reqBody.targetSurah = surahNumber;
+          reqBody.targetAyah = ayahNumber;
+        }
       } else {
-        // General whole Quran mode
+        // General whole Quran / Lexicon mode
         reqBody.message = userText;
       }
 
@@ -411,41 +403,51 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                       <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 size-3.5 text-emerald-400 pointer-events-none" />
                     </div>
 
-                    {!rootWord && scopeChoice !== null && (
+                    {scopeChoice !== null && (
                       <button
                         onClick={() => {
                           const newScope = scopeChoice === 'verse' ? 'general' : 'verse';
                           setScopeChoice(newScope);
                           if (newScope === 'verse') {
-                            setMessages(prev => [
-                              ...prev,
-                              {
-                                role: "assistant",
-                                content: `I see you are reading **Surah ${surahNumber}, Ayah ${ayahNumber}**. How can I help you?`
-                              }
-                            ]);
+                            if (rootWord) {
+                              setMessages(prev => [
+                                ...prev,
+                                {
+                                  role: "assistant",
+                                  content: `I see you are exploring the root word **${rootWord}**. How can I help you with this root?`
+                                }
+                              ]);
+                            } else {
+                              setMessages(prev => [
+                                ...prev,
+                                {
+                                  role: "assistant",
+                                  content: `I see you are reading **Surah ${surahNumber}, Ayah ${ayahNumber}**. How can I help you?`
+                                }
+                              ]);
+                            }
                           } else {
                             setMessages(prev => [
                               ...prev,
                               {
                                 role: "assistant",
-                                content: `As-salamu alaykum! Operating in **${currentModeInfo.name}** across the whole Quran.\n\nSearching strictly within:\n${currentModeInfo.sources.map(s => `- *${s}*`).join("\n")}\n\nAsk me your inquiry below!`
+                                content: `As-salamu alaykum! Operating in **${currentModeInfo.name}** across the ${rootWord ? "whole Lexicon & Quran" : "whole Quran"}.\n\nSearching strictly within:\n${currentModeInfo.sources.map(s => `- *${s}*`).join("\n")}\n\nAsk me your inquiry below!`
                               }
                             ]);
                           }
                         }}
                         className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold border transition-all cursor-pointer bg-emerald-950/30 border-emerald-500/30 text-emerald-300 hover:bg-emerald-900/50"
-                        title="Click to toggle between this verse and whole Quran"
+                        title={rootWord ? "Click to toggle between this root and whole lexicon" : "Click to toggle between this verse and whole Quran"}
                       >
                         {scopeChoice === 'verse' ? (
                           <>
                             <BookOpen className="size-3 text-emerald-400" />
-                            <span>Surah {surahNumber}:{ayahNumber}</span>
+                            <span>{rootWord ? `Root [${rootWord}]` : `Surah ${surahNumber}:${ayahNumber}`}</span>
                           </>
                         ) : (
                           <>
                             <Sparkles className="size-3 text-emerald-400" />
-                            <span>Whole Quran</span>
+                            <span>{rootWord ? "Whole Lexicon" : "Whole Quran"}</span>
                           </>
                         )}
                       </button>
@@ -476,8 +478,8 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                   ref={scrollContainerRef}
                   className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y w-full p-3 sm:p-4 space-y-4 sm:space-y-6 custom-scrollbar"
                 >
-                  {/* Scope Selection Card for Quran & Tafsir Sidebars */}
-                  {!rootWord && scopeChoice === null && messages.length === 0 && (
+                  {/* Scope Selection Card for Lexicon, Quran & Tafsir Sidebars */}
+                  {scopeChoice === null && messages.length === 0 && (
                     <div className="p-4 sm:p-5 rounded-2xl bg-zinc-900/90 border border-emerald-500/40 shadow-xl space-y-3.5 animate-in fade-in slide-in-from-top-2 duration-300">
                       <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider">
                         <Sparkles className="size-4 text-emerald-400" />
@@ -493,7 +495,9 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                             setMessages([
                               {
                                 role: "assistant",
-                                content: `I see you are reading **Surah ${surahNumber}, Ayah ${ayahNumber}**. How can I help you?`
+                                content: rootWord 
+                                  ? `I see you are exploring the root word **${rootWord}**. How can I help you with this root?`
+                                  : `I see you are reading **Surah ${surahNumber}, Ayah ${ayahNumber}**. How can I help you?`
                               }
                             ]);
                           }}
@@ -505,14 +509,18 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
                               <span className="text-xs font-bold text-emerald-300 group-hover:text-emerald-200">
-                                Ask about this Verse (Surah {surahNumber}:{ayahNumber})
+                                {rootWord 
+                                  ? `Ask about Root Word [${rootWord}]` 
+                                  : `Ask about this Verse (Surah ${surahNumber}:${ayahNumber})`}
                               </span>
                               <span className="text-[10px] uppercase font-semibold text-emerald-400/90 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30">
                                 Targeted
                               </span>
                             </div>
                             <p className="text-[11px] text-zinc-400 mt-1">
-                              Focus insights, classical tafsir, and gems specifically on Surah {surahNumber}, Ayah {ayahNumber}.
+                              {rootWord 
+                                ? `Focus lexical definitions, nuances, and gems specifically on root [${rootWord}].`
+                                : `Focus insights, classical tafsir, and gems specifically on Surah ${surahNumber}, Ayah ${ayahNumber}.`}
                             </p>
                           </div>
                         </button>
@@ -523,7 +531,7 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                             setMessages([
                               {
                                 role: "assistant",
-                                content: `As-salamu alaykum! I am **Sheikh Juthur**, operating in **${currentModeInfo.name}** across the whole Quran.\n\nSearching strictly within:\n${currentModeInfo.sources.map(s => `- *${s}*`).join("\n")}\n\nAsk me your inquiry below!`
+                                content: `As-salamu alaykum! I am **Sheikh Juthur**, operating in **${currentModeInfo.name}** across the ${rootWord ? "whole Lexicon & Quran" : "whole Quran"}.\n\nSearching strictly within:\n${currentModeInfo.sources.map(s => `- *${s}*`).join("\n")}\n\nAsk me your inquiry below!`
                               }
                             ]);
                           }}
@@ -535,14 +543,18 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
                               <span className="text-xs font-bold text-zinc-200 group-hover:text-white">
-                                General Question from the Whole Quran
+                                {rootWord 
+                                  ? "General Question from Whole Lexicon & Quran" 
+                                  : "General Question from the Whole Quran"}
                               </span>
                               <span className="text-[10px] uppercase font-semibold text-zinc-400 bg-zinc-800 px-2 py-0.5 rounded-full border border-zinc-700">
-                                Whole Quran
+                                {rootWord ? "Whole Lexicon" : "Whole Quran"}
                               </span>
                             </div>
                             <p className="text-[11px] text-zinc-400 mt-1">
-                              Retrieve concepts, themes, and cross-surah connections across all classical texts.
+                              {rootWord 
+                                ? "Explore broad linguistic principles, cross-root relationships, and classical works."
+                                : "Retrieve concepts, themes, and cross-surah connections across all classical texts."}
                             </p>
                           </div>
                         </button>
