@@ -58,32 +58,32 @@ export const RAG_MODES: RagModeInfo[] = [
   },
   {
     id: "modern",
-    name: "4. Modern & Contextual Mode (Maqasidi & Society)",
-    shortName: "Modern & Contextual",
+    name: "4. Modern & Contemporary Mode",
+    shortName: "Modern & Contemporary",
     badge: "Contemporary Application",
     badgeColor: "bg-blue-500/10 text-blue-400 border-blue-500/30",
-    targetIntent: "Macro-themes, higher objectives of Shariah (Maqasid), societal context, and inter-verse connections across surahs.",
+    targetIntent: "Macro-themes, higher objectives of Shariah (Maqasid), societal context, modern psychology, and inter-verse connections across surahs.",
     sources: [
       "Al-Tahrir wa al-Tanwir (Ibn Ashur)",
       "Adwa' al-Bayan fi Eedah al-Qur'an (Al-Shanqiti)",
       "Al-Tafsir al-Wasit (Shaykh Tantawi)"
     ],
-    description: "Connects Quranic principles to modern societal realities, legislative wisdom, and holistic thematic relationships across the Book."
+    description: "Connects Quranic principles to modern societal realities, psychology, legislative wisdom, and holistic thematic relationships while maintaining focus on the text."
   },
   {
     id: "philosophical",
-    name: "5. Philosophical & Intellectual Mode (Kalam & Rational)",
-    shortName: "Philosophical Mode",
-    badge: "Systematic Logic & Refutation",
+    name: "5. Philosophical & Intellectual Mode",
+    shortName: "Philosophical & Intellectual",
+    badge: "Rational & Intellectual Analysis",
     badgeColor: "bg-purple-500/10 text-purple-400 border-purple-500/30",
-    targetIntent: "Theological debates, rational proofs, systematic scholastic theology (Kalam), and refutation of doubts.",
+    targetIntent: "Intellectual reflection, rational proofs, and philosophical arguments based on classical exegesis.",
     sources: [
       "Tafsir al-Razi (Mafatih al-Ghayb / The Great Tafsir)",
       "Ruh al-Ma'ani (Imam Shihab al-Din al-Alusi)",
       "Anwar al-Tanzil (Tafsir al-Baydawi)"
     ],
-    warning: "NOTE: These classical texts focus on logical proofs, scholastic Kalam debates, and philosophical refutations. For basic jurisprudence or standard devotional reading, please use Default Mode.",
-    description: "Engages with deep rational arguments, philosophical inquiries, and comprehensive systematic theology across classical scholarship."
+    warning: "NOTE: This mode focuses on intellectual and rational reflection of verses using logical proofs. For basic jurisprudence or standard devotional reading, please use Default Mode.",
+    description: "Engages with deep rational arguments, logical proofs, and philosophical reflections across classical scholarship."
   },
   {
     id: "lexicon",
