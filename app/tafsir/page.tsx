@@ -1108,10 +1108,6 @@ function TafsirContent() {
             <Link href="/rag" className="cursor-pointer hover:text-gray-300 transition">
               RAG Bot
             </Link>
-            <Link href="/saved" className="cursor-pointer hover:text-gray-300 transition flex items-center gap-1">
-              <Bookmark className="size-3.5 text-emerald-400" />
-              <span>Saved</span>
-            </Link>
           </nav>
           
           <div className="flex items-center gap-3">

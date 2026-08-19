@@ -12,7 +12,8 @@ import {
   Database,
   ArrowRight,
   AlertTriangle,
-  Info
+  Info,
+  Bookmark
 } from "lucide-react";
 import { inter } from "@/app/fonts";
 import { RAG_MODES } from "@/lib/ai/rag/modes-config";
@@ -26,11 +27,21 @@ export default function RagLandingPage() {
       {/* Global Top Navigation Bar */}
       <div className="sticky top-0 z-40 bg-zinc-950/50 backdrop-blur-3xl border-b border-zinc-800/80 px-4 md:px-8 py-3 shadow-sm">
         <div className="max-w-[1700px] mx-auto relative flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 sm:gap-3">
+          {/* Left: Logo + How RAG Works button */}
+          <div className="flex items-center gap-3">
             <Link href="/home" className="flex items-center gap-2 shrink-0">
               <LogoIcon className="w-8 h-8 rounded-[20%]" />
               <span className="font-bold text-lg sm:text-xl tracking-tight text-white whitespace-nowrap">Al-Juthur</span>
             </Link>
+
+            <button
+              onClick={() => setShowDataInfo(!showDataInfo)}
+              className="hidden md:flex px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-400 hover:bg-emerald-500/20 transition-all items-center gap-1.5 font-medium shadow-sm shrink-0"
+              title="How the RAG Engine Searches & Synthesizes Data"
+            >
+              <Info className="size-3.5 text-emerald-400" />
+              <span>How RAG Works</span>
+            </button>
           </div>
 
           {/* Desktop Navigation Links */}
@@ -52,16 +63,25 @@ export default function RagLandingPage() {
             </Link>
           </nav>
 
-          {/* Action Button: How RAG Works Drawer Toggle */}
+          {/* Top Right: Saved Library */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowDataInfo(!showDataInfo)}
-              className="px-3.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-400 hover:bg-emerald-500/20 transition-all flex items-center gap-1.5 font-medium shadow-sm"
+              className="md:hidden px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-400 hover:bg-emerald-500/20 transition-all flex items-center gap-1.5 font-medium shadow-sm shrink-0"
               title="How the RAG Engine Searches & Synthesizes Data"
             >
               <Info className="size-3.5 text-emerald-400" />
               <span>How RAG Works</span>
             </button>
+
+            <Link 
+              href="/saved" 
+              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-emerald-500/50 text-xs font-semibold text-zinc-300 hover:text-emerald-400 transition shadow-sm"
+              title="Saved Verses, Tafsirs & Scholar Notes"
+            >
+              <Bookmark className="size-3.5 text-emerald-400" />
+              <span>Saved Library</span>
+            </Link>
           </div>
         </div>
       </div>

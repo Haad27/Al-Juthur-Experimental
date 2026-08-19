@@ -20,6 +20,7 @@ import {
   Languages,
   Bot,
   AlertTriangle,
+  Bookmark,
 } from 'lucide-react';
 import InlineTranslation from '@/components/shared/InlineTranslation';
 import { toast } from 'sonner';
@@ -250,12 +251,22 @@ function LexiconPageContent() {
       >
         <div className="max-w-[1700px] mx-auto relative flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex items-center justify-between w-full md:w-auto">
-            {/* Left Logo */}
+            {/* Left Logo + Desktop Root Word Badge */}
             <div className="flex items-center gap-3">
               <Link href="/home" className="flex items-center gap-2">
                 <LogoIcon className="w-8 h-8 rounded-[20%]" />
                 <span className="font-bold text-xl tracking-tight text-white">Al-Juthur</span>
               </Link>
+              
+              {/* Desktop / Laptop Top Left: Active Root Word Badge */}
+              {(activeRoot || result?.normalizedRoot) && (
+                <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-950/60 border border-emerald-500/40 shadow-sm shrink-0">
+                  <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Root:</span>
+                  <span className="text-sm font-bold font-arabic text-white">
+                    {result?.normalizedRoot || activeRoot}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Mobile Only: Current Selected Word Badge (Top Right) */}
@@ -288,15 +299,17 @@ function LexiconPageContent() {
             </Link>
           </nav>
 
-          {/* Desktop / Laptop Top Right: Active Root Word Badge */}
-          {(activeRoot || result?.normalizedRoot) && (
-            <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-950/60 border border-emerald-500/40 shadow-sm shrink-0 ml-auto lg:ml-0">
-              <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Root:</span>
-              <span className="text-sm font-bold font-arabic text-white">
-                {result?.normalizedRoot || activeRoot}
-              </span>
-            </div>
-          )}
+          {/* Desktop Top Right: Saved Library Link */}
+          <div className="hidden md:flex items-center gap-3 shrink-0 ml-auto lg:ml-0">
+            <Link 
+              href="/saved" 
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-emerald-500/50 text-xs font-semibold text-zinc-300 hover:text-emerald-400 transition shadow-sm"
+              title="Saved Verses, Tafsirs & Scholar Notes"
+            >
+              <Bookmark className="size-3.5 text-emerald-400" />
+              <span>Saved Library</span>
+            </Link>
+          </div>
 
           {/* MOBILE ONLY: Pinned Dropdowns for Dictionaries & PDF Lexicons */}
           {result?.entries && result.entries.length > 0 && (

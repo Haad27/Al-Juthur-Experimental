@@ -12,7 +12,7 @@ import { motion } from "framer-motion";
 
 // Icons / Lucide React ⭐
 import MenuIcon from "@/components/svg/icons/MenuIcon";
-import { ArchiveIcon, Circle, Sparkle, Trash, X, XIcon, Search } from "lucide-react";
+import { ArchiveIcon, Circle, Sparkle, Trash, X, XIcon, Search, Bookmark } from "lucide-react";
 // Hooks ⭐
 import useSurahNavigation from "@/hooks/useSurahNavigation";
 // Fonts ⭐
@@ -135,6 +135,17 @@ const SurahsList = () => {
             RAG Bot
           </Link>
         </nav>
+
+        <div className="hidden lg:flex items-center gap-3 shrink-0">
+          <Link 
+            href="/saved" 
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-emerald-500/50 text-xs font-semibold text-zinc-300 hover:text-emerald-400 transition shadow-sm"
+            title="Saved Verses, Tafsirs & Scholar Notes"
+          >
+            <Bookmark className="size-3.5 text-emerald-400" />
+            <span>Saved Library</span>
+          </Link>
+        </div>
       </div>
 
       <div className="space-y-16 w-full flex-col flex-1 text-white xl:px-20 lg:px-8 px-4 pb-36 md:pb-16">

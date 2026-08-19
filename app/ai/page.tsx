@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Languages, Loader2, ArrowRightLeft, ShieldAlert, Copy, Check, LayoutGrid, Columns, BookOpen, Sparkles, Trash, ScrollText, Library, AlertTriangle } from 'lucide-react';
+import { Languages, Loader2, ArrowRightLeft, ShieldAlert, Copy, Check, LayoutGrid, Columns, BookOpen, Sparkles, Trash, ScrollText, Library, AlertTriangle, Bookmark } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { useGlobalState } from '@/lib/providers/GlobalStatesProvider';
@@ -176,6 +176,17 @@ function AiTranslatorContent() {
               RAG Bot
             </Link>
           </nav>
+
+          <div className="hidden md:flex items-center gap-3 shrink-0">
+            <Link 
+              href="/saved" 
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-emerald-500/50 text-xs font-semibold text-zinc-300 hover:text-emerald-400 transition shadow-sm"
+              title="Saved Verses, Tafsirs & Scholar Notes"
+            >
+              <Bookmark className="size-3.5 text-emerald-400" />
+              <span>Saved Library</span>
+            </Link>
+          </div>
         </div>
       </div>
 
