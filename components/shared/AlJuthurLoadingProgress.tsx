@@ -61,14 +61,14 @@ export default function AlJuthurLoadingProgress({
     <div className={cn("relative flex flex-col items-center gap-6 text-center animate-in fade-in duration-300 py-12", className)}>
       {/* Ripple Rings & Logo (Identical to homepage loader) */}
       <div className="relative flex items-center justify-center w-24 h-24">
-        <div className="absolute inset-0 rounded-full border border-emerald-500/40 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" />
-        <div className="absolute inset-0 rounded-full border border-emerald-500/30 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" style={{ animationDelay: "1s" }} />
-        <div className="absolute inset-0 rounded-full border border-emerald-500/20 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" style={{ animationDelay: "2s" }} />
+        <div className="absolute inset-0 rounded-full border border-zinc-400/30 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" />
+        <div className="absolute inset-0 rounded-full border border-zinc-500/20 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" style={{ animationDelay: "1s" }} />
+        <div className="absolute inset-0 rounded-full border border-slate-400/15 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" style={{ animationDelay: "2s" }} />
         
         <img
           src="/assets/favicon/apple-touch-icon.png"
           alt="Al Juthur Logo"
-          className="w-16 h-16 object-contain animate-pulse drop-shadow-[0_0_15px_rgba(16,185,129,0.8)] relative z-10"
+          className="w-16 h-16 object-contain animate-pulse drop-shadow-[0_0_20px_rgba(241,245,249,0.45)] relative z-10"
         />
       </div>
 

@@ -39,22 +39,22 @@ export default function LoadingScreen() {
         >
           {/* Ambient Background Glows */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-            <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] rounded-full bg-emerald-500/10 blur-[120px] animate-pulse" style={{ animationDuration: '8s' }} />
-            <div className="absolute bottom-[10%] -right-[10%] w-[60%] h-[60%] rounded-full bg-teal-500/10 blur-[120px] animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
+            <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] rounded-full bg-slate-500/10 blur-[120px] animate-pulse" style={{ animationDuration: '8s' }} />
+            <div className="absolute bottom-[10%] -right-[10%] w-[60%] h-[60%] rounded-full bg-zinc-500/10 blur-[120px] animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
           </div>
 
           <div className="w-64 flex flex-col items-center gap-6 relative z-10">
             {/* Logo and Rings */}
             <div className="relative flex items-center justify-center w-24 h-24">
               {/* Ripple Rings */}
-              <div className="absolute inset-0 rounded-full border border-emerald-500/40 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" />
-              <div className="absolute inset-0 rounded-full border border-emerald-500/30 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" style={{ animationDelay: '1s' }} />
-              <div className="absolute inset-0 rounded-full border border-emerald-500/20 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" style={{ animationDelay: '2s' }} />
+              <div className="absolute inset-0 rounded-full border border-zinc-400/30 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" />
+              <div className="absolute inset-0 rounded-full border border-zinc-500/20 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" style={{ animationDelay: '1s' }} />
+              <div className="absolute inset-0 rounded-full border border-slate-400/15 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" style={{ animationDelay: '2s' }} />
 
               <motion.img
                 src="/assets/favicon/apple-touch-icon.png"
                 alt="Al Juthur Logo"
-                className="w-16 h-16 object-contain drop-shadow-[0_0_15px_rgba(16,185,129,0.8)]"
+                className="w-16 h-16 object-contain drop-shadow-[0_0_20px_rgba(241,245,249,0.45)]"
                 animate={{ scale: [1, 1.05, 1] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               />
