@@ -191,6 +191,7 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
+    /* Temporarily commented out until payment gateway approval:
     if (tier === "FREE" && dailyQueriesUsed >= dailyQueriesLimit) {
       toast.error("Daily AI Quota Reached (5/5)", {
         description: "You have used all 5 free research questions for today. Upgrade to Pro for 50 queries/day or use code BARAKAH!",
@@ -199,6 +200,7 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
       openPricingModal();
       return;
     }
+    */
     
     const userText = input.trim();
     const userMessage: Message = { role: "user", content: userText };
@@ -468,14 +470,14 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                 </div>
               </div>
               <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                <button
+                {/* <button
                   onClick={openPricingModal}
                   className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold transition-all cursor-pointer shadow-sm"
                   title="View Research Plans & AI Quota"
                 >
                   <Crown className="size-3 text-emerald-400" />
                   <span className="uppercase">{tier}</span>
-                </button>
+                </button> */}
                 <button 
                   onClick={onClose}
                   className="p-2 hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 hover:text-white"

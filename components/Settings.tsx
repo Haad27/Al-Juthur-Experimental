@@ -188,8 +188,8 @@ const Settings = () => {
 
   return (
     <div className="p-2 sm:p-4 space-y-4 max-w-md w-full min-w-0 max-w-full overflow-y-auto overflow-x-hidden scrollable-container max-h-[calc(100vh-190px)] touch-pan-y">
-      {/* Subscription & AI Quota Banner */}
-      <div className="p-3.5 rounded-2xl bg-gradient-to-br from-emerald-950/40 via-zinc-900 to-zinc-900 border border-emerald-500/25 space-y-2.5">
+      {/* Subscription & AI Quota Banner (Temporarily commented until Lemon Squeezy approval) */}
+      {/* <div className="p-3.5 rounded-2xl bg-gradient-to-br from-emerald-950/40 via-zinc-900 to-zinc-900 border border-emerald-500/25 space-y-2.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -219,7 +219,7 @@ const Settings = () => {
             <ArrowUpRight className="w-3.5 h-3.5" />
           </button>
         </div>
-      </div>
+      </div> */}
 
       <SettingSection
         icon={<Globe className="w-4 h-4 text-emerald-400" />}

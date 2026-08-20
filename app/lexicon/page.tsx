@@ -615,8 +615,9 @@ function LexiconPageContent() {
               {/* Lexicon Definitions Display (Starts immediately below header) */}
               <div className="space-y-4 md:space-y-6">
                 {filteredEntries.map((entry) => {
-                  const isFreeDict = (entry.dictIdent || "").toLowerCase().includes("mufradat") || (entry.dictName || "").toLowerCase().includes("mufradat");
-                  const isLocked = tier === "FREE" && !isFreeDict;
+                  // const isFreeDict = (entry.dictIdent || "").toLowerCase().includes("mufradat") || (entry.dictName || "").toLowerCase().includes("mufradat");
+                  // const isLocked = tier === "FREE" && !isFreeDict;
+                  const isLocked = false; // Temporarily unlocked pending payment gateway approval
 
                   return (
                     <div
@@ -628,12 +629,12 @@ function LexiconPageContent() {
                           <h3 className="text-sm md:text-base font-bold text-emerald-300/90 border-l-2 border-emerald-500/60 pl-2.5">
                             {entry.dictName}
                           </h3>
-                          {isLocked && (
+                          {/* {isLocked && (
                             <span className="text-[9px] md:text-[10px] font-bold tracking-wider px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-1">
                               <Lock className="size-2.5" />
                               <span>PRO</span>
                             </span>
-                          )}
+                          )} */}
                           {entry.isEnglish && (
                             <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                               English

@@ -57,6 +57,7 @@ export function ScholarAssistantModal({
     const qToAsk = question || query;
     if (!qToAsk.trim()) return;
 
+    /* Temporarily commented out until payment gateway approval:
     if (tier === "FREE" && dailyQueriesUsed >= dailyQueriesLimit) {
       toast.error("Daily AI Quota Reached (5/5)", {
         description: "You have used all 5 free research questions for today. Upgrade to Pro for 50 queries/day or use code BARAKAH!",
@@ -65,6 +66,7 @@ export function ScholarAssistantModal({
       openPricingModal();
       return;
     }
+    */
 
     setLoading(true);
     setResult(null);
@@ -119,14 +121,14 @@ export function ScholarAssistantModal({
             </div>
           </div>
           <div className="flex items-center gap-2.5">
-            <button
+            {/* <button
               onClick={openPricingModal}
               className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-bold transition-all cursor-pointer shadow-sm"
               title="View Research Plans"
             >
               <Crown className="size-3.5 text-emerald-400" />
               <span className="uppercase">{tier}</span>
-            </button>
+            </button> */}
             <button
               onClick={onClose}
               className="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition cursor-pointer"
