@@ -36,8 +36,8 @@ export default function Loading() {
             Loading your digital Quranic experience...
           </div>
           
-          <div className="w-48 h-[3px] bg-emerald-950/80 border border-emerald-500/20 rounded-full overflow-hidden relative shadow-inner">
-            <div className="absolute top-0 h-full bg-gradient-to-r from-emerald-600 via-emerald-400 to-teal-300 shadow-[0_0_12px_rgba(16,185,129,0.85)] rounded-full animate-[loading-bar_1.5s_ease-in-out_infinite]" style={{ width: '50%' }} />
+          <div className="w-52 h-[4px] bg-zinc-900 border border-white/5 rounded-full overflow-hidden relative shadow-inner">
+            <div className="absolute top-0 h-full bg-gradient-to-r from-emerald-600 via-emerald-400 to-[#6df4ce] shadow-[0_0_16px_rgba(16,185,129,0.85)] rounded-full animate-[loading-bar_1.5s_ease-in-out_infinite]" style={{ width: '50%' }} />
           </div>
         </div>
       </div>
