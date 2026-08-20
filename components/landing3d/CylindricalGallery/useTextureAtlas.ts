@@ -10,18 +10,21 @@ interface AtlasMetadata {
   /** Maps original image index to atlas tile index */
   indexMap: number[];
   /** Reference to the atlas canvas for debug download */
-  atlasCanvasRef: React.RefObject<HTMLCanvasElement | OffscreenCanvas | null>;
+  atlasCanvasRef: React.RefObject<HTMLCanvasElement | null>;
 }
 
 export function useTextureAtlas(images: string[]): AtlasMetadata {
-  const atlasCanvasRef = useRef<HTMLCanvasElement | OffscreenCanvas | null>(null);
+  const atlasCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Deduplicate images
-  const uniqueImages = useMemo(() => Array.from(new Set(images)), [images]);
+  // Deduplicate images and encode URI to handle spaces safely across mobile browsers
+  const uniqueImages = useMemo(() => {
+    const rawUnique = Array.from(new Set(images));
+    return rawUnique.map((img) => encodeURI(img));
+  }, [images]);
 
   // Build index map: for each image in the original array, which atlas tile?
   const indexMap = useMemo(() => {
-    return images.map((img) => uniqueImages.indexOf(img));
+    return images.map((img) => uniqueImages.indexOf(encodeURI(img)));
   }, [images, uniqueImages]);
 
   // Load unique textures
@@ -32,34 +35,49 @@ export function useTextureAtlas(images: string[]): AtlasMetadata {
     const cols = Math.ceil(Math.sqrt(count));
     const rows = Math.ceil(count / cols);
 
-    // Each tile size — use the first texture's natural dimensions
-    const tileW = textures[0]?.image?.width || 512;
-    const tileH = textures[0]?.image?.height || 512;
-    const padding = 2;
+    // Get natural dimensions from loaded textures
+    const origW = textures[0]?.image?.width || 1920;
+    const origH = textures[0]?.image?.height || 1080;
+    const aspect = origH / origW;
 
-    const canvasW = cols * (tileW + padding);
-    const canvasH = rows * (tileH + padding);
+    // Mobile WebGL safety limit:
+    // Many Android devices (Mali, Adreno) have MAX_TEXTURE_SIZE = 4096 (or 2048 on older devices).
+    // Original images (1920x1080 in 3x3 grid) produced a 5760x3240 canvas, which exceeds MAX_TEXTURE_SIZE
+    // and causes WebGL on Android to fail and display black cards.
+    // Capping the atlas dimension to 2048px guarantees 100% compatibility across all Android & iOS devices.
+    const MAX_ATLAS_DIM = 2048;
+    const maxTileW = Math.floor(MAX_ATLAS_DIM / cols);
+    const maxTileH = Math.floor(MAX_ATLAS_DIM / rows);
 
-    const canvas =
-      typeof OffscreenCanvas !== "undefined"
-        ? new OffscreenCanvas(canvasW, canvasH)
-        : document.createElement("canvas");
+    let tileW = Math.min(origW, maxTileW);
+    let tileH = Math.round(tileW * aspect);
 
-    if ("width" in canvas) {
-      canvas.width = canvasW;
-      canvas.height = canvasH;
+    if (tileH * rows > MAX_ATLAS_DIM) {
+      tileH = Math.min(origH, maxTileH);
+      tileW = Math.round(tileH / aspect);
     }
 
-    const ctx = canvas.getContext("2d") as
-      | CanvasRenderingContext2D
-      | OffscreenCanvasRenderingContext2D;
+    tileW = Math.floor(tileW / 2) * 2;
+    tileH = Math.floor(tileH / 2) * 2;
+
+    const canvasW = cols * tileW;
+    const canvasH = rows * tileH;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = canvasW;
+    canvas.height = canvasH;
+
+    const ctx = canvas.getContext("2d");
 
     if (ctx) {
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+
       for (let i = 0; i < count; i++) {
         const col = i % cols;
         const row = Math.floor(i / cols);
-        const x = col * (tileW + padding);
-        const y = row * (tileH + padding);
+        const x = col * tileW;
+        const y = row * tileH;
         const img = textures[i]?.image;
         if (img) {
           ctx.drawImage(img, x, y, tileW, tileH);
@@ -67,14 +85,14 @@ export function useTextureAtlas(images: string[]): AtlasMetadata {
       }
     }
 
-    const atlasTexture = new CanvasTexture(canvas as HTMLCanvasElement);
+    const atlasTexture = new CanvasTexture(canvas);
     atlasTexture.minFilter = LinearFilter;
     atlasTexture.magFilter = LinearFilter;
     atlasTexture.wrapS = ClampToEdgeWrapping;
     atlasTexture.wrapT = ClampToEdgeWrapping;
     atlasTexture.needsUpdate = true;
 
-    atlasCanvasRef.current = canvas as HTMLCanvasElement;
+    atlasCanvasRef.current = canvas;
 
     return { atlas: atlasTexture, cols, rows };
   }, [textures, uniqueImages]);

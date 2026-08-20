@@ -93,19 +93,7 @@ const CylindricalGallery = forwardRef<CylindricalGalleryHandle, CylindricalGalle
     downloadAtlas() {
       const canvas = atlasCanvasRef.current;
       if (!canvas) return;
-      let dataUrl: string;
-      if (canvas instanceof HTMLCanvasElement) {
-        dataUrl = canvas.toDataURL("image/png");
-      } else {
-        // OffscreenCanvas: convert via blob synchronously is not possible,
-        // so we draw it onto a regular canvas
-        const tmp = document.createElement("canvas");
-        tmp.width = canvas.width;
-        tmp.height = canvas.height;
-        const ctx = tmp.getContext("2d")!;
-        ctx.drawImage(canvas as unknown as ImageBitmap, 0, 0);
-        dataUrl = tmp.toDataURL("image/png");
-      }
+      const dataUrl = canvas.toDataURL("image/png");
       const a = document.createElement("a");
       a.href = dataUrl;
       a.download = "texture-atlas.png";
