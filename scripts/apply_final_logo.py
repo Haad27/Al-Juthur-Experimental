@@ -35,11 +35,11 @@ def extract_large_arabic_calligraphy(source_path):
     art_png.save(clean_cached, 'PNG')
     return art_png
 
-# Palette: Deep Forest Jade (#06372b) + Luminous Mint (#6ee7b7) + Mint Glow (#34d399) + Emerald Rim (#10b981)
-BG_COLOR = (6, 55, 43)           # #06372b (Deep Forest Jade)
-FG_COLOR = (110, 231, 183)       # #6ee7b7 (Luminous Mint)
-GLOW_COLOR = (52, 211, 153, 140) # #34d399 (Mint Glow)
-BORDER_COLOR = (16, 185, 129)    # #10b981 (Emerald Rim)
+# Palette: Graphite & Platinum Silver
+BG_COLOR = (24, 24, 27)           # #18181b (Matte Charcoal / Zinc-900)
+FG_COLOR = (241, 245, 249)       # #f1f5f9 (Platinum Silver)
+GLOW_COLOR = (148, 163, 184, 120)# #94a3b8 (Silver Glow)
+BORDER_COLOR = (63, 63, 70)      # #3f3f46 (Graphite Rim)
 
 def generate_logo_icon(art, size, is_rounded=True, bg_color=BG_COLOR, fg_color=FG_COLOR, glow_color=GLOW_COLOR, border_color=BORDER_COLOR, border_width=2, icon_ratio=0.82, corner_ratio=0.22):
     scale = 4
@@ -129,7 +129,7 @@ def main():
     
     art = extract_large_arabic_calligraphy(source_path)
 
-    # 1. In-app Icons & Favicons with Deep Forest Jade & Mint
+    # 1. In-app Icons & Favicons with Graphite & Silver
     rounded_icons = [
         ('public/assets/favicon/apple-touch-icon.png', 180, 0.82, 0.22),
         ('public/assets/favicon/android-chrome-192x192.png', 192, 0.82, 0.22),
@@ -143,7 +143,7 @@ def main():
         os.makedirs(os.path.dirname(dest_path), exist_ok=True)
         icon = generate_logo_icon(art, sz, is_rounded=True, icon_ratio=ir, corner_ratio=cr)
         icon.save(dest_path, 'PNG', optimize=True)
-        print(f"Generated {dest_path} ({sz}x{sz}) - Deep Forest Jade")
+        print(f"Generated {dest_path} ({sz}x{sz}) - Graphite & Silver")
 
     # Multi-resolution favicon.ico
     ico_16 = generate_logo_icon(art, 16, is_rounded=True, icon_ratio=0.85, corner_ratio=0.22)
@@ -154,7 +154,7 @@ def main():
     ico_32.save('public/favicon.ico', format='ICO', sizes=[(16, 16), (32, 32), (48, 48)])
     print("Generated favicon.ico in all locations.")
 
-    # 2. Social Share Link Previews (Solid full-bleed square with Deep Forest Jade)
+    # 2. Social Share Link Previews (Solid full-bleed square with Graphite & Silver)
     og_sq = generate_logo_icon(art, 512, is_rounded=False, icon_ratio=0.82)
     og_sq.save('public/og-share-icon.png', 'PNG', optimize=True)
     og_sq.save('public/og-square.png', 'PNG', optimize=True)
