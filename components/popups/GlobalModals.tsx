@@ -14,7 +14,7 @@ export default function GlobalModals() {
 
   return (
     <>
-      {/* <PricingModal /> */}
+      <PricingModal />
     </>
   );
 }
