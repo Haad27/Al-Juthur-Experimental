@@ -75,17 +75,14 @@ export default function LoadingScreen() {
                 <span className="text-emerald-300 font-mono font-bold">{Math.round(progress)}%</span>
               </div>
               
-              {/* Luminous Emerald Laser Progress Bar */}
-              <div className="w-full h-[4px] bg-zinc-900 border border-white/5 rounded-full relative overflow-visible shadow-inner">
+              {/* Clean Luminous Emerald Progress Bar */}
+              <div className="w-full h-[2.5px] bg-emerald-950/60 rounded-full relative overflow-hidden">
                 <motion.div 
-                  className="absolute left-0 top-0 h-full bg-gradient-to-r from-emerald-600 via-emerald-400 to-[#6df4ce] shadow-[0_0_16px_rgba(16,185,129,0.85)] rounded-full"
+                  className="absolute left-0 top-0 h-full bg-gradient-to-r from-emerald-500 via-emerald-400 to-[#6df4ce] shadow-[0_0_12px_rgba(16,185,129,0.9)] rounded-full"
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
                   transition={{ duration: 0.2 }}
-                >
-                  {/* Leading Laser Comet Pulse */}
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_8px_#6df4ce,0_0_16px_#10b981]" />
-                </motion.div>
+                />
               </div>
             </div>
           </div>

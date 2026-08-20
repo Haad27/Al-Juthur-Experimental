@@ -80,20 +80,18 @@ export default function AlJuthurLoadingProgress({
           {activeSubtitle}
         </div>
 
-        {/* Luminescent Emerald Laser Progress Bar */}
-        <div className="flex flex-col items-center gap-2 w-52 mt-1">
-          <div className="w-full h-[4px] bg-zinc-900 border border-white/5 rounded-full relative overflow-visible shadow-inner">
-            <div
-              className="absolute top-0 left-0 h-full bg-gradient-to-r from-emerald-600 via-emerald-400 to-[#6df4ce] shadow-[0_0_14px_rgba(16,185,129,0.85)] rounded-full transition-all duration-150 ease-out"
-              style={{ width: `${progress}%` }}
-            >
-              {/* Leading Laser Comet Pulse */}
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_8px_#6df4ce,0_0_16px_#10b981]" />
-            </div>
+        {/* Clean Luminous Emerald Progress Bar */}
+        <div className="flex flex-col gap-1.5 w-60 mt-1">
+          <div className="flex items-center justify-between w-full text-[10px] font-bold uppercase tracking-[0.2em]">
+            <span className="text-emerald-400/80">Loading</span>
+            <span className="text-emerald-300 font-mono font-bold">{progress}%</span>
           </div>
-          <span className="text-[11px] font-mono font-bold text-emerald-300 tracking-wider">
-            {progress}%
-          </span>
+          <div className="w-full h-[2.5px] bg-emerald-950/60 rounded-full relative overflow-hidden">
+            <div
+              className="absolute top-0 left-0 h-full bg-gradient-to-r from-emerald-500 via-emerald-400 to-[#6df4ce] shadow-[0_0_12px_rgba(16,185,129,0.9)] rounded-full transition-all duration-150 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
         </div>
       </div>
     </div>
