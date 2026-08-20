@@ -71,10 +71,10 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Fallback response for development / while Lemon Squeezy is pending store approval
+    // Fallback response for development / while store is pending approval
     return NextResponse.json({
       success: true,
-      message: `Lemon Squeezy store verification is currently under review by compliance. You can use promo code 'BARAKAH' or 'TALIB' to test full access instantly!`,
+      message: `Store verification is currently under review by compliance. You can use promo code 'ILOVEQURAN' or 'TALIB' to test full access instantly!`,
       tier,
       billingCycle,
     });

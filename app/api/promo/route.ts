@@ -10,6 +10,10 @@ const PROMO_CODES: Record<
     expiresInDays?: number;
   }
 > = {
+  ILOVEQURAN: {
+    tier: "PATRON",
+    description: "Special I Love Quran VIP Pass - Lifetime Patron Access",
+  },
   BARAKAH: {
     tier: "PATRON",
     description: "Special Barakah Community Pass - Lifetime Patron Access",

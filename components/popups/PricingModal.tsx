@@ -92,13 +92,13 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
       } else {
         // Mock success fallback for preview while store is pending approval
         toast.success(`Redirecting to ${tier} Checkout...`, {
-          description: data.message || "Store approval in progress. You can use promo code 'BARAKAH' for instant test access!",
+          description: data.message || "Store approval in progress. You can use promo code 'ILOVEQURAN' for instant test access!",
           duration: 5000,
         });
       }
     } catch (err) {
       toast.info(`Checkout in Preview Mode`, {
-        description: "Store verification in progress. Enter promo code 'BARAKAH' or 'TALIB' to unlock top tier access immediately!",
+        description: "Store verification in progress. Enter promo code 'ILOVEQURAN' or 'TALIB' to unlock top tier access immediately!",
         duration: 6000,
       });
     } finally {
@@ -500,7 +500,7 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                   <div className="flex gap-2">
                     <input
                       type="text"
-                      placeholder="e.g. BARAKAH, SCHOLAR100"
+                      placeholder="e.g. ILOVEQURAN, SCHOLAR100"
                       value={promoCodeInput}
                       onChange={(e) => setPromoCodeInput(e.target.value)}
                       className="flex-1 px-3.5 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-emerald-500 uppercase tracking-widest font-mono"

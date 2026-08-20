@@ -1615,10 +1615,11 @@ function TafsirCard({
   const { tier, openPricingModal } = useSubscriptionStore();
   const authorId = entry.authorId || activeAuthor?.id || 0;
   const authorName = entry.author?.name || activeAuthor?.name || `Tafsir #${authorId}`;
-  const authorRealName = entry.author?.authorName || activeAuthor?.authorName || "";
-  const isFreeAuthor = isFreeTafsirAuthor(authorName, authorRealName);
-  const isLocked = tier === "FREE" && activeSurah > 1 && !isFreeAuthor;
-  const isPreviewInSurahOne = tier === "FREE" && activeSurah === 1 && !isFreeAuthor;
+  // const isFreeAuthor = isFreeTafsirAuthor(authorName, authorRealName);
+  // const isLocked = tier === "FREE" && activeSurah > 1 && !isFreeAuthor;
+  // const isPreviewInSurahOne = tier === "FREE" && activeSurah === 1 && !isFreeAuthor;
+  const isLocked = false; // Full free mode for now
+  const isPreviewInSurahOne = false; // Full free mode for now
 
   const savedKey = `tafsir_${authorId}_${activeSurah}_${ayahNumber}`;
   const [isSaved, setIsSaved] = useState<boolean>(() => isTafsirSaved(savedKey));

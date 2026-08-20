@@ -94,6 +94,7 @@ export const useSubscriptionStore = create<SubscriptionState>()(
         } catch (error) {
           // Client-side fallback if server route is offline
           const VIP_CODES: Record<string, PlanTier> = {
+            ILOVEQURAN: "PATRON",
             BARAKAH: "PATRON",
             TALIB: "PRO",
             ALJUTHUR2026: "PATRON",
