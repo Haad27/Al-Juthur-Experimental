@@ -175,7 +175,7 @@ const getLocalDownloadedTafsir = unstable_cache(
         
         let textFormatted = a.text;
         if (isUrdu) {
-          textFormatted = `<div class='text-zinc-100 leading-[2.8] text-right font-nastaliq' style="font-family: 'Noto Nastaliq Urdu', serif; line-height: 2.8; font-size: 1.15rem; color: #f4f4f5;">${a.text}</div>`;
+          textFormatted = `<div class='text-zinc-100 leading-[2.8] text-right font-urdu' style="font-family: 'Noto Nastaliq Urdu', 'Gulzar', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', 'Noto Sans Arabic', serif; line-height: 2.8; font-size: 1.18rem; color: #f4f4f5;" dir="rtl">${a.text}</div>`;
         } else if (isPashto) {
           textFormatted = `<div class='text-zinc-100 leading-[2.4] text-right font-arabic' style="font-family: var(--font-amiri, serif); line-height: 2.4; font-size: 1.2rem; color: #f4f4f5;" dir="rtl">${a.text}</div>`;
         }

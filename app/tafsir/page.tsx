@@ -208,7 +208,7 @@ const TafsirFootnotesLoader = ({
             className="w-full text-zinc-100 leading-relaxed text-sm md:text-base" 
             dir={isUrdu ? "rtl" : "auto"}
             style={{
-              fontFamily: isUrdu ? "'IndoPakNastaleeq', 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Scheherazade New', 'Lateef', serif" : undefined,
+              fontFamily: isUrdu ? "'Noto Nastaliq Urdu', 'Gulzar', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', 'Noto Sans Arabic', serif" : undefined,
               lineHeight: isUrdu ? "2.6" : "1.8",
               fontSize: isUrdu ? "1.22rem" : undefined
             }}

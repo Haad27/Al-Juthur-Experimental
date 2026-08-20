@@ -7,7 +7,7 @@ import BottomNav from "@/components/BottomNav";
 import NextTopLoader from "nextjs-toploader";
 
 export const metadata = {
-  metadataBase: new URL("https://aljuthur.vercel.app"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://aljuthur.com"),
   title: {
     default: "Al-Juthur | 120+ Tafsirs, Classical Roots & Scholarly AI",
     template: "%s | Al-Juthur",
@@ -42,32 +42,27 @@ export const metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://aljuthur.vercel.app",
+    url: "https://aljuthur.com",
     siteName: "Al-Juthur",
     title: "Al-Juthur | 120+ Tafsirs, Classical Roots & Scholarly AI",
     description:
       "Explore the depths of classical Arabic with 120+ Tafsirs, 13 historical lexicons, word-by-word root analysis, and custom scholarly AI. Traditional knowledge in a modern interface.",
     images: [
       {
-        url: "/og-share-icon.png",
-        width: 512,
-        height: 512,
-        alt: "Al-Juthur",
-      },
-      {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Al-Juthur",
+        alt: "Al-Juthur - 120+ Tafsirs, Classical Roots & Scholarly AI",
+        type: "image/png",
       },
     ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "Al-Juthur | 120+ Tafsirs, Classical Roots & Scholarly AI",
     description:
       "Explore the depths of classical Arabic with 120+ Tafsirs, 13 historical lexicons, word-by-word root analysis, and custom scholarly AI. Traditional knowledge in a modern interface.",
-    images: ["/og-share-icon.png"],
+    images: ["/og-image.png"],
   },
 };
 

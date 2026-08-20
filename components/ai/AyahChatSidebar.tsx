@@ -684,10 +684,11 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                             const containerClasses = "quran-block my-2 p-3 rounded-lg bg-emerald-950/20 border border-emerald-500/30 shadow-sm relative overflow-hidden [&_.quran-block]:!p-0 [&_.quran-block]:!m-0 [&_.quran-block:not(:first-child)]:!mt-3 [&_.quran-block]:!border-none [&_.quran-block]:!bg-transparent [&_.quran-block]:!shadow-none [&_.quran-block>.quran-bar]:!hidden";
 
                             if (isPredominantlyArabic) {
+                              const isUrdu = /[\u067E\u0686\u0698\u06AF\u0679\u0688\u0691\u06BA\u06D2\u06C1]/.test(textStr) || /\b(اور|ہیں|تھا|تھی|تھے|کے|کی|کو|سے|نے|میں|پر|کا|یہ|وہ|ایک)\b/.test(textStr);
                               return (
                                 <div className={containerClasses}>
                                   <div className="quran-bar absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
-                                  <p className={`m-0 font-arabic text-base md:text-lg text-emerald-200 leading-loose text-right dir-rtl`}>
+                                  <p className={`m-0 ${isUrdu ? 'font-urdu' : 'font-arabic'} text-base md:text-lg text-emerald-200 leading-loose text-right dir-rtl`}>
                                     {children}
                                   </p>
                                 </div>

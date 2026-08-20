@@ -611,7 +611,7 @@ const AyahRow = React.memo(({
                 className="text-white md:leading-[1.5] leading-[1.8] translation-content"
                 style={{ 
                   fontSize: getTranslationFontSize(fontSize, isUrduTranslation),
-                  fontFamily: isUrduTranslation ? "'Noto Nastaliq Urdu', serif" : undefined,
+                  fontFamily: isUrduTranslation ? "'Noto Nastaliq Urdu', 'Gulzar', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', 'Noto Sans Arabic', serif" : undefined,
                   lineHeight: isUrduTranslation ? "2.6" : undefined,
                   textAlign: isUrduTranslation ? "right" : undefined,
                   direction: isUrduTranslation ? "rtl" : undefined,
@@ -644,7 +644,7 @@ const AyahRow = React.memo(({
                           className="leading-[2.8] text-zinc-100 text-right p-3 rounded-lg bg-zinc-900/60 border border-zinc-800/80 font-nastaliq"
                           dir={isUrduTranslation ? "rtl" : "auto"}
                           style={{ 
-                            fontFamily: isUrduTranslation ? "'Noto Nastaliq Urdu', serif" : undefined,
+                            fontFamily: isUrduTranslation ? "'Noto Nastaliq Urdu', 'Gulzar', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', 'Noto Sans Arabic', serif" : undefined,
                             lineHeight: isUrduTranslation ? "2.8" : undefined,
                             fontSize: isUrduTranslation ? "1.15rem" : undefined,
                             color: "#f4f4f5"
@@ -668,7 +668,7 @@ const AyahRow = React.memo(({
                             className="leading-relaxed p-2.5 rounded bg-zinc-900/60 border border-zinc-800/80 text-zinc-100" 
                             dir={isUrduTranslation ? "rtl" : "auto"}
                             style={{ 
-                              fontFamily: isUrduTranslation ? "'Noto Nastaliq Urdu', serif" : undefined,
+                              fontFamily: isUrduTranslation ? "'Noto Nastaliq Urdu', 'Gulzar', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', 'Noto Sans Arabic', serif" : undefined,
                               lineHeight: isUrduTranslation ? "2.6" : undefined,
                               fontSize: isUrduTranslation ? "1.1rem" : undefined,
                               color: "#f4f4f5"

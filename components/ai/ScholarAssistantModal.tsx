@@ -337,9 +337,13 @@ export function ScholarAssistantModal({
 
                 <div
                   className={`p-4 rounded-xl bg-neutral-950 border border-neutral-800 text-xs leading-relaxed text-neutral-200 ${
-                    selectedSource.language === 'ar' ? 'font-arabic text-right text-base leading-loose' : ''
+                    selectedSource.language === 'ur'
+                      ? 'font-urdu text-right text-base leading-loose'
+                      : selectedSource.language === 'ar'
+                      ? 'font-arabic text-right text-base leading-loose'
+                      : ''
                   }`}
-                  dir={selectedSource.language === 'ar' ? 'rtl' : 'ltr'}
+                  dir={selectedSource.language === 'ar' || selectedSource.language === 'ur' ? 'rtl' : 'ltr'}
                 >
                   {selectedSource.snippet
                     .replace(/<[^>]+>/g, ' ')
