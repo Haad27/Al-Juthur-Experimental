@@ -1,6 +1,7 @@
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 import { useAudioStore } from "@/lib/stores/audioStore";
 import React from "react";
+import Link from "next/link";
 import { Slider } from "./ui/slider";
 import { Switch } from "./ui/switch";
 import SettingSection from "./SettingSection";
@@ -477,6 +478,35 @@ const Settings = () => {
         }
         description="Adjust recitation playback speed (0.5x slow to 2.0x fast)."
       />
+
+      {/* Subtle Legal & Policy Links Footer */}
+      <div className="pt-4 pb-2 border-t border-zinc-800/60 mt-4 text-center">
+        <div className="flex items-center justify-center gap-3 text-[11px] text-zinc-500 font-medium">
+          <Link
+            href="/legal?tab=terms"
+            className="hover:text-zinc-300 transition-colors"
+          >
+            Terms
+          </Link>
+          <span className="text-zinc-700">•</span>
+          <Link
+            href="/legal?tab=privacy"
+            className="hover:text-zinc-300 transition-colors"
+          >
+            Privacy
+          </Link>
+          <span className="text-zinc-700">•</span>
+          <Link
+            href="/legal?tab=refund"
+            className="hover:text-zinc-300 transition-colors"
+          >
+            Refund Policy
+          </Link>
+        </div>
+        <p className="text-[10px] text-zinc-600 mt-1.5 font-mono">
+          Al-Juthur © {new Date().getFullYear()}
+        </p>
+      </div>
     </div>
   );
 };
