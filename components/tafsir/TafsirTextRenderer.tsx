@@ -167,7 +167,7 @@ export default function TafsirTextRenderer({
   }
 
   const getFontFamily = () => {
-    if (isUrdu) return "'Noto Nastaliq Urdu', 'Gulzar', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', 'Noto Sans Arabic', serif";
+    if (isUrdu) return "var(--font-noto-nastaliq-urdu), 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', serif";
     if (isPashto) return "'Noto Sans Arabic', 'Noto Naskh Arabic', 'Scheherazade New', 'Amiri', serif";
     if (isPersian) return "'Noto Sans Arabic', 'Noto Naskh Arabic', 'Amiri', serif";
     if (isArabic) return "'UthmanicHafs', 'Amiri', 'Noto Naskh Arabic', serif";

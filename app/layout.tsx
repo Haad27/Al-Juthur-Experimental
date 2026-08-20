@@ -1,7 +1,7 @@
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { GlobalStateProvider } from "@/lib/providers/GlobalStatesProvider";
-import { inter } from "./fonts";
+import { inter, notoNastaliqUrdu } from "./fonts";
 import BottomNav from "@/components/BottomNav";
 
 import NextTopLoader from "nextjs-toploader";
@@ -87,7 +87,7 @@ export default function RootLayout({
   return (
     <GlobalStateProvider>
       <html lang="en" className="dark" suppressHydrationWarning>
-        <body className={`${inter.className} bg-zinc-950 scroll-smooth`} suppressHydrationWarning>
+        <body className={`${inter.className} ${notoNastaliqUrdu.variable} bg-zinc-950 scroll-smooth`} suppressHydrationWarning>
           <NextTopLoader 
             color="#10b981" 
             showSpinner={false} 

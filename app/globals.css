@@ -357,9 +357,9 @@ html, body {
   font-family: 'Amiri', 'NotoNaskhArabic', 'Scheherazade New', serif;
 }
 
-/* Indo-Pak Urdu text styling — high-legibility Nastaliq with full Unicode character support (no missing letters/glyphs) */
+/* Indo-Pak Urdu text styling — Noto Nastaliq Urdu with full Unicode & ligature support */
 .font-urdu, .urdu-text, .font-nastaliq {
-  font-family: 'Noto Nastaliq Urdu', 'Gulzar', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', 'Noto Sans Arabic', 'Noto Naskh Arabic', serif !important;
+  font-family: var(--font-noto-nastaliq-urdu), 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', serif !important;
   direction: rtl;
   text-align: right;
   line-height: 2.6;
@@ -633,7 +633,7 @@ html, body {
 
 /* Urdu tafsir text in immersive mode */
 .tafsir-immersive-text-urdu {
-  font-family: 'Noto Nastaliq Urdu', 'Gulzar', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', 'Noto Sans Arabic', serif;
+  font-family: var(--font-noto-nastaliq-urdu), 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', serif;
   font-size: 1.25rem;
   line-height: 2.8;
   direction: rtl;

@@ -35,13 +35,14 @@ def extract_large_arabic_calligraphy(source_path):
     art_png.save(clean_cached, 'PNG')
     return art_png
 
-# Palette: Option 2 - Deep Forest Velvet & Luminous Mint
-BG_COLOR = (8, 51, 37)            # #083325 (Rich Forest Jade)
-FG_COLOR = (110, 231, 183)        # #6ee7b7 (Luminous Mint Calligraphy)
-GLOW_COLOR = (16, 185, 129, 130)  # #10b981 (Emerald Glow)
-BORDER_COLOR = (52, 211, 153)     # #34d399 (Mint Rim)
+# Palette: Obsidian Black Background + Glowing Emerald Mint Calligraphy (No Border)
+BG_COLOR = (12, 12, 15)           # #0c0c0f (Deep Obsidian Black)
+FG_COLOR = (110, 231, 183)        # #6ee7b7 (Luminous Mint/Emerald Calligraphy)
+GLOW_COLOR = (16, 185, 129, 150)  # #10b981 (Soft Emerald Aura Glow)
+BORDER_COLOR = None               # No border
+BORDER_WIDTH = 0                  # 0 border width
 
-def generate_logo_icon(art, size, is_rounded=True, bg_color=BG_COLOR, fg_color=FG_COLOR, glow_color=GLOW_COLOR, border_color=BORDER_COLOR, border_width=2, icon_ratio=0.82, corner_ratio=0.22):
+def generate_logo_icon(art, size, is_rounded=True, bg_color=BG_COLOR, fg_color=FG_COLOR, glow_color=GLOW_COLOR, border_color=BORDER_COLOR, border_width=BORDER_WIDTH, icon_ratio=0.82, corner_ratio=0.22):
     scale = 4
     high_size = size * scale
     
