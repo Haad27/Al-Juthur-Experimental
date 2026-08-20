@@ -1544,12 +1544,12 @@ function TafsirContent() {
                       {difficultyLevel}
                     </span>
                   )}
-                  {!isFreeTafsirAuthor(author.name, author.authorName) && (
+                  {/* {!isFreeTafsirAuthor(author.name, author.authorName) && (
                     <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30 flex items-center gap-1 shrink-0">
                       <Lock className="size-2.5" />
                       <span>PRO</span>
                     </span>
-                  )}
+                  )} */}
                 </div>
               </div>
             );
