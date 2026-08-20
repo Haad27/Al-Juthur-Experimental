@@ -191,7 +191,7 @@ function LegalContent() {
                     Al-Juthur offers free core study access as well as premium subscription tiers (<strong>Pro</strong> and <strong>Patron</strong>) providing expanded AI quotas, high-definition offline assets, and advanced research features.
                   </p>
                   <p className="text-sm text-zinc-400">
-                    All payment processing is handled through our authorized merchant of record (Lemon Squeezy). Prices are quoted in USD (or local equivalent) and renewals occur automatically unless cancelled prior to the renewal date.
+                    All payment processing is handled securely through our authorized global payment processors. Prices are quoted in USD (or local equivalent) and renewals occur automatically unless cancelled prior to the renewal date.
                   </p>
                 </section>
 
@@ -279,7 +279,7 @@ function LegalContent() {
                 <section className="space-y-3">
                   <h3 className="text-lg font-semibold text-white">3. Payment Information Security</h3>
                   <p>
-                    All payment processing for Al-Juthur is handled directly by <strong>Lemon Squeezy</strong> (PCI-DSS compliant Merchant of Record).
+                    All payment processing for Al-Juthur is handled directly by authorized, PCI-DSS compliant global payment processors.
                   </p>
                   <p className="text-sm text-zinc-400">
                     <strong>Al-Juthur never collects, stores, or transmits your credit card numbers or payment credentials on our servers.</strong>

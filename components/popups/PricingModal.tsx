@@ -108,20 +108,32 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
 
   const FAQS = [
     {
-      q: "Why is core Qur'an reading free?",
-      a: "The Qur'an, word-by-word translations, audio recitations, and fundamental Tafsirs will always remain 100% free forever as a perpetual Waqf (Sadaqah Jariyah). Subscriptions only cover heavy AI GPU compute and continuous scholarly database development.",
+      q: "Do I get a discount or student/scholar financial aid?",
+      a: "Yes! We offer student discounts, scholar concessions, and financial assistance vouchers. Please contact us on WhatsApp / Phone at +92 309 085 2727 or email us at aljuthur@gmail.com to receive your custom discount access code.",
     },
     {
-      q: "What is the Waqf Sponsorship in the Patron plan?",
-      a: "When you subscribe as a Patron, part of your contribution directly funds AI query tokens and server resources for students of Islamic knowledge and researchers in developing countries.",
+      q: "What makes Al-Juthur different from regular Quran apps?",
+      a: "Standard Quran apps separate translations, dictionaries, and commentaries. Al-Juthur unifies everything into a single scholarly workspace: every word connects directly to 13 historical Arabic lexicons (such as Lane's Lexicon & Lisan al-Arab), 130+ Tafsirs across 33 languages, and a 6-Mode Academic AI Scholar for grammar (Sarf & I'rab), historical context (Asbab al-Nuzul), and comparative tafsir synthesis.",
     },
     {
-      q: "Can I cancel or change my plan anytime?",
-      a: "Yes, you can upgrade, downgrade, or cancel your subscription at any time with a single click. You will retain access until the end of your billing period.",
+      q: "Is core Quran reading and translation 100% free?",
+      a: "Yes. Reading all 6,236 Ayahs across 9 authentic Mushaf scripts, 127 translations, word-by-word breakdowns, audio recitations, and classic Tafsirs (like Ibn Kathir and As-Sa'di) is 100% free forever. Paid plans solely support high-performance AI GPU compute and ongoing database curation.",
+    },
+    {
+      q: "How accurate is the AI Scholar & Translation engine?",
+      a: "Our AI Scholar uses a dual-agent Retrieval-Augmented Generation (RAG) pipeline grounded in authoritative classical dictionaries and tafsirs to deliver high scholarly accuracy. While optimized for rigorous scholarship, outputs serve as research aids and should be verified with qualified human scholars (Ulama) for religious decrees.",
+    },
+    {
+      q: "Can I cancel anytime, and how does the 7-Day Money-Back Guarantee work?",
+      a: "You can cancel your subscription at any time with one click and keep full access until your billing cycle ends. If you are not satisfied within your first 7 days, email us at aljuthur@gmail.com or message our support for a 100% full refund with zero hassle.",
+    },
+    {
+      q: "What is the Patron / Waqf tier?",
+      a: "When you subscribe as a Patron, you receive 150 daily AI queries, priority processing, a free Pro gift account for a friend or student, and directly sponsor computational research access for students of Islamic knowledge worldwide.",
     },
     {
       q: "What payment methods are supported?",
-      a: "Lemon Squeezy supports Credit/Debit cards (Visa, Mastercard, Amex), Apple Pay, Google Pay, and PayPal worldwide.",
+      a: "We accept all major Credit/Debit cards (Visa, Mastercard, American Express), Apple Pay, Google Pay, and PayPal globally via our secure checkout.",
     },
   ];
 
@@ -559,7 +571,7 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
             {/* Footer Trust Guarantee */}
             <div className="text-center pt-2 text-[11px] text-slate-400 flex items-center justify-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-500" />
-              <span>Encrypted Global Payments via Lemon Squeezy · Cancel anytime with 1-click</span>
+              <span>Encrypted Global Payments · Cancel anytime with 1-click</span>
             </div>
           </div>
         </motion.div>

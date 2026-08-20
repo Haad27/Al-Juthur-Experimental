@@ -1719,7 +1719,7 @@ function TafsirCard({
         </div>
 
         {/* Inline Translation (Exclusively for Arabic Tafsirs) */}
-        {isArabic && (
+        {isArabic && !isLocked && (
           <div className="mt-4 pt-4 border-t border-zinc-800/40 w-full">
             <InlineTranslation 
               textToTranslate={cleanText} 
@@ -1729,7 +1729,7 @@ function TafsirCard({
         )}
 
         {/* Tafsir (Commentary / Footnotes) */}
-        {entry.footnoteIds && entry.footnoteIds.length > 0 && (
+        {!isLocked && entry.footnoteIds && entry.footnoteIds.length > 0 && (
           <div className="mt-6 pt-4 border-t border-emerald-900/30">
             <TafsirFootnotesLoader 
               footnoteIds={entry.footnoteIds} 

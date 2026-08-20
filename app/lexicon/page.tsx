@@ -668,7 +668,7 @@ function LexiconPageContent() {
                       )}
 
                       <div className="space-y-5">
-                        {entry.definitions.map((def, dIdx) => (
+                        {(isLocked ? entry.definitions.slice(0, 1) : entry.definitions).map((def, dIdx) => (
                           <div key={dIdx} className="space-y-2">
                             <LexiconTextRenderer 
                               text={def} 

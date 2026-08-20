@@ -188,12 +188,14 @@ export default function TafsirTextRenderer({
     return undefined;
   };
 
-  const displayedBlocks = isLocked ? blocks.slice(0, 4) : blocks;
+  const displayedBlocks = isLocked ? blocks.slice(0, 3) : blocks;
 
   return (
     <div className="relative">
       <div
-        className={`space-y-4 ${isRtl ? "text-right" : "text-left"}`}
+        className={`space-y-4 ${isRtl ? "text-right" : "text-left"} ${
+          isLocked ? "overflow-hidden max-h-[160px] [mask-image:linear-gradient(to_bottom,black_30%,transparent_100%)] select-none pointer-events-none" : ""
+        }`}
         dir={isRtl ? "rtl" : "ltr"}
         style={{
           fontFamily: getFontFamily(),
@@ -251,7 +253,7 @@ export default function TafsirTextRenderer({
 
       {/* Frosted Glass Blur Lock Overlay */}
       {isLocked && (
-        <div className="relative -mt-10 pt-16 pb-8 px-6 rounded-3xl bg-gradient-to-t from-[#090e0b] via-[#090e0b]/95 to-transparent border border-emerald-500/20 text-center space-y-4 shadow-2xl backdrop-blur-md z-10">
+        <div className="relative -mt-16 pt-16 pb-8 px-6 rounded-3xl bg-gradient-to-t from-[#090e0b] via-[#090e0b]/95 to-transparent border border-emerald-500/20 text-center space-y-4 shadow-2xl backdrop-blur-md z-10">
           <div className="mx-auto size-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-inner">
             <Lock className="size-6 text-emerald-400" />
           </div>

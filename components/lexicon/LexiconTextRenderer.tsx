@@ -40,11 +40,15 @@ export default function LexiconTextRenderer({
     .map((l) => l.trim())
     .filter(Boolean);
 
-  const displayedLines = isLocked ? lines.slice(0, 4) : lines;
+  const displayedLines = isLocked ? lines.slice(0, 3) : lines;
 
   return (
     <div className="relative">
-      <div className={`space-y-3 text-stone-300 ${compact ? 'leading-snug' : 'leading-relaxed'}`}>
+      <div 
+        className={`space-y-3 text-stone-300 ${compact ? 'leading-snug' : 'leading-relaxed'} ${
+          isLocked ? 'overflow-hidden max-h-[140px] [mask-image:linear-gradient(to_bottom,black_30%,transparent_100%)] select-none pointer-events-none' : ''
+        }`}
+      >
         {displayedLines.map((line, idx) => {
           // Detect Arabic-dominant lines
           const isArabicLine = /[\u0600-\u06FF]/.test(line) && (line.match(/[\u0600-\u06FF]/g)?.length || 0) > line.length * 0.3;
@@ -89,7 +93,7 @@ export default function LexiconTextRenderer({
 
       {/* Frosted Glass Blur Lock Overlay for Lexicons */}
       {isLocked && (
-        <div className="relative -mt-8 pt-14 pb-7 px-5 rounded-3xl bg-gradient-to-t from-[#090e0b] via-[#090e0b]/95 to-transparent border border-emerald-500/20 text-center space-y-3.5 shadow-2xl backdrop-blur-md z-10">
+        <div className="relative -mt-16 pt-16 pb-7 px-5 rounded-3xl bg-gradient-to-t from-[#090e0b] via-[#090e0b]/95 to-transparent border border-emerald-500/20 text-center space-y-3.5 shadow-2xl backdrop-blur-md z-10">
           <div className="mx-auto size-11 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-inner">
             <Lock className="size-5 text-emerald-400" />
           </div>
