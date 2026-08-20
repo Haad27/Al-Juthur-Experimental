@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, Bot, User, Loader2, BookOpen, Layers, ShieldAlert, Sparkles, AlertTriangle, CheckCircle2, ChevronDown, Copy, Bookmark, BookmarkCheck } from "lucide-react";
+import { X, Send, Bot, User, Loader2, BookOpen, Layers, ShieldAlert, Sparkles, AlertTriangle, CheckCircle2, ChevronDown, Copy, Bookmark, BookmarkCheck, Crown } from "lucide-react";
 import { cn, copyToClipboard } from "@/lib/utils";
 import { RAG_MODES, RagModeInfo } from "@/lib/ai/rag/modes-config";
 import { saveScholarAnswer } from "@/lib/readerStorage";
@@ -12,6 +12,7 @@ import { amiri } from "@/app/fonts";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useVisualViewportOffset } from "@/hooks/useVisualViewport";
+import { useSubscriptionStore } from "@/lib/stores/subscriptionStore";
 
 interface SourceItem {
   id: string;
@@ -90,6 +91,7 @@ const renderInlineBadges = (children: React.ReactNode): React.ReactNode => {
 };
 
 export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClose, initialModeId, rootWord }: AyahChatSidebarProps) {
+  const { tier, openPricingModal, incrementDailyQueries } = useSubscriptionStore();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -456,12 +458,22 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                   </div>
                 </div>
               </div>
-              <button 
-                onClick={onClose}
-                className="p-2 hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 hover:text-white shrink-0 ml-2"
-              >
-                <X size={20} />
-              </button>
+              <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                <button
+                  onClick={openPricingModal}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold transition-all cursor-pointer shadow-sm"
+                  title="View Research Plans & AI Quota"
+                >
+                  <Crown className="size-3 text-emerald-400" />
+                  <span className="uppercase">{tier}</span>
+                </button>
+                <button 
+                  onClick={onClose}
+                  className="p-2 hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 hover:text-white"
+                >
+                  <X size={20} />
+                </button>
+              </div>
             </div>
 
             {/* Warning banner */}

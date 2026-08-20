@@ -15,7 +15,11 @@ import {
   BookMarked,
   Check,
   Headphones,
+  Crown,
+  Sparkles,
+  ArrowUpRight,
 } from "lucide-react";
+import { useSubscriptionStore } from "@/lib/stores/subscriptionStore";
 
 // 9 Authentic Mushaf Layouts from the Quranic Universal Library (QUL) database
 const MUSHAF_LAYOUTS = [
@@ -177,11 +181,45 @@ const Settings = () => {
     (l) => l.id === currentStyle || (currentStyle === "uthmani" && l.id === "v2")
   ) || MUSHAF_LAYOUTS[0];
 
+  const { tier, openPricingModal, dailyQueriesLimit, activePromoCode } = useSubscriptionStore();
   const playbackRate = useAudioStore((s) => s.playbackRate || 1);
   const setPlaybackRate = useAudioStore((s) => s.setPlaybackRate);
 
   return (
     <div className="p-2 sm:p-4 space-y-4 max-w-md w-full min-w-0 max-w-full overflow-y-auto overflow-x-hidden scrollable-container max-h-[calc(100vh-190px)] touch-pan-y">
+      {/* Subscription & AI Quota Banner */}
+      <div className="p-3.5 rounded-2xl bg-gradient-to-br from-emerald-950/40 via-zinc-900 to-zinc-900 border border-emerald-500/25 space-y-2.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <Crown className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-bold text-white uppercase tracking-wider">
+                  {tier} Plan
+                </span>
+                {activePromoCode && (
+                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-mono">
+                    VIP
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-zinc-400">
+                {dailyQueriesLimit} AI questions per day
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={openPricingModal}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-emerald-950 text-xs font-bold transition-all shadow-md shadow-emerald-950/40 cursor-pointer"
+          >
+            <span>{tier === "FREE" ? "Upgrade" : "Manage"}</span>
+            <ArrowUpRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+
       <SettingSection
         icon={<Globe className="w-4 h-4 text-emerald-400" />}
         title="Translation"

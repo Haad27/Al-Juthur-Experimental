@@ -25,7 +25,11 @@ export async function POST(req: NextRequest) {
     
     if (!quota.allowed) {
       return NextResponse.json(
-        { success: false, error: 'Daily free RAG token limit reached. Please try again tomorrow.' },
+        {
+          success: false,
+          error: "Daily AI research quota reached. Upgrade to Pro or Patron to continue your research without limits.",
+          isQuotaExceeded: true,
+        },
         { status: 429 }
       );
     }

@@ -82,6 +82,8 @@ export const viewport = {
 
 /* This file is used to define the web app manifest for the Al-Juthur PWA.  */
 /* It includes metadata such as the app name, description, start URL, display mode, background color, theme color, and icons. */
+import GlobalModals from "@/components/popups/GlobalModals";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -99,6 +101,7 @@ export default function RootLayout({
           />
           {children}
           <BottomNav />
+          <GlobalModals />
           <Toaster />
         </body>
       </html>

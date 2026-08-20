@@ -1,7 +1,11 @@
 import Link from "next/link";
 import MenuIcon from "../svg/icons/MenuIcon";
+import { Sparkles, Crown } from "lucide-react";
+import { useSubscriptionStore } from "@/lib/stores/subscriptionStore";
 
 const SidebarHeader = ({ toggleSidebar, isCollapsed }: SidebarHeaderProps) => {
+  const { openPricingModal, tier } = useSubscriptionStore();
+
   return (
     <div className="dark:text-white text-black flex w-full h-[57px] dark:h-14 px-4 justify-between items-center border-b dark:border-white/10 border-[var(--sephia-500)]  transition-all duration-300 hide-on-scroll">
       <div className="flex items-center gap-4">
