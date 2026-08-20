@@ -62,14 +62,14 @@ export default function LoadingScreen() {
             
             {/* Progress Text */}
             <div className="flex flex-col items-center gap-2 w-full mt-4">
-              <div className="text-center text-[10px] font-bold text-emerald-500/80 uppercase tracking-[0.2em] mb-1">
+              <div className="text-center text-[10px] font-bold text-zinc-300 uppercase tracking-[0.2em] mb-1">
                 Initializing Al Juthur
               </div>
               <div className="text-center text-[12px] font-medium text-zinc-400 tracking-wide mb-2">
                 An engaging Quran experience
               </div>
               
-              <div className="flex items-center justify-between w-full text-[10px] font-bold text-emerald-500/50 uppercase tracking-[0.2em]">
+              <div className="flex items-center justify-between w-full text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">
                 <span>Loading Assets</span>
                 <span>{Math.round(progress)}%</span>
               </div>
@@ -77,7 +77,7 @@ export default function LoadingScreen() {
               {/* Progress Bar */}
               <div className="w-full h-[2px] bg-white/5 rounded-full overflow-hidden relative">
                 <motion.div 
-                  className="absolute left-0 top-0 h-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]"
+                  className="absolute left-0 top-0 h-full bg-gradient-to-r from-zinc-400 via-slate-200 to-zinc-300 shadow-[0_0_10px_rgba(241,245,249,0.5)]"
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
                   transition={{ duration: 0.2 }}

@@ -73,7 +73,7 @@ export default function AlJuthurLoadingProgress({
       </div>
 
       <div className="flex flex-col items-center gap-2 w-full mt-2">
-        <div className="text-center text-[10px] font-bold text-emerald-500/80 uppercase tracking-[0.2em] mb-1">
+        <div className="text-center text-[10px] font-bold text-zinc-300 uppercase tracking-[0.2em] mb-1">
           {title}
         </div>
         <div className="text-center text-[12px] font-medium text-zinc-400 tracking-wide mb-1 max-w-sm">
@@ -84,11 +84,11 @@ export default function AlJuthurLoadingProgress({
         <div className="flex flex-col items-center gap-1.5 w-48 mt-1">
           <div className="w-full h-[2px] bg-zinc-800 rounded-full overflow-hidden relative">
             <div
-              className="absolute top-0 left-0 h-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)] rounded-full transition-all duration-150 ease-out"
+              className="absolute top-0 left-0 h-full bg-gradient-to-r from-zinc-400 via-slate-200 to-zinc-300 shadow-[0_0_10px_rgba(241,245,249,0.5)] rounded-full transition-all duration-150 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>
-          <span className="text-[10px] font-mono font-semibold text-emerald-400/90 tracking-wider">
+          <span className="text-[10px] font-mono font-semibold text-zinc-300 tracking-wider">
             {progress}%
           </span>
         </div>

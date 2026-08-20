@@ -195,7 +195,7 @@ function FinalCTA() {
         <img
           src="/assets/favicon/apple-touch-icon.png"
           alt="Al Juthur"
-          className="w-16 h-16 mx-auto mb-6 drop-shadow-[0_0_15px_rgba(241,245,249,0.35)]"
+          className="w-16 h-16 mx-auto mb-6 object-contain"
         />
         <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">
           Start Your Journey

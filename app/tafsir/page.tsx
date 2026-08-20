@@ -224,6 +224,7 @@ function TafsirContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [languages, setLanguages] = useState<Language[]>([]);
+  const [loadingCatalog, setLoadingCatalog] = useState<boolean>(true);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("All");
   const [selectedEra, setSelectedEra] = useState<string>("All Eras");
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("All Levels");
@@ -387,6 +388,7 @@ function TafsirContent() {
 
   // Fetch all languages & authors on mount
   useEffect(() => {
+    setLoadingCatalog(true);
     fetch("/api/tafsir")
       .then((res) => res.json())
       .then((data) => {
@@ -432,7 +434,10 @@ function TafsirContent() {
           }
         }
       })
-      .catch((err) => console.error("Failed to fetch languages:", err));
+      .catch((err) => console.error("Failed to fetch languages:", err))
+      .finally(() => {
+        setLoadingCatalog(false);
+      });
   }, [urlAuthor]);
 
   // Load full Surah Tafsir in ONE single fast request and cache in memory
@@ -1456,7 +1461,25 @@ function TafsirContent() {
 
       {/* Grid of Tafsir Containers (1 col -> 2 -> 3 -> 4 cols on laptop view) */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
-        {filteredAuthors.length === 0 ? (
+        {loadingCatalog ? (
+          <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className="relative overflow-hidden border border-zinc-800/80 bg-zinc-900/30 rounded-xl h-[112px] px-4 py-3 animate-pulse flex flex-col justify-between"
+              >
+                <div className="space-y-2">
+                  <div className="h-4 bg-zinc-800/80 rounded w-3/4" />
+                  <div className="h-3 bg-zinc-800/50 rounded w-1/2" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-3 bg-zinc-800/40 rounded w-1/3" />
+                  <div className="h-3 bg-zinc-800/40 rounded w-1/4" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredAuthors.length === 0 ? (
           <div className="text-center py-20 bg-zinc-900/30 border border-zinc-800/60 rounded-xl">
             <p className="text-zinc-400 text-sm">No Tafsir books found matching your filter selections.</p>
           </div>
