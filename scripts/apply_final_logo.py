@@ -35,11 +35,11 @@ def extract_large_arabic_calligraphy(source_path):
     art_png.save(clean_cached, 'PNG')
     return art_png
 
-# Palette: Graphite & Platinum Silver
-BG_COLOR = (24, 24, 27)           # #18181b (Matte Charcoal / Zinc-900)
-FG_COLOR = (241, 245, 249)       # #f1f5f9 (Platinum Silver)
-GLOW_COLOR = (148, 163, 184, 120)# #94a3b8 (Silver Glow)
-BORDER_COLOR = (63, 63, 70)      # #3f3f46 (Graphite Rim)
+# Palette: Option 2 - Deep Forest Velvet & Luminous Mint
+BG_COLOR = (8, 51, 37)            # #083325 (Rich Forest Jade)
+FG_COLOR = (110, 231, 183)        # #6ee7b7 (Luminous Mint Calligraphy)
+GLOW_COLOR = (16, 185, 129, 130)  # #10b981 (Emerald Glow)
+BORDER_COLOR = (52, 211, 153)     # #34d399 (Mint Rim)
 
 def generate_logo_icon(art, size, is_rounded=True, bg_color=BG_COLOR, fg_color=FG_COLOR, glow_color=GLOW_COLOR, border_color=BORDER_COLOR, border_width=2, icon_ratio=0.82, corner_ratio=0.22):
     scale = 4
