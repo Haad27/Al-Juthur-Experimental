@@ -21,6 +21,7 @@ import {
   Bot,
   AlertTriangle,
   Bookmark,
+  Lock,
 } from 'lucide-react';
 import InlineTranslation from '@/components/shared/InlineTranslation';
 import { toast } from 'sonner';
@@ -30,6 +31,7 @@ import LexiconTextRenderer from '@/components/lexicon/LexiconTextRenderer';
 import { amiriquran, inter } from '@/app/fonts';
 import AyahChatSidebar from '@/components/ai/AyahChatSidebar';
 import FloatingAskScholarButton from '@/components/ai/FloatingAskScholarButton';
+import { useSubscriptionStore } from '@/lib/stores/subscriptionStore';
 
 interface DictionaryInfo {
   id: number;
@@ -108,6 +110,7 @@ const formatArabicWithIndoPak = (html: string) => {
 };
 
 function LexiconPageContent() {
+  const { tier, openPricingModal } = useSubscriptionStore();
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialRoot = searchParams.get('root') || 'رحم';
@@ -611,66 +614,82 @@ function LexiconPageContent() {
 
               {/* Lexicon Definitions Display (Starts immediately below header) */}
               <div className="space-y-4 md:space-y-6">
-                {filteredEntries.map((entry) => (
-                  <div
-                    key={entry.dictId}
-                    className="bg-gradient-to-br from-zinc-900/90 via-zinc-900/60 to-zinc-950/80 border border-emerald-500/20 rounded-2xl p-4 md:p-6 shadow-lg space-y-4 hover:border-emerald-500/35 transition-all"
-                  >
-                    <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-sm md:text-base font-bold text-emerald-300/90 border-l-2 border-emerald-500/60 pl-2.5">
-                          {entry.dictName}
-                        </h3>
-                        {entry.isEnglish && (
-                          <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                            English
-                          </span>
-                        )}
-                        {entry.isModern && (
-                          <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                            Modern (MSA)
-                          </span>
-                        )}
-                      </div>
+                {filteredEntries.map((entry) => {
+                  const isFreeDict = (entry.dictIdent || "").toLowerCase().includes("mufradat") || (entry.dictName || "").toLowerCase().includes("mufradat");
+                  const isLocked = tier === "FREE" && !isFreeDict;
 
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleCopyDefinition(entry.definitions.join('\n'), entry.dictName)}
-                          className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 transition text-xs font-medium text-zinc-300"
-                          title="Copy Definition"
-                        >
-                          <Copy className="size-3.5 shrink-0" />
-                          <span className="hidden sm:inline">Copy</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    {entry.isModern && (
-                      <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 flex gap-3 text-xs md:text-sm text-amber-200/90 leading-relaxed mb-4">
-                        <AlertTriangle className="size-4 md:size-5 shrink-0 text-amber-400 mt-0.5" />
-                        <p>
-                          <strong>Important Note:</strong> This is a modern lexicon (Modern Standard Arabic). It is provided here only for learning purposes and recognizing basic verb forms. <strong>Do not use it</strong> for determining the root meaning of classical Quranic words, as modern usage often differs entirely from 7th-century usage.
-                        </p>
-                      </div>
-                    )}
-
-                    <div className="space-y-5">
-                      {entry.definitions.map((def, dIdx) => (
-                        <div key={dIdx} className="space-y-2">
-                          <LexiconTextRenderer text={def} />
+                  return (
+                    <div
+                      key={entry.dictId}
+                      className="bg-gradient-to-br from-zinc-900/90 via-zinc-900/60 to-zinc-950/80 border border-emerald-500/20 rounded-2xl p-4 md:p-6 shadow-lg space-y-4 hover:border-emerald-500/35 transition-all"
+                    >
+                      <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="text-sm md:text-base font-bold text-emerald-300/90 border-l-2 border-emerald-500/60 pl-2.5">
+                            {entry.dictName}
+                          </h3>
+                          {isLocked && (
+                            <span className="text-[9px] md:text-[10px] font-bold tracking-wider px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                              <Lock className="size-2.5" />
+                              <span>PRO</span>
+                            </span>
+                          )}
+                          {entry.isEnglish && (
+                            <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                              English
+                            </span>
+                          )}
+                          {entry.isModern && (
+                            <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                              Modern (MSA)
+                            </span>
+                          )}
                         </div>
-                      ))}
-                    </div>
-                    {!entry.isEnglish && (
-                      <div className="mt-4 pt-4 border-t border-zinc-800/40 w-full">
-                        <InlineTranslation 
-                          textToTranslate={entry.definitions.join('\n').replace(/<[^>]*>?/gm, '')} 
-                          storageKey={`lexicon_${entry.dictId}_${result?.root || searchQuery}`}
-                        />
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleCopyDefinition(entry.definitions.join('\n'), entry.dictName)}
+                            className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 transition text-xs font-medium text-zinc-300 cursor-pointer"
+                            title="Copy Definition"
+                          >
+                            <Copy className="size-3.5 shrink-0" />
+                            <span className="hidden sm:inline">Copy</span>
+                          </button>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                ))}
+
+                      {entry.isModern && (
+                        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 flex gap-3 text-xs md:text-sm text-amber-200/90 leading-relaxed mb-4">
+                          <AlertTriangle className="size-4 md:size-5 shrink-0 text-amber-400 mt-0.5" />
+                          <p>
+                            <strong>Important Note:</strong> This is a modern lexicon (Modern Standard Arabic). It is provided here only for learning purposes and recognizing basic verb forms. <strong>Do not use it</strong> for determining the root meaning of classical Quranic words, as modern usage often differs entirely from 7th-century usage.
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="space-y-5">
+                        {entry.definitions.map((def, dIdx) => (
+                          <div key={dIdx} className="space-y-2">
+                            <LexiconTextRenderer 
+                              text={def} 
+                              isLocked={isLocked}
+                              dictName={entry.dictName}
+                              onUpgradeClick={openPricingModal}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      {!entry.isEnglish && !isLocked && (
+                        <div className="mt-4 pt-4 border-t border-zinc-800/40 w-full">
+                          <InlineTranslation 
+                            textToTranslate={entry.definitions.join('\n').replace(/<[^>]*>?/gm, '')} 
+                            storageKey={`lexicon_${entry.dictId}_${result?.root || searchQuery}`}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 

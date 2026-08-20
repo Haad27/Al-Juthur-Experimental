@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo, useRef, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
-import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, ChevronLeft, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check, Bookmark, BookmarkCheck } from "lucide-react";
+import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, ChevronLeft, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check, Bookmark, BookmarkCheck, Lock } from "lucide-react";
 import LogoIcon from "@/components/svg/icons/LogoIcon";
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
 import TafsirTextRenderer from "@/components/tafsir/TafsirTextRenderer";
@@ -12,6 +12,7 @@ import AyahChatSidebar from "@/components/ai/AyahChatSidebar";
 import FloatingAskScholarButton from "@/components/ai/FloatingAskScholarButton";
 import AyahWheelPickerModal from "@/components/tafsir/AyahWheelPickerModal";
 import ContinueReadingBanner from "@/components/tafsir/ContinueReadingBanner";
+import { useSubscriptionStore } from "@/lib/stores/subscriptionStore";
 import { 
   getLastReadTafsir, 
   setLastReadTafsir, 
@@ -63,6 +64,15 @@ interface TafsirEntry {
   author?: Author;
   footnoteIds?: string[];
   footnotes?: Record<string, string>;
+}
+
+export function isFreeTafsirAuthor(name?: string, authorName?: string): boolean {
+  const n = (name || "").toLowerCase();
+  const a = (authorName || "").toLowerCase();
+  if (n.includes("kathir") || a.includes("kathir")) return true;
+  if (n.includes("jalalayn") || a.includes("jalal") || n.includes("jalal")) return true;
+  if (n.includes("sa'di") || n.includes("saadi") || n.includes("sadi") || a.includes("sa'di") || a.includes("saadi")) return true;
+  return false;
 }
 
 const getTagColorClass = (color?: string) => {
@@ -1500,18 +1510,24 @@ function TafsirContent() {
                     </div>
                   </div>
 
-                {/* Difficulty Level Bottom Badge */}
-                {difficultyLevel && (
-                  <div className="relative z-10 flex items-center gap-1.5 pt-1 border-t border-zinc-800/60 overflow-hidden">
-                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border truncate max-w-[170px] ${
+                {/* Difficulty Level & Pro Badge */}
+                <div className="relative z-10 flex items-center justify-between gap-1.5 pt-1 border-t border-zinc-800/60 overflow-hidden">
+                  {difficultyLevel && (
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border truncate max-w-[140px] ${
                       difficultyLevel === 'Beginner' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
                       difficultyLevel === 'Advanced' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
                       'bg-blue-500/10 text-blue-400 border-blue-500/30'
                     }`}>
                       {difficultyLevel}
                     </span>
-                  </div>
-                )}
+                  )}
+                  {!isFreeTafsirAuthor(author.name, author.authorName) && (
+                    <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30 flex items-center gap-1 shrink-0">
+                      <Lock className="size-2.5" />
+                      <span>PRO</span>
+                    </span>
+                  )}
+                </div>
               </div>
             );
           })}
@@ -1573,8 +1589,14 @@ function TafsirCard({
   const isArabicOrUrdu = isArabic || isUrduText;
   const cleanText = entry.text.replace(/<[^>]*>?/gm, '');
 
+  const { tier, openPricingModal } = useSubscriptionStore();
   const authorId = entry.authorId || activeAuthor?.id || 0;
   const authorName = entry.author?.name || activeAuthor?.name || `Tafsir #${authorId}`;
+  const authorRealName = entry.author?.authorName || activeAuthor?.authorName || "";
+  const isFreeAuthor = isFreeTafsirAuthor(authorName, authorRealName);
+  const isLocked = tier === "FREE" && activeSurah > 1 && !isFreeAuthor;
+  const isPreviewInSurahOne = tier === "FREE" && activeSurah === 1 && !isFreeAuthor;
+
   const savedKey = `tafsir_${authorId}_${activeSurah}_${ayahNumber}`;
   const [isSaved, setIsSaved] = useState<boolean>(() => isTafsirSaved(savedKey));
 
@@ -1609,6 +1631,24 @@ function TafsirCard({
         data-ayah-idx={idx}
         className="border border-emerald-500/20 bg-zinc-900/40 rounded-xl p-5 md:p-7 transition-all hover:border-emerald-500/50 space-y-6 scroll-mt-24"
       >
+        {/* Free Preview Banner for Surah 1 on Locked Authors */}
+        {isPreviewInSurahOne && idx === 0 && (
+          <div className="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-between text-xs text-emerald-300">
+            <div className="flex items-center gap-2">
+              <Sparkles className="size-4 text-emerald-400 shrink-0" />
+              <span>
+                <strong>Free Preview:</strong> You are enjoying full free access to <strong>{authorName}</strong> on Surah Al-Fatihah!
+              </span>
+            </div>
+            <button
+              onClick={openPricingModal}
+              className="px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-bold text-[11px] transition-all cursor-pointer shrink-0 ml-2"
+            >
+              Unlock All Surahs
+            </button>
+          </div>
+        )}
+
         {/* Top Ayah Header */}
         <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3 gap-2 min-w-0">
           <div className="flex items-center gap-1.5 min-w-0 shrink-0">
@@ -1671,7 +1711,10 @@ function TafsirCard({
             isArabic={isArabicOrUrdu}
             isUrdu={isUrduText}
             langName={activeLangName}
+            isLocked={isLocked}
+            authorName={authorName}
             onNavigateToAyah={(num) => scrollToAyah(num)}
+            onUpgradeClick={openPricingModal}
           />
         </div>
 

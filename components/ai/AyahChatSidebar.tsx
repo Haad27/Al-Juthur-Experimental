@@ -91,7 +91,7 @@ const renderInlineBadges = (children: React.ReactNode): React.ReactNode => {
 };
 
 export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClose, initialModeId, rootWord }: AyahChatSidebarProps) {
-  const { tier, openPricingModal, incrementDailyQueries } = useSubscriptionStore();
+  const { tier, openPricingModal, incrementDailyQueries, dailyQueriesUsed, dailyQueriesLimit } = useSubscriptionStore();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -190,6 +190,15 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
+
+    if (tier === "FREE" && dailyQueriesUsed >= dailyQueriesLimit) {
+      toast.error("Daily AI Quota Reached (5/5)", {
+        description: "You have used all 5 free research questions for today. Upgrade to Pro for 50 queries/day or use code BARAKAH!",
+        duration: 6000,
+      });
+      openPricingModal();
+      return;
+    }
     
     const userText = input.trim();
     const userMessage: Message = { role: "user", content: userText };

@@ -13,7 +13,10 @@ import {
   ChevronRight,
   ShieldCheck,
   Send,
+  Crown,
 } from 'lucide-react';
+import { useSubscriptionStore } from '@/lib/stores/subscriptionStore';
+import { toast } from 'sonner';
 
 interface SourceCitation {
   id: string;
@@ -42,6 +45,7 @@ export function ScholarAssistantModal({
   onClose: () => void;
   initialQuery?: string;
 }) {
+  const { tier, openPricingModal, dailyQueriesUsed, dailyQueriesLimit, incrementDailyQueries } = useSubscriptionStore();
   const [query, setQuery] = useState(initialQuery);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScholarlyAnswer | null>(null);
@@ -52,6 +56,15 @@ export function ScholarAssistantModal({
   const handleAsk = async (question?: string) => {
     const qToAsk = question || query;
     if (!qToAsk.trim()) return;
+
+    if (tier === "FREE" && dailyQueriesUsed >= dailyQueriesLimit) {
+      toast.error("Daily AI Quota Reached (5/5)", {
+        description: "You have used all 5 free research questions for today. Upgrade to Pro for 50 queries/day or use code BARAKAH!",
+        duration: 6000,
+      });
+      openPricingModal();
+      return;
+    }
 
     setLoading(true);
     setResult(null);
@@ -105,12 +118,22 @@ export function ScholarAssistantModal({
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={openPricingModal}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-bold transition-all cursor-pointer shadow-sm"
+              title="View Research Plans"
+            >
+              <Crown className="size-3.5 text-emerald-400" />
+              <span className="uppercase">{tier}</span>
+            </button>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Body Content Area */}

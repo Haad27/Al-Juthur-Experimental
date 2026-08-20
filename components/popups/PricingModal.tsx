@@ -245,17 +245,23 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                     </li>
                     <li className="flex items-start gap-2.5">
                       <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                      <span>Standard Classical Tafsirs (Ibn Kathir)</span>
-                    </li>
-                    <li className="flex items-start gap-2.5">
-                      <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                       <span>
-                        <strong className="text-white">5 AI Queries</strong> per day (Flash-Lite)
+                        <strong className="text-emerald-300">Surah Al-Fatihah Free</strong> on all 130+ Tafsirs
                       </span>
                     </li>
                     <li className="flex items-start gap-2.5">
                       <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                      <span>Basic Arabic Root Dictionary</span>
+                      <span>3 Core Classics (Ibn Kathir En/Ar/Ur, Jalalayn, As-Sa'di)</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <span>
+                        <strong className="text-white">5 AI Queries</strong> per day
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <span>Al-Mufradat & Root Summary Lexicon</span>
                     </li>
                   </ul>
                 </div>
@@ -296,7 +302,7 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
 
                   <div className="flex items-baseline gap-1">
                     <span className="text-3xl sm:text-4xl font-extrabold text-white">
-                      {billingCycle === "monthly" ? "$4" : "$39"}
+                      {billingCycle === "monthly" ? "$3.99" : "$39"}
                     </span>
                     <span className="text-xs text-slate-400">
                       {billingCycle === "monthly" ? "/ month" : "/ year ($3.25/mo)"}
@@ -314,21 +320,15 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                     </li>
                     <li className="flex items-start gap-2.5">
                       <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                      <span>High-Speed <strong className="text-white">Gemini 3.1 Flash</strong> Engine</span>
+                      <span><strong className="text-white">Multiple Powerful Advanced AI Models</strong></span>
                     </li>
                     <li className="flex items-start gap-2.5">
                       <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                      <span>
-                        <strong className="text-emerald-300">Cross-Tafsir Comparative Synthesis</strong>
-                      </span>
+                      <span>All <strong className="text-white">130+ Classical Tafsirs</strong> in 33 languages (Unlocked)</span>
                     </li>
                     <li className="flex items-start gap-2.5">
                       <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                      <span>All <strong className="text-white">130+ Classical Tafsirs</strong> in 33 languages</span>
-                    </li>
-                    <li className="flex items-start gap-2.5">
-                      <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                      <span>All <strong className="text-white">13 Historical Lexicons</strong> & PDF Viewers</span>
+                      <span>All <strong className="text-white">13 Historical Lexicons</strong> & PDF Viewers (Unlocked)</span>
                     </li>
                     <li className="flex items-start gap-2.5">
                       <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
@@ -368,22 +368,22 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                 </div>
               </div>
 
-              {/* TIER 3: PATRON / WAQF */}
+              {/* TIER 3: PATRON / VIP */}
               <div className="relative flex flex-col justify-between rounded-3xl p-6 bg-[#0f1712] border border-amber-500/20 hover:border-amber-500/40 transition-all">
                 <div className="space-y-4">
                   <div className="space-y-1">
                     <h3 className="text-lg font-bold text-white flex items-center gap-2">
                       <span>Patron</span>
                       <span className="text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-                        Waqf Tier
+                        Supporter Tier
                       </span>
                     </h3>
-                    <p className="text-xs text-slate-300">Scholars & Community Benefactors</p>
+                    <p className="text-xs text-slate-300">Scholars, Teachers & Community Benefactors</p>
                   </div>
 
                   <div className="flex items-baseline gap-1">
                     <span className="text-3xl sm:text-4xl font-extrabold text-white">
-                      {billingCycle === "monthly" ? "$10" : "$99"}
+                      {billingCycle === "monthly" ? "$9.99" : "$99"}
                     </span>
                     <span className="text-xs text-slate-400">
                       {billingCycle === "monthly" ? "/ month" : "/ year ($8.25/mo)"}
@@ -402,13 +402,13 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                     <li className="flex items-start gap-2.5">
                       <Check className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                       <span>
-                        <strong className="text-white">Priority AI Queue</strong> (Zero latency fallback)
+                        <strong className="text-white">Priority AI Processing Queue</strong>
                       </span>
                     </li>
                     <li className="flex items-start gap-2.5">
-                      <HeartHandshake className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <Gift className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                       <span className="text-emerald-300">
-                        <strong>Waqf Sadaqah:</strong> Sponsors AI compute for 2 free students globally
+                        <strong>🎁 Gift a Friend:</strong> Includes 1 Free Pro Account for a friend or student
                       </span>
                     </li>
                     <li className="flex items-start gap-2.5">

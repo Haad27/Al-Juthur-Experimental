@@ -1,11 +1,15 @@
-import { BookOpen, Info, ArrowRight } from "lucide-react";
+import { BookOpen, Info, ArrowRight, Lock, Sparkles } from "lucide-react";
+import { useSubscriptionStore } from "@/lib/stores/subscriptionStore";
 
 interface TafsirTextRendererProps {
   text: string;
   isArabic?: boolean;
   isUrdu?: boolean;
   langName?: string;
+  isLocked?: boolean;
+  authorName?: string;
   onNavigateToAyah?: (ayahNum: number) => void;
+  onUpgradeClick?: () => void;
 }
 
 export default function TafsirTextRenderer({ 
@@ -13,8 +17,12 @@ export default function TafsirTextRenderer({
   isArabic: propIsArabic, 
   isUrdu: propIsUrdu, 
   langName = "",
-  onNavigateToAyah 
+  isLocked = false,
+  authorName = "",
+  onNavigateToAyah,
+  onUpgradeClick,
 }: TafsirTextRendererProps) {
+  const { openPricingModal } = useSubscriptionStore();
   if (!text) return null;
 
   const lowerLang = (langName || "").toLowerCase();
@@ -180,62 +188,95 @@ export default function TafsirTextRenderer({
     return undefined;
   };
 
+  const displayedBlocks = isLocked ? blocks.slice(0, 4) : blocks;
+
   return (
-    <div
-      className={`space-y-4 ${isRtl ? "text-right" : "text-left"}`}
-      dir={isRtl ? "rtl" : "ltr"}
-      style={{
-        fontFamily: getFontFamily(),
-        lineHeight: getLineHeight(),
-        fontSize: getFontSize(),
-      }}
-    >
-      {blocks.map((block, idx) => {
-        const transformedHtml = transformHtmlForTailwind(block.text, isRtl);
+    <div className="relative">
+      <div
+        className={`space-y-4 ${isRtl ? "text-right" : "text-left"}`}
+        dir={isRtl ? "rtl" : "ltr"}
+        style={{
+          fontFamily: getFontFamily(),
+          lineHeight: getLineHeight(),
+          fontSize: getFontSize(),
+        }}
+      >
+        {displayedBlocks.map((block, idx) => {
+          const transformedHtml = transformHtmlForTailwind(block.text, isRtl);
 
-        if (block.type.startsWith("h")) {
-          return (
-            <h3
-              key={idx}
-              className={`font-bold text-emerald-300/90 text-base md:text-lg my-4 leading-snug ${
-                isRtl ? "border-r-2 border-emerald-500/60 pr-3" : "border-l-2 border-emerald-500/60 pl-3"
-              }`}
-              style={{ fontSize: getFontSize(), lineHeight: getLineHeight() }}
-              dangerouslySetInnerHTML={{ __html: transformedHtml }}
-            />
-          );
-        }
+          if (block.type.startsWith("h")) {
+            return (
+              <h3
+                key={idx}
+                className={`font-bold text-emerald-300/90 text-base md:text-lg my-4 leading-snug ${
+                  isRtl ? "border-r-2 border-emerald-500/60 pr-3" : "border-l-2 border-emerald-500/60 pl-3"
+                }`}
+                style={{ fontSize: getFontSize(), lineHeight: getLineHeight() }}
+                dangerouslySetInnerHTML={{ __html: transformedHtml }}
+              />
+            );
+          }
 
-        // Check for Arabic section labels
-        const isArabicHeader =
-          block.text.includes("شرح الكلمات") ||
-          block.text.includes("معنى الآية") ||
-          block.text.includes("هداية الآيات") ||
-          (block.text.length < 35 && block.text.endsWith(":"));
+          // Check for Arabic section labels
+          const isArabicHeader =
+            block.text.includes("شرح الكلمات") ||
+            block.text.includes("معنى الآية") ||
+            block.text.includes("هداية الآيات") ||
+            (block.text.length < 35 && block.text.endsWith(":"));
 
-        if (isArabicHeader) {
+          if (isArabicHeader) {
+            return (
+              <p
+                key={idx}
+                className="font-bold text-emerald-300/90 text-base md:text-lg mt-4 pb-1 border-r-2 border-emerald-500/60 pr-3 inline-block"
+                style={{ fontSize: getFontSize(), lineHeight: getLineHeight() }}
+                dangerouslySetInnerHTML={{ __html: transformedHtml }}
+              />
+            );
+          }
+
           return (
             <p
               key={idx}
-              className="font-bold text-emerald-300/90 text-base md:text-lg mt-4 pb-1 border-r-2 border-emerald-500/60 pr-3 inline-block"
-              style={{ fontSize: getFontSize(), lineHeight: getLineHeight() }}
+              className="text-stone-300 text-base md:text-lg whitespace-pre-wrap"
+              style={{ 
+                lineHeight: getLineHeight(), 
+                fontSize: getFontSize() 
+              }}
               dangerouslySetInnerHTML={{ __html: transformedHtml }}
             />
           );
-        }
+        })}
+      </div>
 
-        return (
-          <p
-            key={idx}
-            className="text-stone-300 text-base md:text-lg whitespace-pre-wrap"
-            style={{ 
-              lineHeight: getLineHeight(), 
-              fontSize: getFontSize() 
-            }}
-            dangerouslySetInnerHTML={{ __html: transformedHtml }}
-          />
-        );
-      })}
+      {/* Frosted Glass Blur Lock Overlay */}
+      {isLocked && (
+        <div className="relative -mt-10 pt-16 pb-8 px-6 rounded-3xl bg-gradient-to-t from-[#090e0b] via-[#090e0b]/95 to-transparent border border-emerald-500/20 text-center space-y-4 shadow-2xl backdrop-blur-md z-10">
+          <div className="mx-auto size-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-inner">
+            <Lock className="size-6 text-emerald-400" />
+          </div>
+          <div className="max-w-md mx-auto space-y-1.5">
+            <h4 className="text-base sm:text-lg font-bold text-white font-serif">
+              Unlock Full Commentary with <span className="text-emerald-400">Al-Juthur Pro</span>
+            </h4>
+            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+              You are previewing {authorName || "this classical work"}. Subscribe to Pro to unlock all 130+ classical Tafsirs across all 114 Surahs.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1">
+            <button
+              onClick={onUpgradeClick || openPricingModal}
+              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-emerald-950 font-bold text-xs sm:text-sm shadow-lg shadow-emerald-950 transition-all cursor-pointer flex items-center justify-center gap-2"
+            >
+              <Sparkles className="size-4" />
+              <span>Upgrade to Pro ($3.99/mo)</span>
+            </button>
+          </div>
+          <p className="text-[11px] text-emerald-400/80">
+            💡 Tip: Surah Al-Fatihah is 100% free for all 130+ authors to preview anytime!
+          </p>
+        </div>
+      )}
     </div>
   );
 }
