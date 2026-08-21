@@ -102,26 +102,26 @@ export default function TafsirTextRenderer({
       });
     };
 
-    // Standard mode (Clean Minimal Emerald Theme)
-    // 1. Quranic Verse Citations (<span class="qpc-hafs">) → Clean minimal green container (for full ayahs) or subtle inline green chip
+    // Standard mode (Clean Minimal Typography)
+    // 1. Quranic Verse Citations (<span class="qpc-hafs">)
     html = html.replace(
       /<span[^>]*class="qpc-hafs"[^>]*>([\s\S]*?)<\/span>/gi,
       (match, innerText) => {
         const trimmed = innerText.trim();
-        // If it's a long citation or full ayah block (>= 50 characters)
-        if (trimmed.length >= 50) {
-          return `<span class="block my-3.5 md:my-4 p-3.5 md:p-4 ${
-            isRightToLeft ? "border-r-4 rounded-l-xl" : "border-l-4 rounded-r-xl"
-          } border-emerald-500 bg-emerald-950/30 text-emerald-100/95 font-serif text-lg md:text-xl leading-loose shadow-sm" style="font-family: 'UthmanicHafs', serif;">${trimmed}</span>`;
+        // Standalone long ayah block (>= 80 characters)
+        if (trimmed.length >= 80) {
+          return `<span class="block my-3 p-3 ${
+            isRightToLeft ? "border-r-2 border-emerald-500/60 rounded-l-lg pr-3.5" : "border-l-2 border-emerald-500/60 rounded-r-lg pl-3.5"
+          } bg-emerald-950/20 text-emerald-100/95 font-serif text-lg md:text-xl leading-loose" style="font-family: 'UthmanicHafs', serif;">${trimmed}</span>`;
         }
-        // Shorter inline citation chip
-        return `<span class="bg-emerald-950/40 text-emerald-200/90 border border-emerald-500/30 px-2.5 py-0.5 rounded-lg font-serif text-lg md:text-xl leading-loose inline-block mx-1 my-0.5 shadow-sm" style="font-family: 'UthmanicHafs', serif;">${trimmed}</span>`;
+        // Seamless inline Quranic words / phrases (clean typography, no disruptive boxes or borders)
+        return `<span class="text-emerald-300/95 font-serif text-lg md:text-xl font-normal inline" style="font-family: 'UthmanicHafs', serif;">${trimmed}</span>`;
       }
     );
     // Fallback for unclosed or isolated qpc-hafs opening tags
     html = html.replace(
       /<span[^>]*class="qpc-hafs"[^>]*>/gi,
-      '<span class="bg-emerald-950/40 text-emerald-200/90 border border-emerald-500/30 px-2.5 py-0.5 rounded-lg font-serif text-lg md:text-xl leading-loose inline-block mx-1 my-0.5 shadow-sm" style="font-family: \'UthmanicHafs\', serif;">'
+      '<span class="text-emerald-300/95 font-serif text-lg md:text-xl font-normal inline" style="font-family: \'UthmanicHafs\', serif;">'
     );
 
     // 2. Phrase Highlights → Clean subtle emerald text
