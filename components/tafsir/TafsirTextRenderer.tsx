@@ -76,9 +76,9 @@ export default function TafsirTextRenderer({
     .replace(/<\/div>/gi, "")
     .trim();
 
-  // Strip classical decorative circles / rosettes (۞, ۝, ◌, ֎, etc.) in Tafsir UI
+  // Strip classical decorative circles / rosettes / manuscript variation symbols (🔘, ۞, ۝, ◌, ֎, etc.) in Tafsir UI
   content = content
-    .replace(/[۞۝֎◌◍◎◉⦾⦿⚬◯○●◐◑◒◓◈◇◆▪▫★☆✦✧※\u06DE\u06DD\u058E\u25CC\u25CD\u20DD\u20DE\u20DF\u25CB\u25CF\u25CE\u25C9\u29BF\u29BE\u2735\u2736\u2742\u2740\u273F\u2741\u2055\u2737\u2738\u2739\u273A\u25C8\u2743\u273D\u2734\u25EF\u2B58\u2B57\u25D9\u25D8\u25C6\u25C7\u25A0\u25A1\u25AA\u25AB]/gu, " ")
+    .replace(/[\u{1F518}\u{1F534}\u{1F535}\u{1F536}\u{1F537}\u{1F538}\u{1F539}\u{1F780}-\u{1F7FF}\u{1F6E0}-\u{1F6FF}🔘۞۝֎◌◍◎◉⦾⦿⚬◯○●◐◑◒◓◈◇◆▪▫★☆✦✧※\u06DE\u06DD\u06E9\u058E\u25CC\u25CD\u20DD\u20DE\u20DF\u25CB\u25CF\u25CE\u25C9\u29BF\u29BE\u2299\u229A\u2735\u2736\u2742\u2740\u273F\u2741\u2055\u2737\u2738\u2739\u273A\u25C8\u2743\u273D\u2734\u25EF\u2B58\u2B57\u25D9\u25D8\u25C6\u25C7\u25A0\u25A1\u25AA\u25AB]/gu, " ")
     .replace(/\s{2,}/g, " ");
 
   // 2. Parse blocks by splitting on double newlines or block tags (<p>, <h2>, <h3>)
@@ -124,13 +124,32 @@ export default function TafsirTextRenderer({
       '<span class="bg-zinc-800/40 text-zinc-300 border border-zinc-700/40 px-2 py-0.5 rounded-md font-serif text-base md:text-lg italic leading-loose inline-block mx-1 my-0.5 shadow-sm" style="font-family: \'UthmanicHafs\', serif;">'
     );
 
-    // 2. Phrase Highlights → Clean subtle text
+    // 2. Arabic Quranic Verses in brackets { ... }, ﴿ ... ﴾, « ... » across Urdu and all languages
+    html = html.replace(
+      /([\{﴿«])([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u08E4-\u08FE\uFB50-\uFDFF\uFE70-\uFEFF\s\d.,:;!؟\(\)\[\]\-–—«»"']+?)([\}﴾»])/gu,
+      (match, openBracket, verseContent, closeBracket) => {
+        const trimmed = verseContent.trim();
+        // Check if content has substantial Arabic letters (distinct from pure Urdu sentences)
+        const arabicLettersCount = (trimmed.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/g) || []).length;
+        if (arabicLettersCount >= 3) {
+          if (trimmed.length >= 80) {
+            return `<span class="block my-3 p-3.5 ${
+              isRightToLeft ? "border-r-2 border-zinc-600/70 rounded-l-lg pr-3.5" : "border-l-2 border-zinc-600/70 rounded-r-lg pl-3.5"
+            } bg-zinc-800/30 text-zinc-200 font-serif text-lg md:text-xl leading-loose italic" style="font-family: 'UthmanicHafs', 'Amiri', serif;" dir="rtl">﴿${trimmed}﴾</span>`;
+          }
+          return `<span class="bg-zinc-800/40 text-zinc-300 border border-zinc-700/40 px-2 py-0.5 rounded-md font-serif text-base md:text-lg italic leading-loose inline-block mx-1 my-0.5 shadow-sm" style="font-family: 'UthmanicHafs', 'Amiri', serif;" dir="rtl">﴿${trimmed}﴾</span>`;
+        }
+        return match;
+      }
+    );
+
+    // 3. Phrase Highlights → Clean subtle text
     html = html.replace(
       /<span[^>]*class="hlt"[^>]*>/gi,
       '<span class="text-zinc-200 font-semibold">'
     );
 
-    // 3. Footnotes / Gray Text / Translation quotes → Direction-aware green container or muted pill
+    // 4. Footnotes / Gray Text / Translation quotes → Direction-aware green container or muted pill
     html = html.replace(
       /<span[^>]*class="gray"[^>]*>([\s\S]*?)<\/span>/gi,
       (match, innerText) => {
