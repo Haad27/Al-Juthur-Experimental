@@ -56,9 +56,7 @@ export default function LexiconTextRenderer({
           if (isArabicLine && !line.includes('<li')) {
             const displayLine = line
               .replace(/\u064E\u0670/g, '\u0670')
-              .replace(/\u0670\u064E/g, '\u0670')
-              .replace(/([^\s\u06DF\u06E0])?([\u06DF\u06E0])/g, '<span style="font-family: \'Amiri\', serif;">$1$2</span>')
-              .replace(/([\u06ED])/g, '<span style="display: inline-block; vertical-align: -0.22em; font-family: \'Amiri\', serif;">$1</span>');
+              .replace(/\u0670\u064E/g, '\u0670');
 
             return (
               <p
