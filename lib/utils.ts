@@ -1,4 +1,4 @@
-﻿import { clsx, type ClassValue } from "clsx";
+import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { toast } from "sonner";
 
@@ -81,18 +81,27 @@ export const formatTime = (sec: number) => {
   return `${m}:${s}`;
 };
 
+export function cleanQuranText(text: string): string {
+  if (!text) return "";
+  return text
+    .replace(/\u06ED/g, "") // Remove Tanzil sequential tanween marker (U+06ED Small Low Meem) which mistakenly renders as a literal meem
+    .replace(/\u064E\u0670/g, "\u0670") // Normalize redundant fatha + dagger alif
+    .replace(/\u0670\u064E/g, "\u0670");
+}
+
 export function stripBismillahPrefix(text: string, surahNumber: number, ayahNumber: number): string {
-  if (ayahNumber !== 1 || surahNumber === 1 || surahNumber === 9) return text;
+  const cleaned = cleanQuranText(text);
+  if (ayahNumber !== 1 || surahNumber === 1 || surahNumber === 9) return cleaned;
   const stripHarakat = (str: string) =>
     str.replace(/[\u064B-\u065F\u0670\uFEFF]/g, "").replace(/\u0671/g, "\u0627");
-  const words = text.trim().split(/\s+/);
+  const words = cleaned.trim().split(/\s+/);
   if (words.length >= 4) {
     const first4Normalized = stripHarakat(words.slice(0, 4).join(" "));
     if (first4Normalized === "بسم الله الرحمن الرحيم") {
       return words.slice(4).join(" ");
     }
   }
-  return text;
+  return cleaned;
 }
 
 export function normalizeArabic(text: string) {

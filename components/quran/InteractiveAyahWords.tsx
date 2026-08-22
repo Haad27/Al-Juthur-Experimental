@@ -14,6 +14,7 @@ import { Sparkles, ArrowRight, BookOpen, Loader2, Bot } from 'lucide-react';
 import { useGlobalState } from '@/lib/providers/GlobalStatesProvider';
 import { useAudioStore } from '@/lib/stores/audioStore';
 import { toast } from 'sonner';
+import { cleanQuranText } from '@/lib/utils';
 import LexiconTextRenderer from '@/components/lexicon/LexiconTextRenderer';
 
 interface InteractiveAyahWordsProps {
@@ -212,10 +213,8 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
         const data = wordDataMap[wordIdx];
         const meaning = wbwTranslation?.[`${ayahNumber}:${wordIdx}`];
 
-        // 1. Normalize redundant double-vowel markings (e.g. Fatha + Dagger Alif) to single authentic Dagger Alif
-        const displayWord = word
-          .replace(/\u064E\u0670/g, '\u0670')
-          .replace(/\u0670\u064E/g, '\u0670');
+        // 1. Clean Quran text (remove Tanzil U+06ED artifacts and normalize redundant markings)
+        const displayWord = cleanQuranText(word);
 
         return (
           <Dialog key={idx} onOpenChange={(open) => { 

@@ -1,5 +1,6 @@
 import { Lock, Sparkles } from "lucide-react";
 import { useSubscriptionStore } from "@/lib/stores/subscriptionStore";
+import { cleanQuranText } from "@/lib/utils";
 
 interface LexiconTextRendererProps {
   text: string;
@@ -54,9 +55,7 @@ export default function LexiconTextRenderer({
           const isArabicLine = /[\u0600-\u06FF]/.test(line) && (line.match(/[\u0600-\u06FF]/g)?.length || 0) > line.length * 0.3;
 
           if (isArabicLine && !line.includes('<li')) {
-            const displayLine = line
-              .replace(/\u064E\u0670/g, '\u0670')
-              .replace(/\u0670\u064E/g, '\u0670');
+            const displayLine = cleanQuranText(line);
 
             return (
               <p
