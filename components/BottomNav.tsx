@@ -136,7 +136,7 @@ const BottomNav = () => {
                 {/* Divider */}
                 <div className="h-6 w-px bg-zinc-800 shrink-0" />
 
-                {/* 2. RAG Bot */}
+                {/* 2. AI Scholar */}
                 <Link
                   href="/rag"
                   onClick={() => {
@@ -150,7 +150,7 @@ const BottomNav = () => {
                   }`}
                 >
                   <Bot className="w-5 h-5 mb-0.5" />
-                  <span className="text-[9px] tracking-tight">RAG Bot</span>
+                  <span className="text-[9px] tracking-tight">AI Scholar</span>
                 </Link>
               </div>
             </motion.div>

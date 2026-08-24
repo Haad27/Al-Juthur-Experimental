@@ -2,36 +2,53 @@ export interface RagModeInfo {
   id: string;
   name: string;
   shortName: string;
+  botTitle: string;
   badge: string;
   badgeColor: string;
   targetIntent: string;
   sources: string[];
   warning?: string;
+  disclaimer: string;
+  usageNotes: string[];
+  examplePrompts: string[];
   description: string;
 }
 
 export const RAG_MODES: RagModeInfo[] = [
   {
     id: "default",
-    name: "1. Default Mode (Balanced & Comprehensive)",
-    shortName: "Default Mode",
-    badge: "Normal / Recommended Use",
+    name: "1. AI Scholar · General Tafsir",
+    shortName: "General Tafsir",
+    botTitle: "General Tafsir AI Scholar",
+    badge: "Balanced & Recommended",
     badgeColor: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
-    targetIntent: "Direct answers and general Quranic queries using the safest, most universally accepted classical and comprehensive commentaries.",
+    targetIntent: "Direct answers and general Quranic queries using the safest, most universally accepted classical commentaries.",
     sources: [
-      "Tafsir Ibn Kathir (English)",
+      "Tafsir Ibn Kathir (English & Arabic)",
       "Tafsir al-Tabari (Jami' al-Bayan)",
       "Tafsir al-Baghawi (Ma'alim al-Tanzil)",
       "Tafsir al-Qurtubi (Al-Jami' li-Ahkam al-Qur'an)",
       "Al-Tahrir wa al-Tanwir (Ibn Ashur)"
     ],
+    disclaimer: "Synthesizes authentic classical commentaries into structured English. AI generated responses do not constitute binding religious decrees (fatwas).",
+    usageNotes: [
+      "Best for general verse inquiries, context of revelation (Asbab al-Nuzul), and core Quranic themes.",
+      "Combines authentic narration (Riwayah) with analytical commentary.",
+      "Provides direct verse citations and cross-references."
+    ],
+    examplePrompts: [
+      "What is the background context and main theme of Surah Al-Mulk?",
+      "Explain the spiritual significance of Ayah al-Kursi according to classical tafsir.",
+      "Summarize the story of Ashab al-Kahf (People of the Cave) from Ibn Kathir."
+    ],
     description: "The primary mode for standard study. Combines authentic narration (Riwayah) with rigorous analytical commentary and linguistic clarity."
   },
   {
     id: "classical",
-    name: "2. Classical Mode (Ma'thur & Athar)",
-    shortName: "Classical Mode",
-    badge: "Early Generations & Isnad",
+    name: "2. AI Scholar · Hadith & Isnad",
+    shortName: "Hadith & Isnad",
+    botTitle: "Classical Hadith & Isnad AI Scholar",
+    badge: "Early Salaf & Narrations",
     badgeColor: "bg-amber-500/10 text-amber-400 border-amber-500/30",
     targetIntent: "Focused on historical narrations, early Sahabah and Salaf reports, and isnad-grounded exegesis.",
     sources: [
@@ -39,12 +56,24 @@ export const RAG_MODES: RagModeInfo[] = [
       "Tafsir al-Tabari (Jami' al-Bayan)",
       "Al-Durr al-Manthur fi al-Tafsir al-Ma'thur (Al-Suyuti)"
     ],
+    disclaimer: "Retrieves early transmission reports. Hadith chain verification should be cross-referenced with traditional Hadith specialists.",
+    usageNotes: [
+      "Best for investigating direct statements of Sahabah (Companions) and Tabi'in (Successors).",
+      "Focuses on exegesis transmitted by narration (Tafsir bi-al-Ma'thur).",
+      "Ideal for historical timeline queries."
+    ],
+    examplePrompts: [
+      "What did Ibn Abbas transmit regarding the opening verses of Surah Al-Baqarah?",
+      "Show me early Sahabah narrations about the revelation of Surah Al-Kahf.",
+      "What reports exist in Al-Tabari concerning the night journey (Isra & Mi'raj)?"
+    ],
     description: "Ideal for verifying exactly what the early generations of Islam (Sahabah, Tabi'in) transmitted regarding any ayah or historical event."
   },
   {
     id: "grammar",
-    name: "3. Grammar & Balagha Mode (Linguistic — Tafsir)",
+    name: "3. AI Scholar · Grammar & Balagha",
     shortName: "Grammar & Balagha",
+    botTitle: "Grammar & Balagha AI Scholar",
     badge: "Linguistic & Rhetoric Focus",
     badgeColor: "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
     targetIntent: "Word origins, syntax (i'rab), rhetorical beauty (balagha), particle structure, and deep grammatical breakdown.",
@@ -53,14 +82,26 @@ export const RAG_MODES: RagModeInfo[] = [
       "Al-Bahr al-Muhit (Abu Hayyan al-Gharnati)",
       "I'rab al-Qur'an (Muhyiddin al-Darwish)"
     ],
-    warning: "IMPORTANT WARNING: Scholars in this mode (e.g., Al-Zamakhshari, Abu Hayyan) are world-renowned masters of syntax, linguistics, and rhetoric. Do NOT use this mode as a reference for aqidah (theological creed) or general fiqh rulings. The AI router will flag and refuse out-of-scope theological questions here.",
+    warning: "IMPORTANT GUARDRAIL: Scholars in this mode are masters of syntax and Arabic rhetoric. Do NOT use this mode as a reference for aqidah (creed) or general fiqh rulings. The AI router will refuse out-of-scope theological questions.",
+    disclaimer: "Grammar & Balagha mode is restricted to syntax (I'rab) and Arabic eloquence. It does not provide legal rulings or theological creed (Aqidah).",
+    usageNotes: [
+      "Focuses on Arabic sentence breakdown, particle functions, and rhetorical structures.",
+      "Explains subtle nuance between similar phrasing in different surahs.",
+      "Analyzes verb tense choices and word ordering in the Quran."
+    ],
+    examplePrompts: [
+      "What is the grammatical breakdown (I'rab) of 'Bismillah al-Rahman al-Rahim'?",
+      "Explain the rhetorical beauty (balagha) in the phrasing of Surah Al-Ikhlas.",
+      "Why is the particle 'fa' used instead of 'wa' in Surah Al-Kawtar?"
+    ],
     description: "Exclusively explores the grammatical architecture, rhetorical subtleties, and precise Arabic word morphology of the Quranic text."
   },
   {
     id: "modern",
-    name: "4. Modern & Contemporary Mode",
-    shortName: "Modern & Contemporary",
-    badge: "Contemporary Application",
+    name: "4. AI Scholar · Contemporary & Maqasid",
+    shortName: "Contemporary & Maqasid",
+    botTitle: "Contemporary & Maqasid AI Scholar",
+    badge: "Modern Application & Themes",
     badgeColor: "bg-blue-500/10 text-blue-400 border-blue-500/30",
     targetIntent: "Macro-themes, higher objectives of Shariah (Maqasid), societal context, modern psychology, and inter-verse connections across surahs.",
     sources: [
@@ -68,13 +109,25 @@ export const RAG_MODES: RagModeInfo[] = [
       "Adwa' al-Bayan fi Eedah al-Qur'an (Al-Shanqiti)",
       "Al-Tafsir al-Wasit (Shaykh Tantawi)"
     ],
+    disclaimer: "Connects Quranic principles to contemporary society and thematic analysis. Consult traditional scholars for specific modern legal rulings.",
+    usageNotes: [
+      "Great for understanding thematic links between different surahs.",
+      "Explores higher objectives of Shariah (Maqasid) and ethical guidance.",
+      "Addresses contemporary societal contexts and human psychology."
+    ],
+    examplePrompts: [
+      "How do the principles in Surah Al-Hujurat apply to modern social media ethics?",
+      "What does the Quran teach about mental resilience and anxiety in modern life?",
+      "Explain the thematic connection between Surah Al-Fatiha and Surah Al-Baqarah."
+    ],
     description: "Connects Quranic principles to modern societal realities, psychology, legislative wisdom, and holistic thematic relationships while maintaining focus on the text."
   },
   {
     id: "philosophical",
-    name: "5. Philosophical & Intellectual Mode",
-    shortName: "Philosophical & Intellectual",
-    badge: "Rational & Intellectual Analysis",
+    name: "5. AI Scholar · Rational & Proofs",
+    shortName: "Rational & Proofs",
+    botTitle: "Rational & Philosophical AI Scholar",
+    badge: "Intellectual & Logical Analysis",
     badgeColor: "bg-purple-500/10 text-purple-400 border-purple-500/30",
     targetIntent: "Intellectual reflection, rational proofs, and philosophical arguments based on classical exegesis.",
     sources: [
@@ -82,14 +135,26 @@ export const RAG_MODES: RagModeInfo[] = [
       "Ruh al-Ma'ani (Imam Shihab al-Din al-Alusi)",
       "Anwar al-Tanzil (Tafsir al-Baydawi)"
     ],
-    warning: "NOTE: This mode focuses on intellectual and rational reflection of verses using logical proofs. For basic jurisprudence or standard devotional reading, please use Default Mode.",
+    warning: "NOTE: This mode focuses on intellectual and rational reflection of verses using logical proofs. For basic jurisprudence or standard devotional reading, please use General Tafsir Mode.",
+    disclaimer: "Focuses on rational proofs and academic philosophical exegesis. Not designed for practical jurisprudence or daily devotional rulings.",
+    usageNotes: [
+      "Ideal for exploring logical proofs of monotheism and cosmological reflection.",
+      "Analyzes rational arguments presented in classical scholarly debates.",
+      "Deeply explores ontological and theological questions."
+    ],
+    examplePrompts: [
+      "What rational arguments does Imam al-Razi present for divine creation in Surah Al-An'am?",
+      "How do classical commentators discuss the concept of time in Surah Al-Asr?",
+      "Explain the philosophical proofs for resurrection in Surah Ya-Sin."
+    ],
     description: "Engages with deep rational arguments, logical proofs, and philosophical reflections across classical scholarship."
   },
   {
     id: "lexicon",
-    name: "6. Lexicon Mode (Word-Level Dictionary Lookup)",
-    shortName: "Lexicon Mode",
-    badge: "Root Definition & Etymology",
+    name: "6. AI Scholar · Classical Lexicon",
+    shortName: "Classical Lexicon",
+    botTitle: "Classical Arabic Lexicon AI Scholar",
+    badge: "Root Etymology & Dictionaries",
     badgeColor: "bg-rose-500/10 text-rose-400 border-rose-500/30",
     targetIntent: "Classical dictionary lookups, root concept structure, semantic nuances, and exhaustive classical Arabic usage.",
     sources: [
@@ -98,7 +163,19 @@ export const RAG_MODES: RagModeInfo[] = [
       "Maqayis al-Lughah (Ibn Faris)",
       "Lane's Lexicon (English cross-reference layer)"
     ],
-    warning: "NOTE: Lexicon Mode is strictly bounded to root semantics, word definitions, and morphological forms. For full verse tafsir or practical rulings, switch to Default Mode.",
+    warning: "NOTE: Lexicon Mode is strictly bounded to root semantics, word definitions, and morphological forms. For full verse tafsir or practical rulings, switch to General Tafsir Mode.",
+    disclaimer: "Strictly bounded to 3-letter/4-letter Arabic root definitions and classical dictionary entries. Does not output exegesis or legal rulings.",
+    usageNotes: [
+      "Search by 3-letter Arabic root or word concept (e.g. r-h-m, s-l-m).",
+      "Traces semantic root evolution from pre-Islamic poetry to Quranic usage.",
+      "Provides English definitions cross-referenced with Lane's Lexicon."
+    ],
+    examplePrompts: [
+      "What is the primary root meaning and semantic journey of 'Rahmah' (ر ح م)?",
+      "Explore the classical dictionary definitions for the root 'S-K-N' (س ك ن).",
+      "Compare the root meanings of 'Alim' (علم) vs 'Khabir' (خبر) in classical lexicons."
+    ],
     description: "Searches primary classical Arabic dictionaries to reveal the precise semantic root journey and classical range of meaning for Quranic vocabulary."
   }
 ];
+

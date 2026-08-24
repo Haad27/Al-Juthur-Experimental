@@ -309,7 +309,7 @@ function LexiconPageContent() {
               Translator
             </Link>
             <Link href="/rag" className="hover:text-zinc-200 transition">
-              RAG Bot
+              AI Scholar
             </Link>
           </nav>
 

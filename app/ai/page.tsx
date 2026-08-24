@@ -173,7 +173,7 @@ function AiTranslatorContent() {
               Translator
             </Link>
             <Link href="/rag" className="cursor-pointer hover:text-gray-300 transition text-zinc-400">
-              RAG Bot
+              AI Scholar
             </Link>
           </nav>
 

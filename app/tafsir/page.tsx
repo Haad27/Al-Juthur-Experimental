@@ -1133,7 +1133,7 @@ function TafsirContent() {
               Translator
             </Link>
             <Link href="/rag" className="cursor-pointer hover:text-gray-300 transition">
-              RAG Bot
+              AI Scholar
             </Link>
           </nav>
           

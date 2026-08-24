@@ -240,7 +240,7 @@ const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRAN
         <Link href="/tafsir" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">Tafsir</Link>
         <Link href="/lexicon" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">Lexicon</Link>
         <Link href="/ai" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">Translator</Link>
-        <Link href="/rag" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">RAG Bot</Link>
+        <Link href="/rag" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">AI Scholar</Link>
       </nav>
     </div>
   );
