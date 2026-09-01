@@ -90,7 +90,7 @@ const BottomNav = () => {
     },
   ];
 
-  if (!mounted || pathname === "/" || pathname?.startsWith("/rag/chat") || isAudioActive || isWordDialogVisible || (pathname?.startsWith("/tafsir") && immersiveMode)) return null;
+  if (!mounted || pathname === "/" || pathname === "/rag" || pathname?.startsWith("/rag/") || pathname?.startsWith("/rag?") || isAudioActive || isWordDialogVisible || (pathname?.startsWith("/tafsir") && immersiveMode)) return null;
 
   return (
     <>

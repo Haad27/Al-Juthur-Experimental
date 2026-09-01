@@ -356,7 +356,7 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
                             </Link>
                             
                             <Link
-                              href={`/rag/chat?mode=lexicon&q=${encodeURIComponent(`What does the root ${data.rootQuery} mean?`)}`}
+                              href={`/rag?mode=lexicon&q=${encodeURIComponent(`What does the root ${data.rootQuery} mean?`)}`}
                               className="w-full px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-all text-center"
                             >
                               <Bot className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
