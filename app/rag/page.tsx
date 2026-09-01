@@ -314,45 +314,46 @@ function RagChatContent() {
   return (
     <div className={`flex h-dvh max-h-dvh w-full flex-col overflow-hidden bg-zinc-950 text-white ${inter.className}`}>
       {/* Top Header */}
-      <header className="shrink-0 z-40 bg-zinc-950/90 backdrop-blur-xl border-b border-zinc-800/80 px-3 sm:px-6 py-3 shadow-lg">
-        <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-3">
+      <header className="shrink-0 z-40 bg-zinc-950/90 backdrop-blur-xl border-b border-zinc-800/80 px-2.5 sm:px-6 py-2.5 sm:py-3 shadow-lg">
+        <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-2 sm:gap-3">
           
           {/* Left: Back & Title */}
-          <div className="flex items-center gap-2.5 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
             <Link
               href="/home"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-zinc-900/90 border border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-800 text-xs font-medium transition-all text-zinc-300 hover:text-white"
+              className="flex items-center justify-center size-8 sm:size-auto sm:px-2.5 sm:py-1.5 rounded-xl bg-zinc-900/90 border border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-800 text-xs font-medium transition-all text-zinc-300 hover:text-white shrink-0"
+              title="Return to Home"
             >
               <ArrowLeft className="size-3.5 sm:size-4" />
-              <span className="hidden sm:inline">Home</span>
+              <span className="hidden sm:inline sm:ml-1.5">Home</span>
             </Link>
 
-            <div className="h-5 w-px bg-zinc-800 hidden sm:block" />
+            <div className="h-5 w-px bg-zinc-800 hidden sm:block shrink-0" />
 
-            <div className="flex items-center gap-2">
-              <div className="size-8 sm:size-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-700/10 border border-emerald-500/30 flex items-center justify-center shadow-inner">
-                <Bot className="size-4 sm:size-5 text-emerald-400" />
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+              <div className="size-7 sm:size-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-700/10 border border-emerald-500/30 flex items-center justify-center shadow-inner shrink-0">
+                <Bot className="size-3.5 sm:size-5 text-emerald-400" />
               </div>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-sm sm:text-base text-white tracking-tight">AI Scholar</span>
+              <div className="flex flex-col min-w-0">
+                <div className="flex items-center gap-1 sm:gap-1.5">
+                  <span className="font-bold text-xs sm:text-base text-white tracking-tight shrink-0">AI Scholar</span>
                   <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hidden md:inline">
                     Quranic RAG Engine
                   </span>
                 </div>
-                <span className="text-[11px] text-zinc-400 truncate max-w-[180px] sm:max-w-[260px]">
-                  {currentBot.botTitle}
+                <span className="text-[10px] sm:text-[11px] text-zinc-400 truncate max-w-[90px] xs:max-w-[140px] sm:max-w-[260px]">
+                  {currentBot.shortName}
                 </span>
               </div>
             </div>
           </div>
 
           {/* Right: Actions & Quota */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {/* Disclaimers Toggle Button */}
             <button
               onClick={() => setShowDisclaimers(!showDisclaimers)}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer ${
+              className={`flex items-center justify-center size-8 sm:size-auto sm:px-2.5 sm:py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer ${
                 showDisclaimers
                   ? "bg-emerald-950/40 border-emerald-500/40 text-emerald-300"
                   : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
@@ -360,28 +361,28 @@ function RagChatContent() {
               title="Toggle Usage & Disclaimers"
             >
               <Info className="size-3.5 text-emerald-400" />
-              <span className="hidden md:inline">Notes & Disclaimers</span>
+              <span className="hidden md:inline md:ml-1.5">Notes & Disclaimers</span>
             </button>
 
             {/* Clear Chat Button */}
             {messages.length > 0 && (
               <button
                 onClick={handleClearChat}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-rose-500/40 hover:bg-rose-950/30 text-xs text-zinc-400 hover:text-rose-300 transition-all cursor-pointer"
+                className="flex items-center justify-center size-8 sm:size-auto sm:px-2.5 sm:py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-rose-500/40 hover:bg-rose-950/30 text-xs text-zinc-400 hover:text-rose-300 transition-all cursor-pointer"
                 title="Clear Chat"
               >
                 <Trash2 className="size-3.5" />
-                <span className="hidden lg:inline">Clear</span>
+                <span className="hidden lg:inline lg:ml-1.5">Clear</span>
               </button>
             )}
 
             {/* Token Quota Badge */}
-            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-zinc-900/90 border border-zinc-800 text-[11px] text-zinc-400 font-medium">
-              <Sparkles className="size-3.5 text-emerald-400 shrink-0" />
+            <div className="flex items-center gap-1 sm:gap-1.5 px-2 py-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-zinc-900/90 border border-zinc-800 text-[10px] sm:text-[11px] text-zinc-400 font-medium shrink-0">
+              <Sparkles className="size-3 sm:size-3.5 text-emerald-400 shrink-0" />
               {remainingTokens !== null ? (
-                <span>
+                <span className="whitespace-nowrap">
                   <strong className="text-emerald-400">{(tokenLimit - remainingTokens).toLocaleString()}</strong>
-                  <span className="text-zinc-500">/{tokenLimit.toLocaleString()}</span>
+                  <span className="text-zinc-500 hidden sm:inline">/{tokenLimit.toLocaleString()}</span>
                 </span>
               ) : (
                 <span>Active</span>
