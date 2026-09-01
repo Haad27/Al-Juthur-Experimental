@@ -412,120 +412,125 @@ function RagChatContent() {
       >
         <div className="max-w-[1050px] mx-auto space-y-4 pb-4">
 
-          {/* Opening Screen: Welcome, Disclaimer & Usage Notes */}
+          {/* Opening Screen: Unified Master Card Container */}
           {(messages.length === 0 || showDisclaimers) && (
             <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 sm:gap-3">
+              <div className="relative overflow-hidden rounded-3xl bg-zinc-900/60 border border-zinc-800/90 shadow-2xl backdrop-blur-2xl p-4 sm:p-5 md:p-6 transition-all">
                 
-                {/* Left Column (7 cols): Persona Hero, Sources & Quick-Start Prompts */}
-                <div className="lg:col-span-7 flex flex-col gap-2.5 sm:gap-3">
-                  
-                  {/* Persona & Sources Card */}
-                  <div className="rounded-2xl bg-gradient-to-br from-zinc-900 via-zinc-900/95 to-emerald-950/30 border border-emerald-500/25 p-3 sm:p-3.5 shadow-md flex flex-col justify-between gap-2">
-                    <div>
-                      <div className="flex items-center justify-between gap-2 mb-1">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${currentBot.badgeColor}`}>
-                            {currentBot.badge}
-                          </span>
-                          <span className="text-[10px] text-zinc-500 font-mono">ID: {currentBot.id}</span>
-                        </div>
-                        <Bot className="size-4 sm:size-5 text-emerald-400/70 shrink-0" />
+                {/* Ambient Subtle Glow */}
+                <div className="absolute -top-24 -right-24 size-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
+                {/* 1. Header Section: Bot Persona Hero */}
+                <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 sm:pb-4 border-b border-zinc-800/80">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <div className="size-10 sm:size-11 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/30 flex items-center justify-center shrink-0 shadow-inner">
+                      <Bot className="size-5 sm:size-6 text-emerald-400" />
+                    </div>
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h1 className="text-base sm:text-lg font-bold text-white tracking-tight">
+                          {currentBot.botTitle}
+                        </h1>
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${currentBot.badgeColor}`}>
+                          {currentBot.badge}
+                        </span>
                       </div>
-                      <h1 className="text-sm sm:text-base font-bold text-white tracking-tight">
-                        {currentBot.botTitle}
-                      </h1>
-                      <p className="text-[11px] sm:text-xs text-zinc-300 leading-relaxed mt-0.5">
+                      <p className="text-xs text-zinc-300 leading-relaxed max-w-2xl">
                         {currentBot.description}
                       </p>
                     </div>
-
-                    {/* Inline Indexed Sources */}
-                    <div className="pt-2 border-t border-zinc-800/80">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1 mb-1.5">
-                        <BookOpen className="size-3 text-emerald-400" />
-                        <span>Indexed Sources ({currentBot.sources.length}):</span>
-                      </div>
-                      <div className="flex flex-wrap gap-1">
-                        {currentBot.sources.map((src, idx) => (
-                          <span
-                            key={idx}
-                            className="px-2 py-0.5 rounded-md bg-zinc-950/80 border border-zinc-800 text-[10px] text-zinc-300 font-medium hover:border-emerald-500/30 transition-colors"
-                          >
-                            {src}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
                   </div>
 
-                  {/* Quick-Start Questions Card */}
-                  <div className="rounded-2xl bg-zinc-900/80 border border-emerald-500/20 p-2.5 sm:p-3 shadow-md flex flex-col gap-1.5">
-                    <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-emerald-400">
-                      <div className="flex items-center gap-1">
-                        <Lightbulb className="size-3 shrink-0" />
-                        <span>Quick-Start Prompts</span>
-                      </div>
-                      <span className="text-zinc-500 font-normal lowercase text-[10px]">click to ask</span>
+                  <div className="hidden sm:flex items-center gap-1.5 self-start shrink-0 px-2.5 py-1 rounded-xl bg-zinc-950/80 border border-zinc-800 text-[11px] text-zinc-400 font-mono">
+                    <Sparkles className="size-3 text-emerald-400" />
+                    <span>{currentBot.id}</span>
+                  </div>
+                </div>
+
+                {/* 2. Middle 3-Column Section: Sources, Disclaimers, Guidance */}
+                <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-3 py-3.5 sm:py-4 border-b border-zinc-800/80">
+                  
+                  {/* Sub-Card 1: Primary Indexed Sources */}
+                  <div className="rounded-2xl bg-zinc-950/60 border border-zinc-800/80 p-3 sm:p-3.5 flex flex-col gap-2 shadow-inner">
+                    <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+                      <BookOpen className="size-3.5 text-emerald-400 shrink-0" />
+                      <span>Indexed Sources ({currentBot.sources.length})</span>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
-                      {currentBot.examplePrompts.map((promptText, idx) => (
-                        <button
+                    <div className="flex flex-wrap gap-1">
+                      {currentBot.sources.map((src, idx) => (
+                        <span
                           key={idx}
-                          onClick={() => handleSendQuery(promptText)}
-                          disabled={isLoading}
-                          className="p-2 rounded-xl bg-zinc-950 border border-zinc-800/90 hover:border-emerald-500/50 hover:bg-zinc-900 text-left text-[10px] sm:text-[11px] text-zinc-200 transition-all flex flex-col justify-between gap-1 group cursor-pointer"
+                          className="px-2 py-0.5 rounded-lg bg-zinc-900/90 border border-zinc-800 text-[10px] sm:text-[11px] text-zinc-300 font-medium hover:border-emerald-500/30 transition-colors"
                         >
-                          <span className="line-clamp-2 leading-snug group-hover:text-emerald-300 transition-colors">
-                            "{promptText}"
-                          </span>
-                          <span className="text-[9px] font-semibold text-emerald-400/80 flex items-center gap-0.5 self-end">
-                            <span>Ask</span>
-                            <Send className="size-2 group-hover:translate-x-0.5 transition-transform" />
-                          </span>
-                        </button>
+                          {src}
+                        </span>
                       ))}
                     </div>
                   </div>
 
-                </div>
-
-                {/* Right Column (5 cols): Scope Rules & Usage Guidance */}
-                <div className="lg:col-span-5 flex flex-col gap-2.5 sm:gap-3">
-                  
-                  {/* Disclaimer & Scope */}
-                  <div className="rounded-2xl bg-amber-950/20 border border-amber-500/30 p-3 sm:p-3.5 space-y-1.5 shadow-sm">
-                    <div className="flex items-center gap-1.5 text-amber-400 text-[10px] font-bold uppercase tracking-wider">
-                      <ShieldAlert className="size-3.5 shrink-0" />
-                      <span>Disclaimer & Scope Rules</span>
+                  {/* Sub-Card 2: Scope & Disclaimers */}
+                  <div className="rounded-2xl bg-amber-950/20 border border-amber-500/25 p-3 sm:p-3.5 flex flex-col justify-between gap-2 shadow-inner">
+                    <div>
+                      <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-amber-400 mb-1">
+                        <ShieldAlert className="size-3.5 shrink-0" />
+                        <span>Scope & Disclaimers</span>
+                      </div>
+                      <p className="text-[11px] text-amber-200/90 leading-relaxed">
+                        {currentBot.disclaimer}
+                      </p>
                     </div>
-                    <p className="text-[11px] text-amber-200/90 leading-relaxed">
-                      {currentBot.disclaimer}
-                    </p>
                     <div className="pt-1.5 border-t border-amber-500/20 text-[10px] text-amber-300/80 flex items-center gap-1">
                       <AlertCircle className="size-3 shrink-0" />
-                      <span>Consult qualified Ulama for binding legal rulings.</span>
+                      <span>Consult qualified Ulama for binding rulings.</span>
                     </div>
                   </div>
 
-                  {/* Bot Usage Notes */}
-                  <div className="rounded-2xl bg-zinc-900/90 border border-zinc-800 p-3 sm:p-3.5 space-y-1.5 shadow-sm flex-1 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center gap-1.5 text-emerald-400 text-[10px] font-bold uppercase tracking-wider mb-1.5">
-                        <CheckCircle2 className="size-3.5 shrink-0" />
-                        <span>Scholarly Usage Guidance</span>
-                      </div>
-                      <ul className="space-y-1 text-[11px] text-zinc-300">
-                        {currentBot.usageNotes.map((note, idx) => (
-                          <li key={idx} className="flex items-start gap-1.5 leading-snug">
-                            <span className="size-1 rounded-full bg-emerald-500 shrink-0 mt-1.5" />
-                            <span>{note}</span>
-                          </li>
-                        ))}
-                      </ul>
+                  {/* Sub-Card 3: Scholarly Guidance */}
+                  <div className="rounded-2xl bg-zinc-950/60 border border-zinc-800/80 p-3 sm:p-3.5 flex flex-col gap-2 shadow-inner">
+                    <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-emerald-400">
+                      <CheckCircle2 className="size-3.5 shrink-0" />
+                      <span>Scholarly Guidance</span>
                     </div>
+                    <ul className="space-y-1 text-[11px] text-zinc-300">
+                      {currentBot.usageNotes.map((note, idx) => (
+                        <li key={idx} className="flex items-start gap-1.5 leading-snug">
+                          <span className="size-1 rounded-full bg-emerald-500 shrink-0 mt-1.5" />
+                          <span>{note}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
 
+                </div>
+
+                {/* 3. Bottom Row: Suggested Quick Inquiries */}
+                <div className="relative z-10 pt-3 sm:pt-3.5 space-y-2">
+                  <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+                    <div className="flex items-center gap-1.5 text-emerald-400">
+                      <Lightbulb className="size-3.5 shrink-0" />
+                      <span>Suggested Quick-Start Inquiries</span>
+                    </div>
+                    <span className="text-zinc-500 font-normal lowercase text-[10px]">click to ask</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {currentBot.examplePrompts.map((promptText, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSendQuery(promptText)}
+                        disabled={isLoading}
+                        className="p-2.5 rounded-xl bg-zinc-950/80 hover:bg-emerald-950/30 border border-zinc-800/90 hover:border-emerald-500/50 text-left text-xs text-zinc-200 transition-all flex flex-col justify-between gap-1.5 group cursor-pointer shadow-sm"
+                      >
+                        <span className="line-clamp-2 leading-relaxed text-[11px] text-zinc-300 group-hover:text-emerald-200 transition-colors">
+                          "{promptText}"
+                        </span>
+                        <span className="text-[9px] font-semibold text-emerald-400/80 flex items-center gap-0.5 self-end">
+                          <span>Ask</span>
+                          <Send className="size-2 group-hover:translate-x-0.5 transition-transform" />
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
               </div>
