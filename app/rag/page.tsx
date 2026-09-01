@@ -413,57 +413,57 @@ function RagChatContent() {
 
           {/* Opening Screen: Welcome, Disclaimer & Usage Notes */}
           {(messages.length === 0 || showDisclaimers) && (
-            <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
               
               {/* Bot Persona Hero Banner */}
-              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-zinc-900 via-zinc-900/90 to-emerald-950/40 border border-emerald-500/25 p-5 sm:p-7 shadow-lg">
-                <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-                  <Bot className="size-36 text-emerald-400" />
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-zinc-900 via-zinc-900/90 to-emerald-950/40 border border-emerald-500/25 p-3.5 sm:p-4 shadow-md">
+                <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                  <Bot className="size-16 sm:size-20 text-emerald-400" />
                 </div>
-                <div className="relative z-10 space-y-3">
+                <div className="relative z-10 space-y-1.5">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${currentBot.badgeColor}`}>
+                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${currentBot.badgeColor}`}>
                       {currentBot.badge}
                     </span>
-                    <span className="text-xs text-zinc-400 font-mono">Model ID: {currentBot.id}</span>
+                    <span className="text-[11px] text-zinc-500 font-mono">Model ID: {currentBot.id}</span>
                   </div>
-                  <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                  <h1 className="text-base sm:text-lg font-bold text-white tracking-tight">
                     {currentBot.botTitle}
                   </h1>
-                  <p className="text-sm text-zinc-300 leading-relaxed max-w-[800px]">
+                  <p className="text-xs sm:text-[13px] text-zinc-300 leading-relaxed max-w-[750px]">
                     {currentBot.description}
                   </p>
                 </div>
               </div>
 
               {/* Grid: Disclaimers & Usage Notes */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 
                 {/* Disclaimer & Scope Notes */}
-                <div className="rounded-2xl bg-amber-950/20 border border-amber-500/30 p-5 space-y-3 shadow-sm">
-                  <div className="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider">
-                    <ShieldAlert className="size-4 shrink-0" />
+                <div className="rounded-2xl bg-amber-950/20 border border-amber-500/30 p-3.5 space-y-2 shadow-sm">
+                  <div className="flex items-center gap-1.5 text-amber-400 text-[11px] font-bold uppercase tracking-wider">
+                    <ShieldAlert className="size-3.5 shrink-0" />
                     <span>Disclaimer & Scope Rules</span>
                   </div>
-                  <p className="text-xs sm:text-sm text-amber-200/90 leading-relaxed">
+                  <p className="text-[11px] sm:text-xs text-amber-200/90 leading-relaxed">
                     {currentBot.disclaimer}
                   </p>
-                  <div className="pt-2 border-t border-amber-500/20 text-[11px] text-amber-300/80 flex items-center gap-1.5">
-                    <AlertCircle className="size-3.5 shrink-0" />
+                  <div className="pt-1.5 border-t border-amber-500/20 text-[10px] sm:text-[11px] text-amber-300/80 flex items-center gap-1.5">
+                    <AlertCircle className="size-3 shrink-0" />
                     <span>Always consult qualified human scholars (Ulama) for binding rulings.</span>
                   </div>
                 </div>
 
                 {/* Usage Notes */}
-                <div className="rounded-2xl bg-zinc-900/90 border border-zinc-800 p-5 space-y-3 shadow-sm">
-                  <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider">
-                    <CheckCircle2 className="size-4 shrink-0" />
+                <div className="rounded-2xl bg-zinc-900/90 border border-zinc-800 p-3.5 space-y-2 shadow-sm">
+                  <div className="flex items-center gap-1.5 text-emerald-400 text-[11px] font-bold uppercase tracking-wider">
+                    <CheckCircle2 className="size-3.5 shrink-0" />
                     <span>Bot Usage Notes</span>
                   </div>
-                  <ul className="space-y-2 text-xs sm:text-sm text-zinc-300">
+                  <ul className="space-y-1 text-[11px] sm:text-xs text-zinc-300">
                     {currentBot.usageNotes.map((note, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <span className="size-1.5 rounded-full bg-emerald-500 shrink-0 mt-1.5" />
+                      <li key={idx} className="flex items-start gap-1.5 leading-snug">
+                        <span className="size-1 rounded-full bg-emerald-500 shrink-0 mt-1.5" />
                         <span>{note}</span>
                       </li>
                     ))}
@@ -472,18 +472,18 @@ function RagChatContent() {
               </div>
 
               {/* Queried Classical Sources */}
-              <div className="rounded-2xl bg-zinc-900/70 border border-zinc-800/80 p-4 sm:p-5 space-y-3">
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-400">
-                  <BookOpen className="size-4 text-emerald-400 shrink-0" />
+              <div className="rounded-2xl bg-zinc-900/70 border border-zinc-800/80 p-3 sm:p-3.5 space-y-2">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+                  <BookOpen className="size-3.5 text-emerald-400 shrink-0" />
                   <span>Primary Indexed Sources for {currentBot.shortName}:</span>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {currentBot.sources.map((src, idx) => (
                     <span
                       key={idx}
-                      className="px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-zinc-300 font-medium flex items-center gap-1.5 hover:border-emerald-500/30 transition-colors"
+                      className="px-2.5 py-1 rounded-lg bg-zinc-950 border border-zinc-800 text-[11px] text-zinc-300 font-medium flex items-center gap-1.5 hover:border-emerald-500/30 transition-colors"
                     >
-                      <BookOpen className="size-3 text-emerald-500 shrink-0" />
+                      <BookOpen className="size-2.5 text-emerald-500 shrink-0" />
                       <span>{src}</span>
                     </span>
                   ))}
@@ -491,20 +491,20 @@ function RagChatContent() {
               </div>
 
               {/* Quick-Start Example Prompts */}
-              <div className="rounded-2xl bg-gradient-to-br from-emerald-950/20 via-zinc-900/90 to-zinc-900 border border-emerald-500/20 p-4 sm:p-5 space-y-3">
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400">
-                  <Lightbulb className="size-4 shrink-0" />
+              <div className="rounded-2xl bg-gradient-to-br from-emerald-950/20 via-zinc-900/90 to-zinc-900 border border-emerald-500/20 p-3 sm:p-3.5 space-y-2">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-400">
+                  <Lightbulb className="size-3.5 shrink-0" />
                   <span>Suggested Quick-Start Questions:</span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {currentBot.examplePrompts.map((promptText, idx) => (
                     <button
                       key={idx}
                       onClick={() => handleSendQuery(promptText)}
                       disabled={isLoading}
-                      className="p-3 rounded-xl bg-zinc-950 border border-zinc-800/90 hover:border-emerald-500/50 hover:bg-zinc-900 text-left text-xs text-zinc-200 transition-all flex flex-col justify-between gap-2 group cursor-pointer"
+                      className="p-2.5 rounded-xl bg-zinc-950 border border-zinc-800/90 hover:border-emerald-500/50 hover:bg-zinc-900 text-left text-[11px] sm:text-xs text-zinc-200 transition-all flex flex-col justify-between gap-1.5 group cursor-pointer"
                     >
-                      <span className="line-clamp-3 leading-snug group-hover:text-emerald-300 transition-colors">
+                      <span className="line-clamp-2 leading-snug group-hover:text-emerald-300 transition-colors">
                         "{promptText}"
                       </span>
                       <span className="text-[10px] font-semibold text-emerald-400/80 flex items-center gap-1">
