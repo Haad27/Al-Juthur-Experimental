@@ -530,9 +530,16 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                         value={selectedModeId}
                         onChange={(e) => setSelectedModeId(e.target.value)}
                       >
-                        {RAG_MODES.map(m => (
-                          <option key={m.id} value={m.id} className="bg-zinc-900 text-zinc-300">{m.shortName}</option>
-                        ))}
+                        <optgroup label="Main RAG Models">
+                          {RAG_MODES.filter(m => m.isPrimary).map(m => (
+                            <option key={m.id} value={m.id} className="bg-zinc-900 text-zinc-100 font-medium">{m.shortName}</option>
+                          ))}
+                        </optgroup>
+                        <optgroup label="Specialized Models">
+                          {RAG_MODES.filter(m => !m.isPrimary).map(m => (
+                            <option key={m.id} value={m.id} className="bg-zinc-900 text-zinc-300">{m.shortName}</option>
+                          ))}
+                        </optgroup>
                       </select>
                       <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 size-3.5 text-emerald-400 pointer-events-none" />
                     </div>

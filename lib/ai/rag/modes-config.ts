@@ -19,6 +19,7 @@ export interface RagModeInfo {
   examplePrompts: string[];
   suggestedChips?: SuggestedChip[];
   description: string;
+  isPrimary?: boolean;
 }
 
 export const RAG_MODES: RagModeInfo[] = [
@@ -27,8 +28,9 @@ export const RAG_MODES: RagModeInfo[] = [
     name: "1. AI Scholar · General Tafsir",
     shortName: "General Tafsir",
     botTitle: "General Tafsir AI Scholar",
-    badge: "Balanced & Recommended",
+    badge: "Main Model · Balanced",
     badgeColor: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
+    isPrimary: true,
     targetIntent: "Direct answers and general Quranic queries using the safest, most universally accepted classical commentaries.",
     sources: [
       "Tafsir Ibn Kathir (English & Arabic)",
@@ -44,25 +46,61 @@ export const RAG_MODES: RagModeInfo[] = [
       "Provides direct verse citations and cross-references."
     ],
     examplePrompts: [
-      "What is the background context and main theme of Surah Al-Mulk?",
-      "Explain the spiritual significance of Ayah al-Kursi according to classical tafsir.",
-      "Summarize the story of Ashab al-Kahf (People of the Cave) from Ibn Kathir."
+      "What is the background context and main theme of Surah Al-Mulk according to classical tafsir scholars?",
+      "Explain the spiritual significance of Ayah al-Kursi according to classical tafsir scholars.",
+      "Summarize the story of Ashab al-Kahf (People of the Cave) according to classical tafsir scholars."
     ],
     suggestedChips: [
-      { label: "Explain verse", icon: "book", prompt: "Explain the background context, linguistic nuance, and classical tafsir of Surah Al-Ikhlas." },
-      { label: "Ayat al-Kursi", icon: "sparkles", prompt: "Explain the spiritual significance and deep meanings of Ayah al-Kursi according to Ibn Kathir and classical scholars." },
-      { label: "Surah Al-Mulk", icon: "compass", prompt: "What is the background context and main theme of Surah Al-Mulk according to classical tafsir?" },
-      { label: "People of the Cave", icon: "scroll", prompt: "Summarize the story and spiritual lessons of Ashab al-Kahf (People of the Cave) from Ibn Kathir and Al-Tabari." }
+      { label: "Explain verse", icon: "book", prompt: "Explain the background context, linguistic nuance, and classical tafsir of Surah Al-Ikhlas according to classical tafsir scholars." },
+      { label: "Ayat al-Kursi", icon: "sparkles", prompt: "Explain the spiritual significance and deep meanings of Ayah al-Kursi according to classical tafsir scholars." },
+      { label: "Surah Al-Mulk", icon: "compass", prompt: "What is the background context and main theme of Surah Al-Mulk according to classical tafsir scholars?" },
+      { label: "People of the Cave", icon: "scroll", prompt: "Summarize the story and spiritual lessons of Ashab al-Kahf (People of the Cave) according to classical tafsir scholars." }
     ],
     description: "The primary mode for standard study. Combines authentic narration (Riwayah) with rigorous analytical commentary and linguistic clarity."
   },
   {
+    id: "lexicon",
+    name: "2. AI Scholar · Classical Lexicon",
+    shortName: "Classical Lexicon",
+    botTitle: "Classical Arabic Lexicon AI Scholar",
+    badge: "Main Model · Root Lexicon",
+    badgeColor: "bg-rose-500/10 text-rose-400 border-rose-500/30",
+    isPrimary: true,
+    targetIntent: "Classical dictionary lookups, root concept structure, semantic nuances, and exhaustive classical Arabic usage.",
+    sources: [
+      "Mufradat Alfaz al-Quran (Al-Raghib al-Isfahani)",
+      "Lisan al-Arab (Ibn Manzur)",
+      "Maqayis al-Lughah (Ibn Faris)",
+      "Lane's Lexicon (English cross-reference layer)"
+    ],
+    warning: "NOTE: Lexicon Mode is strictly bounded to root semantics, word definitions, and morphological forms. For full verse exegesis, switch to General Tafsir Mode.",
+    disclaimer: "Strictly bounded to 3-letter/4-letter Arabic root definitions and classical dictionary entries. Does not output exegesis or legal rulings.",
+    usageNotes: [
+      "Search by 3-letter Arabic root or word concept (e.g. r-h-m, s-l-m).",
+      "Traces semantic root evolution from pre-Islamic poetry to Quranic usage.",
+      "Provides English definitions cross-referenced with Lane's Lexicon."
+    ],
+    examplePrompts: [
+      "What is the primary root meaning and semantic journey of 'Rahmah' (ر ح م) according to classical Arabic lexicons?",
+      "Explore the classical dictionary definitions for the root 'S-K-N' (س ك ن) in classical lexicons.",
+      "Compare the root meanings of 'Alim' (علم) vs 'Khabir' (خبر) in classical lexicons."
+    ],
+    suggestedChips: [
+      { label: "Root Rahmah (ر ح م)", icon: "layers", prompt: "What is the primary root meaning and semantic journey of 'Rahmah' (ر ح م) across classical lexicons?" },
+      { label: "Root Sakana (س ك ن)", icon: "search", prompt: "Explore the classical dictionary definitions and root connotations for 'S-K-N' (س ك ن) in classical lexicons." },
+      { label: "Alim vs Khabir", icon: "book", prompt: "Compare the root meanings and subtle semantic differences between 'Alim' (علم) and 'Khabir' (خبر) in classical lexicons." },
+      { label: "Root Taqwa (و ق ي)", icon: "scroll", prompt: "Trace the morphological origin and linguistic evolution of 'Taqwa' from the root W-Q-Y in classical dictionaries." }
+    ],
+    description: "Searches primary classical Arabic dictionaries to reveal the precise semantic root journey and classical range of meaning for Quranic vocabulary."
+  },
+  {
     id: "classical",
-    name: "2. AI Scholar · Hadith & Isnad",
+    name: "3. AI Scholar · Hadith & Isnad",
     shortName: "Hadith & Isnad",
     botTitle: "Classical Hadith & Isnad AI Scholar",
     badge: "Early Salaf & Narrations",
     badgeColor: "bg-amber-500/10 text-amber-400 border-amber-500/30",
+    isPrimary: false,
     targetIntent: "Focused on historical narrations, early Sahabah and Salaf reports, and isnad-grounded exegesis.",
     sources: [
       "Tafsir Ibn Kathir (Arabic & English)",
@@ -78,23 +116,24 @@ export const RAG_MODES: RagModeInfo[] = [
     examplePrompts: [
       "What did Ibn Abbas transmit regarding the opening verses of Surah Al-Baqarah?",
       "Show me early Sahabah narrations about the revelation of Surah Al-Kahf.",
-      "What reports exist in Al-Tabari concerning the night journey (Isra & Mi'raj)?"
+      "What reports exist according to classical tafsir scholars concerning the night journey (Isra & Mi'raj)?"
     ],
     suggestedChips: [
       { label: "Verify narration", icon: "pen", prompt: "What did early Sahabah and Salaf narrate regarding the opening verses of Surah Al-Baqarah?" },
-      { label: "Ibn Abbas reports", icon: "scroll", prompt: "What authentic reports from Ibn Abbas exist in Tafsir al-Tabari regarding the creation of the heavens and earth?" },
+      { label: "Ibn Abbas reports", icon: "scroll", prompt: "What authentic reports from Ibn Abbas exist according to classical tafsir scholars regarding the creation of the heavens and earth?" },
       { label: "Asbab al-Nuzul", icon: "book", prompt: "What are the authentic narrations regarding the cause of revelation (Asbab al-Nuzul) of Surah Al-Kahf?" },
-      { label: "Night Journey", icon: "compass", prompt: "What classical reports exist in Al-Tabari and Ibn Kathir concerning the night journey (Isra & Mi'raj)?" }
+      { label: "Night Journey", icon: "compass", prompt: "What classical reports exist according to classical tafsir scholars concerning the night journey (Isra & Mi'raj)?" }
     ],
     description: "Ideal for verifying exactly what the early generations of Islam (Sahabah, Tabi'in) transmitted regarding any ayah or historical event."
   },
   {
     id: "grammar",
-    name: "3. AI Scholar · Grammar & Balagha",
+    name: "4. AI Scholar · Grammar & Balagha",
     shortName: "Grammar & Balagha",
     botTitle: "Grammar & Balagha AI Scholar",
     badge: "Linguistic & Rhetoric Focus",
     badgeColor: "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
+    isPrimary: false,
     targetIntent: "Word origins, syntax (i'rab), rhetorical beauty (balagha), particle structure, and deep grammatical breakdown.",
     sources: [
       "Al-Kashshaf (Al-Zamakhshari)",
@@ -123,11 +162,12 @@ export const RAG_MODES: RagModeInfo[] = [
   },
   {
     id: "modern",
-    name: "4. AI Scholar · Contemporary & Maqasid",
+    name: "5. AI Scholar · Contemporary & Maqasid",
     shortName: "Contemporary & Maqasid",
     botTitle: "Contemporary & Maqasid AI Scholar",
     badge: "Modern Application & Themes",
     badgeColor: "bg-blue-500/10 text-blue-400 border-blue-500/30",
+    isPrimary: false,
     targetIntent: "Macro-themes, higher objectives of Shariah (Maqasid), societal context, modern psychology, and inter-verse connections across surahs.",
     sources: [
       "Al-Tahrir wa al-Tanwir (Ibn Ashur)",
@@ -155,11 +195,12 @@ export const RAG_MODES: RagModeInfo[] = [
   },
   {
     id: "philosophical",
-    name: "5. AI Scholar · Rational & Proofs",
+    name: "6. AI Scholar · Rational & Proofs",
     shortName: "Rational & Proofs",
     botTitle: "Rational & Philosophical AI Scholar",
     badge: "Intellectual & Logical Analysis",
     badgeColor: "bg-purple-500/10 text-purple-400 border-purple-500/30",
+    isPrimary: false,
     targetIntent: "Intellectual reflection, rational proofs, and philosophical arguments based on classical exegesis.",
     sources: [
       "Tafsir al-Razi (Mafatih al-Ghayb / The Great Tafsir)",
@@ -174,51 +215,17 @@ export const RAG_MODES: RagModeInfo[] = [
       "Deeply explores ontological and thematic questions."
     ],
     examplePrompts: [
-      "What rational arguments does Imam al-Razi present for divine creation in Surah Al-An'am?",
+      "What rational arguments do classical tafsir scholars present for divine creation in Surah Al-An'am?",
       "How do classical commentators discuss the concept of time in Surah Al-Asr?",
       "Explain the philosophical proofs for resurrection in Surah Ya-Sin."
     ],
     suggestedChips: [
-      { label: "Creation arguments", icon: "brain", prompt: "What rational arguments does Imam al-Razi present for divine creation and design in Surah Al-An'am?" },
+      { label: "Creation arguments", icon: "brain", prompt: "What rational arguments do classical tafsir scholars present for divine creation and design in Surah Al-An'am?" },
       { label: "Concept of time", icon: "clock", prompt: "How do classical commentators and philosophers discuss the concept of time in Surah Al-Asr?" },
       { label: "Proofs of resurrection", icon: "lightbulb", prompt: "Explain the philosophical and rational proofs for resurrection presented in Surah Ya-Sin." },
-      { label: "Problem of trials", icon: "sparkles", prompt: "How does Imam al-Alusi explain divine wisdom behind human suffering and trials?" }
+      { label: "Problem of trials", icon: "sparkles", prompt: "How do classical tafsir scholars explain divine wisdom behind human suffering and trials?" }
     ],
     description: "Engages with deep rational arguments, logical proofs, and philosophical reflections across classical scholarship."
-  },
-  {
-    id: "lexicon",
-    name: "6. AI Scholar · Classical Lexicon",
-    shortName: "Classical Lexicon",
-    botTitle: "Classical Arabic Lexicon AI Scholar",
-    badge: "Root Etymology & Dictionaries",
-    badgeColor: "bg-rose-500/10 text-rose-400 border-rose-500/30",
-    targetIntent: "Classical dictionary lookups, root concept structure, semantic nuances, and exhaustive classical Arabic usage.",
-    sources: [
-      "Mufradat Alfaz al-Quran (Al-Raghib al-Isfahani)",
-      "Lisan al-Arab (Ibn Manzur)",
-      "Maqayis al-Lughah (Ibn Faris)",
-      "Lane's Lexicon (English cross-reference layer)"
-    ],
-    warning: "NOTE: Lexicon Mode is strictly bounded to root semantics, word definitions, and morphological forms. For full verse exegesis, switch to General Tafsir Mode.",
-    disclaimer: "Strictly bounded to 3-letter/4-letter Arabic root definitions and classical dictionary entries. Does not output exegesis or legal rulings.",
-    usageNotes: [
-      "Search by 3-letter Arabic root or word concept (e.g. r-h-m, s-l-m).",
-      "Traces semantic root evolution from pre-Islamic poetry to Quranic usage.",
-      "Provides English definitions cross-referenced with Lane's Lexicon."
-    ],
-    examplePrompts: [
-      "What is the primary root meaning and semantic journey of 'Rahmah' (ر ح م)?",
-      "Explore the classical dictionary definitions for the root 'S-K-N' (س ك ن).",
-      "Compare the root meanings of 'Alim' (علم) vs 'Khabir' (خبر) in classical lexicons."
-    ],
-    suggestedChips: [
-      { label: "Root Rahmah (ر ح م)", icon: "layers", prompt: "What is the primary root meaning and semantic journey of 'Rahmah' (ر ح م) across Lisan al-Arab and Lane's Lexicon?" },
-      { label: "Root Sakana (س ك ن)", icon: "search", prompt: "Explore the classical dictionary definitions and root connotations for 'S-K-N' (س ك ن)." },
-      { label: "Alim vs Khabir", icon: "book", prompt: "Compare the root meanings and subtle semantic differences between 'Alim' (علم) and 'Khabir' (خبر) in classical lexicons." },
-      { label: "Root Taqwa (و ق ي)", icon: "scroll", prompt: "Trace the morphological origin and linguistic evolution of 'Taqwa' from the root W-Q-Y in classical dictionaries." }
-    ],
-    description: "Searches primary classical Arabic dictionaries to reveal the precise semantic root journey and classical range of meaning for Quranic vocabulary."
   }
 ];
 

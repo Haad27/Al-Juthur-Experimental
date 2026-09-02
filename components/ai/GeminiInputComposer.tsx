@@ -132,12 +132,46 @@ export default function GeminiInputComposer({
           <SelectTrigger className="!h-auto !py-0 !px-1 !bg-transparent dark:!bg-transparent hover:!bg-transparent dark:hover:!bg-transparent !border-0 dark:!border-0 !shadow-none text-zinc-300 hover:text-white font-normal sm:font-medium text-xs sm:text-sm rounded-none focus:!ring-0 focus-visible:!ring-0 gap-1 inline-flex items-center cursor-pointer transition-colors shrink-0 outline-none">
             <span className="truncate max-w-[120px] sm:max-w-[170px]">{currentBot.shortName}</span>
           </SelectTrigger>
-          <SelectContent className="bg-zinc-900/95 backdrop-blur-xl border-zinc-800 text-zinc-300 max-h-[380px] w-[300px] sm:w-[360px]">
+          <SelectContent className="bg-zinc-900/95 backdrop-blur-xl border-zinc-800 text-zinc-300 max-h-[440px] w-[310px] sm:w-[370px]">
             <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-zinc-500 border-b border-zinc-800 mb-1 flex items-center justify-between">
               <span>Select AI Scholar Persona</span>
-              <span className="text-emerald-400">6 Bots Available</span>
+              <span className="text-emerald-400 font-semibold">6 Bots Available</span>
             </div>
-            {RAG_MODES.map((bot) => (
+
+            {/* Core Models (Primary RAG) */}
+            <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400/90 flex items-center justify-between">
+              <span>Main Core Models</span>
+              <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Primary RAG</span>
+            </div>
+            {RAG_MODES.filter((b) => b.isPrimary).map((bot) => (
+              <SelectItem
+                key={bot.id}
+                value={bot.id}
+                className="focus:bg-zinc-800/80 focus:text-white cursor-pointer py-2.5 border-b border-zinc-800/30"
+              >
+                <div className="flex flex-col gap-1 text-left">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-bold text-xs text-white flex items-center gap-1.5">
+                      <Bot className={`size-3.5 shrink-0 ${bot.id === "lexicon" ? "text-rose-400" : "text-emerald-400"}`} />
+                      <span>{bot.shortName}</span>
+                    </span>
+                    <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded border ${bot.badgeColor}`}>
+                      {bot.badge}
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-zinc-400 leading-snug line-clamp-2">
+                    {bot.targetIntent}
+                  </span>
+                </div>
+              </SelectItem>
+            ))}
+
+            {/* Specialized Models */}
+            <div className="px-3 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-zinc-500 border-t border-zinc-800 mt-1 flex items-center justify-between">
+              <span>Specialized Perspectives</span>
+              <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-zinc-800/80 text-zinc-400 border border-zinc-700">Specialized</span>
+            </div>
+            {RAG_MODES.filter((b) => !b.isPrimary).map((bot) => (
               <SelectItem
                 key={bot.id}
                 value={bot.id}
@@ -146,7 +180,7 @@ export default function GeminiInputComposer({
                 <div className="flex flex-col gap-1 text-left">
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-bold text-xs text-white flex items-center gap-1.5">
-                      <Bot className="size-3.5 text-emerald-400 shrink-0" />
+                      <Bot className="size-3.5 text-zinc-400 shrink-0" />
                       <span>{bot.shortName}</span>
                     </span>
                     <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded border ${bot.badgeColor}`}>
