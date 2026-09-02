@@ -135,12 +135,12 @@ export const RAG_MODES: RagModeInfo[] = [
       "Ruh al-Ma'ani (Imam Shihab al-Din al-Alusi)",
       "Anwar al-Tanzil (Tafsir al-Baydawi)"
     ],
-    warning: "NOTE: This mode focuses on intellectual and rational reflection of verses using logical proofs. For basic jurisprudence or standard devotional reading, please use General Tafsir Mode.",
-    disclaimer: "Focuses on rational proofs and academic philosophical exegesis. Not designed for practical jurisprudence or daily devotional rulings.",
+    warning: "NOTE: This mode focuses on intellectual and rational reflection of verses using logical proofs. This system strictly focuses on Quranic Tafsir and does not issue legal rulings or engage in sectarian/creed disputes.",
+    disclaimer: "Focuses on rational proofs and academic exegesis. Not designed for practical jurisprudence or theological creed debates.",
     usageNotes: [
       "Ideal for exploring logical proofs of monotheism and cosmological reflection.",
       "Analyzes rational arguments presented in classical scholarly debates.",
-      "Deeply explores ontological and theological questions."
+      "Deeply explores ontological and thematic questions."
     ],
     examplePrompts: [
       "What rational arguments does Imam al-Razi present for divine creation in Surah Al-An'am?",
@@ -163,7 +163,7 @@ export const RAG_MODES: RagModeInfo[] = [
       "Maqayis al-Lughah (Ibn Faris)",
       "Lane's Lexicon (English cross-reference layer)"
     ],
-    warning: "NOTE: Lexicon Mode is strictly bounded to root semantics, word definitions, and morphological forms. For full verse tafsir or practical rulings, switch to General Tafsir Mode.",
+    warning: "NOTE: Lexicon Mode is strictly bounded to root semantics, word definitions, and morphological forms. For full verse exegesis, switch to General Tafsir Mode.",
     disclaimer: "Strictly bounded to 3-letter/4-letter Arabic root definitions and classical dictionary entries. Does not output exegesis or legal rulings.",
     usageNotes: [
       "Search by 3-letter Arabic root or word concept (e.g. r-h-m, s-l-m).",

@@ -165,13 +165,69 @@ export async function prepareRagQuery(
     }
   }
 
-  // 2. Fast deterministic guardrail checks
+  // 2. Fast deterministic guardrail checks (Universally applied to ALL modes)
+  const UNIVERSAL_GUARDRAIL_REFUSAL = 
+    "Al-Juthur AI Scholar is strictly dedicated to classical Quranic Tafsir, verse exegesis, and linguistic commentary. It does NOT issue Fiqh rulings (Fatwas) or engage in sectarian, polemical, or theological (Aqeedah) disputes. For binding religious rulings and edicts, please consult certified human scholars (Ulama / Muftis).";
+
+  // A. Immediate block for sectarian groups, modern polemics & controversial theological keywords
+  const isSectarianOrControversial = /\b(mawlid|milad|eid milad|kadiyani|qadiani|qadiyani|ahmadi|ahmadiyya|mirza ghulam|shiya|shia|shi'a|shiite|shiah|rafida|rafidi|rafidhi|sunni vs shia|shia vs sunni|deobandi|barelvi|barelwi|wahhabi|takfir|khawarij|kharijite)\b/i.test(cleanMessage);
+
+  if (isSectarianOrControversial) {
+    return {
+      isScopeValid: false,
+      warningMessage: UNIVERSAL_GUARDRAIL_REFUSAL,
+      expandedQueryAr: baseArWords.join(' '),
+      expandedQueryEn: cleanMessage,
+      keywords: baseKeywords,
+      rootWords: Array.from(new Set(baseRoots)),
+      targetSurahAyah: parsedRef,
+      queryType: parsedRef?.ayah ? 'specific' : 'thematic',
+      mode
+    };
+  }
+
+  // B. Immediate block for direct Fiqh legal rulings, fatwas, or procedural ritual rulings
+  const isDirectFiqhOrFatwa = /\b(fatwa|ruling|halal|haram|permissible|impermissible|forbidden|can i marry|divorce|talaq|how to pray|wudu steps|ghusl steps|zakat calculation|calculate my zakat|inheritance calculation|inheritance share|punishment for)\b/i.test(cleanMessage);
+  
+  // Check if query is explicitly asking for classical Tafsir commentary of a verse rather than a ruling
+  const isExplicitTafsirRequest = /\b(tafsir|commentary|exegesis|ayah|surah|verse|tabari|ibn kathir|qurtubi|baghawi|ashur)\b/i.test(cleanMessage) && (parsedRef !== null || /\b(tafsir of|meaning of verse|commentary on)\b/i.test(cleanMessage));
+
+  if (isDirectFiqhOrFatwa && !isExplicitTafsirRequest) {
+    return {
+      isScopeValid: false,
+      warningMessage: UNIVERSAL_GUARDRAIL_REFUSAL,
+      expandedQueryAr: baseArWords.join(' '),
+      expandedQueryEn: cleanMessage,
+      keywords: baseKeywords,
+      rootWords: Array.from(new Set(baseRoots)),
+      targetSurahAyah: parsedRef,
+      queryType: parsedRef?.ayah ? 'specific' : 'thematic',
+      mode
+    };
+  }
+
+  // C. Immediate block for theological creed (Aqeedah/Kalam) debates
+  const isAqeedahDebate = /\b(aqeedah|aqidah|creed debate|ashari vs|maturidi vs|athari vs|where is allah|is quran created|kalam debate)\b/i.test(cleanMessage);
+  if (isAqeedahDebate && !isExplicitTafsirRequest) {
+    return {
+      isScopeValid: false,
+      warningMessage: UNIVERSAL_GUARDRAIL_REFUSAL,
+      expandedQueryAr: baseArWords.join(' '),
+      expandedQueryEn: cleanMessage,
+      keywords: baseKeywords,
+      rootWords: Array.from(new Set(baseRoots)),
+      targetSurahAyah: parsedRef,
+      queryType: parsedRef?.ayah ? 'specific' : 'thematic',
+      mode
+    };
+  }
+
   if (mode === 'grammar') {
-    const isAqidahOrFiqh = /\b(aqidah|creed|halal|haram|fatwa|ruling|divorce|marriage|inherit|punishment|predestination|qadar)\b/i.test(cleanMessage);
-    if (isAqidahOrFiqh && !/\b(grammar|i'rab|irab|balagha|syntax|particle|rhetoric|linguistic|word|root)\b/i.test(cleanMessage)) {
+    const isOutOfScopeForGrammar = /\b(aqidah|creed|halal|haram|fatwa|ruling|divorce|marriage|inherit|punishment|predestination|qadar)\b/i.test(cleanMessage);
+    if (isOutOfScopeForGrammar && !/\b(grammar|i'rab|irab|balagha|syntax|particle|rhetoric|linguistic|word|root)\b/i.test(cleanMessage)) {
       return {
         isScopeValid: false,
-        warningMessage: "This mode is dedicated strictly to linguistic and grammatical extraction from classical linguists (Al-Zamakhshari, Abu Hayyan, Al-Darwish). For general rulings or theological inquiries, please switch to Default Mode.",
+        warningMessage: UNIVERSAL_GUARDRAIL_REFUSAL,
         expandedQueryAr: baseArWords.join(' '),
         expandedQueryEn: cleanMessage,
         keywords: baseKeywords,
@@ -184,11 +240,11 @@ export async function prepareRagQuery(
   }
 
   if (mode === 'lexicon') {
-    const isGeneralRuling = /\b(halal|haram|fatwa|ruling|how to pray|zakat calculation)\b/i.test(cleanMessage);
-    if (isGeneralRuling && !/\b(meaning|root|word|define|dictionary|lexicon|usage|lane|mufradat|lisan)\b/i.test(cleanMessage)) {
+    const isOutOfScopeForLexicon = /\b(halal|haram|fatwa|ruling|how to pray|zakat calculation)\b/i.test(cleanMessage);
+    if (isOutOfScopeForLexicon && !/\b(meaning|root|word|define|dictionary|lexicon|usage|lane|mufradat|lisan)\b/i.test(cleanMessage)) {
       return {
         isScopeValid: false,
-        warningMessage: "Lexicon Mode is specialized for word-level dictionary lookups and semantic root exploration (Mufradat, Lisan al-Arab, Lane's Lexicon). For general theological answers or commentary, please switch to Default Mode.",
+        warningMessage: UNIVERSAL_GUARDRAIL_REFUSAL,
         expandedQueryAr: baseArWords.join(' '),
         expandedQueryEn: cleanMessage,
         keywords: baseKeywords,
@@ -212,12 +268,12 @@ ACTIVE MODE: "lexicon"
 CRITICAL INSTRUCTIONS:
 1. **Root Word Extraction**: You MUST identify and extract ALL relevant 3-letter or 4-letter Arabic root words from the user's inquiry or referenced verses (e.g., if the user asks about 'mawaddah and rahmah', extract BOTH 'ودد' and 'رحم'; if asking about 'tranquility (sakina) and love', extract 'سكن' and 'ودد'; if asking about a specific verse, extract the primary roots present in that verse). Always return all relevant roots in the "rootWords" array.
 2. **Verse Suggestion**: Provide 1 to 3 prime examples of verses where these root words are beautifully showcased in the Quran. These verses will be used to demonstrate Quranic application of the roots.
-3. **Aqeedah & Fiqh Guardrail**: Strictly refuse theological (Aqeedah), sectarian, or Fiqh questions. Set isScopeValid to false.
+3. **UNIVERSAL AQEEDAH & FIQH GUARDRAIL**: Strictly refuse theological (Aqeedah), sectarian (e.g. Shia, Qadiani/Kadiyani, Mawlid), or Fiqh questions. Set isScopeValid to false.
 
 OUTPUT JSON FORMAT ONLY:
 {
   "isScopeValid": true or false,
-  "warningMessage": "Only if isScopeValid is false, state why clearly.",
+  "warningMessage": "Only if isScopeValid is false: 'Al-Juthur AI Scholar is strictly dedicated to classical Quranic Tafsir, verse exegesis, and linguistic commentary. It does not provide Fiqh rulings (Fatwas) or engage in sectarian/theological (Aqeedah) debates. Please consult qualified human scholars (Ulama) for binding rulings.'",
   "queryType": "thematic",
   "targetSurah": null,
   "targetAyah": null,
@@ -234,7 +290,12 @@ ACTIVE MODE: "${mode}"
 ${options?.targetSurah && options?.targetAyah ? `\nCONTEXT OVERRIDE: The user is specifically inquiring about Surah ${options.targetSurah}, Ayah ${options.targetAyah}. You MUST set targetSurah: ${options.targetSurah}, targetAyah: ${options.targetAyah}, queryType: "specific", and leave suggestedVerses empty.\n` : ''}
 CRITICAL INSTRUCTIONS:
 1. **Arabic Translation for Vector Search**: You must extract the core concepts from the user's English query and translate them into classical Arabic keywords ("expandedQueryAr"). This is critical because our databases are primarily in Arabic. The translation depth depends on the mode (e.g., Classical and Lexicon require heavy, precise Arabic root extraction).
-2. **Aqeedah & Fiqh Guardrail**: If the ACTIVE MODE is "grammar", strictly refuse theological (Aqeedah), sectarian, or Fiqh questions. Set isScopeValid to false. If the mode is "default" or "philosophical", these are allowed.
+2. **UNIVERSAL AQEEDAH, SECTARIAN & FIQH GUARDRAIL (APPLIES TO ALL MODES, INCLUDING DEFAULT)**: 
+   - If the user asks for practical religious legal rulings (Fiqh / Fatwas, e.g. "is X halal/haram?", "how to perform prayer/wudu", "ruling on divorce/inheritance/zakat"), 
+   - OR asks about sectarian groups or modern controversial theological debates (e.g. Mawlid/Milad, Qadiani/Kadiyani, Shia/Shiite, Sunni vs Shia, Ashari vs Athari, Takfir):
+   You MUST set "isScopeValid": false.
+   You MUST set "warningMessage": "Al-Juthur AI Scholar is strictly dedicated to classical Quranic Tafsir, verse exegesis, and linguistic commentary. It does not provide Fiqh rulings (Fatwas) or engage in sectarian, polemical, or theological (Aqeedah) disputes. For binding religious edicts, please consult qualified human scholars (Ulama / Muftis)."
+   Do NOT suggest switching to Default Mode or any other mode, because Al-Juthur is exclusively for Tafsir across all modes.
 3. **Query Type Classification**:
    - "specific": The user explicitly mentions a SINGLE Surah:Ayah reference (e.g. "explain 2:255"). Set targetSurah/targetAyah and leave suggestedVerses empty.
    - "specific_multiple": The user explicitly mentions MULTIPLE verses (e.g. "explain 3:44 and 5:33"). Set targetSurah and targetAyah to null, and put ALL the explicitly requested verses into the "suggestedVerses" array.
@@ -244,7 +305,7 @@ CRITICAL INSTRUCTIONS:
 OUTPUT JSON FORMAT ONLY (no markdown formatting, purely valid JSON):
 {
   "isScopeValid": true or false,
-  "warningMessage": "Only if isScopeValid is false, state why clearly and suggest switching to Default Mode.",
+  "warningMessage": "Only if isScopeValid is false, state why clearly.",
   "queryType": "specific", "specific_multiple", or "thematic",
   "targetSurah": null or exact Surah number (1 to 114) — ONLY for specific queries,
   "targetAyah": null or exact Ayah number — ONLY for specific queries,
