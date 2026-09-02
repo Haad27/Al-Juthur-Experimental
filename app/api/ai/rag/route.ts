@@ -171,6 +171,7 @@ export async function POST(req: NextRequest) {
       ayah?: number | null;
       rootWord?: string | null;
       snippet: string;
+      chunkText?: string;
       workType: 'tafsir' | 'lexicon' | 'textbook';
     }> = [];
 
@@ -201,22 +202,23 @@ export async function POST(req: NextRequest) {
             }
           }
 
+          const cleanContent = doc.content.replace(/<[^>]*>?/gm, '');
+          const cleanDocText = docText.replace(/<[^>]*>?/gm, '').trim();
+
+          retrievedSources.push({
+            id: doc.id,
+            book: doc.workTitle,
+            authorName: doc.authorName,
+            surah: doc.surahId,
+            ayah: doc.ayahId,
+            rootWord: doc.rootWord,
+            snippet: cleanContent.substring(0, 180),
+            chunkText: cleanDocText,
+            workType: doc.workType
+          });
+
           return `[Source ${idx + 1}: ${doc.workTitle} (${doc.authorName}) | ${ref} | Lang: ${doc.language.toUpperCase()}]\n${docText}`;
         }).join("\n\n---\n\n");
-
-      documents.forEach((doc: ScoredParentDocument) => {
-        const cleanContent = doc.content.replace(/<[^>]*>?/gm, '');
-        retrievedSources.push({
-          id: doc.id,
-          book: doc.workTitle,
-          authorName: doc.authorName,
-          surah: doc.surahId,
-          ayah: doc.ayahId,
-          rootWord: doc.rootWord,
-          snippet: cleanContent.substring(0, 180),
-          workType: doc.workType
-        });
-      });
     }
 
     let modeSpecificRole = '';
@@ -293,6 +295,11 @@ ${contextText}`;
       const key = `${src.book}_${src.surah || ''}_${src.ayah || ''}_${src.rootWord || ''}`;
       if (!uniqueSourcesMap.has(key)) {
         uniqueSourcesMap.set(key, src);
+      } else {
+        const existing = uniqueSourcesMap.get(key)!;
+        if (src.chunkText && existing.chunkText && !existing.chunkText.includes(src.chunkText.substring(0, 50))) {
+          existing.chunkText += '\n\n---\n\n' + src.chunkText;
+        }
       }
     });
     

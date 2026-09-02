@@ -14,16 +14,7 @@ import { toast } from "sonner";
 import { useVisualViewportOffset } from "@/hooks/useVisualViewport";
 import { useSubscriptionStore } from "@/lib/stores/subscriptionStore";
 
-interface SourceItem {
-  id: string;
-  book: string;
-  authorName: string;
-  surah?: number | null;
-  ayah?: number | null;
-  rootWord?: string | null;
-  snippet: string;
-  workType: "tafsir" | "lexicon";
-}
+import SourceChunkViewer, { SourceItem } from "@/components/ai/SourceChunkViewer";
 
 interface Message {
   role: "user" | "assistant";
@@ -41,40 +32,149 @@ interface AyahChatSidebarProps {
   rootWord?: string;
 }
 
-const renderInlineBadges = (children: React.ReactNode): React.ReactNode => {
-  return React.Children.map(children, child => {
-    if (typeof child === 'string') {
+function findSourceForBadge(badgeText: string, sources?: SourceItem[]): SourceItem | undefined {
+  if (!sources || sources.length === 0) return undefined;
+
+  const text = badgeText.toLowerCase().trim();
+
+  // Try to extract Surah & Ayah numbers: e.g. "24:32" or "Surah 24:32" or "24, 32"
+  const surahAyahMatch = text.match(/(?:surah\s*)?(\d+)\s*[:：,\s]\s*(\d+)/i);
+  const targetSurah = surahAyahMatch ? parseInt(surahAyahMatch[1], 10) : null;
+  const targetAyah = surahAyahMatch ? parseInt(surahAyahMatch[2], 10) : null;
+
+  // Author keywords mapping
+  const authorKeywords = [
+    { key: "tabari", pattern: /tabari|طبري/i },
+    { key: "kathir", pattern: /kathir|كثير/i },
+    { key: "qurtubi", pattern: /qurtubi|قرطبي/i },
+    { key: "saadi", pattern: /sa'?di|سعدي/i },
+    { key: "baghawi", pattern: /baghawi|بغوي/i },
+    { key: "razi", pattern: /razi|رازي/i },
+    { key: "alusi", pattern: /alusi|آلوسي/i },
+    { key: "muyassar", pattern: /muyassar|ميسر/i },
+    { key: "jalalayn", pattern: /jalalayn|جلالين/i },
+    { key: "wasit", pattern: /wasit|وسيط/i },
+    { key: "adwa", pattern: /adwa|أضواء/i },
+    { key: "tahrir", pattern: /tahrir|تحرير/i },
+    { key: "lisan", pattern: /lisan|لسان/i },
+    { key: "mufradat", pattern: /mufradat|مفردات/i },
+    { key: "maqayis", pattern: /maqayis|مقاييس/i },
+    { key: "qamus", pattern: /qamus|قاموس/i },
+    { key: "shihah", pattern: /shihah|صحاح/i },
+    { key: "lane", pattern: /lane/i },
+    { key: "dream", pattern: /dream/i },
+  ];
+
+  const matchedKeyword = authorKeywords.find((ak) => ak.pattern.test(text));
+  if (matchedKeyword) {
+    const authorMatches = sources.filter(
+      (s) =>
+        matchedKeyword.pattern.test(s.authorName || "") ||
+        matchedKeyword.pattern.test(s.book || "")
+    );
+    if (authorMatches.length > 0) {
+      if (targetSurah && targetAyah) {
+        const exact = authorMatches.find(
+          (s) => s.surah === targetSurah && s.ayah === targetAyah
+        );
+        if (exact) return exact;
+      }
+      if (targetSurah) {
+        const surahOnly = authorMatches.find((s) => s.surah === targetSurah);
+        if (surahOnly) return surahOnly;
+      }
+      return authorMatches[0];
+    }
+  }
+
+  if (targetSurah && targetAyah) {
+    const exact = sources.find((s) => s.surah === targetSurah && s.ayah === targetAyah);
+    if (exact) return exact;
+  }
+
+  const rootMatch = sources.find(
+    (s) => s.rootWord && text.includes(s.rootWord.toLowerCase())
+  );
+  if (rootMatch) return rootMatch;
+
+  const looseMatch = sources.find((s) => {
+    const combined = (s.book + " " + (s.authorName || "")).toLowerCase();
+    const words = text.split(/[\s,.-]+/);
+    return words.some((w) => w.length > 3 && combined.includes(w));
+  });
+  if (looseMatch) return looseMatch;
+
+  return sources[0];
+}
+
+const renderInlineBadges = (
+  children: React.ReactNode,
+  sources?: SourceItem[],
+  onSelectSource?: (source: SourceItem) => void
+): React.ReactNode => {
+  return React.Children.map(children, (child) => {
+    if (typeof child === "string") {
       const parts = child.split(/(\[[^\]]+\])/g);
       return parts.map((part, i) => {
         if (
-          part.startsWith('[') && 
-          part.endsWith(']') && 
-          part.length > 2 && 
+          part.startsWith("[") &&
+          part.endsWith("]") &&
+          part.length > 2 &&
           (
-            part.includes('Tafsir') || 
-            part.includes('Surah') || 
-            part.includes('Adwa') || 
-            part.includes('Kathir') || 
-            part.includes('Tabari') || 
-            part.includes('Qurtubi') || 
-            part.includes('Wasit') || 
-            part.includes('Root') || 
-            part.includes('Lexicon') || 
-            part.includes('Lisan') || 
-            part.includes('Mufradat') || 
-            part.includes('Maqayis') || 
-            part.includes('Qamus') || 
-            part.includes('Shihah') || 
-            part.includes("Mu'jam") || 
+            part.includes("Tafsir") ||
+            part.includes("Surah") ||
+            part.includes("Adwa") ||
+            part.includes("Kathir") ||
+            part.includes("Tabari") ||
+            part.includes("Qurtubi") ||
+            part.includes("Wasit") ||
+            part.includes("Saadi") ||
+            part.includes("Sa'di") ||
+            part.includes("Baghawi") ||
+            part.includes("Razi") ||
+            part.includes("Alusi") ||
+            part.includes("Muyassar") ||
+            part.includes("Jalalayn") ||
+            part.includes("Root") ||
+            part.includes("Lexicon") ||
+            part.includes("Lisan") ||
+            part.includes("Mufradat") ||
+            part.includes("Maqayis") ||
+            part.includes("Qamus") ||
+            part.includes("Shihah") ||
+            part.includes("Mu'jam") ||
+            part.includes("Lane") ||
             part.match(/\[\d+:\d+\]/)
           )
         ) {
           const badgeText = part.slice(1, -1);
+          const matchedSource = findSourceForBadge(badgeText, sources) || {
+            id: `badge-${i}`,
+            book: badgeText,
+            authorName: badgeText.split(",")[0] || badgeText,
+            snippet: `Reference: ${badgeText}`,
+            chunkText: `Reference cited in classical commentary:\n\n${badgeText}`,
+            workType:
+              badgeText.toLowerCase().includes("lexicon") ||
+              badgeText.toLowerCase().includes("lisan") ||
+              badgeText.toLowerCase().includes("root")
+                ? "lexicon"
+                : "tafsir"
+          };
+
           return (
-            <span key={i} className="inline-flex items-center gap-1 mx-1 px-2 py-0.5 rounded-full bg-emerald-950/20 border border-emerald-500/15 text-emerald-400/75 text-[11px] font-mono not-italic align-middle opacity-80 hover:opacity-100 transition-opacity">
-              <BookOpen className="size-2.5 text-emerald-500/60 shrink-0 inline" />
-              <span>{badgeText}</span>
-            </span>
+            <button
+              key={i}
+              type="button"
+              onClick={() => onSelectSource?.(matchedSource)}
+              className="inline-flex items-center gap-1 mx-1 px-2 py-0.5 rounded-full bg-emerald-950/40 border border-emerald-500/25 text-emerald-300 hover:bg-emerald-900/80 hover:border-emerald-400 hover:text-emerald-100 text-[11px] font-mono not-italic align-middle opacity-90 hover:opacity-100 transition-all cursor-pointer active:scale-95 group"
+              title="Click to view retrieved chunk from this source"
+            >
+              <BookOpen className="size-2.5 text-emerald-400 group-hover:text-emerald-300 shrink-0 inline" />
+              <span className="underline decoration-emerald-500/40 underline-offset-2 group-hover:decoration-emerald-300">
+                {badgeText}
+              </span>
+            </button>
           );
         }
         return part;
@@ -83,7 +183,7 @@ const renderInlineBadges = (children: React.ReactNode): React.ReactNode => {
     if (React.isValidElement(child) && (child as any).props?.children) {
       return React.cloneElement(child, {
         ...(child as any).props,
-        children: renderInlineBadges((child as any).props.children)
+        children: renderInlineBadges((child as any).props.children, sources, onSelectSource)
       });
     }
     return child;
@@ -98,6 +198,7 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
   const [selectedModeId, setSelectedModeId] = useState(initialModeId || "default");
   const [scopeChoice, setScopeChoice] = useState<'verse' | 'general' | null>(null);
   const [isContentReady, setIsContentReady] = useState(false);
+  const [activeSource, setActiveSource] = useState<SourceItem | null>(null);
   useVisualViewportOffset();
 
   useEffect(() => {
@@ -689,7 +790,7 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                                 <div className={containerClasses}>
                                   <div className="quran-bar absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
                                   <p className={`m-0 ${isUrdu ? 'font-urdu' : 'font-arabic'} text-base md:text-lg text-emerald-200 leading-loose text-right dir-rtl`}>
-                                    {children}
+                                    {renderInlineBadges(children, msg.sources, (s) => setActiveSource(s))}
                                   </p>
                                 </div>
                               );
@@ -701,13 +802,13 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                                 <div className={containerClasses}>
                                   <div className="quran-bar absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
                                   <p className="m-0 italic text-[13px] sm:text-sm text-zinc-200">
-                                    {children}
+                                    {renderInlineBadges(children, msg.sources, (s) => setActiveSource(s))}
                                   </p>
                                 </div>
                               );
                             }
 
-                            return <p className="mb-2 [&:last-child]:mb-0" {...props}>{renderInlineBadges(children)}</p>;
+                            return <p className="mb-2 [&:last-child]:mb-0" {...props}>{renderInlineBadges(children, msg.sources, (s) => setActiveSource(s))}</p>;
                           },
                           blockquote: ({node, children}) => {
                             let textStr = '';
@@ -725,7 +826,7 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                               <div className={containerClasses}>
                                 <div className="quran-bar absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
                                 <blockquote className={`m-0 border-none p-0 text-zinc-200 ${isPredominantlyArabic ? `${amiri.className} text-base md:text-lg leading-loose text-right text-emerald-200` : 'italic text-[13px] sm:text-sm text-zinc-200'}`}>
-                                  {renderInlineBadges(children)}
+                                  {renderInlineBadges(children, msg.sources, (s) => setActiveSource(s))}
                                 </blockquote>
                               </div>
                             );
@@ -744,17 +845,15 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                             <BookOpen className="size-3 text-emerald-500 shrink-0" />
                             <span className="truncate">Sources Used ({msg.sources.length}):</span>
                           </span>
+                          <span className="text-[10px] text-zinc-500 shrink-0">Click to view chunk</span>
                         </div>
                         <div className="grid grid-cols-1 gap-1.5">
                           {msg.sources.map((src, i) => (
-                            <Link
+                            <button
                               key={i}
-                              href={
-                                src.workType === "lexicon"
-                                  ? `/lexicon?root=${src.rootWord || "رحم"}&author=${encodeURIComponent(src.authorName || src.book)}`
-                                  : `/tafsir?surah=${src.surah || 1}&ayah=${src.ayah || 1}&author=${encodeURIComponent(src.authorName || src.book)}`
-                              }
-                              className="group p-2 rounded-lg bg-zinc-950/80 border border-zinc-800 hover:border-emerald-500/40 transition-all text-left space-y-0.5"
+                              type="button"
+                              onClick={() => setActiveSource(src)}
+                              className="group p-2 rounded-lg bg-zinc-950/80 border border-zinc-800 hover:border-emerald-500/40 hover:bg-zinc-900/60 transition-all text-left space-y-0.5 cursor-pointer w-full"
                             >
                               <div className="flex items-center justify-between">
                                 <span className="text-[11px] font-bold text-zinc-200 group-hover:text-emerald-400 transition-colors flex items-center gap-1 truncate">
@@ -763,9 +862,9 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                                 </span>
                               </div>
                               <p className="text-[10px] text-zinc-500 group-hover:text-zinc-400 line-clamp-2 leading-snug">
-                                {src.snippet}
+                                {src.chunkText || src.snippet}
                               </p>
-                            </Link>
+                            </button>
                           ))}
                         </div>
                       </div>
@@ -814,6 +913,17 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
               <div className="flex-1 w-full flex flex-col items-center justify-center min-h-[300px] gap-3">
                 <Loader2 className="size-8 animate-spin text-emerald-500/50" />
                 <span className="text-xs text-zinc-500 font-medium">Loading Scholar AI...</span>
+              </div>
+            )}
+
+            {/* Source Chunk Viewer Overlay Drawer */}
+            {activeSource && (
+              <div className="absolute inset-0 z-50 flex flex-col bg-zinc-950 shadow-2xl animate-in slide-in-from-right duration-200">
+                <SourceChunkViewer
+                  source={activeSource}
+                  onClose={() => setActiveSource(null)}
+                  isMobile={true}
+                />
               </div>
             )}
           </motion.div>

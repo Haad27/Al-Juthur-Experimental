@@ -1,3 +1,9 @@
+export interface SuggestedChip {
+  label: string;
+  prompt: string;
+  icon: string;
+}
+
 export interface RagModeInfo {
   id: string;
   name: string;
@@ -11,6 +17,7 @@ export interface RagModeInfo {
   disclaimer: string;
   usageNotes: string[];
   examplePrompts: string[];
+  suggestedChips?: SuggestedChip[];
   description: string;
 }
 
@@ -41,6 +48,12 @@ export const RAG_MODES: RagModeInfo[] = [
       "Explain the spiritual significance of Ayah al-Kursi according to classical tafsir.",
       "Summarize the story of Ashab al-Kahf (People of the Cave) from Ibn Kathir."
     ],
+    suggestedChips: [
+      { label: "Explain verse", icon: "book", prompt: "Explain the background context, linguistic nuance, and classical tafsir of Surah Al-Ikhlas." },
+      { label: "Ayat al-Kursi", icon: "sparkles", prompt: "Explain the spiritual significance and deep meanings of Ayah al-Kursi according to Ibn Kathir and classical scholars." },
+      { label: "Surah Al-Mulk", icon: "compass", prompt: "What is the background context and main theme of Surah Al-Mulk according to classical tafsir?" },
+      { label: "People of the Cave", icon: "scroll", prompt: "Summarize the story and spiritual lessons of Ashab al-Kahf (People of the Cave) from Ibn Kathir and Al-Tabari." }
+    ],
     description: "The primary mode for standard study. Combines authentic narration (Riwayah) with rigorous analytical commentary and linguistic clarity."
   },
   {
@@ -66,6 +79,12 @@ export const RAG_MODES: RagModeInfo[] = [
       "What did Ibn Abbas transmit regarding the opening verses of Surah Al-Baqarah?",
       "Show me early Sahabah narrations about the revelation of Surah Al-Kahf.",
       "What reports exist in Al-Tabari concerning the night journey (Isra & Mi'raj)?"
+    ],
+    suggestedChips: [
+      { label: "Verify narration", icon: "pen", prompt: "What did early Sahabah and Salaf narrate regarding the opening verses of Surah Al-Baqarah?" },
+      { label: "Ibn Abbas reports", icon: "scroll", prompt: "What authentic reports from Ibn Abbas exist in Tafsir al-Tabari regarding the creation of the heavens and earth?" },
+      { label: "Asbab al-Nuzul", icon: "book", prompt: "What are the authentic narrations regarding the cause of revelation (Asbab al-Nuzul) of Surah Al-Kahf?" },
+      { label: "Night Journey", icon: "compass", prompt: "What classical reports exist in Al-Tabari and Ibn Kathir concerning the night journey (Isra & Mi'raj)?" }
     ],
     description: "Ideal for verifying exactly what the early generations of Islam (Sahabah, Tabi'in) transmitted regarding any ayah or historical event."
   },
@@ -94,6 +113,12 @@ export const RAG_MODES: RagModeInfo[] = [
       "Explain the rhetorical beauty (balagha) in the phrasing of Surah Al-Ikhlas.",
       "Why is the particle 'fa' used instead of 'wa' in Surah Al-Kawtar?"
     ],
+    suggestedChips: [
+      { label: "I'rab of Bismillah", icon: "file", prompt: "What is the detailed grammatical breakdown (I'rab) and particle syntax of 'Bismillah al-Rahman al-Rahim'?" },
+      { label: "Balagha of Al-Ikhlas", icon: "sparkles", prompt: "Explain the rhetorical beauty and eloquence (Balagha) in the phrasing and rhyme of Surah Al-Ikhlas." },
+      { label: "Particle 'fa' vs 'wa'", icon: "layers", prompt: "Why is the connective particle 'fa' used instead of 'wa' in Surah Al-Kawthar according to classical grammarians?" },
+      { label: "Taqdim & Ta'khir", icon: "book", prompt: "Explain the rhetorical purpose of Taqdim wa Ta'khir (word fronting) in 'Iyyaka na'budu' (Surah Al-Fatiha)." }
+    ],
     description: "Exclusively explores the grammatical architecture, rhetorical subtleties, and precise Arabic word morphology of the Quranic text."
   },
   {
@@ -119,6 +144,12 @@ export const RAG_MODES: RagModeInfo[] = [
       "How do the principles in Surah Al-Hujurat apply to modern social media ethics?",
       "What does the Quran teach about mental resilience and anxiety in modern life?",
       "Explain the thematic connection between Surah Al-Fatiha and Surah Al-Baqarah."
+    ],
+    suggestedChips: [
+      { label: "Social media ethics", icon: "compass", prompt: "How do the societal principles in Surah Al-Hujurat apply to modern social media ethics and communication?" },
+      { label: "Anxiety & peace", icon: "heart", prompt: "What does the Quran teach about emotional resilience, dealing with anxiety, and finding inner tranquility?" },
+      { label: "Maqasid of Shariah", icon: "layers", prompt: "What are the higher objectives of Shariah (Maqasid) reflected in Surah Al-Baqarah?" },
+      { label: "Surah thematic links", icon: "book", prompt: "Explain the holistic thematic connection between Surah Al-Fatiha and Surah Al-Baqarah." }
     ],
     description: "Connects Quranic principles to modern societal realities, psychology, legislative wisdom, and holistic thematic relationships while maintaining focus on the text."
   },
@@ -147,6 +178,12 @@ export const RAG_MODES: RagModeInfo[] = [
       "How do classical commentators discuss the concept of time in Surah Al-Asr?",
       "Explain the philosophical proofs for resurrection in Surah Ya-Sin."
     ],
+    suggestedChips: [
+      { label: "Creation arguments", icon: "brain", prompt: "What rational arguments does Imam al-Razi present for divine creation and design in Surah Al-An'am?" },
+      { label: "Concept of time", icon: "clock", prompt: "How do classical commentators and philosophers discuss the concept of time in Surah Al-Asr?" },
+      { label: "Proofs of resurrection", icon: "lightbulb", prompt: "Explain the philosophical and rational proofs for resurrection presented in Surah Ya-Sin." },
+      { label: "Problem of trials", icon: "sparkles", prompt: "How does Imam al-Alusi explain divine wisdom behind human suffering and trials?" }
+    ],
     description: "Engages with deep rational arguments, logical proofs, and philosophical reflections across classical scholarship."
   },
   {
@@ -174,6 +211,12 @@ export const RAG_MODES: RagModeInfo[] = [
       "What is the primary root meaning and semantic journey of 'Rahmah' (ر ح م)?",
       "Explore the classical dictionary definitions for the root 'S-K-N' (س ك ن).",
       "Compare the root meanings of 'Alim' (علم) vs 'Khabir' (خبر) in classical lexicons."
+    ],
+    suggestedChips: [
+      { label: "Root Rahmah (ر ح م)", icon: "layers", prompt: "What is the primary root meaning and semantic journey of 'Rahmah' (ر ح م) across Lisan al-Arab and Lane's Lexicon?" },
+      { label: "Root Sakana (س ك ن)", icon: "search", prompt: "Explore the classical dictionary definitions and root connotations for 'S-K-N' (س ك ن)." },
+      { label: "Alim vs Khabir", icon: "book", prompt: "Compare the root meanings and subtle semantic differences between 'Alim' (علم) and 'Khabir' (خبر) in classical lexicons." },
+      { label: "Root Taqwa (و ق ي)", icon: "scroll", prompt: "Trace the morphological origin and linguistic evolution of 'Taqwa' from the root W-Q-Y in classical dictionaries." }
     ],
     description: "Searches primary classical Arabic dictionaries to reveal the precise semantic root journey and classical range of meaning for Quranic vocabulary."
   }
