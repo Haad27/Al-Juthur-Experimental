@@ -10,7 +10,6 @@ import {
   AlertCircle,
   Loader2,
   Bot,
-  User,
   BookOpen,
   Layers,
   ChevronDown,
@@ -616,35 +615,16 @@ function RagChatContent() {
           {messages.map((msg, idx) => (
             <div
               key={idx}
-              className={`flex gap-3 sm:gap-4 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
-              {/* Avatar */}
-              <div
-                className={`shrink-0 size-9 sm:size-10 rounded-2xl flex items-center justify-center shadow-md ${
-                  msg.role === "user"
-                    ? "bg-zinc-800 border border-zinc-700"
-                    : msg.isScopeInvalid
-                    ? "bg-amber-500/20 border border-amber-500/40"
-                    : "bg-emerald-500/20 border border-emerald-500/40"
-                }`}
-              >
-                {msg.role === "user" ? (
-                  <User className="size-4 sm:size-5 text-zinc-300" />
-                ) : msg.isScopeInvalid ? (
-                  <ShieldAlert className="size-4 sm:size-5 text-amber-400" />
-                ) : (
-                  <Bot className="size-4 sm:size-5 text-emerald-400" />
-                )}
-              </div>
-
               {/* Message Bubble */}
               <div
-                className={`max-w-[90%] sm:max-w-[85%] rounded-2xl px-4 py-3.5 sm:px-6 sm:py-5 shadow-md relative group ${
+                className={`rounded-2xl px-4 py-3.5 sm:px-6 sm:py-5 shadow-md relative group ${
                   msg.role === "user"
-                    ? "bg-zinc-800/90 border border-zinc-700/70 rounded-tr-xs text-zinc-100"
+                    ? "max-w-[90%] sm:max-w-[80%] bg-zinc-800/90 border border-zinc-700/70 text-zinc-100 pr-10"
                     : msg.isScopeInvalid
-                    ? "bg-amber-950/30 border border-amber-500/40 rounded-tl-xs text-amber-100"
-                    : "bg-zinc-900/90 border border-zinc-800 rounded-tl-xs text-zinc-100"
+                    ? "w-full bg-amber-950/30 border border-amber-500/40 text-amber-100"
+                    : "w-full bg-zinc-900/90 border border-zinc-800 text-zinc-100"
                 }`}
               >
                 {/* Assistant Copy & Bookmark */}
@@ -863,11 +843,8 @@ function RagChatContent() {
 
           {/* Loading Indicator */}
           {isLoading && (
-            <div className="flex gap-3 sm:gap-4">
-              <div className="shrink-0 size-9 sm:size-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
-                <Bot className="size-4 sm:size-5 text-emerald-400" />
-              </div>
-              <div className="bg-zinc-900/90 border border-zinc-800 rounded-2xl rounded-tl-xs px-5 py-4 flex items-center gap-3 shadow-md">
+            <div className="flex justify-start">
+              <div className="bg-zinc-900/90 border border-zinc-800 rounded-2xl px-5 py-4 flex items-center gap-3 shadow-md">
                 <Loader2 className="size-4 animate-spin text-emerald-400 shrink-0" />
                 <div className="flex flex-col gap-0.5">
                   <span className="text-xs sm:text-sm font-medium text-zinc-200">

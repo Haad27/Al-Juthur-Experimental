@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, Bot, User, Loader2, BookOpen, Layers, ShieldAlert, Sparkles, AlertTriangle, CheckCircle2, ChevronDown, Copy, Bookmark, BookmarkCheck, Crown } from "lucide-react";
+import { X, Send, Bot, Loader2, BookOpen, Layers, ShieldAlert, Sparkles, AlertTriangle, CheckCircle2, ChevronDown, Copy, Bookmark, BookmarkCheck, Crown } from "lucide-react";
 import { cn, copyToClipboard } from "@/lib/utils";
 import { RAG_MODES, RagModeInfo } from "@/lib/ai/rag/modes-config";
 import { saveScholarAnswer } from "@/lib/readerStorage";
@@ -710,30 +710,18 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                 <div 
                   key={idx} 
                   className={cn(
-                    "flex gap-2.5 sm:gap-3",
-                    msg.role === "user" ? "ml-auto flex-row-reverse" : "mr-auto"
+                    "flex",
+                    msg.role === "user" ? "justify-end" : "justify-start"
                   )}
                 >
-                  {/* Avatar */}
-                  <div className={cn(
-                    "size-7 sm:size-8 rounded-full flex items-center justify-center shrink-0 border shadow-sm",
-                    msg.role === "user" 
-                      ? "bg-zinc-800 border-zinc-700 text-zinc-300" 
-                      : msg.isScopeInvalid
-                      ? "bg-amber-500/20 border-amber-500/40 text-amber-400" 
-                      : "bg-emerald-500/20 border-emerald-500/40 text-emerald-400"
-                  )}>
-                    {msg.role === "user" ? <User size={14} /> : msg.isScopeInvalid ? <ShieldAlert size={14} /> : <Bot size={14} />}
-                  </div>
-
                   {/* Message Content */}
                   <div className={cn(
-                    "max-w-[88%] sm:max-w-[85%] rounded-2xl p-3 sm:p-4 text-xs sm:text-sm leading-relaxed shadow-sm relative group",
+                    "rounded-2xl p-3 sm:p-4 text-xs sm:text-sm leading-relaxed shadow-sm relative group",
                     msg.role === "user" 
-                      ? "bg-zinc-800/90 border border-zinc-700/60 rounded-tr-sm text-zinc-200" 
+                      ? "max-w-[88%] sm:max-w-[85%] bg-zinc-800/90 border border-zinc-700/60 text-zinc-200 pr-8" 
                       : msg.isScopeInvalid
-                      ? "bg-amber-950/30 border border-amber-500/40 rounded-tl-sm text-amber-100"
-                      : "bg-zinc-900/90 border border-zinc-800 rounded-tl-sm text-zinc-200"
+                      ? "w-full bg-amber-950/30 border border-amber-500/40 text-amber-100"
+                      : "w-full bg-zinc-900/90 border border-zinc-800 text-zinc-200"
                   )}>
                     {msg.role === "assistant" && idx > 0 && (
                       <div className="absolute top-2 right-2 flex items-center gap-1 opacity-80 sm:opacity-0 sm:group-hover:opacity-100 focus-within:opacity-100 transition">
@@ -895,12 +883,9 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                 </div>
               ))}
               {isLoading && (
-                <div className="flex gap-2.5 sm:gap-3 mr-auto">
-                  <div className="size-7 sm:size-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center shrink-0">
-                    <Bot className="size-3.5 sm:size-4 text-emerald-400" />
-                  </div>
-                  <div className="p-3 rounded-2xl rounded-tl-sm bg-zinc-900 border border-zinc-800 flex items-center gap-2">
-                    <Loader2 className="size-3.5 sm:size-4 animate-spin text-emerald-500" />
+                <div className="flex justify-start">
+                  <div className="p-3 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center gap-2 shadow-sm">
+                    <Loader2 className="size-3.5 sm:size-4 animate-spin text-emerald-500 shrink-0" />
                     <span className="text-xs text-zinc-400">Searching classical texts...</span>
                   </div>
                 </div>
