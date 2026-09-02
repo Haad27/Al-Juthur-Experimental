@@ -562,7 +562,7 @@ function RagChatContent() {
 
               {/* Main Headline */}
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight mb-3">
-                Your source for trusted Islamic knowledge
+                Your Source for Tafsir and Classical Lexicon
               </h1>
               <p className="text-xs sm:text-sm text-zinc-400 max-w-lg mb-8 leading-relaxed">
                 {currentBot.targetIntent}
