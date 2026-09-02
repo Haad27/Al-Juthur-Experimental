@@ -1732,7 +1732,7 @@ function TafsirCard({
         <div className="pt-2 border-t border-zinc-800/40">
           <TafsirTextRenderer
             text={entry.text}
-            isArabic={isArabicOrUrdu}
+            isArabic={isArabic}
             isUrdu={isUrduText}
             langName={activeLangName}
             isLocked={isLocked}

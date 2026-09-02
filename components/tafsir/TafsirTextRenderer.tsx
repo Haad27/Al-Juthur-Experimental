@@ -29,7 +29,7 @@ export default function TafsirTextRenderer({
   const isUrdu = !!propIsUrdu || lowerLang.includes("urdu");
   const isPashto = lowerLang.includes("pashto") || lowerLang === "ps";
   const isPersian = lowerLang.includes("persian") || lowerLang.includes("farsi") || lowerLang.includes("uyghur") || lowerLang.includes("kurdish") || lowerLang.includes("sindhi");
-  const isArabic = !!propIsArabic || lowerLang.includes("arabic") || lowerLang === "العربية";
+  const isArabic = (!isUrdu && !isPashto && !isPersian) && (!!propIsArabic || lowerLang.includes("arabic") || lowerLang === "العربية");
   const isRtl = isArabic || isUrdu || isPashto || isPersian;
 
   const trimmedText = text.trim();
@@ -80,6 +80,14 @@ export default function TafsirTextRenderer({
   content = content
     .replace(/[\u{1F518}\u{1F534}\u{1F535}\u{1F536}\u{1F537}\u{1F538}\u{1F539}\u{1F780}-\u{1F7FF}\u{1F6E0}-\u{1F6FF}🔘۞۝֎◌◍◎◉⦾⦿⚬◯○●◐◑◒◓◈◇◆▪▫★☆✦✧※\u06DE\u06DD\u06E9\u058E\u25CC\u25CD\u20DD\u20DE\u20DF\u25CB\u25CF\u25CE\u25C9\u29BF\u29BE\u2299\u229A\u2735\u2736\u2742\u2740\u273F\u2741\u2055\u2737\u2738\u2739\u273A\u25C8\u2743\u273D\u2734\u25EF\u2B58\u2B57\u25D9\u25D8\u25C6\u25C7\u25A0\u25A1\u25AA\u25AB]/gu, " ")
     .replace(/\s{2,}/g, " ");
+
+  // In Arabic Tafsir texts, remove characters (Arabic comma ،, semicolon ؛, question mark, orphan Quranic placeholder glyphs)
+  // that font engines (such as Uthmanic Quran fonts) map to dotted-circle / ayah glyphs instead of normal punctuation
+  if (isArabic) {
+    content = content
+      .replace(/[\u0600-\u060F\u061B\u061F\u06D4\u06DF\u06E3\u06EB\u06EE\u06EF]/gu, " ")
+      .replace(/\s{2,}/g, " ");
+  }
 
   // 2. Parse blocks by splitting on double newlines or block tags (<p>, <h2>, <h3>)
   content = content.replace(/<br\s*\/?>/gi, "\n");

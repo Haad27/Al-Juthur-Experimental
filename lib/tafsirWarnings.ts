@@ -34,5 +34,22 @@ export function getTafsirWarning(name: string, authorName?: string | null): Tafs
     };
   }
 
+  if (
+    text.includes("maududi") ||
+    text.includes("moudidi") ||
+    text.includes("mowdudi") ||
+    text.includes("modudi") ||
+    text.includes("tafheem") ||
+    text.includes("مودودي") ||
+    text.includes("مودودی") ||
+    text.includes("تفہیم") ||
+    text.includes("تفهيم")
+  ) {
+    return {
+      hasWarning: true,
+      message: "This is an influential modern commentary with a distinct socio-political and contemporary reformist emphasis that some scholars have critiqued. Readers are encouraged to benefit from its intellectual depth and systematic explanations while being mindful of these scholarly discussions.",
+    };
+  }
+
   return { hasWarning: false, message: "" };
 }
