@@ -217,7 +217,8 @@ export async function POST(req: NextRequest) {
             workType: doc.workType
           });
 
-          return `[Source ${idx + 1}: ${doc.workTitle} (${doc.authorName}) | ${ref} | Lang: ${doc.language.toUpperCase()}]\n${docText}`;
+          const citeTag = `[${doc.workTitle}, ${ref}]`;
+          return `[Source ${idx + 1}: ${doc.workTitle} (${doc.authorName}) | ${ref} | Lang: ${doc.language.toUpperCase()}]\n(Citation tag to use in text: ${citeTag})\n${docText}`;
         }).join("\n\n---\n\n");
     }
 
@@ -260,10 +261,10 @@ MODE DIRECTIVE: ${modeSpecificRole}
 
 ACTIVE RAG MODE: "${mode.toUpperCase()}"
 
-CRITICAL MANDATORY FACTUALITY RULES:
+CRITICAL MANDATORY FACTUALITY & CITATION RULES:
 1. ZERO FABRICATION OF QURANIC VERSES OR STRUCTURE.
 2. EXACT SURAH STRUCTURE (e.g., Al-Fatihah has EXACTLY 7 verses).
-3. STRICT SCHOLARLY ATTRIBUTION: Every major claim MUST cite the exact source name in brackets (e.g., [Tafsir Ibn Kathir, Surah 1:1]).
+3. MANDATORY INLINE CITATION PILLS (CRITICAL): You MUST cite your sources frequently inline throughout your explanation. Whenever you explain a verse, cite an opinion, quote an author, or provide linguistic roots, place an explicit bracket tag at the end of the claim (e.g., [Tafsir Al-Tabari, Surah 24:32], [Tafsir Ibn Kathir, Surah 2:187], [Tafsir Al-Qurtubi, Surah 4:1], [Tafsir Al-Baghawi, Surah 30:21], [Lisan al-Arab, Root: سلم], [Mufradat al-Raghib, Root: كفر]). Use the exact citation format indicated under each source. DO NOT OMIT BRACKET CITATIONS—our application automatically converts them into interactive buttons for the student to inspect the exact retrieved classical chunk in a sidebar!
 4. CLEAR & STRUCTURED: Organize your response into neat markdown sections for your student.
 5. FOLLOW-UP SUGGESTIONS: Always append 3 concise, short suggested follow-up questions at the very end of your response under the heading '### Suggested Follow-ups'. Format them as a bulleted list. Ensure the questions are brief.
 6. VERSE FORMATTING RULE: Whenever you quote or translate a Quranic verse in ANY mode, ALWAYS place it in a markdown blockquote (e.g. > "Verse text..." [Surah X:Y]). Never embed Quranic verse quotes inside plain text paragraphs.
@@ -273,7 +274,7 @@ CRITICAL MANDATORY FACTUALITY RULES:
 - In all other modes: '### Gem from this Ayat' (Provide a profound tafsir or thematic point).
 8. UNRETRIEVED TOPICS: If the user asks about multiple topics but the retrieved texts only cover the main one, DO NOT invent or hallucinate answers for the unretrieved topics. Answer the main topic using the provided texts, and at the very end of your response (before the suggested follow-ups), explicitly ask the user if they want to proceed to the unaddressed topics (e.g., "You also asked about [Topic X and Topic Y]. Since we focused on [Main Topic] here, if this is clear, should we explore those next?").
 9. MULTI-VERSE THEMATIC COVERAGE: When the retrieved texts span MULTIPLE different verses (e.g. sources from 4:19, 2:228, 65:6, 30:21), you MUST touch on ALL of them. Dedicate a section or paragraph to each verse. Do NOT deep-dive exhaustively into just one verse and ignore the rest. Give balanced coverage across all retrieved verses so the student gets a holistic Quranic perspective on the topic. If they want to go deeper into a specific verse, they can ask.
-10. EQUAL SOURCE CITATION: You MUST actively cite and quote from ALL the different scholars/authors provided in the retrieved texts (e.g. if Tabari, Ibn Kathir, and Qurtubi are retrieved, you must quote all of them). Do not rely heavily on just one author and ignore the rest. Give equal weight and citation to all retrieved authors to provide a rich, multi-scholar perspective.
+10. EQUAL SOURCE CITATION: You MUST actively cite and quote from ALL the different scholars/authors provided in the retrieved texts (e.g. if Tabari, Ibn Kathir, and Qurtubi are retrieved, you must quote all of them with their respective citation tags). Do not rely heavily on just one author and ignore the rest. Give equal weight and citation to all retrieved authors to provide a rich, multi-scholar perspective.
 
 ${contextText}`;
 

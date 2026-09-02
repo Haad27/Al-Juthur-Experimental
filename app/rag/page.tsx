@@ -171,13 +171,15 @@ const renderInlineBadges = (
     if (typeof child === "string") {
       const parts = child.split(/(\[[^\]]+\])/g);
       return parts.map((part, i) => {
-        if (
+        const isCitation =
           part.startsWith("[") &&
           part.endsWith("]") &&
           part.length > 2 &&
           (
             part.includes("Tafsir") ||
             part.includes("Surah") ||
+            part.includes("Ayah") ||
+            part.includes("Source") ||
             part.includes("Adwa") ||
             part.includes("Kathir") ||
             part.includes("Tabari") ||
@@ -190,6 +192,9 @@ const renderInlineBadges = (
             part.includes("Alusi") ||
             part.includes("Muyassar") ||
             part.includes("Jalalayn") ||
+            part.includes("Tanwir") ||
+            part.includes("Tahrir") ||
+            part.includes("Zilal") ||
             part.includes("Root") ||
             part.includes("Lexicon") ||
             part.includes("Lisan") ||
@@ -199,9 +204,23 @@ const renderInlineBadges = (
             part.includes("Shihah") ||
             part.includes("Mu'jam") ||
             part.includes("Lane") ||
-            part.match(/\[\d+:\d+\]/)
-          )
-        ) {
+            part.includes("Dream") ||
+            part.includes("تفسير") ||
+            part.includes("سورة") ||
+            part.includes("طبري") ||
+            part.includes("كثير") ||
+            part.includes("قرطبي") ||
+            part.includes("بغوي") ||
+            part.includes("سعدي") ||
+            part.includes("رازي") ||
+            part.includes("لسان") ||
+            part.includes("مفردات") ||
+            part.includes("مقاييس") ||
+            part.match(/\[\d+[:：,]\d+\]/) ||
+            (sources && sources.some((s) => s.book && part.toLowerCase().includes(s.book.toLowerCase().slice(0, 5))))
+          );
+
+        if (isCitation) {
           const badgeText = part.slice(1, -1);
           const matchedSource = findSourceForBadge(badgeText, sources) || {
             id: `badge-${i}`,
@@ -464,21 +483,11 @@ function RagChatContent() {
 
             <div className="h-5 w-px bg-zinc-800 hidden sm:block" />
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <div className="size-8 sm:size-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-700/10 border border-emerald-500/30 flex items-center justify-center shadow-inner">
                 <Bot className="size-4 sm:size-5 text-emerald-400" />
               </div>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-sm sm:text-base text-white tracking-tight">AI Scholar</span>
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hidden md:inline">
-                    Quranic RAG Engine
-                  </span>
-                </div>
-                <span className="text-[11px] text-zinc-400 truncate max-w-[180px] sm:max-w-[260px]">
-                  {currentBot.botTitle}
-                </span>
-              </div>
+              <span className="font-bold text-sm sm:text-base text-white tracking-tight">AI Scholar</span>
             </div>
           </div>
 
@@ -551,7 +560,7 @@ function RagChatContent() {
                 </span>
               </div>
 
-              {/* Main Headline like the pic */}
+              {/* Main Headline */}
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight mb-3">
                 Your source for trusted Islamic knowledge
               </h1>
@@ -804,16 +813,22 @@ function RagChatContent() {
                         <BookOpen className="size-3.5 text-emerald-400 shrink-0" />
                         <span className="truncate">Classical Citations ({msg.sources.length}):</span>
                       </span>
-                      <span className="text-[10px] text-zinc-500 shrink-0">Click to view retrieved chunk</span>
+                      <span className="text-[10px] text-zinc-500 shrink-0">Click reference to open</span>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {msg.sources.map((src, i) => (
-                        <button
+                        <Link
                           key={i}
-                          type="button"
-                          onClick={() => setActiveSource(src)}
-                          className="group p-3 rounded-xl bg-zinc-950/90 border border-zinc-800 hover:border-emerald-500/40 hover:bg-zinc-900/70 transition-all text-left space-y-1 cursor-pointer w-full"
+                          href={
+                            src.workType === "textbook"
+                              ? "/-Dream-Textbook.pdf"
+                              : src.workType === "lexicon"
+                              ? `/lexicon?root=${encodeURIComponent(src.rootWord || "رحم")}&author=${encodeURIComponent(src.authorName || src.book)}`
+                              : `/tafsir?surah=${src.surah || 1}&ayah=${src.ayah || 1}&author=${encodeURIComponent(src.authorName || src.book)}`
+                          }
+                          target={src.workType === "textbook" ? "_blank" : "_self"}
+                          className="group p-3 rounded-xl bg-zinc-950/90 border border-zinc-800 hover:border-emerald-500/40 transition-all text-left space-y-1 block"
                         >
                           <div className="flex items-center justify-between gap-1">
                             <span className="text-xs font-bold text-zinc-200 group-hover:text-emerald-300 transition-colors flex items-center gap-1 truncate">
@@ -835,9 +850,9 @@ function RagChatContent() {
                             </span>
                           </div>
                           <p className="text-[11px] text-zinc-500 group-hover:text-zinc-400 line-clamp-2 leading-snug">
-                            {src.chunkText || src.snippet}
+                            {src.snippet}
                           </p>
-                        </button>
+                        </Link>
                       ))}
                     </div>
                   </div>
@@ -884,13 +899,13 @@ function RagChatContent() {
             />
 
             {/* Subtle Sources & Disclaimers Caption */}
-            <div className="flex items-center justify-center gap-2 text-[11px] text-zinc-500 pt-2 px-3 text-center">
-              <span>{currentBot.sources.slice(0, 2).join(", ")}{currentBot.sources.length > 2 && ` +${currentBot.sources.length - 2} more`}</span>
+            <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-[11px] text-zinc-500 pt-2 px-3 text-center">
+              <span>AI can hallucinate — always cross-check with cited sources.</span>
               <span className="hidden sm:inline">•</span>
               <button
                 type="button"
                 onClick={() => setShowDisclaimers(true)}
-                className="underline hover:text-zinc-400 transition-colors cursor-pointer hidden sm:inline"
+                className="underline hover:text-zinc-400 transition-colors cursor-pointer"
               >
                 Notes & Disclaimers
               </button>
@@ -993,9 +1008,17 @@ function RagChatContent() {
             <p className="text-xs text-zinc-300 leading-relaxed">
               {currentBot.disclaimer}
             </p>
-            <div className="pt-2 border-t border-zinc-800 text-[11px] text-amber-300/90 flex items-center gap-1.5">
-              <AlertCircle className="size-3.5 shrink-0" />
-              <span>Always consult qualified human scholars (Ulama) for binding rulings.</span>
+            <div className="pt-2.5 border-t border-zinc-800 space-y-2">
+              <div className="text-[11px] text-amber-300/95 flex items-start gap-1.5 leading-relaxed">
+                <AlertCircle className="size-3.5 shrink-0 mt-0.5 text-amber-400" />
+                <span>
+                  <strong>AI Generation & Hallucination Notice:</strong> Answers are generated by artificial intelligence and can hallucinate or contain inaccuracies. Always remember to cross-check and verify information from the cited classical sources provided with every response.
+                </span>
+              </div>
+              <div className="text-[11px] text-zinc-400 flex items-center gap-1.5">
+                <AlertCircle className="size-3.5 shrink-0 text-zinc-500" />
+                <span>Always consult qualified human scholars (Ulama) for binding rulings.</span>
+              </div>
             </div>
           </div>
 
@@ -1012,6 +1035,12 @@ function RagChatContent() {
                   <span>{note}</span>
                 </li>
               ))}
+              <li className="flex items-start gap-2">
+                <span className="size-1.5 rounded-full bg-amber-400 shrink-0 mt-1.5" />
+                <span>
+                  <strong>Cross-Check Citations:</strong> Because answers are generated by AI, hallucination is possible. Always review and cross-check the claims with the cited sources and referenced source chunks.
+                </span>
+              </li>
             </ul>
           </div>
 

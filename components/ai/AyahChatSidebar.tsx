@@ -116,13 +116,15 @@ const renderInlineBadges = (
     if (typeof child === "string") {
       const parts = child.split(/(\[[^\]]+\])/g);
       return parts.map((part, i) => {
-        if (
+        const isCitation =
           part.startsWith("[") &&
           part.endsWith("]") &&
           part.length > 2 &&
           (
             part.includes("Tafsir") ||
             part.includes("Surah") ||
+            part.includes("Ayah") ||
+            part.includes("Source") ||
             part.includes("Adwa") ||
             part.includes("Kathir") ||
             part.includes("Tabari") ||
@@ -135,6 +137,9 @@ const renderInlineBadges = (
             part.includes("Alusi") ||
             part.includes("Muyassar") ||
             part.includes("Jalalayn") ||
+            part.includes("Tanwir") ||
+            part.includes("Tahrir") ||
+            part.includes("Zilal") ||
             part.includes("Root") ||
             part.includes("Lexicon") ||
             part.includes("Lisan") ||
@@ -144,9 +149,23 @@ const renderInlineBadges = (
             part.includes("Shihah") ||
             part.includes("Mu'jam") ||
             part.includes("Lane") ||
-            part.match(/\[\d+:\d+\]/)
-          )
-        ) {
+            part.includes("Dream") ||
+            part.includes("تفسير") ||
+            part.includes("سورة") ||
+            part.includes("طبري") ||
+            part.includes("كثير") ||
+            part.includes("قرطبي") ||
+            part.includes("بغوي") ||
+            part.includes("سعدي") ||
+            part.includes("رازي") ||
+            part.includes("لسان") ||
+            part.includes("مفردات") ||
+            part.includes("مقاييس") ||
+            part.match(/\[\d+[:：,]\d+\]/) ||
+            (sources && sources.some((s) => s.book && part.toLowerCase().includes(s.book.toLowerCase().slice(0, 5))))
+          );
+
+        if (isCitation) {
           const badgeText = part.slice(1, -1);
           const matchedSource = findSourceForBadge(badgeText, sources) || {
             id: `badge-${i}`,
@@ -845,15 +864,18 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                             <BookOpen className="size-3 text-emerald-500 shrink-0" />
                             <span className="truncate">Sources Used ({msg.sources.length}):</span>
                           </span>
-                          <span className="text-[10px] text-zinc-500 shrink-0">Click to view chunk</span>
                         </div>
                         <div className="grid grid-cols-1 gap-1.5">
                           {msg.sources.map((src, i) => (
-                            <button
+                            <Link
                               key={i}
-                              type="button"
-                              onClick={() => setActiveSource(src)}
-                              className="group p-2 rounded-lg bg-zinc-950/80 border border-zinc-800 hover:border-emerald-500/40 hover:bg-zinc-900/60 transition-all text-left space-y-0.5 cursor-pointer w-full"
+                              href={
+                                src.workType === "lexicon"
+                                  ? `/lexicon?root=${encodeURIComponent(src.rootWord || "رحم")}&author=${encodeURIComponent(src.authorName || src.book)}`
+                                  : `/tafsir?surah=${src.surah || 1}&ayah=${src.ayah || 1}&author=${encodeURIComponent(src.authorName || src.book)}`
+                              }
+                              target="_blank"
+                              className="group p-2 rounded-lg bg-zinc-950/80 border border-zinc-800 hover:border-emerald-500/40 transition-all text-left space-y-0.5 block"
                             >
                               <div className="flex items-center justify-between">
                                 <span className="text-[11px] font-bold text-zinc-200 group-hover:text-emerald-400 transition-colors flex items-center gap-1 truncate">
@@ -862,9 +884,9 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                                 </span>
                               </div>
                               <p className="text-[10px] text-zinc-500 group-hover:text-zinc-400 line-clamp-2 leading-snug">
-                                {src.chunkText || src.snippet}
+                                {src.snippet}
                               </p>
-                            </button>
+                            </Link>
                           ))}
                         </div>
                       </div>
