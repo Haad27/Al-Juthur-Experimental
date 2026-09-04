@@ -43,6 +43,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 import SourceChunkViewer, { SourceItem } from "@/components/ai/SourceChunkViewer";
 import GeminiInputComposer from "@/components/ai/GeminiInputComposer";
+import RagModeChips from "@/components/ai/RagModeChips";
 
 function getChipIcon(iconName: string) {
   switch (iconName) {
@@ -465,51 +466,43 @@ function RagChatContent() {
   };
 
   return (
-    <div className={`flex h-dvh max-h-dvh w-full flex-col overflow-hidden bg-zinc-950 text-white ${inter.className}`}>
-      {/* Top Header */}
-      <header className="shrink-0 z-40 bg-zinc-950/90 backdrop-blur-xl border-b border-zinc-800/80 px-3 sm:px-6 py-3 shadow-lg">
+    <div className={`flex h-dvh max-h-dvh w-full flex-col overflow-hidden bg-background text-foreground ${inter.className}`}>
+      <header className="shrink-0 z-40 bg-background/90 backdrop-blur-md border-b border-border px-3 sm:px-6 py-3 pr-14">
         <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-3">
           
-          {/* Left: Back & Title */}
           <div className="flex items-center gap-2.5 shrink-0">
             <Link
               href="/home"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-zinc-900/90 border border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-800 text-xs font-medium transition-all text-zinc-300 hover:text-white"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-card border border-border hover:bg-muted text-xs font-medium transition-all text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="size-3.5 sm:size-4" />
               <span className="hidden sm:inline">Home</span>
             </Link>
 
-            <div className="h-5 w-px bg-zinc-800 hidden sm:block" />
+            <div className="h-5 w-px bg-border hidden sm:block" />
 
             <div className="flex items-center gap-2.5">
-              <div className="size-8 sm:size-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-700/10 border border-emerald-500/30 flex items-center justify-center shadow-inner">
-                <Bot className="size-4 sm:size-5 text-emerald-400" />
-              </div>
-              <span className="font-bold text-sm sm:text-base text-white tracking-tight">AI Scholar</span>
+              <span className="font-semibold text-sm sm:text-base text-foreground tracking-tight">AI Scholar</span>
             </div>
           </div>
 
-          {/* Right: Actions & Quota */}
           <div className="flex items-center gap-2 shrink-0">
-            {/* Disclaimers Toggle Button */}
             <button
               onClick={() => setShowDisclaimers(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-zinc-800 bg-zinc-900/90 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 hover:border-zinc-700 text-xs font-medium transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted text-xs font-medium transition-all cursor-pointer"
               title="View Notes & Disclaimers"
             >
-              <Info className="size-3.5 text-emerald-400" />
+              <Info className="size-3.5" />
               <span className="hidden md:inline">Notes & Disclaimers</span>
               {currentBot.warning && (
-                <span className="size-1.5 rounded-full bg-amber-400" title="Guardrail active" />
+                <span className="size-1.5 rounded-full bg-accent" title="Guardrail active" />
               )}
             </button>
 
-            {/* Clear Chat Button */}
             {messages.length > 0 && (
               <button
                 onClick={handleClearChat}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-rose-500/40 hover:bg-rose-950/30 text-xs text-zinc-400 hover:text-rose-300 transition-all cursor-pointer"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-card border border-border hover:bg-muted text-xs text-muted-foreground hover:text-foreground transition-all cursor-pointer"
                 title="Clear Chat"
               >
                 <Trash2 className="size-3.5" />
@@ -517,13 +510,12 @@ function RagChatContent() {
               </button>
             )}
 
-            {/* Token Quota Badge */}
-            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-zinc-900/90 border border-zinc-800 text-[11px] text-zinc-400 font-medium">
-              <Sparkles className="size-3.5 text-emerald-400 shrink-0" />
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-card border border-border text-[11px] text-muted-foreground font-medium">
+              <Sparkles className="size-3.5 text-accent shrink-0" />
               {remainingTokens !== null ? (
                 <span>
-                  <strong className="text-emerald-400">{(tokenLimit - remainingTokens).toLocaleString()}</strong>
-                  <span className="text-zinc-500">/{tokenLimit.toLocaleString()}</span>
+                  <strong className="text-foreground">{(tokenLimit - remainingTokens).toLocaleString()}</strong>
+                  <span>/{tokenLimit.toLocaleString()}</span>
                 </span>
               ) : (
                 <span>Active</span>
@@ -560,12 +552,16 @@ function RagChatContent() {
               </div>
 
               {/* Main Headline */}
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight mb-3">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground tracking-tight mb-3">
                 Your Source for Tafsir and Classical Lexicon
               </h1>
-              <p className="text-xs sm:text-sm text-zinc-400 max-w-lg mb-8 leading-relaxed">
+              <p className="text-xs sm:text-sm text-muted-foreground max-w-lg mb-6 leading-[1.7]">
                 {currentBot.targetIntent}
               </p>
+
+              <div className="w-full max-w-2xl mx-auto mb-4">
+                <RagModeChips activeModeId={activeModeId} onSwitchMode={handleSwitchMode} />
+              </div>
 
               {/* Search / Input Box like Gemini */}
               <div className="w-full max-w-2xl mx-auto mb-5 sm:mb-6">
@@ -862,8 +858,9 @@ function RagChatContent() {
 
       {/* Input Composer Footer (Gemini Sleek Capsule Style) - only shown during active chat */}
       {messages.length > 0 && (
-        <footer className="shrink-0 bg-zinc-950 border-t border-zinc-800/80 p-3 sm:p-4 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] md:pb-5">
-          <div className="max-w-[850px] mx-auto">
+        <footer className="shrink-0 bg-background border-t border-border p-3 sm:p-4 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] md:pb-5">
+          <div className="max-w-[850px] mx-auto space-y-2">
+            <RagModeChips activeModeId={activeModeId} onSwitchMode={handleSwitchMode} />
             <GeminiInputComposer
               input={input}
               setInput={setInput}

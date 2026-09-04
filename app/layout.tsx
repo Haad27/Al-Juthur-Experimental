@@ -3,6 +3,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { GlobalStateProvider } from "@/lib/providers/GlobalStatesProvider";
 import { inter, notoNastaliqUrdu } from "./fonts";
 import BottomNav from "@/components/BottomNav";
+import AppThemeProvider from "@/components/theme/AppThemeProvider";
+import FloatingThemeToggle from "@/components/layout/FloatingThemeToggle";
 
 import NextTopLoader from "nextjs-toploader";
 
@@ -75,9 +77,9 @@ export const viewport = {
   interactiveWidget: "resizes-content" as const,
 };
 
-/* This file is used to define the web app manifest for the Al-Juthur PWA.  */
-/* It includes metadata such as the app name, description, start URL, display mode, background color, theme color, and icons. */
 import GlobalModals from "@/components/popups/GlobalModals";
+
+const THEME_BOOTSTRAP = `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}}catch(e){}})();`;
 
 export default function RootLayout({
   children,
@@ -85,21 +87,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <GlobalStateProvider>
-      <html lang="en" className="dark" suppressHydrationWarning>
-        <body className={`${inter.className} ${notoNastaliqUrdu.variable} bg-zinc-950 scroll-smooth`} suppressHydrationWarning>
-          <NextTopLoader 
-            color="#10b981" 
-            showSpinner={false} 
-            height={2}
-            shadow="0 0 10px #10b981,0 0 5px #10b981"
-          />
-          {children}
-          <BottomNav />
-          <GlobalModals />
-          <Toaster />
-        </body>
-      </html>
-    </GlobalStateProvider>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
+      </head>
+      <body className={`${inter.className} ${notoNastaliqUrdu.variable} bg-background text-foreground scroll-smooth`} suppressHydrationWarning>
+        <AppThemeProvider>
+          <GlobalStateProvider>
+            <NextTopLoader
+              color="#8B6914"
+              showSpinner={false}
+              height={2}
+              shadow="none"
+            />
+            <FloatingThemeToggle />
+            {children}
+            <BottomNav />
+            <GlobalModals />
+            <Toaster />
+          </GlobalStateProvider>
+        </AppThemeProvider>
+      </body>
+    </html>
   );
 }

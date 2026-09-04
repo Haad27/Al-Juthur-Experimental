@@ -96,7 +96,7 @@ export default function GeminiInputComposer({
   return (
     <div
       className={cn(
-        "relative flex w-full bg-[#1e1f20] border border-zinc-800/80 hover:border-zinc-700/80 focus-within:border-zinc-600 focus-within:ring-1 focus-within:ring-zinc-600/30 shadow-xl transition-all duration-150 ease-out",
+        "relative flex w-full bg-card border border-border hover:border-accent/40 focus-within:border-ring focus-within:ring-1 focus-within:ring-ring/30 shadow-sm transition-all duration-150 ease-out",
         isMultiline
           ? "flex-col rounded-3xl p-3 sm:p-3.5 gap-2"
           : "flex-row items-center rounded-full h-12 sm:h-[50px] px-4 gap-2",
@@ -113,7 +113,7 @@ export default function GeminiInputComposer({
         rows={1}
         autoFocus={autoFocus}
         className={cn(
-          "bg-transparent border-0 ring-0 focus:ring-0 focus:outline-none placeholder-zinc-500 text-sm sm:text-base text-zinc-100 resize-none",
+          "bg-transparent border-0 ring-0 focus:ring-0 focus:outline-none placeholder-muted-foreground text-sm sm:text-base text-foreground resize-none",
           isMultiline
             ? "w-full min-h-[56px] max-h-[220px] py-1 px-1 leading-relaxed overflow-y-auto custom-scrollbar"
             : "flex-1 h-6 leading-6 py-0 my-0 overflow-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
@@ -129,10 +129,10 @@ export default function GeminiInputComposer({
       >
         {/* Mode Dropdown (Flash-style from Gemini - seamless with container) */}
         <Select value={activeModeId} onValueChange={onSwitchMode}>
-          <SelectTrigger className="!h-auto !py-0 !px-1 !bg-transparent dark:!bg-transparent hover:!bg-transparent dark:hover:!bg-transparent !border-0 dark:!border-0 !shadow-none text-zinc-300 hover:text-white font-normal sm:font-medium text-xs sm:text-sm rounded-none focus:!ring-0 focus-visible:!ring-0 gap-1 inline-flex items-center cursor-pointer transition-colors shrink-0 outline-none">
+          <SelectTrigger className="!h-auto !py-0 !px-1 !bg-transparent dark:!bg-transparent hover:!bg-transparent dark:hover:!bg-transparent !border-0 dark:!border-0 !shadow-none text-muted-foreground hover:text-foreground font-normal sm:font-medium text-xs sm:text-sm rounded-none focus:!ring-0 focus-visible:!ring-0 gap-1 inline-flex items-center cursor-pointer transition-colors shrink-0 outline-none">
             <span className="truncate max-w-[120px] sm:max-w-[170px]">{currentBot.shortName}</span>
           </SelectTrigger>
-          <SelectContent className="bg-zinc-900/95 backdrop-blur-xl border-zinc-800 text-zinc-300 max-h-[440px] w-[310px] sm:w-[370px]">
+          <SelectContent className="bg-popover text-popover-foreground border-border max-h-[440px] w-[310px] sm:w-[370px]">
             <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-zinc-500 border-b border-zinc-800 mb-1 flex items-center justify-between">
               <span>Select AI Scholar Persona</span>
               <span className="text-emerald-400 font-semibold">6 Bots Available</span>
@@ -204,8 +204,8 @@ export default function GeminiInputComposer({
           className={cn(
             "size-8 sm:size-8.5 rounded-full flex items-center justify-center transition-all shrink-0",
             input.trim() && !isLoading
-              ? "bg-emerald-500 hover:bg-emerald-400 text-white shadow-sm shadow-emerald-500/20 cursor-pointer active:scale-95"
-              : "bg-zinc-800/80 text-zinc-600 cursor-not-allowed"
+              ? "bg-primary hover:opacity-90 text-primary-foreground cursor-pointer active:scale-95"
+              : "bg-muted text-muted-foreground cursor-not-allowed"
           )}
           title="Send Question"
         >

@@ -111,7 +111,7 @@ const Sidebar = () => {
     <div>
       <div
         className={cn(
-          "min-h-screen lg:block hidden sticky top-0 z-40 border-r dark:border-[#262629ff] border-[var(--sephia-500)] bg-zinc-900 text-white transition-all duration-300 shadow-sm",
+          "min-h-screen lg:block hidden sticky top-0 z-40 border-r border-border bg-sidebar text-sidebar-foreground transition-all duration-300",
           isAudioActive 
             ? "w-0 opacity-0 overflow-hidden border-none pointer-events-none" 
             : isCollapsed ? "w-16" : "md:w-[350px]"
@@ -126,7 +126,7 @@ const Sidebar = () => {
         {/* Creative Animated Tab Switcher */}
         {!isCollapsed && (
           <div className="relative mt-4 mx-4">
-            <div className="relative flex items-center p-1 bg-zinc-950/90 dark:bg-zinc-950/90 border border-zinc-800/80 rounded-2xl shadow-xl backdrop-blur-2xl overflow-hidden">
+            <div className="relative flex items-center p-1 bg-muted border border-border rounded-2xl overflow-hidden">
               {tabs.map((tab) => {
                 const isActive = activeTab === tab.key;
                 return (
@@ -137,14 +137,14 @@ const Sidebar = () => {
                     className={cn(
                       "relative z-10 flex-1 flex items-center justify-center gap-2 py-2.5 px-3 text-xs font-bold transition-all duration-200 cursor-pointer select-none group",
                       isActive
-                        ? "text-white"
-                        : "text-zinc-400 hover:text-zinc-200"
+                        ? "text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground"
                     )}
                   >
                     {isActive && (
                       <motion.div
                         layoutId="sidebar-creative-tab-bg"
-                        className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 rounded-xl border-t border-emerald-300/40 shadow-[0_0_20px_rgba(16,185,129,0.35)] z-0"
+                        className="absolute inset-0 bg-primary rounded-xl z-0"
                         transition={{ type: "spring", stiffness: 450, damping: 30 }}
                       />
                     )}

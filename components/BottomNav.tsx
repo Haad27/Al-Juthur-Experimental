@@ -3,18 +3,19 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  Home, 
-  ScrollText, 
-  Library, 
-  Languages, 
-  Bot, 
-  Bookmark, 
-  Sparkles 
+import {
+  Home,
+  ScrollText,
+  Library,
+  Languages,
+  Bot,
+  Bookmark,
+  Sparkles,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 import { useAudioStore } from "@/lib/stores/audioStore";
+import { cn } from "@/lib/utils";
 
 const BottomNav = () => {
   const pathname = usePathname();
@@ -28,7 +29,6 @@ const BottomNav = () => {
     setMounted(true);
   }, []);
 
-  // Close mini AI bar on route change
   React.useEffect(() => {
     setIsAiSheetOpen(false);
   }, [pathname]);
@@ -51,8 +51,6 @@ const BottomNav = () => {
       setIsWordDialogVisible(false);
     }
   }, [pathname, setImmersiveMode, setIsWordDialogVisible]);
-
-  const isImmersive = immersiveMode && (pathname?.startsWith("/tafsir") || pathname?.startsWith("/lexicon"));
 
   const isAiActive = pathname?.startsWith("/ai") || pathname?.startsWith("/rag");
 
@@ -94,62 +92,58 @@ const BottomNav = () => {
 
   return (
     <>
-      {/* Floating Mini AI Studio Bar (Appears vertically directly above bottom nav) */}
       <AnimatePresence>
         {isAiSheetOpen && (
           <>
-            {/* Backdrop to tap-outside and dismiss */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsAiSheetOpen(false)}
-              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px] md:hidden"
+              className="fixed inset-0 z-40 bg-background/60 backdrop-blur-[2px] md:hidden"
             />
 
-            {/* Mini Floating Navbar Pill with 2 AI Buttons */}
             <motion.div
               initial={{ opacity: 0, y: 14, scale: 0.92 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 14, scale: 0.92 }}
               transition={{ type: "spring", stiffness: 450, damping: 28 }}
-              className="fixed bottom-[calc(5.1rem+env(safe-area-inset-bottom,0px))] inset-x-0 mx-auto w-fit z-50 md:hidden flex justify-center pointer-events-auto"
+              className="pointer-events-auto fixed inset-x-0 bottom-[calc(5.1rem+env(safe-area-inset-bottom,0px))] z-50 mx-auto flex w-fit justify-center md:hidden"
             >
-              <div className="rounded-full border border-emerald-500/40 bg-zinc-950/90 backdrop-blur-2xl backdrop-saturate-150 shadow-[0_16px_40px_rgba(0,0,0,0.8),0_0_20px_rgba(16,185,129,0.2)] px-2 py-1.5 flex items-center gap-1">
-                {/* 1. Translator */}
+              <div className="flex items-center gap-1 rounded-full border border-border bg-card/95 px-2 py-1.5 shadow-lg backdrop-blur-xl">
                 <Link
                   href="/ai"
                   onClick={() => {
                     setIsAiSheetOpen(false);
                     setImmersiveMode(false);
                   }}
-                  className={`relative flex flex-col items-center justify-center px-3.5 py-1 min-w-[62px] h-12 rounded-full transition-colors duration-200 ${
+                  className={cn(
+                    "relative flex h-12 min-w-[62px] flex-col items-center justify-center rounded-full px-3.5 py-1 transition-colors",
                     pathname?.startsWith("/ai")
-                      ? "text-emerald-400 font-bold bg-white/[0.12] border border-white/10"
-                      : "text-zinc-400 hover:text-white"
-                  }`}
+                      ? "bg-muted font-semibold text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
                 >
-                  <Languages className="w-5 h-5 mb-0.5" />
+                  <Languages className="mb-0.5 w-5 h-5" />
                   <span className="text-[9px] tracking-tight">Translator</span>
                 </Link>
 
-                {/* Divider */}
-                <div className="h-6 w-px bg-zinc-800 shrink-0" />
+                <div className="h-6 w-px shrink-0 bg-border" />
 
-                {/* 2. AI Scholar */}
                 <Link
                   href="/rag"
                   onClick={() => {
                     setIsAiSheetOpen(false);
                     setImmersiveMode(false);
                   }}
-                  className={`relative flex flex-col items-center justify-center px-3.5 py-1 min-w-[62px] h-12 rounded-full transition-colors duration-200 ${
+                  className={cn(
+                    "relative flex h-12 min-w-[62px] flex-col items-center justify-center rounded-full px-3.5 py-1 transition-colors",
                     pathname?.startsWith("/rag")
-                      ? "text-emerald-400 font-bold bg-white/[0.12] border border-white/10"
-                      : "text-zinc-400 hover:text-white"
-                  }`}
+                      ? "bg-muted font-semibold text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
                 >
-                  <Bot className="w-5 h-5 mb-0.5" />
+                  <Bot className="mb-0.5 w-5 h-5" />
                   <span className="text-[9px] tracking-tight">AI Scholar</span>
                 </Link>
               </div>
@@ -158,14 +152,13 @@ const BottomNav = () => {
         )}
       </AnimatePresence>
 
-      {/* Primary Floating Bottom Nav Bar */}
-      <div 
-        suppressHydrationWarning 
-        className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] inset-x-0 mx-auto w-fit max-w-[95vw] z-50 md:hidden pointer-events-none flex justify-center"
+      <div
+        suppressHydrationWarning
+        className="pointer-events-none fixed inset-x-0 bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] z-50 mx-auto flex w-fit max-w-[95vw] justify-center md:hidden"
         style={{ transform: "none", WebkitTransform: "none" }}
       >
-        <nav className="pointer-events-auto rounded-full border border-emerald-500/35 bg-zinc-950/75 backdrop-blur-2xl backdrop-saturate-150 shadow-[0_12px_40px_rgba(0,0,0,0.6),0_0_15px_rgba(16,185,129,0.15)] px-2 py-1.5 flex items-center gap-0.5">
-          <div className="flex items-center gap-0.5 relative">
+        <nav className="pointer-events-auto flex items-center gap-0.5 rounded-full border border-border bg-card/90 px-2 py-1.5 shadow-lg backdrop-blur-xl">
+          <div className="relative flex items-center gap-0.5">
             {navItems.map((item) => {
               const isActive = item.isActive;
 
@@ -174,40 +167,19 @@ const BottomNav = () => {
                   <button
                     key={item.label}
                     onClick={item.onClick}
-                    className="relative flex flex-col items-center justify-center px-2.5 sm:px-3 py-1 min-w-[54px] h-12 rounded-full transition-colors duration-300 cursor-pointer"
+                    className="relative flex h-12 min-w-[54px] cursor-pointer flex-col items-center justify-center rounded-full px-2.5 py-1 sm:px-3"
                   >
                     {isActive && (
                       <motion.div
                         layoutId="active-pill"
-                        className={`absolute inset-0 rounded-full z-0 ${
-                          isImmersive 
-                            ? "bg-amber-500/20 border border-amber-500/40" 
-                            : "bg-white/[0.12] border border-white/10"
-                        }`}
+                        className="absolute inset-0 z-0 rounded-full border border-border bg-muted"
                         transition={{ type: "spring", stiffness: 380, damping: 30 }}
                       />
                     )}
-                    
-                    <motion.div
-                      animate={{
-                        y: isActive ? -1 : 0,
-                        scale: isActive ? 1.05 : 1,
-                      }}
-                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                      className={`relative z-10 flex items-center justify-center transition-colors duration-300 ${
-                        isActive ? (isImmersive ? "text-amber-400" : "text-emerald-400") : "text-zinc-400 hover:text-zinc-200"
-                      }`}
-                    >
+                    <div className={cn("relative z-10", isActive ? "text-foreground" : "text-muted-foreground")}>
                       {item.icon}
-                    </motion.div>
-                    
-                    <span 
-                      className={`relative z-10 text-[9px] tracking-tight mt-0.5 transition-all duration-300 ${
-                        isActive 
-                          ? (isImmersive ? "text-amber-400 font-bold" : "text-emerald-400 font-bold")
-                          : "text-zinc-500 font-medium hover:text-zinc-300"
-                      }`}
-                    >
+                    </div>
+                    <span className={cn("relative z-10 mt-0.5 text-[9px] tracking-tight", isActive ? "font-semibold text-foreground" : "text-muted-foreground")}>
                       {item.label}
                     </span>
                   </button>
@@ -219,40 +191,19 @@ const BottomNav = () => {
                   key={item.label}
                   href={item.href!}
                   onClick={() => setImmersiveMode(false)}
-                  className="relative flex flex-col items-center justify-center px-2.5 sm:px-3 py-1 min-w-[54px] h-12 rounded-full transition-colors duration-300"
+                  className="relative flex h-12 min-w-[54px] flex-col items-center justify-center rounded-full px-2.5 py-1 sm:px-3"
                 >
                   {isActive && (
                     <motion.div
                       layoutId="active-pill"
-                      className={`absolute inset-0 rounded-full z-0 ${
-                        isImmersive 
-                          ? "bg-amber-500/20 border border-amber-500/40" 
-                          : "bg-white/[0.12] border border-white/10"
-                      }`}
+                      className="absolute inset-0 z-0 rounded-full border border-border bg-muted"
                       transition={{ type: "spring", stiffness: 380, damping: 30 }}
                     />
                   )}
-                  
-                  <motion.div
-                    animate={{
-                      y: isActive ? -1 : 0,
-                      scale: isActive ? 1.05 : 1,
-                    }}
-                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                    className={`relative z-10 flex items-center justify-center transition-colors duration-300 ${
-                      isActive ? (isImmersive ? "text-amber-400" : "text-emerald-400") : "text-zinc-400 hover:text-zinc-200"
-                    }`}
-                  >
+                  <div className={cn("relative z-10", isActive ? "text-foreground" : "text-muted-foreground")}>
                     {item.icon}
-                  </motion.div>
-                  
-                  <span 
-                    className={`relative z-10 text-[9px] tracking-tight mt-0.5 transition-all duration-300 ${
-                      isActive 
-                        ? (isImmersive ? "text-amber-400 font-bold" : "text-emerald-400 font-bold")
-                        : "text-zinc-500 font-medium hover:text-zinc-300"
-                    }`}
-                  >
+                  </div>
+                  <span className={cn("relative z-10 mt-0.5 text-[9px] tracking-tight", isActive ? "font-semibold text-foreground" : "text-muted-foreground")}>
                     {item.label}
                   </span>
                 </Link>

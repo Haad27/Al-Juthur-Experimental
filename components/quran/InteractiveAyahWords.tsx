@@ -234,13 +234,13 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
               >
                 <span 
                   id={`word-${ayahNumber}-${wordIdx}`} 
-                  className={`text-white group-hover:text-emerald-300 ${mushafFontClass} transition-all duration-150`}
+                  className={`text-arabic group-hover:text-accent ${mushafFontClass} transition-all duration-150`}
                   dangerouslySetInnerHTML={{ __html: displayWord }}
                 />
                 {showWbw && meaning && (
                   <span 
                     id={`meaning-${ayahNumber}-${wordIdx}`} 
-                    className="text-zinc-500 dark:text-zinc-400 group-hover:text-emerald-200 font-sans tracking-tight mt-0.5 block whitespace-nowrap text-center select-none transition-colors duration-150" 
+                    className="text-muted-foreground group-hover:text-foreground font-sans tracking-tight mt-0.5 block whitespace-nowrap text-center select-none transition-colors duration-150" 
                     dir="ltr"
                     style={{ fontSize: `${0.5 + (wbwFontSize * 0.1)}rem` }}
                   >
@@ -250,7 +250,7 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
               </span>
             </DialogTrigger>
             <DialogContent
-              className="max-w-[95vw] sm:max-w-xl md:max-w-2xl lg:max-w-3xl w-full max-h-[90vh] overflow-y-auto overflow-x-hidden bg-slate-950 border border-slate-800 text-slate-100 p-5 rounded-2xl shadow-2xl flex flex-col custom-scrollbar z-[100]"
+              className="max-w-[95vw] sm:max-w-xl md:max-w-2xl lg:max-w-3xl w-full max-h-[90vh] overflow-y-auto overflow-x-hidden bg-popover border border-border text-popover-foreground p-5 rounded-2xl shadow-lg flex flex-col custom-scrollbar z-[100]"
             >
               <DialogHeader className="sr-only">
                 <DialogTitle>Root Word Analysis</DialogTitle>

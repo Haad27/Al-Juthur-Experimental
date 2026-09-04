@@ -9,7 +9,7 @@ export default function AiScholarPage() {
   const [isModalOpen, setIsModalOpen] = useState(true);
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white flex flex-col">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Navbar */}
       <header className="border-b border-neutral-800/80 bg-neutral-900/40 backdrop-blur-md px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">

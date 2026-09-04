@@ -39,6 +39,7 @@ import {
 } from "@/lib/readerStorage";
 import { copyToClipboard, cn } from "@/lib/utils";
 import { toast } from "sonner";
+import AppHeader from "@/components/layout/AppHeader";
 
 interface Ayah {
   number: number;
@@ -216,8 +217,9 @@ export default function SavedPage() {
   };
 
   return (
-    <main className="min-h-screen w-full bg-[#0a0a0c] text-white px-4 sm:px-6 lg:px-8 py-8 pb-28">
-      <div className="max-w-5xl mx-auto space-y-8">
+    <main className="min-h-screen w-full bg-background text-foreground pb-28">
+      <AppHeader />
+      <div className="max-w-5xl mx-auto space-y-8 px-4 sm:px-6 lg:px-8 py-8">
         
         {/* Top Navigation Row */}
         <div className="flex items-center justify-between gap-4 border-b border-zinc-800/80 pb-4">

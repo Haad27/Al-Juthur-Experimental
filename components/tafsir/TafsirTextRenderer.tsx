@@ -103,7 +103,7 @@ export default function TafsirTextRenderer({
         if (contentInside) {
           return contentInside.replace(
             /([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u08E4-\u08FE\uFB50-\uFDFF\uFE70-\uFEFF]+(?:[\s\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u08E4-\u08FE\uFB50-\uFDFF\uFE70-\uFEFF\d\(\)\[\]«».,;:؟!]+)*[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u08E4-\u08FE\uFB50-\uFDFF\uFE70-\uFEFF]+|[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u08E4-\u08FE\uFB50-\uFDFF\uFE70-\uFEFF]+)/g,
-            '<span style="font-family: \'Noto Naskh Arabic\', \'Amiri\', serif; font-size: 1.25em; line-height: 2.2; font-weight: normal; color: #f1f5f9; display: inline-block; text-align: right;" dir="rtl">$1</span>'
+            '<span style="font-family: \'Noto Naskh Arabic\', \'Amiri\', serif; font-size: 1.25em; line-height: 2.2; font-weight: normal; color: var(--arabic); display: inline-block; text-align: right;" dir="rtl">$1</span>'
           );
         }
         return match;

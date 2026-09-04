@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { useGlobalState } from '@/lib/providers/GlobalStatesProvider';
 import { cn, copyToClipboard } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
-import LogoIcon from '@/components/svg/icons/LogoIcon';
+import AppHeader from '@/components/layout/AppHeader';
 
 function AiTranslatorContent() {
   const searchParams = useSearchParams();
@@ -144,51 +144,8 @@ function AiTranslatorContent() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pb-36 md:pb-10 relative selection:bg-emerald-500/30">
-      {/* Subtle ambient light background */}
-      <div className="absolute top-0 inset-x-0 h-[500px] bg-gradient-to-b from-emerald-900/10 to-transparent pointer-events-none" />
-      {/* Top Navigation Bar */}
-      <div className="hidden md:block sticky top-0 z-40 bg-zinc-950/50 backdrop-blur-3xl border-b border-zinc-800/80 px-4 md:px-8 py-3 shadow-sm">
-        <div className="max-w-[1700px] mx-auto relative flex flex-col md:flex-row md:items-center justify-between gap-4">
-          {/* Logo and App Name */}
-          <div className="flex items-center gap-4">
-            <Link href="/home" className="flex items-center gap-2">
-              <LogoIcon className="w-8 h-8 rounded-[20%] hidden md:block" />
-              <span className="font-bold text-xl tracking-tight text-white hidden md:block">Al-Juthur</span>
-            </Link>
-          </div>
-
-          {/* Desktop Full Navigation */}
-          <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-6 text-zinc-400 text-sm font-medium">
-            <Link href="/home" className="cursor-pointer hover:text-gray-300 transition text-zinc-400">
-              Home
-            </Link>
-            <Link href="/tafsir" className="cursor-pointer hover:text-gray-300 transition">
-              Tafsir
-            </Link>
-            <Link href="/lexicon" className="cursor-pointer hover:text-gray-300 transition">
-              Lexicon
-            </Link>
-            <Link href="/ai" className="cursor-pointer text-white font-medium">
-              Translator
-            </Link>
-            <Link href="/rag" className="cursor-pointer hover:text-gray-300 transition text-zinc-400">
-              AI Scholar
-            </Link>
-          </nav>
-
-          <div className="hidden md:flex items-center gap-3 shrink-0">
-            <Link 
-              href="/saved" 
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-emerald-500/50 text-xs font-semibold text-zinc-300 hover:text-emerald-400 transition shadow-sm"
-              title="Saved Verses, Tafsirs & Scholar Notes"
-            >
-              <Bookmark className="size-3.5 text-emerald-400" />
-              <span>Saved Library</span>
-            </Link>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-background text-foreground flex flex-col pb-36 md:pb-10 relative">
+      <AppHeader />
 
       <main className="flex-1 flex flex-col p-[clamp(0.5rem,2vh,1.5rem)] max-w-5xl mx-auto w-full gap-[clamp(0.5rem,2vh,1.5rem)]">
         
@@ -200,10 +157,10 @@ function AiTranslatorContent() {
                 <Sparkles className="w-3 h-3" />
                 AI Translation
               </div>
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-white drop-shadow-sm">
-                Classical Arabic <span className="text-emerald-400">AI Translator</span>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight text-foreground">
+                Classical Arabic AI Translator
               </h1>
-              <p className="max-w-xl mx-auto text-zinc-500 text-xs sm:text-sm mt-1 sm:mt-2">
+              <p className="max-w-xl mx-auto text-muted-foreground text-xs sm:text-sm mt-1 sm:mt-2 leading-[1.7]">
                 Paste classical Arabic Tafsir, Lexicon passages, or ancient Islamic texts. Watch the AI transcreate them into English.
               </p>
               

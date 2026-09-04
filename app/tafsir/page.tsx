@@ -12,6 +12,8 @@ import AyahChatSidebar from "@/components/ai/AyahChatSidebar";
 import FloatingAskScholarButton from "@/components/ai/FloatingAskScholarButton";
 import AyahWheelPickerModal from "@/components/tafsir/AyahWheelPickerModal";
 import ContinueReadingBanner from "@/components/tafsir/ContinueReadingBanner";
+import AppHeader from "@/components/layout/AppHeader";
+import TafsirComparePanel from "@/components/tafsir/TafsirComparePanel";
 import { useSubscriptionStore } from "@/lib/stores/subscriptionStore";
 import { 
   getLastReadTafsir, 
@@ -688,9 +690,9 @@ function TafsirContent() {
 
     // ── STANDARD MODE ──────────────────────────────────────────
     return (
-      <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white ${inter.className} transition-all duration-300`}>
+      <div className={`min-h-screen bg-background text-foreground ${inter.className} transition-colors`}>
         {/* Top Navigation Bar (Mobile Only) */}
-        <div className={`md:hidden sticky top-0 z-40 bg-zinc-950/60 backdrop-blur-3xl border-b border-zinc-800/80 px-3 py-3 transition-all duration-300 ${topNavVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}>
+        <div className={`md:hidden sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border px-3 py-3 transition-all duration-300 ${topNavVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}>
           <div className="max-w-[1700px] mx-auto">
             {/* Top Row: Back, Title, Immersive Toggle */}
             <div className="flex items-center justify-between gap-2 md:gap-4 w-full">
@@ -698,7 +700,7 @@ function TafsirContent() {
               <div className="flex items-center gap-2 md:gap-4 min-w-0">
                 <button
                   onClick={() => setActiveAuthor(null)}
-                  className="flex items-center justify-center p-2 md:px-3 md:py-1.5 rounded-lg bg-zinc-900/80 border border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-800/80 text-sm font-medium transition-all text-zinc-300 hover:text-white shrink-0"
+                  className="flex items-center justify-center p-2 md:px-3 md:py-1.5 rounded-lg bg-card border border-border hover:bg-muted text-sm font-medium transition-all text-muted-foreground hover:text-foreground shrink-0"
                 >
                   <ArrowLeft className="size-4" />
                   <span className="hidden md:inline ml-2">All Tafsirs</span>
@@ -708,7 +710,7 @@ function TafsirContent() {
                 
                 <div className="flex flex-col min-w-0 justify-center">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <h1 className="text-sm md:text-base font-bold text-zinc-100 leading-tight truncate">
+                    <h1 className="text-sm md:text-base font-semibold text-foreground leading-tight truncate">
                       {activeAuthor.name.replace(/\s*\([^)]*\)\s*$/, '').trim()}
                     </h1>
                     <span className="hidden md:inline-flex text-[9px] px-1.5 py-0.5 rounded-sm bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-semibold uppercase tracking-wider shrink-0 mt-0.5">
@@ -741,7 +743,7 @@ function TafsirContent() {
                     setSelectedLangForWheel(activeLangName);
                     setWheelModalOpen(true);
                   }}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-xs font-semibold text-emerald-400 transition-all shrink-0 cursor-pointer"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-border bg-card hover:bg-muted text-xs font-medium text-foreground transition-all shrink-0 cursor-pointer"
                 >
                   <Compass className="size-3.5" />
                   <span>Ayah Picker</span>
@@ -749,52 +751,70 @@ function TafsirContent() {
               </div>
             </div>
 
-            {/* Bottom Row (Mobile Only): Surah & Ayah Dropdowns */}
+            {/* Bottom Row (Mobile Only): Surah, Ayah & Tafsir */}
             <div className="md:hidden flex gap-2 w-full mt-3">
-              {/* Surah Dropdown */}
               <div className="relative flex-1 min-w-0">
                 <select
                   value={activeSurah}
                   onChange={(e) => setActiveSurah(Number(e.target.value))}
-                  className="w-full appearance-none bg-zinc-900 border border-emerald-500/50 rounded-lg px-3 py-2 text-xs text-zinc-300 font-medium focus:outline-none focus:border-emerald-500/50 pr-8 shadow-sm truncate"
+                  className="w-full appearance-none bg-card border border-border rounded-lg px-3 py-2 text-xs text-foreground font-medium focus:outline-none focus:ring-1 focus:ring-ring pr-8 truncate"
                 >
                   {SURAHS_DATA.map((s) => (
-                    <option key={s.number} value={s.number} className="bg-zinc-900 text-zinc-200">
+                    <option key={s.number} value={s.number} className="bg-card text-foreground">
                       {s.number}. {s.englishName}
                     </option>
                   ))}
                 </select>
-                <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 size-3.5 text-zinc-500 pointer-events-none rotate-90" />
+                <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none rotate-90" />
               </div>
 
-              {/* Ayah Dropdown */}
-              <div className="relative w-28 shrink-0">
+              <div className="relative w-24 shrink-0">
                 <select
                   value={currentAyahIndex + 1}
                   onChange={(e) => scrollToAyah(Number(e.target.value))}
-                  className="w-full appearance-none bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-300 font-medium focus:outline-none focus:border-emerald-500/50 pr-8 shadow-sm"
+                  className="w-full appearance-none bg-card border border-border rounded-lg px-3 py-2 text-xs text-foreground font-medium focus:outline-none focus:ring-1 focus:ring-ring pr-8"
                 >
                   {Array.from({ length: currentSurahMeta.numberOfAyahs }, (_, i) => i + 1).map((num) => (
-                    <option key={num} value={num} className="bg-zinc-900 text-zinc-200">
+                    <option key={num} value={num} className="bg-card text-foreground">
                       Ayah {num}
                     </option>
                   ))}
                 </select>
-                <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 size-3.5 text-zinc-500 pointer-events-none rotate-90" />
+                <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none rotate-90" />
               </div>
+            </div>
+            <div className="md:hidden mt-2">
+              <select
+                value={activeAuthor.id}
+                onChange={(e) => {
+                  const id = Number(e.target.value);
+                  const match = allAuthorsWithLang.find((a) => a.author.id === id);
+                  if (match) {
+                    setActiveAuthor(match.author);
+                    setActiveLangName(match.language.name);
+                  }
+                }}
+                className="w-full appearance-none bg-card border border-border rounded-lg px-3 py-2 text-xs text-foreground font-medium focus:outline-none focus:ring-1 focus:ring-ring pr-8"
+              >
+                {allAuthorsWithLang.map(({ author, language }) => (
+                  <option key={`${language.id}-${author.id}`} value={author.id} className="bg-card text-foreground">
+                    {author.name.replace(/\s*\([^)]*\)\s*$/, "").trim()} · {language.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         </div>
         {/* Layout: Sidebar + Main Content + Right Ayah Navigator */}
         <div className={cn("w-full flex min-h-screen transition-all duration-300", aiChatContext ? "lg:pr-[420px] xl:pr-[450px]" : "")}>
           {/* Left Sidebar: 114 Surahs */}
-          <aside className="hidden md:flex flex-col w-64 lg:w-72 shrink-0 border-r border-zinc-800/60 bg-zinc-950/50 sticky top-0 h-screen overflow-y-auto custom-scrollbar">
-            <div className="p-4 border-b border-zinc-800/60 sticky top-0 bg-zinc-950/90 z-10 flex flex-col gap-4">
+          <aside className="hidden md:flex flex-col w-64 lg:w-72 shrink-0 border-r border-border bg-background sticky top-0 h-screen overflow-y-auto custom-scrollbar">
+            <div className="p-4 border-b border-border sticky top-0 bg-background z-10 flex flex-col gap-4">
               {/* Tafsir Header Info */}
               <div className="flex items-start gap-3">
                 <button
                   onClick={() => setActiveAuthor(null)}
-                  className="flex items-center justify-center p-2 rounded-lg bg-zinc-900/80 border border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-800/80 transition-all text-zinc-400 hover:text-white shrink-0"
+                  className="flex items-center justify-center p-2 rounded-lg bg-card border border-border hover:bg-muted transition-all text-muted-foreground hover:text-foreground shrink-0"
                   title="Back to All Tafsirs"
                 >
                   <ArrowLeft className="size-4" />
@@ -816,9 +836,29 @@ function TafsirContent() {
                 </div>
               </div>
 
+              <select
+                value={activeAuthor.id}
+                onChange={(e) => {
+                  const id = Number(e.target.value);
+                  const match = allAuthorsWithLang.find((a) => a.author.id === id);
+                  if (match) {
+                    setActiveAuthor(match.author);
+                    setActiveLangName(match.language.name);
+                  }
+                }}
+                className="w-full appearance-none bg-card border border-border rounded-lg px-3 py-2 text-xs text-foreground font-medium focus:outline-none focus:ring-1 focus:ring-ring"
+                title="Switch tafsir"
+              >
+                {allAuthorsWithLang.map(({ author, language }) => (
+                  <option key={`${language.id}-${author.id}`} value={author.id}>
+                    {author.name.replace(/\s*\([^)]*\)\s*$/, "").trim()} · {language.name}
+                  </option>
+                ))}
+              </select>
+
               {/* Sidebar Header */}
-              <div className="flex items-center justify-between pt-2 border-t border-zinc-800/50">
-                <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+              <div className="flex items-center justify-between pt-2 border-t border-border">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Surahs (1 - 114)
                 </h2>
                 <button
@@ -827,7 +867,7 @@ function TafsirContent() {
                     setSelectedLangForWheel(activeLangName);
                     setWheelModalOpen(true);
                   }}
-                  className="flex items-center gap-1 px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-[10px] font-bold text-emerald-400 transition-all cursor-pointer"
+                  className="flex items-center gap-1 px-2 py-1 rounded border border-border hover:bg-muted text-[10px] font-medium text-foreground transition-all cursor-pointer"
                   title="Open Ayah Picker"
                 >
                   <Compass className="size-3" />
@@ -863,8 +903,8 @@ function TafsirContent() {
                     }}
                     className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-all ${
                       isActive
-                        ? "bg-emerald-500/15 border border-emerald-500/40 text-white shadow-sm"
-                        : "hover:bg-zinc-900/60 text-zinc-400 hover:text-zinc-200"
+                        ? "bg-muted border border-border text-foreground"
+                        : "hover:bg-muted/60 text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -884,7 +924,7 @@ function TafsirContent() {
           </aside>
 
           {/* Main Content Area */}
-          <main className="flex-1 p-4 md:p-8 space-y-8 min-w-0 transition-all duration-300">
+          <main className="flex-1 p-4 md:p-8 space-y-8 min-w-0 transition-all duration-300 max-w-3xl mx-auto">
 
             {authorWarning.hasWarning && (
               <div className="bg-amber-500/10 border border-amber-500/40 rounded-xl p-4 flex gap-3 text-amber-200 text-sm">
@@ -898,8 +938,8 @@ function TafsirContent() {
 
             {/* Surah Banner Header */}
             <div className={cn(
-              "relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-gradient-to-r from-emerald-950/40 via-zinc-900/60 to-zinc-900/40 transition-all duration-300",
-              aiChatContext ? "p-4 sm:p-5" : "p-4 sm:p-6 lg:p-8"
+              "relative rounded-xl border border-border bg-card transition-all duration-300",
+              aiChatContext ? "p-4 sm:p-5" : "p-4 sm:p-6"
             )}>
               <div className="absolute -right-10 -bottom-10 size-48 rounded-full bg-emerald-500/10 blur-3xl" />
               <div className={cn(
@@ -1030,6 +1070,7 @@ function TafsirContent() {
                         activeAuthor={activeAuthor}
                         aiChatContext={aiChatContext}
                         scrollToAyah={scrollToAyah}
+                        languages={languages}
                       />
                     );
                   }}
@@ -1105,55 +1146,14 @@ function TafsirContent() {
   // TAFSIR LIBRARY VIEW (GRID OF COLLECTION CARDS)
   // ==========================================
   return (
-    <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white pb-36 md:pb-24 ${inter.className}`}>
+    <div className={`min-h-screen bg-background text-foreground pb-36 md:pb-24 ${inter.className}`}>
       
-      {/* Top Navigation Bar (Library View) */}
-      <div className={`hidden md:block fixed top-0 inset-x-0 z-50 bg-zinc-950/80 backdrop-blur-3xl border-b border-zinc-800/80 px-4 md:px-8 py-3 shadow-sm transition-transform duration-300 ${topNavVisible ? 'translate-y-0' : '-translate-y-full'}`}>
-        <div className="max-w-7xl mx-auto relative flex flex-col md:flex-row md:items-center justify-between gap-4">
-          {/* Logo and App Name */}
-          <div className="flex items-center gap-4">
-            <Link href="/home" className="flex items-center gap-2">
-              <LogoIcon className="text-white size-6 hidden md:block" />
-              <p className="font-bold text-lg md:text-xl text-white hidden md:block">Al-Juthur</p>
-            </Link>
-          </div>
-
-          {/* Desktop Full Navigation (Same as Homepage) */}
-          <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-6 text-zinc-400 text-sm font-medium">
-            <Link href="/home" className="cursor-pointer hover:text-gray-300 transition text-zinc-400">
-              Home
-            </Link>
-            <Link href="/tafsir" className="cursor-pointer text-white font-medium">
-              Tafsir
-            </Link>
-            <Link href="/lexicon" className="cursor-pointer hover:text-gray-300 transition">
-              Lexicon
-            </Link>
-            <Link href="/ai" className="cursor-pointer hover:text-gray-300 transition">
-              Translator
-            </Link>
-            <Link href="/rag" className="cursor-pointer hover:text-gray-300 transition">
-              AI Scholar
-            </Link>
-          </nav>
-          
-          <div className="flex items-center gap-3">
-            <Link 
-              href="/saved" 
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-emerald-500/50 text-xs font-semibold text-zinc-300 hover:text-emerald-400 transition"
-              title="Saved Verses, Tafsirs & Scholar Notes"
-            >
-              <Bookmark className="size-3.5 text-emerald-400" />
-              <span>Saved Library</span>
-            </Link>
-          </div>
-        </div>
-      </div>
+      <AppHeader />
 
       {/* Hero Header removed for cleaner UI consistency */}
 
       {/* Sticky Filters & Search (Action Bar) */}
-      <div className={`sticky z-30 bg-zinc-950/90 backdrop-blur-xl border-y border-zinc-800/60 shadow-sm mb-4 transition-all duration-300 top-0 mt-0 md:mt-14 ${topNavVisible ? 'md:top-[53px]' : ''}`}>
+      <div className={`sticky z-30 bg-background/90 backdrop-blur-md border-y border-border mb-4 transition-all duration-300 top-0 mt-0`}>
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-3">
           
           {/* Action Row: Search, Refine, Active Chips */}
@@ -1163,7 +1163,7 @@ function TafsirContent() {
             <div className="flex items-center gap-4 flex-1">
               <div className="flex items-center gap-2 shrink-0">
                 <Library className="size-5 text-emerald-400" />
-                <span className="font-bold text-white text-base md:text-lg">Tafsir Library</span>
+                <span className="font-semibold text-foreground text-base md:text-lg">Tafsir Library</span>
               </div>
               
               {/* Active Filter Feedback Chips */}
@@ -1210,7 +1210,7 @@ function TafsirContent() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setIsSearchFocused(true)}
-                  className="w-full bg-zinc-900/80 border border-emerald-500/30 rounded-xl pl-10 pr-4 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-emerald-500/60 transition-all hover:border-emerald-500/50 shadow-sm"
+                  className="w-full bg-card border border-border rounded-xl pl-10 pr-4 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-all"
                 />
                 
                 {/* Autocomplete Dropdown */}
@@ -1595,7 +1595,8 @@ function TafsirCard({
   activeLangName, 
   activeAuthor,
   aiChatContext, 
-  scrollToAyah 
+  scrollToAyah,
+  languages = [],
 }: {
   entry: any;
   idx: number;
@@ -1604,6 +1605,7 @@ function TafsirCard({
   activeAuthor?: Author | null;
   aiChatContext: any;
   scrollToAyah: (num: number) => void;
+  languages?: Language[];
 }) {
   const ayahNumber = entry.ayah?.numberInSurah || idx + 1;
   const arabicText = entry.ayah?.text && entry.ayah.text !== "Arabic Text" ? entry.ayah.text : null;
@@ -1649,11 +1651,11 @@ function TafsirCard({
   };
 
   return (
-    <div className="pb-6">
+    <div className="pb-10">
       <div
         id={`ayah-${ayahNumber}`}
         data-ayah-idx={idx}
-        className="border border-emerald-500/20 bg-zinc-900/40 rounded-xl p-5 md:p-7 transition-all hover:border-emerald-500/50 space-y-6 scroll-mt-24"
+        className="space-y-6 scroll-mt-24 border-b border-border pb-10"
       >
         {/* Free Preview Banner for Surah 1 on Locked Authors */}
         {isPreviewInSurahOne && idx === 0 && (
@@ -1676,10 +1678,10 @@ function TafsirCard({
         {/* Top Ayah Header */}
         <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3 gap-2 min-w-0">
           <div className="flex items-center gap-1.5 min-w-0 shrink-0">
-            <span className="shrink-0 h-7 px-1.5 min-w-[1.75rem] rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-xs font-bold text-emerald-400 whitespace-nowrap">
+            <span className="shrink-0 h-7 px-1.5 min-w-[1.75rem] rounded-md bg-muted border border-border flex items-center justify-center text-xs font-semibold text-foreground whitespace-nowrap">
               {activeSurah}:{ayahNumber}
             </span>
-            <span className="text-xs sm:text-sm font-semibold text-zinc-300 whitespace-nowrap">Ayah {ayahNumber}</span>
+            <span className="text-xs sm:text-sm font-medium text-muted-foreground whitespace-nowrap">Ayah {ayahNumber}</span>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
             <button
@@ -1722,14 +1724,14 @@ function TafsirCard({
         {/* Arabic Verse */}
         {arabicText && (
           <div className="py-2">
-            <p className={`font-mushaf-indopak-16 text-[1.65rem] md:text-4xl text-right leading-loose text-amber-100 font-normal`} dir="rtl" style={{ lineHeight: '2.4' }}>
+            <p className={`font-mushaf-indopak-16 text-[1.65rem] md:text-4xl text-right leading-loose text-arabic font-normal`} dir="rtl" style={{ lineHeight: '2.4' }}>
               {arabicText}
             </p>
           </div>
         )}
 
         {/* Tafsir Text */}
-        <div className="pt-2 border-t border-zinc-800/40">
+        <div className="pt-2 reading-measure reading-prose">
           <TafsirTextRenderer
             text={entry.text}
             isArabic={isArabic}
@@ -1761,6 +1763,15 @@ function TafsirCard({
               isUrdu={isUrduText} 
             />
           </div>
+        )}
+        {activeAuthor && (
+          <TafsirComparePanel
+            ayahIndex={idx}
+            ayahNumber={ayahNumber}
+            surahId={activeSurah}
+            currentAuthorId={authorId}
+            languages={languages}
+          />
         )}
       </div>
     </div>

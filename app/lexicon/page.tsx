@@ -29,6 +29,7 @@ import { useGlobalState } from '@/lib/providers/GlobalStatesProvider';
 import { copyToClipboard } from '@/lib/utils';
 import LexiconTextRenderer from '@/components/lexicon/LexiconTextRenderer';
 import { amiriquran, inter } from '@/app/fonts';
+import AppHeader from '@/components/layout/AppHeader';
 import AyahChatSidebar from '@/components/ai/AyahChatSidebar';
 import FloatingAskScholarButton from '@/components/ai/FloatingAskScholarButton';
 import { useSubscriptionStore } from '@/lib/stores/subscriptionStore';
@@ -245,95 +246,27 @@ function LexiconPageContent() {
   // STANDARD LEXICON MODE (PINNED GLOSSY TOP BAR + 3-COLUMN DESKTOP)
   // ==========================================
   return (
-    <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-slate-100 pb-36 md:pb-24 ${inter.className} transition-all duration-300 ${!!aiChatContext ? 'lg:pr-[420px] xl:pr-[450px]' : ''}`}>
-      {/* Global Top Navigation Bar (Glassy Backdrop & Shadow) */}
-      <div 
-        className={`sticky top-0 z-40 bg-zinc-950/50 backdrop-blur-3xl border-b border-zinc-800/80 px-4 md:px-8 py-3 shadow-sm transition-all duration-300 ${
-          topNavVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
-        }`}
-      >
-        <div className="max-w-[1700px] mx-auto relative flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div className="flex items-center justify-between w-full md:w-auto">
-            {/* Left Logo + Desktop Root Word Badge */}
-            <div className="flex items-center gap-3">
-              <Link href="/home" className="flex items-center gap-2">
-                <LogoIcon className="w-8 h-8 rounded-[20%]" />
-                <span className="font-bold text-xl tracking-tight text-white">Al-Juthur</span>
-              </Link>
-              
-              {/* Desktop / Laptop Top Left: Active Root Word Badge */}
-              {(activeRoot || result?.normalizedRoot) && (
-                <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-950/60 border border-emerald-500/40 shadow-sm shrink-0">
-                  <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Root:</span>
-                  <span className="text-sm font-bold font-arabic text-white">
-                    {result?.normalizedRoot || activeRoot}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Mobile Only: Current Selected Word Badge + Saved Library Button (Top Right) */}
-            <div className="md:hidden flex items-center gap-2 shrink-0">
-              {(activeRoot || result?.normalizedRoot) && (
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-950/60 border border-emerald-500/40 shadow-sm shrink-0">
-                  <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Root:</span>
-                  <span className="text-sm font-bold font-arabic text-white">
-                    {result?.normalizedRoot || activeRoot}
-                  </span>
-                </div>
-              )}
-              {/* Mobile Saved Library button (commented out for Approach 3)
-              <Link
-                href="/saved"
-                className="flex items-center justify-center p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-emerald-400 hover:bg-zinc-800 transition"
-                title="Saved Library"
-              >
-                <Bookmark className="size-4" />
-              </Link>
-              */}
-            </div>
-          </div>
-
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-6 text-zinc-400 text-sm font-medium">
-            <Link href="/home" className="hover:text-zinc-200 transition">
-              Home
-            </Link>
-            <Link href="/tafsir" className="hover:text-zinc-200 transition">
-              Tafsir
-            </Link>
-            <Link href="/lexicon" className="text-white font-bold">
-              Lexicon
-            </Link>
-            <Link href="/ai" className="hover:text-zinc-200 transition">
-              Translator
-            </Link>
-            <Link href="/rag" className="hover:text-zinc-200 transition">
-              AI Scholar
-            </Link>
-          </nav>
-
-          {/* Desktop Top Right: Saved Library Link */}
-          <div className="hidden md:flex items-center gap-3 shrink-0 ml-auto lg:ml-0">
-            <Link 
-              href="/saved" 
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-emerald-500/50 text-xs font-semibold text-zinc-300 hover:text-emerald-400 transition shadow-sm"
-              title="Saved Verses, Tafsirs & Scholar Notes"
-            >
-              <Bookmark className="size-3.5 text-emerald-400" />
-              <span>Saved Library</span>
-            </Link>
-          </div>
+    <div className={`min-h-screen bg-background text-foreground pb-36 md:pb-24 ${inter.className} transition-all duration-300 ${!!aiChatContext ? 'lg:pr-[420px] xl:pr-[450px]' : ''}`}>
+      <AppHeader
+        subtitle={
+          (activeRoot || result?.normalizedRoot) ? (
+            <span className="hidden md:inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1 text-xs">
+              <span className="uppercase tracking-wider text-muted-foreground">Root</span>
+              <span className="font-arabic font-semibold text-arabic">{result?.normalizedRoot || activeRoot}</span>
+            </span>
+          ) : undefined
+        }
+      />
 
           {/* MOBILE ONLY: Pinned Dropdowns for Dictionaries & PDF Lexicons */}
           {result?.entries && result.entries.length > 0 && (
-            <div className="md:hidden flex gap-2 w-full pt-1">
+            <div className="md:hidden flex gap-2 w-full px-4 pt-3">
               {/* Dictionary Dropdown (Prominent Green Border) */}
               <div className="relative flex-1 min-w-0">
                 <select
                   value={selectedDictId}
                   onChange={(e) => setSelectedDictId(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-                  className="w-full appearance-none bg-emerald-950/30 border border-emerald-500/70 rounded-lg px-3 py-1.5 text-xs text-emerald-300 font-semibold focus:outline-none focus:border-emerald-400 pr-7 shadow-sm truncate"
+                  className="w-full appearance-none bg-card border border-border rounded-lg px-3 py-1.5 text-xs text-foreground font-medium focus:outline-none focus:ring-1 focus:ring-ring pr-7 truncate"
                 >
                   <option value="all" className="bg-zinc-900 text-white">All Dictionaries ({result.entries.length})</option>
                   {result.entries.map((entry) => (
@@ -368,8 +301,6 @@ function LexiconPageContent() {
               )}
             </div>
           )}
-        </div>
-      </div>
 
       {/* Search Bar & Container */}
       <div className="max-w-[1700px] mx-auto px-4 md:px-8 pt-4 md:pt-6">
@@ -380,10 +311,10 @@ function LexiconPageContent() {
               <Sparkles className="size-3 text-emerald-400" />
               <span>Classical Lexical Engine</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+            <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground">
               Classical Arabic Root Lexicon
             </h1>
-            <p className="text-xs text-zinc-400 max-w-md mx-auto">
+            <p className="text-xs text-muted-foreground max-w-md mx-auto leading-[1.7]">
               Explore Lane&apos;s Lexicon, Lisan al-Arab, and classical etymological dictionaries by Arabic root.
             </p>
           </div>
@@ -397,12 +328,12 @@ function LexiconPageContent() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setIsLexiconSearchFocused(true)}
                 placeholder="Search Arabic root (e.g. رحم, كتب, نور)..."
-                className="w-full pl-12 pr-28 py-2.5 md:py-3 bg-zinc-900/90 border border-zinc-800 rounded-xl text-sm md:text-base text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500/60 shadow-lg transition-all"
+                className="w-full pl-12 pr-28 py-2.5 md:py-3 bg-card border border-border rounded-xl text-sm md:text-base text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-all"
                 dir="auto"
               />
               <button
                 type="submit"
-                className="absolute right-2 px-4 md:px-5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs md:text-sm rounded-lg shadow-md transition-all flex items-center gap-1.5"
+                className="absolute right-2 px-4 md:px-5 py-1.5 bg-primary text-primary-foreground font-medium text-xs md:text-sm rounded-lg transition-opacity hover:opacity-90 flex items-center gap-1.5"
               >
                 Explore
               </button>
