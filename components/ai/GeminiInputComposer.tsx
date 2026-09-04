@@ -133,33 +133,33 @@ export default function GeminiInputComposer({
             <span className="truncate max-w-[120px] sm:max-w-[170px]">{currentBot.shortName}</span>
           </SelectTrigger>
           <SelectContent className="bg-popover text-popover-foreground border-border max-h-[440px] w-[310px] sm:w-[370px]">
-            <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-zinc-500 border-b border-zinc-800 mb-1 flex items-center justify-between">
+            <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border mb-1 flex items-center justify-between">
               <span>Select AI Scholar Persona</span>
-              <span className="text-emerald-400 font-semibold">6 Bots Available</span>
+              <span className="text-accent font-semibold">6 Bots Available</span>
             </div>
 
             {/* Core Models (Primary RAG) */}
-            <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400/90 flex items-center justify-between">
+            <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-accent flex items-center justify-between">
               <span>Main Core Models</span>
-              <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Primary RAG</span>
+              <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-accent/10 text-accent border border-accent/30">Primary RAG</span>
             </div>
             {RAG_MODES.filter((b) => b.isPrimary).map((bot) => (
               <SelectItem
                 key={bot.id}
                 value={bot.id}
-                className="focus:bg-zinc-800/80 focus:text-white cursor-pointer py-2.5 border-b border-zinc-800/30"
+                className="focus:bg-muted focus:text-foreground cursor-pointer py-2.5 border-b border-border/30"
               >
                 <div className="flex flex-col gap-1 text-left">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-bold text-xs text-white flex items-center gap-1.5">
-                      <Bot className={`size-3.5 shrink-0 ${bot.id === "lexicon" ? "text-rose-400" : "text-emerald-400"}`} />
+                    <span className="font-bold text-xs text-foreground flex items-center gap-1.5">
+                      <Bot className={`size-3.5 shrink-0 ${bot.id === "lexicon" ? "text-rose-400" : "text-accent"}`} />
                       <span>{bot.shortName}</span>
                     </span>
                     <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded border ${bot.badgeColor}`}>
                       {bot.badge}
                     </span>
                   </div>
-                  <span className="text-[11px] text-zinc-400 leading-snug line-clamp-2">
+                  <span className="text-[11px] text-muted-foreground leading-snug line-clamp-2">
                     {bot.targetIntent}
                   </span>
                 </div>
@@ -167,27 +167,27 @@ export default function GeminiInputComposer({
             ))}
 
             {/* Specialized Models */}
-            <div className="px-3 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-zinc-500 border-t border-zinc-800 mt-1 flex items-center justify-between">
+            <div className="px-3 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-t border-border mt-1 flex items-center justify-between">
               <span>Specialized Perspectives</span>
-              <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-zinc-800/80 text-zinc-400 border border-zinc-700">Specialized</span>
+              <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border">Specialized</span>
             </div>
             {RAG_MODES.filter((b) => !b.isPrimary).map((bot) => (
               <SelectItem
                 key={bot.id}
                 value={bot.id}
-                className="focus:bg-zinc-800/80 focus:text-white cursor-pointer py-2.5 border-b border-zinc-800/30 last:border-none"
+                className="focus:bg-muted focus:text-foreground cursor-pointer py-2.5 border-b border-border/30 last:border-none"
               >
                 <div className="flex flex-col gap-1 text-left">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-bold text-xs text-white flex items-center gap-1.5">
-                      <Bot className="size-3.5 text-zinc-400 shrink-0" />
+                    <span className="font-bold text-xs text-foreground flex items-center gap-1.5">
+                      <Bot className="size-3.5 text-muted-foreground shrink-0" />
                       <span>{bot.shortName}</span>
                     </span>
                     <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded border ${bot.badgeColor}`}>
                       {bot.badge}
                     </span>
                   </div>
-                  <span className="text-[11px] text-zinc-400 leading-snug line-clamp-2">
+                  <span className="text-[11px] text-muted-foreground leading-snug line-clamp-2">
                     {bot.targetIntent}
                   </span>
                 </div>

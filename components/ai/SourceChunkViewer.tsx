@@ -88,20 +88,20 @@ export default function SourceChunkViewer({
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-zinc-950 text-white select-text">
+    <div className="flex flex-col h-full w-full bg-background text-foreground select-text">
       {/* Header */}
-      <div className="shrink-0 p-4 sm:p-5 border-b border-zinc-800/90 bg-zinc-900/60 backdrop-blur-md">
+      <div className="shrink-0 p-4 sm:p-5 border-b border-border bg-card/70 backdrop-blur-md">
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1.5 flex-1 min-w-0">
             {/* Top Author / Category Badge */}
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-semibold">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent/10 border border-accent/25 text-accent text-xs font-semibold">
                 {source.workType === "textbook" ? (
                   <BookOpen className="size-3 text-indigo-400" />
                 ) : source.workType === "lexicon" ? (
                   <Layers className="size-3 text-rose-400" />
                 ) : (
-                  <BookOpen className="size-3 text-emerald-400" />
+                  <BookOpen className="size-3 text-accent" />
                 )}
                 <span className="truncate max-w-[200px]">
                   {source.authorName || source.book}
@@ -109,7 +109,7 @@ export default function SourceChunkViewer({
               </span>
 
               {/* Surah/Ayah or Root Badge */}
-              <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-zinc-800/80 border border-zinc-700/60 text-zinc-300">
+              <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-muted border border-border text-reading">
                 {source.workType === "textbook"
                   ? "Grammar Reference"
                   : source.workType === "lexicon"
@@ -119,7 +119,7 @@ export default function SourceChunkViewer({
             </div>
 
             {/* Book Title */}
-            <h2 className="text-base sm:text-lg font-bold text-zinc-100 tracking-tight leading-snug truncate">
+            <h2 className="text-base sm:text-lg font-bold text-foreground tracking-tight leading-snug truncate">
               {source.book}
             </h2>
           </div>
@@ -127,7 +127,7 @@ export default function SourceChunkViewer({
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="shrink-0 p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800 hover:border-zinc-700 transition-colors cursor-pointer"
+            className="shrink-0 p-2 rounded-xl bg-card border border-border text-muted-foreground hover:text-foreground hover:bg-muted hover:border-border transition-colors cursor-pointer"
             aria-label="Close Chunk Viewer"
           >
             <X className="size-4 sm:size-5" />
@@ -135,8 +135,8 @@ export default function SourceChunkViewer({
         </div>
 
         {/* Verification banner */}
-        <div className="mt-3 flex items-center gap-1.5 text-[11px] text-emerald-400/90 font-medium bg-emerald-950/30 border border-emerald-500/20 rounded-lg px-2.5 py-1">
-          <ShieldCheck className="size-3.5 text-emerald-400 shrink-0" />
+        <div className="mt-3 flex items-center gap-1.5 text-[11px] text-accent font-medium bg-accent/10 border border-accent/20 rounded-lg px-2.5 py-1">
+          <ShieldCheck className="size-3.5 text-accent shrink-0" />
           <span>Exact classical passage retrieved & grounded by RAG</span>
         </div>
       </div>
@@ -153,7 +153,7 @@ export default function SourceChunkViewer({
               return (
                 <div
                   key={idx}
-                  className="my-3 flex items-center justify-center gap-2 py-1.5 px-3 rounded-lg bg-zinc-900/90 border border-zinc-800 text-[11px] text-zinc-400 font-mono text-center"
+                  className="my-3 flex items-center justify-center gap-2 py-1.5 px-3 rounded-lg bg-card border border-border text-[11px] text-muted-foreground font-mono text-center"
                 >
                   <span>... Deep Excerpt Match in Source ...</span>
                 </div>
@@ -165,31 +165,31 @@ export default function SourceChunkViewer({
                 key={idx}
                 dir={isArabic ? "rtl" : "ltr"}
                 className={`${isArabic ? amiri.className : inter.className} ${getFontSizeClass()} ${
-                  isArabic ? "text-right text-zinc-100" : "text-left text-zinc-200"
-                } selection:bg-emerald-500/30 selection:text-white`}
+                  isArabic ? "text-right text-foreground" : "text-left text-foreground"
+                } selection:bg-accent/30 selection:text-foreground`}
               >
                 {para}
               </p>
             );
           })
         ) : (
-          <p className="text-zinc-500 text-sm italic">No text content available.</p>
+          <p className="text-muted-foreground text-sm italic">No text content available.</p>
         )}
       </div>
 
       {/* Footer Actions */}
-      <div className="shrink-0 p-3.5 sm:p-4 border-t border-zinc-800/90 bg-zinc-900/80 backdrop-blur-md flex items-center justify-between gap-2.5">
+      <div className="shrink-0 p-3.5 sm:p-4 border-t border-border bg-card/90 backdrop-blur-md flex items-center justify-between gap-2.5">
         {/* Left Toolbar: Copy & Font Controls */}
         <div className="flex items-center gap-1.5">
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-emerald-500/40 hover:bg-zinc-800 text-xs font-medium text-zinc-300 hover:text-white transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-card border border-border hover:border-accent/40 hover:bg-muted text-xs font-medium text-reading hover:text-foreground transition-all cursor-pointer"
             title="Copy retrieved text"
           >
             {copied ? (
               <>
-                <Check className="size-3.5 text-emerald-400" />
-                <span className="text-emerald-400">Copied</span>
+                <Check className="size-3.5 text-accent" />
+                <span className="text-accent">Copied</span>
               </>
             ) : (
               <>
@@ -202,7 +202,7 @@ export default function SourceChunkViewer({
           {isArabic && (
             <button
               onClick={cycleFontSize}
-              className="flex items-center gap-1 px-2.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800 text-xs text-zinc-400 hover:text-zinc-200 transition-all cursor-pointer"
+              className="flex items-center gap-1 px-2.5 py-2 rounded-xl bg-card border border-border hover:border-border hover:bg-muted text-xs text-muted-foreground hover:text-foreground transition-all cursor-pointer"
               title="Toggle Font Size"
             >
               <Type className="size-3.5" />
@@ -216,7 +216,7 @@ export default function SourceChunkViewer({
           href={continueReadingHref}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-xs sm:text-sm font-semibold shadow-md shadow-emerald-500/20 transition-all active:scale-95 shrink-0"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-accent hover:bg-accent/90 text-accent-foreground text-xs sm:text-sm font-semibold shadow-sm transition-all active:scale-95 shrink-0"
         >
           <span>Continue Reading</span>
           <ExternalLink className="size-3.5 shrink-0" />

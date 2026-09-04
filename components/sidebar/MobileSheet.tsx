@@ -75,7 +75,7 @@ const MobileSheet = ({
       {surahNumber ? (
         <div
           className={cn(
-            "fixed top-0 left-0 right-0 w-full lg:hidden flex flex-col gap-2 transition-all duration-300 ease-out p-2 pl-4 pr-2 dark:bg-zinc-950/60 bg-zinc-950/60 backdrop-blur-3xl border-b dark:border-zinc-800/60 border-black/10 shadow-md min-h-16 z-[99999]",
+            "fixed top-0 left-0 right-0 w-full lg:hidden flex flex-col gap-2 transition-all duration-300 ease-out p-2 pl-4 pr-2 dark:bg-card/80 bg-card/80 backdrop-blur-3xl border-b dark:border-border border-border/10 shadow-md min-h-16 z-[99999]",
             (show && !isAudioActive && !isWordDialogVisible)
               ? "translate-y-0 opacity-100 pointer-events-auto"
               : "-translate-y-full opacity-0 pointer-events-none"
@@ -88,7 +88,7 @@ const MobileSheet = ({
                 <div className="flex items-center gap-2 min-w-0 flex-1 mr-2">
                   <Link
                     href="/home#start_reading"
-                    className="p-1.5 -ml-1 rounded-lg bg-zinc-900/80 border border-zinc-800 text-zinc-400 hover:text-emerald-400 hover:border-emerald-500/50 transition-all flex items-center justify-center shrink-0 cursor-pointer shadow-sm"
+                    className="p-1.5 -ml-1 rounded-lg bg-card/90 border border-border text-muted-foreground hover:text-accent hover:border-accent/50 transition-all flex items-center justify-center shrink-0 cursor-pointer shadow-sm"
                     title="Back to All Surahs"
                   >
                     <ArrowLeft className="size-4" />
@@ -96,17 +96,17 @@ const MobileSheet = ({
 
                   <div className="flex flex-col min-w-0 justify-center">
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <span className="text-emerald-400 font-extrabold text-base sm:text-lg tracking-tight truncate drop-shadow-[0_0_8px_rgba(16,185,129,0.25)]">
+                      <span className="text-accent font-extrabold text-base sm:text-lg tracking-tight truncate ">
                         {currentSurahObj?.englishName}
                       </span>
                       {currentSurahObj?.englishNameTranslation && (
-                        <span className="text-zinc-400 text-[11px] font-medium truncate max-w-[140px] hidden sm:inline">
+                        <span className="text-muted-foreground text-[11px] font-medium truncate max-w-[140px] hidden sm:inline">
                           ({currentSurahObj.englishNameTranslation})
                         </span>
                       )}
                     </div>
                     {currentSurahObj?.englishNameTranslation && (
-                      <span className="text-zinc-400 text-[10px] font-medium truncate sm:hidden">
+                      <span className="text-muted-foreground text-[10px] font-medium truncate sm:hidden">
                         {currentSurahObj.englishNameTranslation}
                       </span>
                     )}
@@ -115,13 +115,13 @@ const MobileSheet = ({
 
                 <div className="flex items-center gap-2 shrink-0">
                   {currentSurahObj?.revelationType && (
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-semibold tracking-wider uppercase">
+                    <span className="px-2 py-0.5 rounded-full bg-accent/10 border border-accent/30 text-accent text-[10px] font-semibold tracking-wider uppercase">
                       {currentSurahObj.revelationType}
                     </span>
                   )}
                   <button 
                     onClick={() => { setActiveTab("settings"); setIsOpen(true); }} 
-                    className="p-1.5 rounded-lg bg-zinc-900 border border-emerald-500/60 shadow-[0_0_12px_rgba(16,185,129,0.4)] text-emerald-400 hover:text-emerald-300 hover:shadow-[0_0_16px_rgba(16,185,129,0.6)] transition-all duration-300"
+                    className="p-1.5 rounded-lg bg-card border border-accent/50  text-accent hover:text-accent  transition-all duration-300"
                   >
                     <SlidersHorizontal className="size-4" />
                   </button>
@@ -137,12 +137,12 @@ const MobileSheet = ({
                   router.push(`/surah/${value}`);
                 }}
               >
-                <SelectTrigger className="w-full h-[38px] bg-zinc-900 border-emerald-500/50 rounded-lg text-xs text-zinc-300 font-medium focus:ring-0 shadow-sm pr-8">
+                <SelectTrigger className="w-full h-[38px] bg-card border-accent/40 rounded-lg text-xs text-reading font-medium focus:ring-0 shadow-sm pr-8">
                   <SelectValue placeholder="Select Surah" />
                 </SelectTrigger>
-                <SelectContent className="bg-zinc-900 border-zinc-800 max-h-[300px]">
+                <SelectContent className="bg-card border-border max-h-[300px]">
                   {SURAHS_DATA.map((s) => (
-                    <SelectItem key={s.number} value={s.number.toString()} className="text-zinc-200 focus:bg-emerald-600 focus:text-white cursor-pointer transition-colors text-xs">
+                    <SelectItem key={s.number} value={s.number.toString()} className="text-foreground focus:bg-accent focus:text-foreground cursor-pointer transition-colors text-xs">
                       {s.number}. {s.englishName}
                     </SelectItem>
                   ))}
@@ -166,12 +166,12 @@ const MobileSheet = ({
                   }
                 }}
               >
-                <SelectTrigger className="w-full h-[38px] bg-zinc-900 border-zinc-800 rounded-lg text-xs text-zinc-300 font-medium focus:ring-0 shadow-sm pr-8">
+                <SelectTrigger className="w-full h-[38px] bg-card border-border rounded-lg text-xs text-reading font-medium focus:ring-0 shadow-sm pr-8">
                   <SelectValue placeholder="Ayah..." />
                 </SelectTrigger>
-                <SelectContent className="bg-zinc-900 border-zinc-800 max-h-[300px]">
+                <SelectContent className="bg-card border-border max-h-[300px]">
                   {Array.from({ length: SURAHS_DATA.find((s) => s.number === surahNumber)?.numberOfAyahs || 1 }, (_, i) => i + 1).map((num) => (
-                    <SelectItem key={num} value={num.toString()} className="text-zinc-200 focus:bg-emerald-600 focus:text-white cursor-pointer transition-colors text-xs">
+                    <SelectItem key={num} value={num.toString()} className="text-foreground focus:bg-accent focus:text-foreground cursor-pointer transition-colors text-xs">
                       Ayah {num}
                     </SelectItem>
                   ))}
@@ -183,7 +183,7 @@ const MobileSheet = ({
       ) : null}
       <SheetContent
         side="right"
-        className="z-[99999] dark:bg-zinc-900 bg-[var(--sephia-200)] dark:text-white text-black px-3 sm:px-4 border-l dark:border-[#262629ff] border-black sm:min-w-[25%] min-w-[90%] w-full max-w-[92vw] sm:max-w-md overflow-x-hidden overflow-y-auto touch-pan-y"
+        className="z-[99999] bg-card bg-background text-foreground text-foreground px-3 sm:px-4 border-l border-border border-border sm:min-w-[25%] min-w-[90%] w-full max-w-[92vw] sm:max-w-md overflow-x-hidden overflow-y-auto touch-pan-y"
       >
         <VisuallyHidden>
           <SheetTitle>Menu</SheetTitle>
@@ -194,7 +194,7 @@ const MobileSheet = ({
           <p className="text-gray-400 text-xl">Menu</p>
         </div> */}
         <div className="relative mt-4 mx-1">
-          <div className="relative flex items-center p-1 bg-zinc-950/90 dark:bg-zinc-950/90 border border-zinc-800/80 rounded-2xl shadow-xl backdrop-blur-2xl overflow-hidden">
+          <div className="relative flex items-center p-1 bg-background/90 dark:bg-background/90 border border-border rounded-2xl shadow-xl backdrop-blur-2xl overflow-hidden">
             {[
               { key: "search", label: "Search", icon: <Search className="w-4 h-4" /> },
               { key: "settings", label: "Settings", icon: <SlidersHorizontal className="w-4 h-4" /> },
@@ -208,24 +208,24 @@ const MobileSheet = ({
                   className={cn(
                     "relative z-10 flex-1 flex items-center justify-center gap-2 py-2.5 px-3 text-xs font-bold transition-all duration-200 cursor-pointer select-none group",
                     isActive
-                      ? "text-white"
-                      : "text-zinc-400 hover:text-zinc-200"
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                 >
                   {isActive && (
                     <motion.div
                       layoutId="mobile-creative-tab-bg"
-                      className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 rounded-xl border-t border-emerald-300/40 shadow-[0_0_20px_rgba(16,185,129,0.35)] z-0"
+                      className="absolute inset-0 bg-gradient-to-r from-accent via-accent to-accent rounded-xl border-t border-accent/40  z-0"
                       transition={{ type: "spring", stiffness: 450, damping: 30 }}
                     />
                   )}
                   <span className="relative z-10 flex items-center gap-2 tracking-wide">
-                    <span className={cn("transition-transform duration-200 group-hover:scale-110", isActive && "text-emerald-100 drop-shadow-[0_0_6px_rgba(255,255,255,0.7)]")}>
+                    <span className={cn("transition-transform duration-200 group-hover:scale-110", isActive && "text-accent-foreground drop-shadow-[0_0_6px_rgba(255,255,255,0.7)]")}>
                       {tab.icon}
                     </span>
                     <span>{tab.label}</span>
                     {isActive && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse shadow-sm ml-0.5" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse shadow-sm ml-0.5" />
                     )}
                   </span>
                 </button>
@@ -244,7 +244,7 @@ const MobileSheet = ({
                     setSearchQuery(e.target.value);
                   }} // Update search query on input change
                   placeholder="Search by Surah"
-                  className="bg-zinc-800 text-white border-0"
+                  className="bg-muted text-foreground border-0"
                 />
               </div>
             </div>
@@ -262,8 +262,8 @@ const MobileSheet = ({
                     className={cn(
                       "p-3 rounded-2xl border transition-all duration-200 flex items-center justify-between group cursor-pointer w-full",
                       isActive
-                        ? "bg-gradient-to-r from-emerald-950/60 to-zinc-900/90 border-emerald-500/50 shadow-lg shadow-emerald-500/10"
-                        : "bg-zinc-900/40 hover:bg-zinc-800/60 border-zinc-800/60 hover:border-emerald-500/30"
+                        ? "bg-gradient-to-r from-accent/10 to-card border-accent/40 shadow-lg "
+                        : "bg-card/50 hover:bg-muted/80 border-border hover:border-accent/30"
                     )}
                   >
                     <div className="flex items-center gap-3 min-w-0">
@@ -271,8 +271,8 @@ const MobileSheet = ({
                         className={cn(
                           "w-9 h-9 rounded-xl flex items-center justify-center font-mono font-bold text-xs shrink-0 transition-all duration-200 border",
                           isActive
-                            ? "bg-emerald-500 text-white border-emerald-400 shadow-md shadow-emerald-500/30"
-                            : "bg-zinc-800/80 text-zinc-400 group-hover:text-emerald-300 group-hover:bg-emerald-500/10 border-zinc-700/50"
+                            ? "bg-accent text-foreground border-accent shadow-md shadow-sm"
+                            : "bg-muted text-muted-foreground group-hover:text-accent group-hover:bg-accent/10 border-border"
                         )}
                       >
                         {surah.number}
@@ -282,24 +282,24 @@ const MobileSheet = ({
                           className={cn(
                             "text-xs font-semibold truncate transition-colors",
                             isActive
-                              ? "text-emerald-400 font-bold"
-                              : "text-zinc-200 group-hover:text-emerald-300"
+                              ? "text-accent font-bold"
+                              : "text-foreground group-hover:text-accent"
                           )}
                         >
                           {surah.englishName}
                         </span>
-                        <span className="text-[10px] text-zinc-500 truncate">
+                        <span className="text-[10px] text-muted-foreground truncate">
                           {surah.englishNameTranslation}
                         </span>
                       </div>
                     </div>
 
                     <div className="flex flex-col items-end shrink-0 ml-2">
-                      <span className="font-sans font-medium text-base text-emerald-400/90 group-hover:text-emerald-300 transition-colors">
+                      <span className="font-sans font-medium text-base text-accent group-hover:text-accent transition-colors">
                         {surah.name}
                       </span>
                       {surah.numberOfAyahs && (
-                        <span className="text-[9px] text-zinc-500 font-mono">
+                        <span className="text-[9px] text-muted-foreground font-mono">
                           {surah.numberOfAyahs} ayahs
                         </span>
                       )}

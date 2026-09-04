@@ -84,7 +84,7 @@ const getTagColorClass = (color?: string) => {
     case "blue": return "bg-blue-500/10 text-blue-400 border-blue-500/30";
     case "purple": return "bg-purple-500/10 text-purple-400 border-purple-500/30";
     case "cyan": return "bg-cyan-500/10 text-cyan-400 border-cyan-500/30";
-    default: return "bg-zinc-800/80 text-zinc-400 border-zinc-700/60";
+    default: return "bg-muted text-muted-foreground border-border";
   }
 };
 
@@ -190,24 +190,24 @@ const TafsirFootnotesLoader = ({
   }, [footnoteIds, initialFootnotes]);
 
   if (loading && Object.keys(fetchedFootnotes).length === 0) {
-    return <p className="text-emerald-400/80 animate-pulse text-xs">Loading commentary notes...</p>;
+    return <p className="text-accent animate-pulse text-xs">Loading commentary notes...</p>;
   }
 
   return (
     <div className="space-y-6 mt-3">
       {footnoteIds.map((fId, idx) => (
         <div key={fId} className="w-full">
-          <div className="flex items-center justify-between pb-2 border-b border-emerald-500/20 mb-3">
-            <div className="flex items-center gap-2 font-bold text-emerald-400 text-xs md:text-sm tracking-wider uppercase">
-              <BookOpenText className="size-4 text-emerald-400" />
+          <div className="flex items-center justify-between pb-2 border-b border-accent/20 mb-3">
+            <div className="flex items-center gap-2 font-bold text-accent text-xs md:text-sm tracking-wider uppercase">
+              <BookOpenText className="size-4 text-accent" />
               <span>{isUrdu ? "تفسیر (TAFSIR)" : "TAFSIR"}</span>
             </div>
-            <span className="text-emerald-400 font-bold px-2.5 py-0.5 bg-emerald-950/70 rounded-full border border-emerald-500/30 text-xs font-mono" dir="ltr">
+            <span className="text-accent font-bold px-2.5 py-0.5 bg-accent/10 rounded-full border border-accent/30 text-xs font-mono" dir="ltr">
               [{idx + 1}]
             </span>
           </div>
           <div 
-            className="w-full text-zinc-100 leading-relaxed text-sm md:text-base" 
+            className="w-full text-foreground leading-relaxed text-sm md:text-base" 
             dir={isUrdu ? "rtl" : "auto"}
             style={{
               fontFamily: isUrdu ? "var(--font-noto-nastaliq-urdu), 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', serif" : undefined,
@@ -706,19 +706,19 @@ function TafsirContent() {
                   <span className="hidden md:inline ml-2">All Tafsirs</span>
                 </button>
                 
-                <div className="h-4 w-px bg-zinc-800 hidden md:block mx-1 shrink-0" />
+                <div className="h-4 w-px bg-muted hidden md:block mx-1 shrink-0" />
                 
                 <div className="flex flex-col min-w-0 justify-center">
                   <div className="flex items-center gap-2 mb-0.5">
                     <h1 className="text-sm md:text-base font-semibold text-foreground leading-tight truncate">
                       {activeAuthor.name.replace(/\s*\([^)]*\)\s*$/, '').trim()}
                     </h1>
-                    <span className="hidden md:inline-flex text-[9px] px-1.5 py-0.5 rounded-sm bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-semibold uppercase tracking-wider shrink-0 mt-0.5">
+                    <span className="hidden md:inline-flex text-[9px] px-1.5 py-0.5 rounded-sm bg-accent/10 border border-accent/30 text-accent font-semibold uppercase tracking-wider shrink-0 mt-0.5">
                       {activeLangName}
                     </span>
                   </div>
                   {activeAuthor.authorName && (
-                    <p className="hidden md:flex text-[11px] text-zinc-500 truncate">
+                    <p className="hidden md:flex text-[11px] text-muted-foreground truncate">
                       {activeAuthor.authorName}
                     </p>
                   )}
@@ -730,7 +730,7 @@ function TafsirContent() {
                 {/* Mobile Saved Library button (commented out for Approach 3)
                 <Link
                   href="/saved"
-                  className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-emerald-400 transition-all flex items-center justify-center cursor-pointer"
+                  className="p-1.5 rounded-lg bg-accent/10 border border-accent/30 hover:bg-accent/15 text-accent transition-all flex items-center justify-center cursor-pointer"
                   title="Saved Library"
                 >
                   <Bookmark className="size-3.5" />
@@ -821,15 +821,15 @@ function TafsirContent() {
                 </button>
                 <div className="flex flex-col min-w-0 justify-center py-0.5">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <h1 className="text-sm font-bold text-zinc-100 leading-snug break-words">
+                    <h1 className="text-sm font-bold text-foreground leading-snug break-words">
                       {activeAuthor.name.replace(/\s*\([^)]*\)\s*$/, '').trim()}
                     </h1>
-                    <span className="inline-flex text-[9px] px-1.5 py-0.5 rounded-sm bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold uppercase tracking-wider shrink-0">
+                    <span className="inline-flex text-[9px] px-1.5 py-0.5 rounded-sm bg-accent/10 border border-accent/20 text-accent font-semibold uppercase tracking-wider shrink-0">
                       {activeLangName}
                     </span>
                   </div>
                   {activeAuthor.authorName && (
-                    <p className="text-[11px] text-zinc-500 truncate mt-0.5">
+                    <p className="text-[11px] text-muted-foreground truncate mt-0.5">
                       {activeAuthor.authorName}
                     </p>
                   )}
@@ -908,15 +908,15 @@ function TafsirContent() {
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`size-6 rounded-md flex items-center justify-center text-xs font-bold ${isActive ? "bg-emerald-500 text-zinc-950" : "bg-zinc-800/80 text-zinc-400"}`}>
+                      <div className={`size-6 rounded-md flex items-center justify-center text-xs font-bold ${isActive ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground"}`}>
                         {surah.number}
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-sm font-semibold text-zinc-200">{surah.englishName}</span>
-                        <span className="text-[11px] text-zinc-500">{surah.englishNameTranslation}</span>
+                        <span className="text-sm font-semibold text-foreground">{surah.englishName}</span>
+                        <span className="text-[11px] text-muted-foreground">{surah.englishNameTranslation}</span>
                       </div>
                     </div>
-                    <span className={`${amiriquran.className} text-base text-zinc-300`}>{surah.name}</span>
+                    <span className={`${amiriquran.className} text-base text-reading`}>{surah.name}</span>
                   </button>
                 );
               })}
@@ -941,13 +941,13 @@ function TafsirContent() {
               "relative rounded-xl border border-border bg-card transition-all duration-300",
               aiChatContext ? "p-4 sm:p-5" : "p-4 sm:p-6"
             )}>
-              <div className="absolute -right-10 -bottom-10 size-48 rounded-full bg-emerald-500/10 blur-3xl" />
+              <div className="absolute -right-10 -bottom-10 size-48 rounded-full bg-accent/10 blur-3xl" />
               <div className={cn(
                 "relative z-10 min-w-0 transition-all flex flex-col items-center justify-center text-center gap-2",
                 aiChatContext ? "gap-2" : "gap-3"
               )}>
                 <div className="min-w-0 flex-1 flex flex-col items-center">
-                  <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[10px] sm:text-xs font-medium uppercase tracking-wider text-emerald-400 mb-1">
+                  <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[10px] sm:text-xs font-medium uppercase tracking-wider text-accent mb-1">
                     <span>Surah {currentSurahMeta.number}</span>
                     <span>•</span>
                     <span>{currentSurahMeta.revelationType}</span>
@@ -955,7 +955,7 @@ function TafsirContent() {
                     <span>{currentSurahMeta.numberOfAyahs} Ayahs</span>
                   </div>
                   <h2 className={cn(
-                    "font-extrabold text-white leading-tight transition-all [word-break:break-word] text-center",
+                    "font-extrabold text-foreground leading-tight transition-all [word-break:break-word] text-center",
                     aiChatContext ? "text-base sm:text-lg" : "text-lg sm:text-xl lg:text-2xl xl:text-3xl"
                   )}>
                     {currentSurahMeta.englishName} ({currentSurahMeta.englishNameTranslation})
@@ -963,7 +963,7 @@ function TafsirContent() {
                 </div>
                 <div className="shrink-0 transition-all mt-1">
                   <h3 className={cn(
-                    "font-mushaf-uthmani text-emerald-300 leading-relaxed transition-all text-center",
+                    "font-mushaf-uthmani text-accent leading-relaxed transition-all text-center",
                     aiChatContext ? "text-xl sm:text-2xl" : "text-2xl sm:text-3xl xl:text-[2.75rem]"
                   )}>
                     {currentSurahMeta.name}
@@ -975,42 +975,41 @@ function TafsirContent() {
               <div className="mt-3 flex flex-col items-center w-full max-w-3xl mx-auto">
                 <button
                   onClick={() => setShowSurahContext(!showSurahContext)}
-                  className="group relative inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/50 hover:bg-emerald-500/20 hover:border-emerald-400 cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)] transition-all duration-300"
+                  className="group relative inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-accent/10 border border-accent/40 hover:bg-accent/15 hover:border-accent cursor-pointer transition-colors"
                   title={showSurahContext ? "Hide Context" : "Read Surah Context and Theme"}
                 >
-                  <div className="absolute inset-0 rounded-full bg-emerald-400/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <Compass size={14} className="text-emerald-400 group-hover:text-emerald-300 transition-colors relative z-10 animate-[spin_4s_linear_infinite]" />
-                  <span className="text-[11px] md:text-[12px] font-bold tracking-widest text-emerald-300 group-hover:text-white transition-colors uppercase relative z-10">
+                  <Compass size={14} className="text-accent relative z-10" />
+                  <span className="text-[11px] md:text-[12px] font-bold tracking-widest text-accent group-hover:text-foreground transition-colors uppercase relative z-10">
                     {showSurahContext ? "Close Context" : "Context & Theme"}
                   </span>
                 </button>
 
                 {showSurahContext && surahInfo && (
-                  <div className="mt-4 p-5 sm:p-6 w-full rounded-2xl bg-zinc-950/95 border border-emerald-500/40 text-sm text-zinc-100 shadow-[0_10px_40px_rgba(16,185,129,0.15)] relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500 text-left">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent"></div>
+                  <div className="mt-4 p-5 sm:p-6 w-full rounded-2xl bg-popover border border-accent/40 text-sm text-foreground  relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500 text-left">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent/40 to-transparent"></div>
                     
-                    <div className="font-semibold text-emerald-400 uppercase tracking-wider text-[11px] mb-5 border-b border-emerald-500/20 pb-3 flex items-center justify-between">
-                      <span className="text-emerald-400 font-bold uppercase tracking-wider text-[12px] flex items-center gap-2">
+                    <div className="font-semibold text-accent uppercase tracking-wider text-[11px] mb-5 border-b border-accent/20 pb-3 flex items-center justify-between">
+                      <span className="text-accent font-bold uppercase tracking-wider text-[12px] flex items-center gap-2">
                         <Compass size={15} />
                         CONTEXT & THEME OF {currentSurahMeta.englishName.toUpperCase()} ({currentSurahMeta.name})
                       </span>
                       <button 
                         onClick={() => setShowSurahContext(false)} 
-                        className="hover:bg-zinc-800 p-1.5 rounded-full transition-colors text-zinc-400 hover:text-white cursor-pointer"
+                        className="hover:bg-muted p-1.5 rounded-full transition-colors text-muted-foreground hover:text-foreground cursor-pointer"
                       >
                         <span className="sr-only">Close</span>
                         <X size={16} />
                       </button>
                     </div>
                     
-                    <div className="space-y-4 leading-relaxed text-zinc-300">
+                    <div className="space-y-4 leading-relaxed text-reading">
                       {surahInfo.bismillah_pre_ayah && (
-                        <p className="text-xs text-emerald-400/90 italic font-mono bg-emerald-500/5 p-2 rounded-lg border border-emerald-500/10 mb-3">
+                        <p className="text-xs text-accent italic font-mono bg-accent/10 p-2 rounded-lg border border-accent/15 mb-3">
                           Note: Bismillah is included as part of this Surah.
                         </p>
                       )}
                       <div 
-                        className="text-zinc-200 leading-relaxed max-w-none text-xs sm:text-sm [&>h2]:text-emerald-400 [&>h2]:font-bold [&>h2]:text-sm sm:[&>h2]:text-base [&>h2]:mt-4 [&>h2]:mb-1.5 [&>h2:first-child]:mt-0 [&>h3]:text-emerald-300 [&>h3]:font-bold [&>h3]:text-xs sm:[&>h3]:text-sm [&>h3]:mt-3 [&>h3]:mb-1 [&>p]:mb-2.5 [&>ol]:list-decimal [&>ol]:ml-5 [&>ol]:mb-2.5 [&>ul]:list-disc [&>ul]:ml-5 [&>ul]:mb-2.5 [&>li]:mb-1 [&>a]:text-emerald-400 [&>a:hover]:underline [&>strong]:text-zinc-100"
+                        className="text-foreground leading-relaxed max-w-none text-xs sm:text-sm [&>h2]:text-accent [&>h2]:font-bold [&>h2]:text-sm sm:[&>h2]:text-base [&>h2]:mt-4 [&>h2]:mb-1.5 [&>h2:first-child]:mt-0 [&>h3]:text-accent [&>h3]:font-bold [&>h3]:text-xs sm:[&>h3]:text-sm [&>h3]:mt-3 [&>h3]:mb-1 [&>p]:mb-2.5 [&>ol]:list-decimal [&>ol]:ml-5 [&>ol]:mb-2.5 [&>ul]:list-disc [&>ul]:ml-5 [&>ul]:mb-2.5 [&>li]:mb-1 [&>a]:text-accent [&>a:hover]:underline [&>strong]:text-foreground"
                         dangerouslySetInnerHTML={{ __html: surahInfo.heading || surahInfo.text }}
                       />
                     </div>
@@ -1046,16 +1045,16 @@ function TafsirContent() {
                     const entry = loadedTafsir[idx];
                     if (!entry) {
                       return (
-                        <div key={`skeleton-${idx}`} className="border border-zinc-800/80 bg-zinc-900/40 rounded-xl p-6 mb-6 animate-pulse flex flex-col gap-4">
-                          <div className="flex justify-between items-center border-b border-zinc-800/60 pb-3">
-                            <div className="w-20 h-6 bg-zinc-800 rounded-lg" />
-                            <div className="w-16 h-6 bg-zinc-800/60 rounded" />
+                        <div key={`skeleton-${idx}`} className="border border-border bg-card/50 rounded-xl p-6 mb-6 animate-pulse flex flex-col gap-4">
+                          <div className="flex justify-between items-center border-b border-border pb-3">
+                            <div className="w-20 h-6 bg-muted rounded-lg" />
+                            <div className="w-16 h-6 bg-muted/80 rounded" />
                           </div>
-                          <div className="w-full h-12 bg-zinc-800/40 rounded-lg" />
+                          <div className="w-full h-12 bg-muted/60 rounded-lg" />
                           <div className="space-y-2 mt-2">
-                            <div className="w-full h-4 bg-zinc-800/30 rounded" />
-                            <div className="w-5/6 h-4 bg-zinc-800/30 rounded" />
-                            <div className="w-3/4 h-4 bg-zinc-800/20 rounded" />
+                            <div className="w-full h-4 bg-muted/40 rounded" />
+                            <div className="w-5/6 h-4 bg-muted/40 rounded" />
+                            <div className="w-3/4 h-4 bg-muted/30 rounded" />
                           </div>
                         </div>
                       );
@@ -1080,8 +1079,8 @@ function TafsirContent() {
           </main>
 
           {/* Right Sidebar: Compact Ayah Jump Index */}
-          <aside className={cn("flex-col w-16 lg:w-20 shrink-0 border-l border-zinc-800/60 bg-zinc-950/50 sticky top-0 h-screen overflow-y-auto no-scrollbar py-6 pb-28", aiChatContext ? "hidden xl:flex" : "hidden md:flex")}>
-            <div className="text-[9px] uppercase font-bold text-zinc-500 tracking-widest text-center mb-6">Ayahs</div>
+          <aside className={cn("flex-col w-16 lg:w-20 shrink-0 border-l border-border bg-background/50 sticky top-0 h-screen overflow-y-auto no-scrollbar py-6 pb-28", aiChatContext ? "hidden xl:flex" : "hidden md:flex")}>
+            <div className="text-[9px] uppercase font-bold text-muted-foreground tracking-widest text-center mb-6">Ayahs</div>
             <div className="flex flex-col items-center gap-2 pb-24">
               {Array.from({ length: currentSurahMeta.numberOfAyahs }, (_, i) => i + 1).map((num) => {
                 const isCurrent = num === currentAyahIndex + 1;
@@ -1093,8 +1092,8 @@ function TafsirContent() {
                     className={cn(
                       "size-8 lg:size-9 rounded-full flex items-center justify-center text-[10px] lg:text-[11px] font-semibold transition-all shrink-0 border border-transparent cursor-pointer",
                       isCurrent
-                        ? "bg-emerald-500 text-zinc-950 font-bold shadow-lg shadow-emerald-500/30 scale-110"
-                        : "text-zinc-500 hover:bg-emerald-500/20 hover:text-emerald-400"
+                        ? "bg-accent text-accent-foreground font-bold shadow-lg shadow-sm scale-110"
+                        : "text-muted-foreground hover:bg-accent/15 hover:text-accent"
                     )}
                     title={`Jump to Ayah ${num}`}
                   >
@@ -1162,7 +1161,7 @@ function TafsirContent() {
             {/* Left side: Title + Active Chips */}
             <div className="flex items-center gap-4 flex-1">
               <div className="flex items-center gap-2 shrink-0">
-                <Library className="size-5 text-emerald-400" />
+                <Library className="size-5 text-accent" />
                 <span className="font-semibold text-foreground text-base md:text-lg">Tafsir Library</span>
               </div>
               
@@ -1172,19 +1171,19 @@ function TafsirContent() {
                   {selectedEra !== "All Eras" && (
                     <button 
                       onClick={() => setSelectedEra("All Eras")}
-                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-medium text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors group"
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-card border border-border text-xs font-medium text-reading hover:text-foreground hover:bg-muted transition-colors group"
                     >
                       {selectedEra.replace(" & Contemporary", "")}
-                      <X className="size-3 text-zinc-500 group-hover:text-red-400 transition-colors" />
+                      <X className="size-3 text-muted-foreground group-hover:text-red-400 transition-colors" />
                     </button>
                   )}
                   {selectedDifficulty !== "All Levels" && (
                     <button 
                       onClick={() => setSelectedDifficulty("All Levels")}
-                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-medium text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors group"
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-card border border-border text-xs font-medium text-reading hover:text-foreground hover:bg-muted transition-colors group"
                     >
                       {selectedDifficulty}
-                      <X className="size-3 text-zinc-500 group-hover:text-red-400 transition-colors" />
+                      <X className="size-3 text-muted-foreground group-hover:text-red-400 transition-colors" />
                     </button>
                   )}
                   <button 
@@ -1192,7 +1191,7 @@ function TafsirContent() {
                       setSelectedEra("All Eras");
                       setSelectedDifficulty("All Levels");
                     }}
-                    className="text-[10px] text-zinc-500 hover:text-zinc-300 ml-1 underline decoration-zinc-700 underline-offset-2 transition-colors"
+                    className="text-[10px] text-muted-foreground hover:text-reading ml-1 underline decoration-border underline-offset-2 transition-colors"
                   >
                     Clear all
                   </button>
@@ -1203,7 +1202,7 @@ function TafsirContent() {
             {/* Right side: Search and Refine */}
             <div className="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto shrink-0">
               <div ref={searchContainerRef} className="relative w-full md:w-80">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-zinc-500" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                 <input
                   type="text"
                   placeholder="Search tafsirs..."
@@ -1215,7 +1214,7 @@ function TafsirContent() {
                 
                 {/* Autocomplete Dropdown */}
                 {isSearchFocused && searchQuery.trim().length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto custom-scrollbar">
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto custom-scrollbar">
                     {filteredAuthors.length > 0 ? (
                       <div className="p-1.5 flex flex-col gap-1">
                         {filteredAuthors.slice(0, 10).map(({ author, language }) => (
@@ -1225,18 +1224,18 @@ function TafsirContent() {
                               setSearchQuery(author.name);
                               setIsSearchFocused(false);
                             }}
-                            className="flex flex-col text-left px-3 py-2 hover:bg-emerald-500/10 rounded-lg transition-colors w-full"
+                            className="flex flex-col text-left px-3 py-2 hover:bg-accent/10 rounded-lg transition-colors w-full"
                           >
-                            <span className="text-sm font-semibold text-zinc-200">{author.name}</span>
-                            <span className="text-[10px] text-zinc-500 flex items-center gap-1">
+                            <span className="text-sm font-semibold text-foreground">{author.name}</span>
+                            <span className="text-[10px] text-muted-foreground flex items-center gap-1">
                               {author.authorName && <span>{author.authorName} • </span>}
-                              <span className="text-emerald-400">{language.name}</span>
+                              <span className="text-accent">{language.name}</span>
                             </span>
                           </button>
                         ))}
                       </div>
                     ) : (
-                      <div className="px-4 py-3 text-xs text-zinc-500 text-center">No matches found</div>
+                      <div className="px-4 py-3 text-xs text-muted-foreground text-center">No matches found</div>
                     )}
                   </div>
                 )}
@@ -1246,7 +1245,7 @@ function TafsirContent() {
                 {/* Mobile Saved Library button (commented out for Approach 3)
                 <Link
                   href="/saved"
-                  className="md:hidden flex items-center justify-center p-2 rounded-xl bg-zinc-900/80 border border-emerald-500/30 text-emerald-400 hover:bg-zinc-800 transition"
+                  className="md:hidden flex items-center justify-center p-2 rounded-xl bg-card/90 border border-accent/30 text-accent hover:bg-muted transition"
                   title="Saved Library"
                 >
                   <Bookmark className="size-4" />
@@ -1258,16 +1257,16 @@ function TafsirContent() {
                     onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
                     className={`flex items-center justify-center gap-2 px-3 py-2 rounded-xl border transition-all ${
                       isFilterPanelOpen || selectedEra !== "All Eras" || selectedDifficulty !== "All Levels"
-                        ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400"
-                        : "bg-zinc-900/80 border-emerald-500/30 text-zinc-400 hover:text-emerald-400 hover:border-emerald-500/50"
+                        ? "bg-accent/10 border-accent/40 text-accent"
+                        : "bg-card/90 border-accent/30 text-muted-foreground hover:text-accent hover:border-accent/50"
                     }`}
                   >
                     <Filter className="size-4" />
                     <span className="text-sm font-semibold hidden sm:inline">Refine</span>
                     {(selectedEra !== "All Eras" || selectedDifficulty !== "All Levels") && (
                       <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-accent"></span>
                       </span>
                     )}
                   </button>
@@ -1275,21 +1274,21 @@ function TafsirContent() {
                   {/* Filter Popover Panel */}
                   {isFilterPanelOpen && (
                     <>
-                      <div className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm transition-opacity" onClick={() => setIsFilterPanelOpen(false)}></div>
-                      <div className="fixed md:absolute inset-x-0 bottom-0 md:inset-auto md:right-0 md:top-full mt-2 w-full md:w-[420px] bg-zinc-950 md:bg-zinc-900 border-t md:border border-emerald-500/30 md:border-zinc-800/80 shadow-2xl z-[80] overflow-hidden rounded-t-3xl md:rounded-2xl p-5 md:p-6 flex flex-col gap-5 max-h-[80vh] overflow-y-auto custom-scrollbar pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))] md:pb-6 animate-in slide-in-from-bottom-4 md:slide-in-from-top-2 duration-200">
-                        <div className="flex items-center justify-between pb-3 border-b border-zinc-800 sticky top-0 bg-zinc-950 md:bg-zinc-900 z-10">
-                          <h3 className="font-bold text-white text-base sm:text-lg flex items-center gap-2">
-                            <Filter className="size-4 text-emerald-400" /> Filter Tafsirs
+                      <div className="fixed inset-0 z-[70] bg-foreground/30 backdrop-blur-sm transition-opacity" onClick={() => setIsFilterPanelOpen(false)}></div>
+                      <div className="fixed md:absolute inset-x-0 bottom-0 md:inset-auto md:right-0 md:top-full mt-2 w-full md:w-[420px] bg-background md:bg-card border-t md:border border-accent/30 md:border-border shadow-2xl z-[80] overflow-hidden rounded-t-3xl md:rounded-2xl p-5 md:p-6 flex flex-col gap-5 max-h-[80vh] overflow-y-auto custom-scrollbar pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))] md:pb-6 animate-in slide-in-from-bottom-4 md:slide-in-from-top-2 duration-200">
+                        <div className="flex items-center justify-between pb-3 border-b border-border sticky top-0 bg-background md:bg-card z-10">
+                          <h3 className="font-bold text-foreground text-base sm:text-lg flex items-center gap-2">
+                            <Filter className="size-4 text-accent" /> Filter Tafsirs
                           </h3>
-                          <button onClick={() => setIsFilterPanelOpen(false)} className="p-1.5 rounded-full bg-zinc-900 text-zinc-400 hover:text-white transition-colors">
+                          <button onClick={() => setIsFilterPanelOpen(false)} className="p-1.5 rounded-full bg-card text-muted-foreground hover:text-foreground transition-colors">
                             <X className="size-5" />
                           </button>
                         </div>
                         
                         {/* Era Selection inside Panel */}
                         <div className="flex flex-col gap-3">
-                          <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5 uppercase tracking-wider">
-                            <BookOpen className="size-3.5 text-emerald-400" /> Era
+                          <span className="text-xs font-bold text-muted-foreground flex items-center gap-1.5 uppercase tracking-wider">
+                            <BookOpen className="size-3.5 text-accent" /> Era
                           </span>
                           <div className="flex flex-wrap gap-2">
                             {ERAS.map((eraName) => {
@@ -1302,8 +1301,8 @@ function TafsirContent() {
                                   onClick={() => setSelectedEra(eraName)}
                                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                                     selectedEra === eraName
-                                      ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
-                                      : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+                                      ? "bg-accent text-accent-foreground shadow-md shadow-sm"
+                                      : "bg-card border border-border text-muted-foreground hover:text-foreground hover:border-border"
                                   }`}
                                 >
                                   {eraName.replace(" & Contemporary", "")} <span className="opacity-60 ml-0.5">({count})</span>
@@ -1315,8 +1314,8 @@ function TafsirContent() {
 
                         {/* Difficulty Selection inside Panel */}
                         <div className="flex flex-col gap-3 pb-4 md:pb-0">
-                          <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5 uppercase tracking-wider">
-                            <Sparkles className="size-3.5 text-emerald-400" /> Difficulty
+                          <span className="text-xs font-bold text-muted-foreground flex items-center gap-1.5 uppercase tracking-wider">
+                            <Sparkles className="size-3.5 text-accent" /> Difficulty
                           </span>
                           <div className="flex flex-wrap gap-2">
                             {["All Levels", "Beginner", "Intermediate", "Advanced"].map((level) => {
@@ -1329,8 +1328,8 @@ function TafsirContent() {
                                   onClick={() => setSelectedDifficulty(level)}
                                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                                     selectedDifficulty === level
-                                      ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
-                                      : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+                                      ? "bg-accent text-accent-foreground shadow-md shadow-sm"
+                                      : "bg-card border border-border text-muted-foreground hover:text-foreground hover:border-border"
                                   }`}
                                 >
                                   {level} <span className="opacity-60 ml-0.5">({count})</span>
@@ -1349,13 +1348,13 @@ function TafsirContent() {
           </div>
 
           {/* Language Filter Tabs */}
-          <div className="relative flex items-center w-full mt-3 pt-3 border-t border-zinc-800/60 group">
+          <div className="relative flex items-center w-full mt-3 pt-3 border-t border-border group">
             {/* Scroll Left Button (Desktop) */}
             {canScrollLangLeft && (
               <button
                 type="button"
                 onClick={() => scrollLangHorizontally("left")}
-                className="hidden md:flex absolute left-0 z-20 items-center justify-center size-7 rounded-full bg-zinc-900/95 border border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800 shadow-xl backdrop-blur transition-all"
+                className="hidden md:flex absolute left-0 z-20 items-center justify-center size-7 rounded-full bg-card border border-border text-reading hover:text-foreground hover:bg-muted shadow-xl backdrop-blur transition-all"
                 aria-label="Scroll left"
               >
                 <ChevronLeft className="size-4" />
@@ -1364,7 +1363,7 @@ function TafsirContent() {
 
             {/* Left fade gradient when scrollable */}
             {canScrollLangLeft && (
-              <div className="hidden md:block absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-zinc-950 to-transparent pointer-events-none z-10" />
+              <div className="hidden md:block absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-background to-transparent pointer-events-none z-10" />
             )}
 
             {/* Horizontal Scrollable Tabs */}
@@ -1390,15 +1389,15 @@ function TafsirContent() {
                 isDraggingLang ? "cursor-grabbing" : "cursor-grab"
               }`}
             >
-              <span className="text-xs font-semibold text-zinc-400 pr-2 whitespace-nowrap flex items-center gap-1.5 shrink-0 pointer-events-none">
-                <Languages className="size-3.5 text-emerald-400" /> Language:
+              <span className="text-xs font-semibold text-muted-foreground pr-2 whitespace-nowrap flex items-center gap-1.5 shrink-0 pointer-events-none">
+                <Languages className="size-3.5 text-accent" /> Language:
               </span>
               <button
                 onClick={() => setSelectedLanguage("All")}
                 className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
                   selectedLanguage === "All"
-                    ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
-                    : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+                    ? "bg-accent text-accent-foreground shadow-md shadow-sm"
+                    : "bg-card/70 border border-border text-muted-foreground hover:text-foreground hover:border-border"
                 }`}
               >
                 All ({allAuthorsWithLang.length})
@@ -1409,8 +1408,8 @@ function TafsirContent() {
                   onClick={() => setSelectedLanguage(lang.name)}
                   className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
                     selectedLanguage === lang.name
-                      ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
-                      : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+                      ? "bg-accent text-accent-foreground shadow-md shadow-sm"
+                      : "bg-card/70 border border-border text-muted-foreground hover:text-foreground hover:border-border"
                   }`}
                 >
                   {lang.name} ({lang.authors?.length || 0})
@@ -1420,7 +1419,7 @@ function TafsirContent() {
 
             {/* Right fade gradient when scrollable */}
             {canScrollLangRight && (
-              <div className="hidden md:block absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-zinc-950 to-transparent pointer-events-none z-10" />
+              <div className="hidden md:block absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
             )}
 
             {/* Scroll Right Button (Desktop) */}
@@ -1428,7 +1427,7 @@ function TafsirContent() {
               <button
                 type="button"
                 onClick={() => scrollLangHorizontally("right")}
-                className="hidden md:flex absolute right-0 z-20 items-center justify-center size-7 rounded-full bg-zinc-900/95 border border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800 shadow-xl backdrop-blur transition-all"
+                className="hidden md:flex absolute right-0 z-20 items-center justify-center size-7 rounded-full bg-card border border-border text-reading hover:text-foreground hover:bg-muted shadow-xl backdrop-blur transition-all"
                 aria-label="Scroll right"
               >
                 <ChevronRight className="size-4" />
@@ -1466,22 +1465,22 @@ function TafsirContent() {
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
-                className="relative overflow-hidden border border-zinc-800/80 bg-zinc-900/30 rounded-xl h-[112px] px-4 py-3 animate-pulse flex flex-col justify-between"
+                className="relative overflow-hidden border border-border bg-card/40 rounded-xl h-[112px] px-4 py-3 animate-pulse flex flex-col justify-between"
               >
                 <div className="space-y-2">
-                  <div className="h-4 bg-zinc-800/80 rounded w-3/4" />
-                  <div className="h-3 bg-zinc-800/50 rounded w-1/2" />
+                  <div className="h-4 bg-muted rounded w-3/4" />
+                  <div className="h-3 bg-muted/70 rounded w-1/2" />
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="h-3 bg-zinc-800/40 rounded w-1/3" />
-                  <div className="h-3 bg-zinc-800/40 rounded w-1/4" />
+                  <div className="h-3 bg-muted/60 rounded w-1/3" />
+                  <div className="h-3 bg-muted/60 rounded w-1/4" />
                 </div>
               </div>
             ))}
           </div>
         ) : filteredAuthors.length === 0 ? (
-          <div className="text-center py-20 bg-zinc-900/30 border border-zinc-800/60 rounded-xl">
-            <p className="text-zinc-400 text-sm">No Tafsir books found matching your filter selections.</p>
+          <div className="text-center py-20 bg-card/40 border border-border rounded-xl">
+            <p className="text-muted-foreground text-sm">No Tafsir books found matching your filter selections.</p>
           </div>
         ) : (
           <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
@@ -1495,31 +1494,31 @@ function TafsirContent() {
                     setSelectedLangForWheel(language.name);
                     setWheelModalOpen(true);
                   }}
-                  className="relative overflow-hidden border border-emerald-500/50 hover:border-emerald-500 bg-zinc-900/40 group cursor-pointer rounded-xl h-[112px] backdrop-blur-md px-4 py-3 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10 flex flex-col justify-between"
+                  className="relative overflow-hidden border border-border hover:border-accent/40 bg-card group cursor-pointer rounded-xl h-[112px] px-4 py-3 shadow-sm transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md flex flex-col justify-between"
                 >
                   {/* Giant Faded Watermark Number */}
-                  <div className="absolute -right-2 -bottom-4 text-[75px] font-black text-emerald-500/30 group-hover:text-emerald-500 transition-colors duration-500 pointer-events-none select-none leading-none">
+                  <div className="absolute -right-2 -bottom-4 text-[75px] font-black text-accent/30 group-hover:text-accent transition-colors duration-500 pointer-events-none select-none leading-none">
                     {index + 1}
                   </div>
 
                   <div className="relative z-10 flex items-start justify-between gap-2 min-w-0">
                     <div className="flex flex-col space-y-0.5 min-w-0 flex-1">
-                      <p className="font-semibold text-white group-hover:text-emerald-400 transition-colors text-sm sm:text-base truncate leading-tight">
+                      <p className="font-semibold text-foreground group-hover:text-accent transition-colors text-sm sm:text-base truncate leading-tight">
                         {author.name}
                       </p>
                       {author.authorName && (
-                        <p className="text-[11px] text-emerald-400/90 font-medium flex items-center gap-1 min-w-0">
-                          <User className="size-3 text-emerald-400/70 shrink-0" />
-                          <span className="text-zinc-400 shrink-0">Author:</span>
+                        <p className="text-[11px] text-accent font-medium flex items-center gap-1 min-w-0">
+                          <User className="size-3 text-accent shrink-0" />
+                          <span className="text-muted-foreground shrink-0">Author:</span>
                           <span className="truncate" title={author.authorName}>{author.authorName}</span>
                         </p>
                       )}
-                      <div className="flex items-center gap-1.5 text-[11px] text-zinc-400 pt-0.5 truncate">
-                        <span className="text-zinc-300 font-medium shrink-0">{language.name}</span>
+                      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground pt-0.5 truncate">
+                        <span className="text-reading font-medium shrink-0">{language.name}</span>
                         {author.era && (
                           <>
                             <span className="shrink-0">•</span>
-                            <span className="text-zinc-400 truncate" title={author.era}>
+                            <span className="text-muted-foreground truncate" title={author.era}>
                               {author.era.replace(" & Contemporary", "")}
                             </span>
                           </>
@@ -1529,12 +1528,12 @@ function TafsirContent() {
 
                     {/* Top Right: Al-Juthur Logo */}
                     <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
-                      <LogoIcon className="size-5 text-emerald-400 group-hover:scale-110 transition-transform" />
+                      <LogoIcon className="size-5 text-accent group-hover:scale-110 transition-transform" />
                     </div>
                   </div>
 
                 {/* Difficulty Level & Pro Badge */}
-                <div className="relative z-10 flex items-center justify-between gap-1.5 pt-1 border-t border-zinc-800/60 overflow-hidden">
+                <div className="relative z-10 flex items-center justify-between gap-1.5 pt-1 border-t border-border overflow-hidden">
                   {difficultyLevel && (
                     <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border truncate max-w-[140px] ${
                       difficultyLevel === 'Beginner' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
@@ -1659,16 +1658,16 @@ function TafsirCard({
       >
         {/* Free Preview Banner for Surah 1 on Locked Authors */}
         {isPreviewInSurahOne && idx === 0 && (
-          <div className="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-between text-xs text-emerald-300">
+          <div className="p-3 rounded-2xl bg-accent/10 border border-accent/30 flex items-center justify-between text-xs text-accent">
             <div className="flex items-center gap-2">
-              <Sparkles className="size-4 text-emerald-400 shrink-0" />
+              <Sparkles className="size-4 text-accent shrink-0" />
               <span>
                 <strong>Free Preview:</strong> You are enjoying full free access to <strong>{authorName}</strong> on Surah Al-Fatihah!
               </span>
             </div>
             <button
               onClick={openPricingModal}
-              className="px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-bold text-[11px] transition-all cursor-pointer shrink-0 ml-2"
+              className="px-2.5 py-1 rounded-lg bg-accent hover:bg-accent/90 text-accent-foreground font-bold text-[11px] transition-all cursor-pointer shrink-0 ml-2"
             >
               Unlock All Surahs
             </button>
@@ -1676,7 +1675,7 @@ function TafsirCard({
         )}
 
         {/* Top Ayah Header */}
-        <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3 gap-2 min-w-0">
+        <div className="flex items-center justify-between border-b border-border pb-3 gap-2 min-w-0">
           <div className="flex items-center gap-1.5 min-w-0 shrink-0">
             <span className="shrink-0 h-7 px-1.5 min-w-[1.75rem] rounded-md bg-muted border border-border flex items-center justify-center text-xs font-semibold text-foreground whitespace-nowrap">
               {activeSurah}:{ayahNumber}
@@ -1689,14 +1688,14 @@ function TafsirCard({
               className={cn(
                 "flex items-center rounded-lg transition font-medium whitespace-nowrap gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs cursor-pointer",
                 isSaved 
-                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 hover:bg-emerald-500/30 shadow-sm" 
-                  : "bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300",
+                  ? "bg-accent/15 text-accent border border-accent/40 hover:bg-accent/20 shadow-sm" 
+                  : "bg-muted hover:bg-muted text-reading",
                 aiChatContext && "lg:gap-1 lg:px-2 lg:text-[10px]"
               )}
               title={isSaved ? "Remove from Saved" : "Save Tafsir to Profile"}
             >
               {isSaved ? (
-                <BookmarkCheck className={cn("shrink-0 size-3.5 text-emerald-400", aiChatContext && "lg:size-3")} />
+                <BookmarkCheck className={cn("shrink-0 size-3.5 text-accent", aiChatContext && "lg:size-3")} />
               ) : (
                 <Bookmark className={cn("shrink-0 size-3.5", aiChatContext && "lg:size-3")} />
               )}
@@ -1710,7 +1709,7 @@ function TafsirCard({
                 copyToClipboard(cleanText, "Tafsir explanation copied to clipboard!");
               }}
               className={cn(
-                "flex items-center rounded-lg bg-zinc-800/80 hover:bg-zinc-700 transition font-medium text-zinc-300 whitespace-nowrap gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs cursor-pointer",
+                "flex items-center rounded-lg bg-muted hover:bg-muted transition font-medium text-reading whitespace-nowrap gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs cursor-pointer",
                 aiChatContext && "lg:gap-1 lg:px-2 lg:text-[10px]"
               )}
               title="Copy Tafsir"
@@ -1746,7 +1745,7 @@ function TafsirCard({
 
         {/* Inline Translation (Exclusively for Arabic Tafsirs) */}
         {isArabic && !isLocked && (
-          <div className="mt-4 pt-4 border-t border-zinc-800/40 w-full">
+          <div className="mt-4 pt-4 border-t border-border/40 w-full">
             <InlineTranslation 
               textToTranslate={cleanText} 
               storageKey={`tafsir_${entry.authorId || 'auth'}_${activeSurah}_${ayahNumber}`}
@@ -1756,7 +1755,7 @@ function TafsirCard({
 
         {/* Tafsir (Commentary / Footnotes) */}
         {!isLocked && entry.footnoteIds && entry.footnoteIds.length > 0 && (
-          <div className="mt-6 pt-4 border-t border-emerald-900/30">
+          <div className="mt-6 pt-4 border-t border-border">
             <TafsirFootnotesLoader 
               footnoteIds={entry.footnoteIds} 
               initialFootnotes={entry.footnotes}

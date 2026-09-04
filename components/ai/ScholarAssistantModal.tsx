@@ -105,13 +105,13 @@ export function ScholarAssistantModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-800 bg-neutral-900/60">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-500/20 to-amber-500/20 border border-emerald-500/30">
-              <Sparkles className="w-5 h-5 text-emerald-400" />
+            <div className="p-2 rounded-xl bg-gradient-to-br from-accent/20 to-amber-500/20 border border-accent/30">
+              <Sparkles className="w-5 h-5 text-accent" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
                 Academic AI Scholar
-                <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-normal">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-accent/10 border border-accent/30 text-accent font-normal">
                   Graph-RAG & Multi-Lingual
                 </span>
               </h2>
@@ -123,15 +123,15 @@ export function ScholarAssistantModal({
           <div className="flex items-center gap-2.5">
             {/* <button
               onClick={openPricingModal}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-bold transition-all cursor-pointer shadow-sm"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-accent/10 hover:bg-accent/15 border border-accent/30 text-accent text-xs font-bold transition-all cursor-pointer shadow-sm"
               title="View Research Plans"
             >
-              <Crown className="size-3.5 text-emerald-400" />
+              <Crown className="size-3.5 text-accent" />
               <span className="uppercase">{tier}</span>
             </button> */}
             <button
               onClick={onClose}
-              className="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition cursor-pointer"
+              className="p-2 rounded-lg text-neutral-400 hover:text-foreground hover:bg-neutral-800 transition cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -151,12 +151,12 @@ export function ScholarAssistantModal({
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAsk()}
                   placeholder="Ask a scholarly question (e.g. 'What did Ibn Kathir say about Surah 2:45?')"
-                  className="w-full pl-4 pr-28 py-3 bg-neutral-900 border border-neutral-700/80 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-emerald-500 transition text-sm"
+                  className="w-full pl-4 pr-28 py-3 bg-neutral-900 border border-neutral-700/80 rounded-xl text-foreground placeholder-neutral-500 focus:outline-none focus:border-accent transition text-sm"
                 />
                 <button
                   onClick={() => handleAsk()}
                   disabled={loading || !query.trim()}
-                  className="absolute right-2 flex items-center gap-2 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-neutral-800 disabled:text-neutral-500 text-white font-medium text-xs rounded-lg transition"
+                  className="absolute right-2 flex items-center gap-2 px-4 py-1.5 bg-accent hover:bg-accent disabled:bg-neutral-800 disabled:text-neutral-500 text-foreground font-medium text-xs rounded-lg transition"
                 >
                   {loading ? 'Researching...' : 'Research'}
                   <Send className="w-3.5 h-3.5" />
@@ -185,9 +185,9 @@ export function ScholarAssistantModal({
             <div className="flex-1 overflow-y-auto p-6">
               {loading ? (
                 <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
-                  <div className="w-10 h-10 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin" />
                   <div>
-                    <h3 className="text-sm font-semibold text-white">Searching Classical Tafsir & Lexicon Database...</h3>
+                    <h3 className="text-sm font-semibold text-foreground">Searching Classical Tafsir & Lexicon Database...</h3>
                     <p className="text-xs text-neutral-400 mt-1">
                       Performing BM25 + Vector Hybrid Retrieval across Ibn Kathir, Jalalayn, and Lane's Lexicon
                     </p>
@@ -196,8 +196,8 @@ export function ScholarAssistantModal({
               ) : result ? (
                 <div className="space-y-6">
                   {/* Verified Scholarly Badge */}
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-accent/10 border border-accent/20 text-accent text-xs">
+                    <ShieldCheck className="w-4 h-4 text-accent" />
                     <span>
                       Synthesized from <strong>{result.sources.length} Classical Parent Blocks</strong> with full text integrity. Click any citation badge below to view original text.
                     </span>
@@ -213,14 +213,14 @@ export function ScholarAssistantModal({
 
                       if (line.startsWith('## ')) {
                         return (
-                          <h2 key={idx} className="text-lg font-bold text-white border-b border-neutral-800 pb-2">
+                          <h2 key={idx} className="text-lg font-bold text-foreground border-b border-neutral-800 pb-2">
                             {cleanLine.replace('## ', '')}
                           </h2>
                         );
                       }
                       if (line.startsWith('### ')) {
                         return (
-                          <h3 key={idx} className="text-base font-semibold text-emerald-400 mt-4">
+                          <h3 key={idx} className="text-base font-semibold text-accent mt-4">
                             {cleanLine.replace('### ', '')}
                           </h3>
                         );
@@ -236,7 +236,7 @@ export function ScholarAssistantModal({
                         return (
                           <blockquote
                             key={idx}
-                            className="p-3 my-2 border-l-4 border-emerald-500 bg-neutral-900/60 rounded-r-lg text-neutral-300 text-xs italic"
+                            className="p-3 my-2 border-l-4 border-accent bg-neutral-900/60 rounded-r-lg text-neutral-300 text-xs italic"
                           >
                             {cleanLine.replace('> ', '')}
                           </blockquote>
@@ -263,7 +263,7 @@ export function ScholarAssistantModal({
                           onClick={() => setSelectedSource(src)}
                           className={`flex items-start justify-between p-3 rounded-xl border text-left transition ${
                             selectedSource?.id === src.id
-                              ? 'bg-emerald-500/15 border-emerald-500/50 text-white'
+                              ? 'bg-accent/10 border-accent/40 text-foreground'
                               : 'bg-neutral-900/70 border-neutral-800 hover:border-neutral-700 text-neutral-300'
                           }`}
                         >
@@ -290,10 +290,10 @@ export function ScholarAssistantModal({
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center h-full text-center p-8">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500/10 to-amber-500/10 border border-neutral-800 flex items-center justify-center mb-4">
-                    <BookOpen className="w-7 h-7 text-emerald-400" />
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-accent/10 to-amber-500/10 border border-border flex items-center justify-center mb-4">
+                    <BookOpen className="w-7 h-7 text-accent" />
                   </div>
-                  <h3 className="text-base font-bold text-white">Ask Any Quranic or Lexical Question</h3>
+                  <h3 className="text-base font-bold text-foreground">Ask Any Quranic or Lexical Question</h3>
                   <p className="text-xs text-neutral-400 max-w-md mt-1.5">
                     Our Graph-RAG engine searches full classical Parent Blocks across English & Arabic Tafsirs and Lexicons to provide academic answers with verifiable citations.
                   </p>
@@ -307,14 +307,14 @@ export function ScholarAssistantModal({
             <div className="w-full md:w-96 border-l border-neutral-800 bg-neutral-900/80 flex flex-col h-full animate-slideLeft">
               <div className="p-4 border-b border-neutral-800 flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-bold text-white">{selectedSource.workTitle}</h4>
+                  <h4 className="text-sm font-bold text-foreground">{selectedSource.workTitle}</h4>
                   <p className="text-xs text-amber-400">
                     {selectedSource.authorName} • Language: {selectedSource.language.toUpperCase()}
                   </p>
                 </div>
                 <button
                   onClick={() => setSelectedSource(null)}
-                  className="p-1 rounded text-neutral-400 hover:text-white"
+                  className="p-1 rounded text-neutral-400 hover:text-foreground"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -322,7 +322,7 @@ export function ScholarAssistantModal({
 
               <div className="p-4 flex-1 overflow-y-auto space-y-4">
                 <div className="flex items-center gap-2 text-xs text-neutral-400">
-                  <FileText className="w-3.5 h-3.5 text-emerald-400" />
+                  <FileText className="w-3.5 h-3.5 text-accent" />
                   <span>
                     {selectedSource.surahId && selectedSource.ayahId
                       ? `Surah ${selectedSource.surahId}, Ayah ${selectedSource.ayahId}`
@@ -330,7 +330,7 @@ export function ScholarAssistantModal({
                       ? `Lexicon Root: ${selectedSource.rootWord}`
                       : 'Source Reference'}
                   </span>
-                  <span className="ml-auto text-emerald-400 font-mono text-[11px]">
+                  <span className="ml-auto text-accent font-mono text-[11px]">
                     Score: {selectedSource.score.toFixed(4)}
                   </span>
                 </div>

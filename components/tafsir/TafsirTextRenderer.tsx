@@ -37,8 +37,8 @@ export default function TafsirTextRenderer({
   // Handle empty or placeholder brackets "{}"
   if (!trimmedText || trimmedText === "{}" || trimmedText === "[]") {
     return (
-      <div className="py-3 px-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 text-zinc-400 text-xs sm:text-sm italic flex items-center gap-2.5">
-        <Info className="size-4 text-zinc-500 shrink-0" />
+      <div className="py-3 px-4 rounded-xl bg-card/70 border border-border text-muted-foreground text-xs sm:text-sm italic flex items-center gap-2.5">
+        <Info className="size-4 text-muted-foreground shrink-0" />
         <span>No specific commentary entry recorded for this verse.</span>
       </div>
     );
@@ -50,20 +50,20 @@ export default function TafsirTextRenderer({
     const targetSurah = parseInt(crossRefMatch[1], 10);
     const targetAyah = parseInt(crossRefMatch[2], 10);
     return (
-      <div className="py-3 px-4 rounded-xl bg-zinc-950/80 border border-zinc-800/80 text-zinc-400 text-xs sm:text-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-inner">
+      <div className="py-3 px-4 rounded-xl bg-background/80 border border-border text-muted-foreground text-xs sm:text-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-inner">
         <div className="flex items-center gap-2.5 italic">
-          <BookOpen className="size-4 text-emerald-500/70 shrink-0 not-italic" />
+          <BookOpen className="size-4 text-accent shrink-0 not-italic" />
           <span>
-            Tafsir for this verse is covered under <strong className="text-zinc-200 not-italic font-semibold">Ayah {targetAyah}</strong>.
+            Tafsir for this verse is covered under <strong className="text-foreground not-italic font-semibold">Ayah {targetAyah}</strong>.
           </span>
         </div>
         {onNavigateToAyah && (
           <button
             onClick={() => onNavigateToAyah(targetAyah)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/60 text-zinc-300 hover:text-emerald-400 font-medium text-xs transition-all cursor-pointer shrink-0"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card hover:bg-muted border border-border text-reading hover:text-accent font-medium text-xs transition-all cursor-pointer shrink-0"
           >
             <span>Jump to Ayah {targetAyah}</span>
-            <ArrowRight className="size-3.5 text-zinc-400" />
+            <ArrowRight className="size-3.5 text-muted-foreground" />
           </button>
         )}
       </div>
@@ -119,17 +119,17 @@ export default function TafsirTextRenderer({
         // Standalone long ayah block (>= 80 characters)
         if (trimmed.length >= 80) {
           return `<span class="block my-3 p-3.5 ${
-            isRightToLeft ? "border-r-2 border-zinc-600/70 rounded-l-lg pr-3.5" : "border-l-2 border-zinc-600/70 rounded-r-lg pl-3.5"
-          } bg-zinc-800/30 text-zinc-200 font-serif text-lg md:text-xl leading-loose italic" style="font-family: 'UthmanicHafs', serif;">${trimmed}</span>`;
+            isRightToLeft ? "border-r-2 border-border rounded-l-lg pr-3.5" : "border-l-2 border-border rounded-r-lg pl-3.5"
+          } bg-muted/40 text-arabic font-serif text-lg md:text-xl leading-loose italic" style="font-family: 'UthmanicHafs', serif;">${trimmed}</span>`;
         }
         // Subtle inline italic muted chip
-        return `<span class="bg-zinc-800/40 text-zinc-300 border border-zinc-700/40 px-2 py-0.5 rounded-md font-serif text-base md:text-lg italic leading-loose inline-block mx-1 my-0.5 shadow-sm" style="font-family: 'UthmanicHafs', serif;">${trimmed}</span>`;
+        return `<span class="bg-muted/60 text-arabic border border-border px-2 py-0.5 rounded-md font-serif text-base md:text-lg italic leading-loose inline-block mx-1 my-0.5" style="font-family: 'UthmanicHafs', serif;">${trimmed}</span>`;
       }
     );
     // Fallback for unclosed or isolated qpc-hafs opening tags
     html = html.replace(
       /<span[^>]*class="qpc-hafs"[^>]*>/gi,
-      '<span class="bg-zinc-800/40 text-zinc-300 border border-zinc-700/40 px-2 py-0.5 rounded-md font-serif text-base md:text-lg italic leading-loose inline-block mx-1 my-0.5 shadow-sm" style="font-family: \'UthmanicHafs\', serif;">'
+      '<span class="bg-muted/60 text-arabic border border-border px-2 py-0.5 rounded-md font-serif text-base md:text-lg italic leading-loose inline-block mx-1 my-0.5" style="font-family: \'UthmanicHafs\', serif;">'
     );
 
     // 2. Arabic Quranic Verses in brackets { ... }, ﴿ ... ﴾, « ... » across Urdu and all languages
@@ -142,10 +142,10 @@ export default function TafsirTextRenderer({
         if (arabicLettersCount >= 3) {
           if (trimmed.length >= 80) {
             return `<span class="block my-3 p-3.5 ${
-              isRightToLeft ? "border-r-2 border-zinc-600/70 rounded-l-lg pr-3.5" : "border-l-2 border-zinc-600/70 rounded-r-lg pl-3.5"
-            } bg-zinc-800/30 text-zinc-200 font-serif text-lg md:text-xl leading-loose italic" style="font-family: 'UthmanicHafs', 'Amiri', serif;" dir="rtl">﴿${trimmed}﴾</span>`;
+              isRightToLeft ? "border-r-2 border-border rounded-l-lg pr-3.5" : "border-l-2 border-border rounded-r-lg pl-3.5"
+            } bg-muted/40 text-arabic font-serif text-lg md:text-xl leading-loose italic" style="font-family: 'UthmanicHafs', 'Amiri', serif;" dir="rtl">﴿${trimmed}﴾</span>`;
           }
-          return `<span class="bg-zinc-800/40 text-zinc-300 border border-zinc-700/40 px-2 py-0.5 rounded-md font-serif text-base md:text-lg italic leading-loose inline-block mx-1 my-0.5 shadow-sm" style="font-family: 'UthmanicHafs', 'Amiri', serif;" dir="rtl">﴿${trimmed}﴾</span>`;
+          return `<span class="bg-muted/60 text-arabic border border-border px-2 py-0.5 rounded-md font-serif text-base md:text-lg italic leading-loose inline-block mx-1 my-0.5" style="font-family: 'UthmanicHafs', 'Amiri', serif;" dir="rtl">﴿${trimmed}﴾</span>`;
         }
         return match;
       }
@@ -154,7 +154,7 @@ export default function TafsirTextRenderer({
     // 3. Phrase Highlights → Clean subtle text
     html = html.replace(
       /<span[^>]*class="hlt"[^>]*>/gi,
-      '<span class="text-zinc-200 font-semibold">'
+      '<span class="text-foreground font-semibold">'
     );
 
     // 4. Footnotes / Gray Text / Translation quotes → Direction-aware green container or muted pill
@@ -163,11 +163,11 @@ export default function TafsirTextRenderer({
       (match, innerText) => {
         const trimmed = innerText.trim();
         if (trimmed.length < 50) {
-          return `<span class="text-zinc-400 italic bg-zinc-800/40 px-1.5 py-0.5 rounded border border-zinc-700/40 inline-block my-0.5 text-xs md:text-sm">${trimmed}</span>`;
+          return `<span class="text-muted-foreground italic bg-muted/60 px-1.5 py-0.5 rounded border border-border inline-block my-0.5 text-xs md:text-sm">${trimmed}</span>`;
         }
         return `<span class="block my-4 p-4 ${
           isRightToLeft ? "border-r-4 rounded-l-xl" : "border-l-4 rounded-r-xl"
-        } border-emerald-500 bg-emerald-950/30 text-emerald-100/90 text-sm md:text-base italic shadow-sm">${trimmed}</span>`;
+        } border-accent bg-accent/10 text-reading text-sm md:text-base italic shadow-sm">${trimmed}</span>`;
       }
     );
 
@@ -257,7 +257,7 @@ export default function TafsirTextRenderer({
           // If a block has no actual letters (e.g. "* *", "***", "• • •"), render it as a subtle centered divider
           if (!hasLetters && cleanTextOnly.length > 0) {
             return (
-              <div key={idx} className="my-2 py-1 text-center text-zinc-600 text-xs tracking-widest select-none">
+              <div key={idx} className="my-2 py-1 text-center text-muted-foreground text-xs tracking-widest select-none">
                 • • •
               </div>
             );
@@ -270,8 +270,8 @@ export default function TafsirTextRenderer({
             return (
               <h3
                 key={idx}
-                className={`font-bold text-emerald-300/90 text-base md:text-lg my-4 leading-snug ${
-                  isRtl ? "border-r-2 border-emerald-500/60 pr-3" : "border-l-2 border-emerald-500/60 pl-3"
+                className={`font-bold text-accent text-base md:text-lg my-4 leading-snug ${
+                  isRtl ? "border-r-2 border-accent/50 pr-3" : "border-l-2 border-accent/50 pl-3"
                 }`}
                 style={{ fontSize: getFontSize(), lineHeight: getLineHeight() }}
                 dangerouslySetInnerHTML={{ __html: transformedHtml }}
@@ -292,7 +292,7 @@ export default function TafsirTextRenderer({
             return (
               <p
                 key={idx}
-                className="font-bold text-emerald-300/90 text-base md:text-lg mt-4 pb-1 border-r-2 border-emerald-500/60 pr-3 inline-block"
+                className="font-bold text-accent text-base md:text-lg mt-4 pb-1 border-r-2 border-accent/50 pr-3 inline-block"
                 style={{ fontSize: getFontSize(), lineHeight: getLineHeight() }}
                 dangerouslySetInnerHTML={{ __html: transformedHtml }}
               />
@@ -302,7 +302,7 @@ export default function TafsirTextRenderer({
           return (
             <p
               key={idx}
-              className="text-stone-300 text-base md:text-lg whitespace-pre-wrap"
+              className="text-reading text-base md:text-lg whitespace-pre-wrap"
               style={{ 
                 lineHeight: getLineHeight(), 
                 fontSize: getFontSize() 
@@ -315,28 +315,28 @@ export default function TafsirTextRenderer({
 
       {/* Frosted Glass Blur Lock Overlay */}
       {isLocked && (
-        <div className="relative -mt-16 pt-16 pb-8 px-6 rounded-3xl bg-gradient-to-t from-[#090e0b] via-[#090e0b]/95 to-transparent border border-emerald-500/20 text-center space-y-4 shadow-2xl backdrop-blur-md z-10">
-          <div className="mx-auto size-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-inner">
-            <Lock className="size-6 text-emerald-400" />
+        <div className="relative -mt-16 pt-16 pb-8 px-6 rounded-3xl bg-gradient-to-t from-background via-background/95 to-transparent border border-accent/20 text-center space-y-4 shadow-2xl backdrop-blur-md z-10">
+          <div className="mx-auto size-12 rounded-2xl bg-accent/10 border border-accent/30 flex items-center justify-center text-accent shadow-inner">
+            <Lock className="size-6 text-accent" />
           </div>
           <div className="max-w-md mx-auto space-y-1.5">
-            <h4 className="text-base sm:text-lg font-bold text-white font-serif">
-              Unlock Full Commentary with <span className="text-emerald-400">Al-Juthur Pro</span>
+            <h4 className="text-base sm:text-lg font-bold text-foreground font-serif">
+              Unlock Full Commentary with <span className="text-accent">Al-Juthur Pro</span>
             </h4>
-            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
               You are previewing {authorName || "this classical work"}. Subscribe to Pro to unlock all 130+ classical Tafsirs across all 114 Surahs.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1">
             <button
               onClick={onUpgradeClick || openPricingModal}
-              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-emerald-950 font-bold text-xs sm:text-sm shadow-lg shadow-emerald-950 transition-all cursor-pointer flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-accent hover:bg-accent/90 text-accent-foreground font-bold text-xs sm:text-sm shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2"
             >
               <Sparkles className="size-4" />
               <span>Upgrade to Pro ($3.99/mo)</span>
             </button>
           </div>
-          <p className="text-[11px] text-emerald-400/80">
+          <p className="text-[11px] text-accent">
             💡 Tip: Surah Al-Fatihah is 100% free for all 130+ authors to preview anytime!
           </p>
         </div>

@@ -21,21 +21,21 @@ const AyahSkeleton = React.memo(({ estimatedHeight, isSidebarOpen }: AyahSkeleto
       style={{ minHeight: estimatedHeight }}
       className={cn(
         "relative flex flex-col rounded-2xl shadow-sm w-full min-w-0 overflow-hidden box-border",
-        "border border-emerald-500/10 bg-zinc-900/30",
+        "border border-accent/15 bg-card/40",
         isSidebarOpen
           ? "my-1.5 sm:my-2 p-3 sm:p-4"
           : "my-3 sm:my-5 p-3.5 sm:p-6 md:p-7"
       )}
     >
       {/* Shimmer overlay */}
-      <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.6s_infinite] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
+      <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.6s_infinite] bg-gradient-to-r from-transparent via-foreground/8 to-transparent" />
 
       <div className={cn("flex w-full", isSidebarOpen ? "sm:gap-6 gap-3" : "sm:gap-12 gap-4")}>
         {/* Left action column */}
         <div className="flex flex-col gap-2 shrink-0 items-center justify-center">
-          <div className="w-14 h-7 rounded-lg bg-zinc-800/70" />
+          <div className="w-14 h-7 rounded-lg bg-muted" />
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="w-8 h-8 rounded-full bg-zinc-800/50" />
+            <div key={i} className="w-8 h-8 rounded-full bg-muted/70" />
           ))}
         </div>
 
@@ -43,30 +43,30 @@ const AyahSkeleton = React.memo(({ estimatedHeight, isSidebarOpen }: AyahSkeleto
         <div className="flex flex-col w-full gap-3 items-end">
           {/* Arabic text lines — proportional to estimated content */}
           <div className="w-full flex flex-col items-end gap-3">
-            <div className="h-8 rounded-lg bg-zinc-800/60 w-full" />
-            <div className="h-8 rounded-lg bg-zinc-800/50 w-5/6" />
+            <div className="h-8 rounded-lg bg-muted/80 w-full" />
+            <div className="h-8 rounded-lg bg-muted/70 w-5/6" />
             {estimatedHeight > 280 && (
-              <div className="h-8 rounded-lg bg-zinc-800/40 w-4/5" />
+              <div className="h-8 rounded-lg bg-muted/60 w-4/5" />
             )}
             {estimatedHeight > 380 && (
-              <div className="h-8 rounded-lg bg-zinc-800/35 w-3/4" />
+              <div className="h-8 rounded-lg bg-muted/50 w-3/4" />
             )}
           </div>
 
           {/* Translation lines */}
           <div className="w-full flex flex-col gap-2 mt-4 items-start">
-            <div className="h-4 rounded bg-zinc-800/40 w-full" />
-            <div className="h-4 rounded bg-zinc-800/35 w-11/12" />
-            <div className="h-4 rounded bg-zinc-800/30 w-4/5" />
+            <div className="h-4 rounded bg-muted/60 w-full" />
+            <div className="h-4 rounded bg-muted/50 w-11/12" />
+            <div className="h-4 rounded bg-muted/40 w-4/5" />
             {estimatedHeight > 320 && (
-              <div className="h-4 rounded bg-zinc-800/25 w-3/4" />
+              <div className="h-4 rounded bg-muted/40 w-3/4" />
             )}
           </div>
 
           {/* Actions row */}
           <div className="flex gap-2 mt-4">
-            <div className="h-7 w-28 rounded-full bg-zinc-800/40" />
-            <div className="h-7 w-20 rounded-full bg-zinc-800/35" />
+            <div className="h-7 w-28 rounded-full bg-muted/60" />
+            <div className="h-7 w-20 rounded-full bg-muted/50" />
           </div>
         </div>
       </div>

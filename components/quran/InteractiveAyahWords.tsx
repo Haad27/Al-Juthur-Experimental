@@ -48,7 +48,7 @@ const formatArabicWithIndoPak = (html: string) => {
   if (!html) return '';
   return html.replace(
     /([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+(?:\s+[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+)*)/g,
-    '<span class="font-mushaf-indopak-16 text-sm sm:text-base leading-normal text-emerald-200 inline-block mx-1" dir="rtl">$&</span>'
+    '<span class="font-mushaf-indopak-16 text-sm sm:text-base leading-normal text-arabic inline-block mx-1" dir="rtl">$&</span>'
   );
 };
 
@@ -195,7 +195,7 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
           return (
             <span 
               key={idx} 
-              className={`inline-flex flex-col items-center justify-end px-0.5 py-0.5 text-zinc-400 select-none min-w-0 -mx-1.5 ${mushafFontClass}`}
+              className={`inline-flex flex-col items-center justify-end px-0.5 py-0.5 text-muted-foreground select-none min-w-0 -mx-1.5 ${mushafFontClass}`}
             >
               <span className="text-[0.85em] leading-none mb-1">{word}</span>
               {showWbw && (
@@ -223,7 +223,7 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
           }}>
             <DialogTrigger asChild>
               <span
-                className="group inline-flex flex-col items-center justify-end cursor-pointer px-1 py-0.5 rounded-lg hover:bg-emerald-500/30 transition-colors duration-150 select-none min-w-[2.5rem]"
+                className="group inline-flex flex-col items-center justify-end cursor-pointer px-1 py-0.5 rounded-lg hover:bg-accent/20 transition-colors duration-150 select-none min-w-[2.5rem]"
                 onClick={(e) => {
                   if (useAudioStore.getState().isPlaying) {
                     e.preventDefault();
@@ -257,17 +257,17 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
               </DialogHeader>
               {loadingIndex === wordIdx && !data ? (
                 <div className="flex items-center justify-center py-6 gap-2 text-slate-400">
-                  <Loader2 className="w-5 h-5 animate-spin text-emerald-400" />
+                  <Loader2 className="w-5 h-5 animate-spin text-accent" />
                   <span className="text-sm">Analyzing root & morphology...</span>
                 </div>
               ) : data ? (
                 <div className="space-y-3.5">
                   {/* Header: Clicked Word + Location */}
                   <div className="flex items-center justify-between border-b border-slate-800 pb-2.5 pr-8">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-accent bg-accent/10 px-2.5 py-0.5 rounded-full">
                       {surahNumber}:{ayahNumber}:{wordIdx}
                     </span>
-                    <span className="font-arabic text-2xl font-bold text-white">
+                    <span className="font-arabic text-2xl font-bold text-foreground">
                       {word}
                     </span>
                   </div>
@@ -288,21 +288,21 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
                         <div className="grid grid-cols-2 gap-2 text-xs">
                           <div className="p-2 rounded-xl bg-slate-800/60 border border-slate-800">
                             <span className="text-slate-400 block mb-0.5">Root Word</span>
-                            <span className={`text-base font-bold text-emerald-300 ${isMuqattaat ? 'font-sans text-sm' : 'font-arabic'}`}>
+                            <span className={`text-base font-bold text-accent ${isMuqattaat ? 'font-sans text-sm' : 'font-arabic'}`}>
                               {isMuqattaat ? 'None' : (data.morphology.root || 'N/A')}
                             </span>
                           </div>
                           <div className="p-2 rounded-xl bg-slate-800/60 border border-slate-800">
                             <span className="text-slate-400 block mb-0.5">Sarf (Morphology)</span>
-                            <span className="font-arabic text-xs font-medium text-white leading-relaxed line-clamp-3">
+                            <span className="font-arabic text-xs font-medium text-foreground leading-relaxed line-clamp-3">
                               {isMuqattaat ? 'Quranic Initials (حروف مقطعة)' : (data.morphology.stem || 'N/A')}
                             </span>
                           </div>
                         </div>
 
                         {data.morphology.irab && !isMuqattaat && (
-                          <div className="text-xs text-slate-300 bg-emerald-950/30 p-2.5 rounded-xl border border-emerald-900/50 leading-relaxed font-arabic text-right dir-rtl">
-                            <strong className="text-emerald-400 font-semibold block mb-1 font-sans text-left dir-ltr">
+                          <div className="text-xs text-reading bg-accent/10 p-2.5 rounded-xl border border-accent/30 leading-relaxed font-arabic text-right dir-rtl">
+                            <strong className="text-accent font-semibold block mb-1 font-sans text-left dir-ltr">
                               I'rab (Grammar):
                             </strong>
                             {data.morphology.irab}
@@ -315,14 +315,14 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
                             <p className="font-bold text-amber-200 text-sm font-arabic">
                               حروف مقطعة — Huroof-e-Muqatta&apos;at (Quranic Initials)
                             </p>
-                            <p className="text-zinc-300 text-xs leading-relaxed">
+                            <p className="text-reading text-xs leading-relaxed">
                               These disjointed letters appear at the opening of certain Surahs. Classical scholarship establishes that they do not possess an etymological root word, and their true reality and ultimate meaning reside exclusively with Allah ﷻ.
                             </p>
                           </div>
                         ) : data.aiSummary ? (
-                          <div className="text-xs text-slate-300 bg-slate-800/40 p-2.5 rounded-xl border border-slate-800 leading-relaxed space-y-3">
+                          <div className="text-xs text-reading bg-slate-800/40 p-2.5 rounded-xl border border-slate-800 leading-relaxed space-y-3">
                             <div>
-                              <strong className="text-emerald-400 font-semibold block mb-1">
+                              <strong className="text-accent font-semibold block mb-1">
                                 Root Meaning:
                               </strong>
                               <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-slate-200 prose-em:text-slate-400" dangerouslySetInnerHTML={{ __html: formatArabicWithIndoPak(data.aiSummary.root_meaning_html) }} />
@@ -335,8 +335,8 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
                             </div>
                           </div>
                         ) : data.rootSummary ? (
-                          <div className="text-xs text-slate-300 bg-slate-800/40 p-2.5 rounded-xl border border-slate-800 leading-relaxed">
-                            <strong className="text-emerald-400 font-semibold block mb-1">
+                          <div className="text-xs text-reading bg-slate-800/40 p-2.5 rounded-xl border border-slate-800 leading-relaxed">
+                            <strong className="text-accent font-semibold block mb-1">
                               Lane&apos;s Lexicon Summary:
                             </strong>
                             {data.rootSummary}
@@ -348,7 +348,7 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5 mt-3">
                             <Link
                               href={`/lexicon?root=${encodeURIComponent(data.rootQuery)}`}
-                              className="w-full px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/30 transition-all text-center"
+                              className="w-full px-3 py-2 rounded-xl bg-accent hover:bg-accent text-foreground text-xs font-semibold flex items-center justify-center gap-1.5 shadow-md  transition-all text-center"
                             >
                               <BookOpen className="w-3.5 h-3.5 shrink-0" />
                               <span className="truncate">Explore Root [{data.rootQuery}] in Lexicons</span>
@@ -359,7 +359,7 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
                               href={`/rag?mode=lexicon&q=${encodeURIComponent(`What does the root ${data.rootQuery} mean?`)}`}
                               className="w-full px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-all text-center"
                             >
-                              <Bot className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                              <Bot className="w-3.5 h-3.5 text-accent shrink-0" />
                               <span className="truncate">Ask our Lexicon RAG</span>
                               <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                             </Link>

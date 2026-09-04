@@ -186,11 +186,11 @@ const renderInlineBadges = (
               key={i}
               type="button"
               onClick={() => onSelectSource?.(matchedSource)}
-              className="inline-flex items-center gap-1 mx-1 px-2 py-0.5 rounded-full bg-emerald-950/40 border border-emerald-500/25 text-emerald-300 hover:bg-emerald-900/80 hover:border-emerald-400 hover:text-emerald-100 text-[11px] font-mono not-italic align-middle opacity-90 hover:opacity-100 transition-all cursor-pointer active:scale-95 group"
+              className="inline-flex items-center gap-1 mx-1 px-2 py-0.5 rounded-full bg-accent/10 border border-accent/25 text-accent hover:bg-accent/15 hover:border-accent hover:text-accent text-[11px] font-mono not-italic align-middle opacity-90 hover:opacity-100 transition-all cursor-pointer active:scale-95 group"
               title="Click to view retrieved chunk from this source"
             >
-              <BookOpen className="size-2.5 text-emerald-400 group-hover:text-emerald-300 shrink-0 inline" />
-              <span className="underline decoration-emerald-500/40 underline-offset-2 group-hover:decoration-emerald-300">
+              <BookOpen className="size-2.5 text-accent group-hover:text-accent shrink-0 inline" />
+              <span className="underline decoration-accent/40 underline-offset-2 group-hover:decoration-accent">
                 {badgeText}
               </span>
             </button>
@@ -476,10 +476,10 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-zinc-950 z-[100] lg:hidden overflow-hidden"
+            className="fixed inset-0 bg-background z-[100] lg:hidden overflow-hidden"
           >
             {/* Subtle green ambient glow behind container */}
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-96 bg-emerald-500/15 blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-96 bg-accent/10 blur-[120px] pointer-events-none" />
           </motion.div>
           
           {/* Sidebar / Bottom Sheet Container */}
@@ -489,40 +489,40 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
             exit={{ x: "100%", y: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className={cn(
-              "fixed z-[101] lg:z-50 bg-zinc-950 flex flex-col items-start shadow-2xl overflow-visible transition-all duration-300 ease-out",
+              "fixed z-[101] lg:z-50 bg-background flex flex-col items-start shadow-2xl overflow-visible transition-all duration-300 ease-out",
               "top-0 right-0 h-dvh max-h-dvh w-full sm:w-96 lg:w-[420px] xl:w-[450px]", // Desktop right sidebar
-              "max-lg:bottom-0 max-lg:top-auto max-lg:h-[85dvh] max-lg:rounded-t-3xl max-lg:border-t max-lg:border-emerald-500/30 max-lg:shadow-[0_-20px_50px_-10px_rgba(16,185,129,0.15)]", // Mobile bottom sheet container vibe
-              "lg:border-l border-emerald-500/20 lg:shadow-[-20px_0_50px_-10px_rgba(16,185,129,0.15)]"
+              "max-lg:bottom-0 max-lg:top-auto max-lg:h-[85dvh] max-lg:rounded-t-3xl max-lg:border-t max-lg:border-accent/30 max-lg:", // Mobile bottom sheet container vibe
+              "lg:border-l border-accent/20 lg:"
             )}
           >
             {/* Decorative edge line for desktop */}
-            <div className="hidden lg:block absolute left-0 top-0 bottom-0 w-[2px] bg-gradient-to-b from-transparent via-emerald-500/40 to-transparent shadow-[0_0_10px_rgba(16,185,129,0.5)] z-50 pointer-events-none" />
+            <div className="hidden lg:block absolute left-0 top-0 bottom-0 w-[2px] bg-gradient-to-b from-transparent via-accent/40 to-transparent  z-50 pointer-events-none" />
 
             {/* Decorative top edge line for mobile */}
-            <div className="lg:hidden absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent shadow-[0_0_15px_rgba(16,185,129,0.5)] z-50 pointer-events-none" />
+            <div className="lg:hidden absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent/40 to-transparent  z-50 pointer-events-none" />
 
             {/* Header */}
-            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-emerald-500/20 bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 rounded-t-3xl lg:rounded-none w-full shadow-lg relative overflow-hidden shrink-0">
-              <div className="absolute inset-0 bg-emerald-500/5 blur-3xl pointer-events-none" />
+            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-accent/20 bg-gradient-to-br from-card to-background/90 rounded-t-3xl lg:rounded-none w-full shadow-lg relative overflow-hidden shrink-0">
+              <div className="absolute inset-0 bg-accent/10 blur-3xl pointer-events-none" />
               <div className="flex items-center gap-3 min-w-0 flex-1 relative z-10">
-                <div className="p-2 bg-emerald-500/10 rounded-full border border-emerald-500/20 shrink-0">
-                  <Bot size={20} className="text-emerald-400" />
+                <div className="p-2 bg-accent/10 rounded-full border border-accent/20 shrink-0">
+                  <Bot size={20} className="text-accent" />
                 </div>
                 <div className="flex flex-col min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-emerald-400 leading-tight">
+                    <h3 className="font-semibold text-accent leading-tight">
                       {rootWord ? "Lexicon Scholar AI" : surahNumber > 0 ? "Quran & Tafsir Scholar AI" : "Tafsir Scholar AI"}
                     </h3>
                     {remainingTokens !== null && (
-                      <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-mono text-emerald-400 shrink-0">
+                      <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-accent/10 border border-accent/20 text-[9px] font-mono text-accent shrink-0">
                         <Sparkles className="size-2.5" />
                         {remainingTokens.toLocaleString()}
                       </div>
                     )}
                   </div>
                   <div className="flex items-center gap-1.5 flex-wrap mt-1">
-                    <div className="relative inline-flex items-center bg-emerald-950/20 border border-emerald-500/40 rounded-md hover:bg-emerald-900/40 transition-colors cursor-pointer">
-                      <span className="text-[11px] text-emerald-400 font-medium py-1 pl-2 pr-6 truncate pointer-events-none">
+                    <div className="relative inline-flex items-center bg-accent/10 border border-accent/40 rounded-md hover:bg-accent/15 transition-colors cursor-pointer">
+                      <span className="text-[11px] text-accent font-medium py-1 pl-2 pr-6 truncate pointer-events-none">
                         {RAG_MODES.find(m => m.id === selectedModeId)?.shortName || "Select Mode"}
                       </span>
                       <select 
@@ -532,16 +532,16 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                       >
                         <optgroup label="Main RAG Models">
                           {RAG_MODES.filter(m => m.isPrimary).map(m => (
-                            <option key={m.id} value={m.id} className="bg-zinc-900 text-zinc-100 font-medium">{m.shortName}</option>
+                            <option key={m.id} value={m.id} className="bg-card text-foreground font-medium">{m.shortName}</option>
                           ))}
                         </optgroup>
                         <optgroup label="Specialized Models">
                           {RAG_MODES.filter(m => !m.isPrimary).map(m => (
-                            <option key={m.id} value={m.id} className="bg-zinc-900 text-zinc-300">{m.shortName}</option>
+                            <option key={m.id} value={m.id} className="bg-card text-reading">{m.shortName}</option>
                           ))}
                         </optgroup>
                       </select>
-                      <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 size-3.5 text-emerald-400 pointer-events-none" />
+                      <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 size-3.5 text-accent pointer-events-none" />
                     </div>
 
                     {scopeChoice !== null && (
@@ -577,17 +577,17 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                             ]);
                           }
                         }}
-                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold border transition-all cursor-pointer bg-emerald-950/30 border-emerald-500/30 text-emerald-300 hover:bg-emerald-900/50"
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold border transition-all cursor-pointer bg-accent/10 border-accent/30 text-accent hover:bg-accent/15"
                         title={rootWord ? "Click to toggle between this root and whole lexicon" : "Click to toggle between this verse and whole Quran"}
                       >
                         {scopeChoice === 'verse' ? (
                           <>
-                            <BookOpen className="size-3 text-emerald-400" />
+                            <BookOpen className="size-3 text-accent" />
                             <span>{rootWord ? `Root [${rootWord}]` : `Surah ${surahNumber}:${ayahNumber}`}</span>
                           </>
                         ) : (
                           <>
-                            <Sparkles className="size-3 text-emerald-400" />
+                            <Sparkles className="size-3 text-accent" />
                             <span>{rootWord ? "Whole Lexicon" : "Whole Quran"}</span>
                           </>
                         )}
@@ -599,15 +599,15 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
               <div className="flex items-center gap-1.5 shrink-0 ml-2">
                 {/* <button
                   onClick={openPricingModal}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold transition-all cursor-pointer shadow-sm"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-accent/10 hover:bg-accent/15 border border-accent/30 text-accent text-[10px] font-bold transition-all cursor-pointer shadow-sm"
                   title="View Research Plans & AI Quota"
                 >
-                  <Crown className="size-3 text-emerald-400" />
+                  <Crown className="size-3 text-accent" />
                   <span className="uppercase">{tier}</span>
                 </button> */}
                 <button 
                   onClick={onClose}
-                  className="p-2 hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 hover:text-white"
+                  className="p-2 hover:bg-muted rounded-full transition-colors text-muted-foreground hover:text-foreground"
                 >
                   <X size={20} />
                 </button>
@@ -631,12 +631,12 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                 >
                   {/* Scope Selection Card for Lexicon, Quran & Tafsir Sidebars */}
                   {scopeChoice === null && messages.length === 0 && (
-                    <div className="p-4 sm:p-5 rounded-2xl bg-zinc-900/90 border border-emerald-500/40 shadow-xl space-y-3.5 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider">
-                        <Sparkles className="size-4 text-emerald-400" />
+                    <div className="p-4 sm:p-5 rounded-2xl bg-card border border-accent/40 shadow-xl space-y-3.5 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="flex items-center gap-2 text-accent text-xs font-bold uppercase tracking-wider">
+                        <Sparkles className="size-4 text-accent" />
                         <span>Select Inquiring Scope</span>
                       </div>
-                      <p className="text-xs text-zinc-300 leading-relaxed">
+                      <p className="text-xs text-reading leading-relaxed">
                         For best results, please choose from these 2 options:
                       </p>
                       <div className="flex flex-col gap-2.5 pt-1">
@@ -652,23 +652,23 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                               }
                             ]);
                           }}
-                          className="w-full text-left p-3.5 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/50 hover:border-emerald-400 transition-all flex items-start gap-3 group cursor-pointer"
+                          className="w-full text-left p-3.5 rounded-xl bg-accent/10 hover:bg-accent/15 border border-accent/40 hover:border-accent transition-all flex items-start gap-3 group cursor-pointer"
                         >
-                          <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400 shrink-0 group-hover:scale-105 transition-transform">
+                          <div className="p-2 rounded-lg bg-accent/15 text-accent shrink-0 group-hover:scale-105 transition-transform">
                             <BookOpen className="size-4" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
-                              <span className="text-xs font-bold text-emerald-300 group-hover:text-emerald-200">
+                              <span className="text-xs font-bold text-accent group-hover:text-arabic">
                                 {rootWord 
                                   ? `Ask about Root Word [${rootWord}]` 
                                   : `Ask about this Verse (Surah ${surahNumber}:${ayahNumber})`}
                               </span>
-                              <span className="text-[10px] uppercase font-semibold text-emerald-400/90 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                              <span className="text-[10px] uppercase font-semibold text-accent bg-accent/10 px-2 py-0.5 rounded-full border border-accent/30">
                                 Targeted
                               </span>
                             </div>
-                            <p className="text-[11px] text-zinc-400 mt-1">
+                            <p className="text-[11px] text-muted-foreground mt-1">
                               {rootWord 
                                 ? `Focus lexical definitions, nuances, and gems specifically on root [${rootWord}].`
                                 : `Focus insights, classical tafsir, and gems specifically on Surah ${surahNumber}, Ayah ${ayahNumber}.`}
@@ -686,23 +686,23 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                               }
                             ]);
                           }}
-                          className="w-full text-left p-3.5 rounded-xl bg-zinc-900/60 hover:bg-zinc-800/80 border border-zinc-700/60 hover:border-zinc-500 transition-all flex items-start gap-3 group cursor-pointer"
+                          className="w-full text-left p-3.5 rounded-xl bg-card/70 hover:bg-muted border border-border hover:border-border transition-all flex items-start gap-3 group cursor-pointer"
                         >
-                          <div className="p-2 rounded-lg bg-zinc-800 text-zinc-300 shrink-0 group-hover:scale-105 transition-transform">
-                            <Sparkles className="size-4 text-emerald-400" />
+                          <div className="p-2 rounded-lg bg-muted text-reading shrink-0 group-hover:scale-105 transition-transform">
+                            <Sparkles className="size-4 text-accent" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
-                              <span className="text-xs font-bold text-zinc-200 group-hover:text-white">
+                              <span className="text-xs font-bold text-foreground group-hover:text-foreground">
                                 {rootWord 
                                   ? "General Question from Whole Lexicon & Quran" 
                                   : "General Question from the Whole Quran"}
                               </span>
-                              <span className="text-[10px] uppercase font-semibold text-zinc-400 bg-zinc-800 px-2 py-0.5 rounded-full border border-zinc-700">
+                              <span className="text-[10px] uppercase font-semibold text-muted-foreground bg-muted px-2 py-0.5 rounded-full border border-border">
                                 {rootWord ? "Whole Lexicon" : "Whole Quran"}
                               </span>
                             </div>
-                            <p className="text-[11px] text-zinc-400 mt-1">
+                            <p className="text-[11px] text-muted-foreground mt-1">
                               {rootWord 
                                 ? "Explore broad linguistic principles, cross-root relationships, and classical works."
                                 : "Retrieve concepts, themes, and cross-surah connections across all classical texts."}
@@ -725,10 +725,10 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                   <div className={cn(
                     "rounded-2xl p-3 sm:p-4 text-xs sm:text-sm leading-relaxed shadow-sm relative group",
                     msg.role === "user" 
-                      ? "max-w-[88%] sm:max-w-[85%] bg-zinc-800/90 border border-zinc-700/60 text-zinc-200 pr-8" 
+                      ? "max-w-[88%] sm:max-w-[85%] bg-muted border border-border text-foreground pr-8" 
                       : msg.isScopeInvalid
                       ? "w-full bg-amber-950/30 border border-amber-500/40 text-amber-100"
-                      : "w-full bg-zinc-900/90 border border-zinc-800 text-zinc-200"
+                      : "w-full bg-card border border-border text-foreground"
                   )}>
                     {msg.role === "assistant" && idx > 0 && (
                       <div className="absolute top-2 right-2 flex items-center gap-1 opacity-80 sm:opacity-0 sm:group-hover:opacity-100 focus-within:opacity-100 transition">
@@ -753,14 +753,14 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                             });
                             toast.success("Saved Scholar research answer to Profile!");
                           }}
-                          className="p-1.5 rounded-lg text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800/80 transition cursor-pointer"
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-accent hover:bg-muted transition cursor-pointer"
                           title="Save Answer to Profile"
                         >
                           <Bookmark className="size-3.5" />
                         </button>
                         <button
                           onClick={() => copyToClipboard(msg.content, "Response copied to clipboard!")}
-                          className="p-1.5 rounded-lg text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800/80 transition cursor-pointer"
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-accent hover:bg-muted transition cursor-pointer"
                           title="Copy to clipboard"
                         >
                           <Copy className="size-3.5" />
@@ -770,7 +770,7 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                     {msg.role === "user" && (
                       <button
                         onClick={() => copyToClipboard(msg.content, "Message copied to clipboard!")}
-                        className="absolute top-2 right-2 p-1.5 rounded-lg text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800/80 transition opacity-60 hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 cursor-pointer"
+                        className="absolute top-2 right-2 p-1.5 rounded-lg text-muted-foreground hover:text-accent hover:bg-muted transition opacity-60 hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 cursor-pointer"
                         title="Copy to clipboard"
                       >
                         <Copy className="size-3.5" />
@@ -787,23 +787,23 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                       <ReactMarkdown 
                         remarkPlugins={[remarkGfm]}
                         components={{
-                          h1: ({node, ...props}) => <h1 className="text-base font-bold text-zinc-100 mt-3 mb-2 border-b border-zinc-800 pb-1" {...props} />,
-                          h2: ({node, ...props}) => <h2 className="text-sm font-bold text-zinc-100 mt-2 mb-1" {...props} />,
-                          h3: ({node, ...props}) => <h3 className="text-xs font-semibold text-zinc-200 mt-2 mb-1" {...props} />,
-                          strong: ({node, ...props}) => <strong className="font-semibold text-zinc-100" {...props} />,
+                          h1: ({node, ...props}) => <h1 className="text-base font-bold text-foreground mt-3 mb-2 border-b border-border pb-1" {...props} />,
+                          h2: ({node, ...props}) => <h2 className="text-sm font-bold text-foreground mt-2 mb-1" {...props} />,
+                          h3: ({node, ...props}) => <h3 className="text-xs font-semibold text-foreground mt-2 mb-1" {...props} />,
+                          strong: ({node, ...props}) => <strong className="font-semibold text-foreground" {...props} />,
                           p: ({node, children, ...props}) => {
                             const textStr = React.Children.toArray(children).join('');
                             const arabicMatches = textStr.match(/[\u0600-\u06FF]/g) || [];
                             const isPredominantlyArabic = arabicMatches.length > 10 && (arabicMatches.length / textStr.length > 0.35);
                             
-                            const containerClasses = "quran-block my-2 p-3 rounded-lg bg-emerald-950/20 border border-emerald-500/30 shadow-sm relative overflow-hidden [&_.quran-block]:!p-0 [&_.quran-block]:!m-0 [&_.quran-block:not(:first-child)]:!mt-3 [&_.quran-block]:!border-none [&_.quran-block]:!bg-transparent [&_.quran-block]:!shadow-none [&_.quran-block>.quran-bar]:!hidden";
+                            const containerClasses = "quran-block my-2 p-3 rounded-lg bg-accent/10 border border-accent/30 shadow-sm relative overflow-hidden [&_.quran-block]:!p-0 [&_.quran-block]:!m-0 [&_.quran-block:not(:first-child)]:!mt-3 [&_.quran-block]:!border-none [&_.quran-block]:!bg-transparent [&_.quran-block]:!shadow-none [&_.quran-block>.quran-bar]:!hidden";
 
                             if (isPredominantlyArabic) {
                               const isUrdu = /[\u067E\u0686\u0698\u06AF\u0679\u0688\u0691\u06BA\u06D2\u06C1]/.test(textStr) || /\b(اور|ہیں|تھا|تھی|تھے|کے|کی|کو|سے|نے|میں|پر|کا|یہ|وہ|ایک)\b/.test(textStr);
                               return (
                                 <div className={containerClasses}>
-                                  <div className="quran-bar absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
-                                  <p className={`m-0 ${isUrdu ? 'font-urdu' : 'font-arabic'} text-base md:text-lg text-emerald-200 leading-loose text-right dir-rtl`}>
+                                  <div className="quran-bar absolute top-0 left-0 w-1 h-full bg-accent/80" />
+                                  <p className={`m-0 ${isUrdu ? 'font-urdu' : 'font-arabic'} text-base md:text-lg text-arabic leading-loose text-right dir-rtl`}>
                                     {renderInlineBadges(children, msg.sources, (s) => setActiveSource(s))}
                                   </p>
                                 </div>
@@ -814,8 +814,8 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                             if (isInlineVerseQuote && textStr.length < 350 && !textStr.toLowerCase().includes('tafsir')) {
                               return (
                                 <div className={containerClasses}>
-                                  <div className="quran-bar absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
-                                  <p className="m-0 italic text-[13px] sm:text-sm text-zinc-200">
+                                  <div className="quran-bar absolute top-0 left-0 w-1 h-full bg-accent/80" />
+                                  <p className="m-0 italic text-[13px] sm:text-sm text-foreground">
                                     {renderInlineBadges(children, msg.sources, (s) => setActiveSource(s))}
                                   </p>
                                 </div>
@@ -834,12 +834,12 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                             });
                             const arabicMatches = textStr.match(/[\u0600-\u06FF]/g) || [];
                             const isPredominantlyArabic = arabicMatches.length > 10 && (arabicMatches.length / textStr.length > 0.35);
-                            const containerClasses = "quran-block my-2 p-3 rounded-lg bg-emerald-950/20 border border-emerald-500/30 shadow-sm relative overflow-hidden [&_.quran-block]:!p-0 [&_.quran-block]:!m-0 [&_.quran-block:not(:first-child)]:!mt-3 [&_.quran-block]:!border-none [&_.quran-block]:!bg-transparent [&_.quran-block]:!shadow-none [&_.quran-block>.quran-bar]:!hidden";
+                            const containerClasses = "quran-block my-2 p-3 rounded-lg bg-accent/10 border border-accent/30 shadow-sm relative overflow-hidden [&_.quran-block]:!p-0 [&_.quran-block]:!m-0 [&_.quran-block:not(:first-child)]:!mt-3 [&_.quran-block]:!border-none [&_.quran-block]:!bg-transparent [&_.quran-block]:!shadow-none [&_.quran-block>.quran-bar]:!hidden";
 
                             return (
                               <div className={containerClasses}>
-                                <div className="quran-bar absolute top-0 left-0 w-1 h-full bg-emerald-500/80" />
-                                <blockquote className={`m-0 border-none p-0 text-zinc-200 ${isPredominantlyArabic ? `${amiri.className} text-base md:text-lg leading-loose text-right text-emerald-200` : 'italic text-[13px] sm:text-sm text-zinc-200'}`}>
+                                <div className="quran-bar absolute top-0 left-0 w-1 h-full bg-accent/80" />
+                                <blockquote className={`m-0 border-none p-0 text-foreground ${isPredominantlyArabic ? `${amiri.className} text-base md:text-lg leading-loose text-right text-arabic` : 'italic text-[13px] sm:text-sm text-foreground'}`}>
                                   {renderInlineBadges(children, msg.sources, (s) => setActiveSource(s))}
                                 </blockquote>
                               </div>
@@ -853,10 +853,10 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
 
                     {/* Sources Section */}
                     {msg.sources && msg.sources.length > 0 && (
-                      <div className="mt-3 pt-2.5 sm:mt-4 sm:pt-3 border-t border-zinc-800/80 space-y-2">
-                        <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-semibold text-zinc-400">
+                      <div className="mt-3 pt-2.5 sm:mt-4 sm:pt-3 border-t border-border space-y-2">
+                        <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-semibold text-muted-foreground">
                           <span className="flex items-center gap-1.5">
-                            <BookOpen className="size-3 text-emerald-500 shrink-0" />
+                            <BookOpen className="size-3 text-accent shrink-0" />
                             <span className="truncate">Sources Used ({msg.sources.length}):</span>
                           </span>
                         </div>
@@ -870,15 +870,15 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                                   : `/tafsir?surah=${src.surah || 1}&ayah=${src.ayah || 1}&author=${encodeURIComponent(src.authorName || src.book)}`
                               }
                               target="_blank"
-                              className="group p-2 rounded-lg bg-zinc-950/80 border border-zinc-800 hover:border-emerald-500/40 transition-all text-left space-y-0.5 block"
+                              className="group p-2 rounded-lg bg-background/80 border border-border hover:border-accent/40 transition-all text-left space-y-0.5 block"
                             >
                               <div className="flex items-center justify-between">
-                                <span className="text-[11px] font-bold text-zinc-200 group-hover:text-emerald-400 transition-colors flex items-center gap-1 truncate">
-                                  {src.workType === "lexicon" ? <Layers className="size-2.5 text-rose-400 shrink-0" /> : <BookOpen className="size-2.5 text-emerald-400 shrink-0" />}
+                                <span className="text-[11px] font-bold text-foreground group-hover:text-accent transition-colors flex items-center gap-1 truncate">
+                                  {src.workType === "lexicon" ? <Layers className="size-2.5 text-rose-400 shrink-0" /> : <BookOpen className="size-2.5 text-accent shrink-0" />}
                                   <span className="truncate">{src.book}</span>
                                 </span>
                               </div>
-                              <p className="text-[10px] text-zinc-500 group-hover:text-zinc-400 line-clamp-2 leading-snug">
+                              <p className="text-[10px] text-muted-foreground group-hover:text-muted-foreground line-clamp-2 leading-snug">
                                 {src.snippet}
                               </p>
                             </Link>
@@ -891,9 +891,9 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
               ))}
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="p-3 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center gap-2 shadow-sm">
-                    <Loader2 className="size-3.5 sm:size-4 animate-spin text-emerald-500 shrink-0" />
-                    <span className="text-xs text-zinc-400">Searching classical texts...</span>
+                  <div className="p-3 rounded-2xl bg-card border border-border flex items-center gap-2 shadow-sm">
+                    <Loader2 className="size-3.5 sm:size-4 animate-spin text-accent shrink-0" />
+                    <span className="text-xs text-muted-foreground">Searching classical texts...</span>
                   </div>
                 </div>
               )}
@@ -902,7 +902,7 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
 
             {/* Input Area */}
             <div 
-              className="relative z-10 shrink-0 bg-zinc-950 border-t border-zinc-800/80 p-3 sm:p-4 pb-[max(env(safe-area-inset-bottom,0px),8px)] w-full after:content-[''] after:absolute after:top-full after:left-0 after:right-0 after:h-[100vh] after:bg-zinc-950 pointer-events-auto"
+              className="relative z-10 shrink-0 bg-background border-t border-border p-3 sm:p-4 pb-[max(env(safe-area-inset-bottom,0px),8px)] w-full after:content-[''] after:absolute after:top-full after:left-0 after:right-0 after:h-[100vh] after:bg-background pointer-events-auto"
             >
               <div className="relative flex items-center">
                 <textarea 
@@ -910,13 +910,13 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder={`Ask in ${currentModeInfo.shortName}...`}
-                  className="w-full bg-zinc-900/90 border border-zinc-800 rounded-2xl py-3 pl-3.5 pr-12 text-[16px] sm:text-[14px] text-zinc-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-colors resize-none min-h-[48px] max-h-[120px] custom-scrollbar"
+                  className="w-full bg-card border border-border rounded-2xl py-3 pl-3.5 pr-12 text-[16px] sm:text-[14px] text-foreground focus:outline-none focus:ring-1 focus:ring-ring focus:border-accent/50 transition-colors resize-none min-h-[48px] max-h-[120px] custom-scrollbar"
                   rows={1}
                 />
                 <button 
                   onClick={handleSend}
                   disabled={!input.trim() || isLoading}
-                  className="absolute right-2.5 bottom-2.5 size-7 sm:size-8 rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:bg-zinc-800 disabled:text-zinc-600 text-white flex items-center justify-center transition-all shadow-sm"
+                  className="absolute right-2.5 bottom-2.5 size-7 sm:size-8 rounded-xl bg-accent hover:bg-accent/90 disabled:bg-muted disabled:text-muted-foreground text-foreground flex items-center justify-center transition-all shadow-sm"
                 >
                   <Send size={14} />
                 </button>
@@ -925,14 +925,14 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
               </>
             ) : (
               <div className="flex-1 w-full flex flex-col items-center justify-center min-h-[300px] gap-3">
-                <Loader2 className="size-8 animate-spin text-emerald-500/50" />
-                <span className="text-xs text-zinc-500 font-medium">Loading Scholar AI...</span>
+                <Loader2 className="size-8 animate-spin text-accent" />
+                <span className="text-xs text-muted-foreground font-medium">Loading Scholar AI...</span>
               </div>
             )}
 
             {/* Source Chunk Viewer Overlay Drawer */}
             {activeSource && (
-              <div className="absolute inset-0 z-50 flex flex-col bg-zinc-950 shadow-2xl animate-in slide-in-from-right duration-200">
+              <div className="absolute inset-0 z-50 flex flex-col bg-background shadow-2xl animate-in slide-in-from-right duration-200">
                 <SourceChunkViewer
                   source={activeSource}
                   onClose={() => setActiveSource(null)}

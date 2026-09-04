@@ -15,17 +15,17 @@ const NavigatorButton = ({
     className={`
       flex items-center gap-2 px-5 py-2 transition
       shadow-md rounded-md text-sm
-      bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700
-      hover:bg-zinc-100 dark:hover:bg-zinc-700
+      bg-card dark:bg-muted border border-border dark:border-border
+      hover:bg-muted dark:hover:bg-muted
       ${direction === "Previous" ? "justify-start" : "justify-end"}
     `}
   >
     {direction === "Previous" && (
-      <ArrowLeftIcon className="w-5 h-5 text-zinc-500" />
+      <ArrowLeftIcon className="w-5 h-5 text-muted-foreground" />
     )}
-    <span className="text-zinc-800 dark:text-white">{direction} Surah</span>
+    <span className="text-foreground">{direction} Surah</span>
     {direction === "Next" && (
-      <ArrowRightIcon className="w-5 h-5 text-zinc-500" />
+      <ArrowRightIcon className="w-5 h-5 text-muted-foreground" />
     )}
   </Link>
 );

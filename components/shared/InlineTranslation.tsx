@@ -189,8 +189,8 @@ export default function InlineTranslation({
     <div className="mt-2 flex flex-col items-end w-full">
       <div className="flex items-center gap-2">
         {isSaved && !isOpen && (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-950/60 border border-emerald-500/30 text-[10px] text-emerald-400 font-semibold shadow-sm">
-            <Check className="size-3 text-emerald-400" /> Saved
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent/10 border border-accent/30 text-[10px] text-accent font-semibold shadow-sm">
+            <Check className="size-3 text-accent" /> Saved
           </span>
         )}
         <button
@@ -198,8 +198,8 @@ export default function InlineTranslation({
           className={cn(
             "flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl transition-all duration-300 font-medium text-xs sm:text-sm shadow-sm cursor-pointer",
             isOpen
-              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
-              : "bg-emerald-500/20 text-emerald-300 border border-emerald-400/50 hover:bg-emerald-500/30 hover:-translate-y-0.5 hover:shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+              ? "bg-accent/10 text-accent border border-accent/30"
+              : "bg-accent/15 text-accent border border-accent/50 hover:bg-accent/20 hover:-translate-y-0.5 "
           )}
         >
           <Languages className="size-4 shrink-0" />
@@ -208,30 +208,30 @@ export default function InlineTranslation({
       </div>
 
       {isOpen && (
-        <div className="w-full mt-3 animate-in fade-in slide-in-from-top-2 duration-300 bg-zinc-950/80 border border-emerald-500/20 rounded-2xl p-4 sm:p-6 shadow-xl relative overflow-hidden text-left">
-          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500/0 via-emerald-500/40 to-emerald-500/0" />
+        <div className="w-full mt-3 animate-in fade-in slide-in-from-top-2 duration-300 bg-background/80 border border-accent/20 rounded-2xl p-4 sm:p-6 shadow-xl relative overflow-hidden text-left">
+          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-accent/0 via-accent/40 to-accent/0" />
           
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <h4 className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+              <h4 className="flex items-center gap-2 text-accent font-bold text-sm">
                 <Sparkles className="size-4" />
                 English Translation
               </h4>
 
               {isLoading && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] text-emerald-400 font-medium animate-pulse">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent/10 border border-accent/20 text-[10px] text-accent font-medium animate-pulse">
                   <Loader2 className="size-3 animate-spin" /> Translating...
                 </span>
               )}
 
               {isDone && !error && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] text-emerald-400 font-medium">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/10 border border-accent/20 text-[10px] text-accent font-medium">
                   <Check className="size-3" /> Translation Complete
                 </span>
               )}
 
               {isSaved && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-400 font-mono">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-card border border-border text-[10px] text-muted-foreground font-mono">
                   Saved
                 </span>
               )}
@@ -241,7 +241,7 @@ export default function InlineTranslation({
               {translationText && (
                 <button
                   onClick={() => copyToClipboard(translationText, "English translation copied!")}
-                  className="text-xs text-emerald-400 hover:text-emerald-300 flex items-center gap-1 transition px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 cursor-pointer shadow-sm"
+                  className="text-xs text-accent hover:text-accent flex items-center gap-1 transition px-2.5 py-1 rounded-lg bg-accent/10 border border-accent/30 hover:bg-accent/15 cursor-pointer shadow-sm"
                   title="Copy English Translation"
                 >
                   <Copy className="size-3.5" /> <span>Copy</span>
@@ -255,25 +255,25 @@ export default function InlineTranslation({
                     sessionStorage.setItem("ai_translator_raw_markdown", rawMarkdown);
                   }
                 }}
-                className="text-xs text-zinc-400 hover:text-emerald-400 flex items-center gap-1 transition px-2 py-1 rounded-lg hover:bg-zinc-900"
+                className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 transition px-2 py-1 rounded-lg hover:bg-card"
               >
                 Full Details <ExternalLink className="size-3" />
               </Link>
               {onClose && (
-                <button onClick={onClose} className="text-zinc-500 hover:text-zinc-300 p-1">
+                <button onClick={onClose} className="text-muted-foreground hover:text-reading p-1">
                   <X className="size-4" />
                 </button>
               )}
             </div>
           </div>
 
-          <div className="min-h-[60px] text-zinc-200 text-sm sm:text-base leading-relaxed font-inter whitespace-pre-wrap text-left">
+          <div className="min-h-[60px] text-foreground text-sm sm:text-base leading-relaxed font-inter whitespace-pre-wrap text-left">
             {isLoading && !translationText ? (
-              <div className="flex flex-col items-center justify-center h-full gap-3 text-zinc-400 py-6 text-center">
-                <Loader2 className="w-6 h-6 animate-spin text-emerald-400" />
+              <div className="flex flex-col items-center justify-center h-full gap-3 text-muted-foreground py-6 text-center">
+                <Loader2 className="w-6 h-6 animate-spin text-accent" />
                 <div className="space-y-1">
-                  <p className="text-zinc-300 font-medium text-sm">Translating with scholarly accuracy...</p>
-                  <p className="text-xs text-zinc-500 max-w-xs mx-auto">
+                  <p className="text-reading font-medium text-sm">Translating with scholarly accuracy...</p>
+                  <p className="text-xs text-muted-foreground max-w-xs mx-auto">
                     The AI is reviewing the text thoroughly. We will notify you with a popup as soon as it's done!
                   </p>
                 </div>
@@ -287,7 +287,7 @@ export default function InlineTranslation({
                     <span>{translationText}</span>
                   </div>
                 ) : (
-                  <span className="flex items-center gap-2 text-zinc-400">
+                  <span className="flex items-center gap-2 text-muted-foreground">
                     <Loader2 className="size-3 animate-spin" /> Gathering context...
                   </span>
                 )}
@@ -296,16 +296,16 @@ export default function InlineTranslation({
 
             {/* Live Streaming Dots Bottom Indicator when streaming mid-way */}
             {isLoading && translationText && (
-              <div className="mt-4 pt-3 border-t border-emerald-500/20 flex items-center justify-between text-xs text-emerald-400 bg-emerald-950/20 -mx-4 -mb-4 sm:-mx-6 sm:-mb-6 p-3 px-4 sm:px-6 rounded-b-2xl animate-pulse">
+              <div className="mt-4 pt-3 border-t border-accent/20 flex items-center justify-between text-xs text-accent bg-accent/10 -mx-4 -mb-4 sm:-mx-6 sm:-mb-6 p-3 px-4 sm:px-6 rounded-b-2xl animate-pulse">
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce [animation-delay:-0.3s]" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce [animation-delay:-0.15s]" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce [animation-delay:-0.3s]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce [animation-delay:-0.15s]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce" />
                   </div>
-                  <span className="font-medium text-emerald-300">AI is actively generating the next section...</span>
+                  <span className="font-medium text-accent">AI is actively generating the next section...</span>
                 </div>
-                <span className="text-zinc-500 font-mono text-[10px] uppercase tracking-wider">Live stream</span>
+                <span className="text-muted-foreground font-mono text-[10px] uppercase tracking-wider">Live stream</span>
               </div>
             )}
           </div>

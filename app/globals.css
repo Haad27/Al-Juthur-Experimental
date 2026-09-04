@@ -163,6 +163,11 @@ html, body {
   color: var(--arabic);
 }
 
+/* Audio word highlight (class name kept for existing player logic) */
+.\!text-emerald-400 {
+  color: var(--accent) !important;
+}
+
 /* Font Face for UthmanicHafs (KFQPC Hafs V22 — Modern Madani Mushaf) */
 @font-face {
   font-family: 'UthmanicHafs';

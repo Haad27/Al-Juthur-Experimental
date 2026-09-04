@@ -356,7 +356,7 @@ export default function SurahPlayer({
         arabicTextElement?.classList.remove("text-red-500");
         document
           .getElementById(currentAyahId)
-          ?.classList.remove("bg-zinc-800/75");
+          ?.classList.remove("bg-accent/15");
 
         setCurrentAyah((prev) => prev + 1);
 
@@ -364,7 +364,7 @@ export default function SurahPlayer({
           window.dispatchEvent(new CustomEvent('scrollToAyah', { detail: { index: currentAyahRef.current + 1 } }));
           document
             .getElementById(`ayah-${currentAyahRef.current + 2}`)
-            ?.classList.add("bg-zinc-800/75");
+            ?.classList.add("bg-accent/15");
         } else {
           toast.success("You completed the Surah!");
           setTimeout(() => router.push(`/surah/${surahNumber + 1}`), 1500); 
@@ -392,7 +392,7 @@ export default function SurahPlayer({
       startRecognition();
       document
         .getElementById(`ayah-${currentAyahRef.current + 1}`)
-        ?.classList.add("bg-zinc-800/75"); 
+        ?.classList.add("bg-accent/15"); 
       toast.success("Start reciting aloud. Tap mic again to stop.");
     } catch {
       setRecording(false);
@@ -419,10 +419,10 @@ export default function SurahPlayer({
         animate={{ rotate: mobileFabOpen ? 90 : 0, scale: mobileFabOpen ? 1.05 : 1 }}
         transition={{ type: "spring", stiffness: 400, damping: 25 }}
         className={cn(
-          "fixed bottom-[calc(6.75rem+env(safe-area-inset-bottom,0px))] md:bottom-8 z-[9999] size-12 md:size-14 rounded-full text-white shadow-2xl flex items-center justify-center transition-all duration-300 cursor-pointer select-none border",
+          "fixed bottom-[calc(6.75rem+env(safe-area-inset-bottom,0px))] md:bottom-8 z-[9999] size-12 md:size-14 rounded-full text-foreground shadow-2xl flex items-center justify-center transition-all duration-300 cursor-pointer select-none border",
           mobileFabOpen
-            ? "bg-emerald-700 border-emerald-300 shadow-[0_0_25px_rgba(16,185,129,0.6)] ring-4 ring-emerald-500/30"
-            : "bg-emerald-600 border-emerald-400/40 hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(16,185,129,0.35)]",
+            ? "bg-accent border-accent  ring-4 ring-accent/30"
+            : "bg-accent border-accent/40 hover:scale-105 active:scale-95 ",
           aiChatContext ? "max-lg:hidden right-4 lg:right-[440px] xl:right-[470px]" : "right-4 md:right-8",
           isWordDialogVisible ? "max-md:hidden" : ""
         )}
@@ -437,7 +437,7 @@ export default function SurahPlayer({
               exit={{ rotate: 90, opacity: 0, scale: 0.5 }}
               transition={{ duration: 0.18 }}
             >
-              <X className="size-5 md:size-6 text-white stroke-[2.5]" />
+              <X className="size-5 md:size-6 text-foreground stroke-[2.5]" />
             </motion.div>
           ) : playing ? (
             <motion.div
@@ -447,7 +447,7 @@ export default function SurahPlayer({
               exit={{ opacity: 0, scale: 0.5 }}
               transition={{ duration: 0.18 }}
             >
-              <Pause className="size-5 md:size-6 text-white" />
+              <Pause className="size-5 md:size-6 text-foreground" />
             </motion.div>
           ) : (
             <motion.div
@@ -457,7 +457,7 @@ export default function SurahPlayer({
               exit={{ opacity: 0, scale: 0.5 }}
               transition={{ duration: 0.18 }}
             >
-              <Mic className={`size-5 md:size-6 ${recording ? "text-emerald-300 animate-pulse" : "text-white"}`} />
+              <Mic className={`size-5 md:size-6 ${recording ? "text-accent animate-pulse" : "text-foreground"}`} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -469,22 +469,22 @@ export default function SurahPlayer({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 15, scale: 0.95 }}
           className={cn(
-            "fixed bottom-[calc(10.25rem+env(safe-area-inset-bottom,0px))] md:bottom-[5.5rem] z-[9999] w-64 md:w-72 bg-zinc-900/95 border border-emerald-500/50 rounded-2xl p-4 shadow-[0_0_30px_rgba(16,185,129,0.3)] backdrop-blur-2xl space-y-4 text-white transition-all duration-300 max-h-[85vh] overflow-y-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
+            "fixed bottom-[calc(10.25rem+env(safe-area-inset-bottom,0px))] md:bottom-[5.5rem] z-[9999] w-64 md:w-72 bg-card border border-accent/40 rounded-2xl p-4  backdrop-blur-2xl space-y-4 text-foreground transition-all duration-300 max-h-[85vh] overflow-y-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
             aiChatContext ? "max-lg:hidden right-4 lg:right-[440px] xl:right-[470px]" : "right-4 md:right-8"
           )}
         >
-          <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Recitation Player</span>
-            <button onClick={() => setMobileFabOpen(false)} className="p-1 hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-white transition cursor-pointer">
+          <div className="flex items-center justify-between border-b border-border pb-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-accent">Recitation Player</span>
+            <button onClick={() => setMobileFabOpen(false)} className="p-1 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground transition cursor-pointer">
               <ChevronDown className="size-4" />
             </button>
           </div>
 
               {/* Start Ayah Selector Mobile */}
-              <div className="flex items-center justify-between bg-zinc-950/60 rounded-xl px-3 py-2">
-                 <span className="text-xs text-zinc-400">Start Ayah:</span>
+              <div className="flex items-center justify-between bg-card/80 rounded-xl px-3 py-2">
+                 <span className="text-xs text-muted-foreground">Start Ayah:</span>
                  <select 
-                   className="bg-transparent text-white text-xs outline-none cursor-pointer"
+                   className="bg-transparent text-foreground text-xs outline-none cursor-pointer"
                    value={startAyah}
                    onChange={(e) => {
                      const val = Number(e.target.value);
@@ -495,31 +495,31 @@ export default function SurahPlayer({
                    }}
                  >
                    {Array.from({ length: lastAyahNumber }, (_, i) => i + 1).map(num => (
-                     <option key={num} value={num} className="bg-zinc-800">{num}</option>
+                     <option key={num} value={num} className="bg-muted">{num}</option>
                    ))}
                  </select>
               </div>
 
               {/* Playback Controls */}
               <div className="flex items-center justify-center gap-4 py-1">
-                <button onClick={() => skip(-10)} className="p-2 bg-zinc-800/80 hover:bg-zinc-800 rounded-full text-white">
+                <button onClick={() => skip(-10)} className="p-2 bg-muted hover:bg-muted rounded-full text-foreground">
                   <SkipBackIcon className="size-4" />
                 </button>
-                <button onClick={handlePlayPause} className="p-3 bg-emerald-600 hover:bg-emerald-500 rounded-full text-white shadow-lg">
+                <button onClick={handlePlayPause} className="p-3 bg-accent hover:bg-accent rounded-full text-foreground shadow-lg">
                   {playing ? <Pause className="size-5" /> : <Play className="size-5" />}
                 </button>
-                <button onClick={() => skip(10)} className="p-2 bg-zinc-800/80 hover:bg-zinc-800 rounded-full text-white">
+                <button onClick={() => skip(10)} className="p-2 bg-muted hover:bg-muted rounded-full text-foreground">
                   <SkipForwardIcon className="size-4" />
                 </button>
               </div>
 
               {/* Time / Progress */}
-              <div className="text-center font-mono text-xs text-zinc-400">
+              <div className="text-center font-mono text-xs text-muted-foreground">
                 {formatTime(currentTime)} / {formatTime(duration)}
               </div>
 
               {/* Speed Selector */}
-              <div className="flex items-center justify-center gap-1 bg-zinc-950/60 p-1 rounded-xl">
+              <div className="flex items-center justify-center gap-1 bg-card/80 p-1 rounded-xl">
                 {playbackRates.slice(2, 6).map((rate) => {
                   const isActive = (audioStore.playbackRate || playbackRate) === rate;
                   return (
@@ -534,7 +534,7 @@ export default function SurahPlayer({
                         }
                       }}
                       className={`flex-1 py-1 rounded-lg text-xs font-semibold transition ${
-                        isActive ? "bg-emerald-600 text-white shadow" : "text-zinc-400 hover:text-white"
+                        isActive ? "bg-accent text-foreground shadow" : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
                       {rate}×
@@ -545,9 +545,9 @@ export default function SurahPlayer({
 
               {/* Reciter Selector */}
               <div className="flex flex-col gap-1 mt-2">
-                 <span className="text-xs text-zinc-400">Reciter:</span>
+                 <span className="text-xs text-muted-foreground">Reciter:</span>
                  <select 
-                   className="bg-zinc-950/60 border border-zinc-800 rounded-lg px-2 py-1.5 text-xs text-white outline-none cursor-pointer w-full"
+                   className="bg-card/80 border border-border rounded-lg px-2 py-1.5 text-xs text-foreground outline-none cursor-pointer w-full"
                    value={selectedReciter || 7}
                    onChange={(e) => {
                      setSelectedReciter(Number(e.target.value));
@@ -555,7 +555,7 @@ export default function SurahPlayer({
                    }}
                  >
                    {reciters.map(r => (
-                     <option key={r.id} value={r.id} className="bg-zinc-800">
+                     <option key={r.id} value={r.id} className="bg-muted">
                        {r.reciter_name} {r.style ? `(${r.style})` : ''}
                      </option>
                    ))}
@@ -574,11 +574,11 @@ export default function SurahPlayer({
                 }}
                 className={`w-full py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-2 border transition ${
                   recording
-                    ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
-                    : "bg-zinc-800/60 border-zinc-700/60 text-zinc-300 hover:bg-zinc-800"
+                    ? "bg-accent/15 border-accent/40 text-accent"
+                    : "bg-muted/80 border-border text-reading hover:bg-muted"
                 }`}
               >
-                <Mic className="size-4 text-emerald-400" />
+                <Mic className="size-4 text-accent" />
                 <span>{recording ? "Recording Active..." : "Voice Recite Assistant"}</span>
               </button>
             </motion.div>

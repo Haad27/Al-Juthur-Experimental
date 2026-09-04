@@ -15,16 +15,16 @@ export default function AiScholarPage() {
         <div className="flex items-center gap-4">
           <Link
             href="/home"
-            className="p-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white transition"
+            className="p-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-foreground transition"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-gradient-to-tr from-emerald-500/20 to-amber-500/20 border border-emerald-500/30">
-              <Sparkles className="w-5 h-5 text-emerald-400" />
+            <div className="p-2 rounded-xl bg-gradient-to-tr from-emerald-500/20 to-amber-500/20 border border-accent/30">
+              <Sparkles className="w-5 h-5 text-accent" />
             </div>
             <div>
-              <h1 className="text-base font-bold text-white">Academic AI Scholar & Quranic Graph-RAG</h1>
+              <h1 className="text-base font-bold text-foreground">Academic AI Scholar & Quranic Graph-RAG</h1>
               <p className="text-xs text-neutral-400">
                 Tafsir Ibn Kathir • Tafsir Al-Jalalayn • Lane's Lexicon • Lisan al-Arab
               </p>
@@ -33,7 +33,7 @@ export default function AiScholarPage() {
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-lg shadow-emerald-600/20 transition"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-accent hover:bg-accent text-foreground text-xs font-semibold shadow-lg  transition"
         >
           <Search className="w-4 h-4" />
           Launch Research Assistant
@@ -42,10 +42,10 @@ export default function AiScholarPage() {
 
       {/* Main Intro Body */}
       <main className="flex-1 max-w-4xl mx-auto px-6 py-12 flex flex-col items-center text-center">
-        <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-500/10 via-amber-500/10 to-transparent border border-emerald-500/20 mb-6">
-          <BookOpen className="w-8 h-8 text-emerald-400" />
+        <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-500/10 via-amber-500/10 to-transparent border border-accent/20 mb-6">
+          <BookOpen className="w-8 h-8 text-accent" />
         </div>
-        <h2 className="text-3xl font-extrabold text-white tracking-tight">
+        <h2 className="text-3xl font-extrabold text-foreground tracking-tight">
           Verifiable Quranic Scholarship via AI
         </h2>
         <p className="text-sm text-neutral-400 max-w-2xl mt-3 leading-relaxed">
@@ -54,8 +54,8 @@ export default function AiScholarPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full mt-10">
           <div className="p-5 rounded-2xl bg-neutral-900/60 border border-neutral-800 text-left">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-accent" />
               Parent-Child Chunking
             </h3>
             <p className="text-xs text-neutral-400 mt-2 leading-relaxed">
@@ -64,7 +64,7 @@ export default function AiScholarPage() {
           </div>
 
           <div className="p-5 rounded-2xl bg-neutral-900/60 border border-neutral-800 text-left">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+            <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-amber-400" />
               On-Demand Translation
             </h3>
@@ -74,7 +74,7 @@ export default function AiScholarPage() {
           </div>
 
           <div className="p-5 rounded-2xl bg-neutral-900/60 border border-neutral-800 text-left">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+            <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-blue-400" />
               Clickable Source Drawer
             </h3>
@@ -86,7 +86,7 @@ export default function AiScholarPage() {
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="mt-10 px-8 py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold text-sm shadow-xl shadow-emerald-500/20 transition transform hover:-translate-y-0.5"
+          className="mt-10 px-8 py-3.5 rounded-xl bg-gradient-to-r from-accent to-accent hover:from-emerald-500 hover:to-accent text-foreground font-bold text-sm shadow-xl shadow-sm transition transform hover:-translate-y-0.5"
         >
           Open AI Scholar Assistant
         </button>
