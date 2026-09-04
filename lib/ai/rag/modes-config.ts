@@ -29,7 +29,7 @@ export const RAG_MODES: RagModeInfo[] = [
     shortName: "General Tafsir",
     botTitle: "General Tafsir AI Scholar",
     badge: "Main Model · Balanced",
-    badgeColor: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
+    badgeColor: "bg-accent/10 text-accent border-accent/25",
     isPrimary: true,
     targetIntent: "Direct answers and general Quranic queries using the safest, most universally accepted classical commentaries.",
     sources: [
@@ -64,7 +64,7 @@ export const RAG_MODES: RagModeInfo[] = [
     shortName: "Classical Lexicon",
     botTitle: "Classical Arabic Lexicon AI Scholar",
     badge: "Main Model · Root Lexicon",
-    badgeColor: "bg-rose-500/10 text-rose-400 border-rose-500/30",
+    badgeColor: "bg-accent/10 text-accent border-accent/25",
     isPrimary: true,
     targetIntent: "Classical dictionary lookups, root concept structure, semantic nuances, and exhaustive classical Arabic usage.",
     sources: [
@@ -99,7 +99,7 @@ export const RAG_MODES: RagModeInfo[] = [
     shortName: "Hadith & Isnad",
     botTitle: "Classical Hadith & Isnad AI Scholar",
     badge: "Early Salaf & Narrations",
-    badgeColor: "bg-amber-500/10 text-amber-400 border-amber-500/30",
+    badgeColor: "bg-accent/10 text-accent border-accent/25",
     isPrimary: false,
     targetIntent: "Focused on historical narrations, early Sahabah and Salaf reports, and isnad-grounded exegesis.",
     sources: [
@@ -132,7 +132,7 @@ export const RAG_MODES: RagModeInfo[] = [
     shortName: "Grammar & Balagha",
     botTitle: "Grammar & Balagha AI Scholar",
     badge: "Linguistic & Rhetoric Focus",
-    badgeColor: "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
+    badgeColor: "bg-accent/10 text-accent border-accent/25",
     isPrimary: false,
     targetIntent: "Word origins, syntax (i'rab), rhetorical beauty (balagha), particle structure, and deep grammatical breakdown.",
     sources: [
@@ -166,7 +166,7 @@ export const RAG_MODES: RagModeInfo[] = [
     shortName: "Contemporary & Maqasid",
     botTitle: "Contemporary & Maqasid AI Scholar",
     badge: "Modern Application & Themes",
-    badgeColor: "bg-blue-500/10 text-blue-400 border-blue-500/30",
+    badgeColor: "bg-accent/10 text-accent border-accent/25",
     isPrimary: false,
     targetIntent: "Macro-themes, higher objectives of Shariah (Maqasid), societal context, modern psychology, and inter-verse connections across surahs.",
     sources: [
@@ -199,7 +199,7 @@ export const RAG_MODES: RagModeInfo[] = [
     shortName: "Rational & Proofs",
     botTitle: "Rational & Philosophical AI Scholar",
     badge: "Intellectual & Logical Analysis",
-    badgeColor: "bg-purple-500/10 text-purple-400 border-purple-500/30",
+    badgeColor: "bg-accent/10 text-accent border-accent/25",
     isPrimary: false,
     targetIntent: "Intellectual reflection, rational proofs, and philosophical arguments based on classical exegesis.",
     sources: [

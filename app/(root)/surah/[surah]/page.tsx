@@ -135,7 +135,7 @@ export default async function SurahPage({
         (_match: string, id: string) => {
           fIds.push(id);
           fIdsCount++;
-          return `<span class="text-emerald-500 font-bold mx-1 cursor-pointer footnote-ref" data-findex="${fIdsCount}" data-fid="${id}">[${fIdsCount}]</span>`;
+          return `<span class="text-accent font-bold mx-1 cursor-pointer footnote-ref" data-findex="${fIdsCount}" data-fid="${id}">[${fIdsCount}]</span>`;
         }
       );
       cleanText = cleanText.replace(/<sup[^>]*>([\s\S]*?)<\/sup>/gi, "$1");

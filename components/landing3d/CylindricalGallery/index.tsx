@@ -48,8 +48,8 @@ function CaptionBadge({ caption }: { caption: string }) {
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
 
-      // Glowing Cyan-Emerald Fill
-      ctx.fillStyle = "#6df4ce";
+      // Glowing Illuminated Gold Fill
+      ctx.fillStyle = "#F5E8C7";
       ctx.fillText(caption, 512, 128);
     }
     const tex = new THREE.CanvasTexture(canvas);

@@ -50,6 +50,22 @@ export const PRESETS: Record<string, PresetValues> = {
       ditherBaseScale: 0.44,
     },
   },
+  scholarGold: {
+    bloom: {
+      bloomIntensity: 0.85,
+    },
+    border: {
+      borderColor: "#C4A574",
+      borderEmission: 1.3,
+    },
+    dither: {
+      ditherUseColor: false,
+      ditherFgColor: "#C4A574",
+      ditherGap: 4.5,
+      ditherContrast: 0.0,
+      ditherBaseScale: 0.5,
+    },
+  },
 };
 
 export const PRESET_KEYS = Object.keys(PRESETS) as string[];

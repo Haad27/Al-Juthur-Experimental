@@ -63,13 +63,13 @@ export default function ParticleTrails({
     return arr;
   }, []);
 
-  // Create emissive teal material
+  // Create emissive radiant gold material
   const material = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
-        color: new THREE.Color("#6df4ce"),
+        color: new THREE.Color("#D4AF37"),
         transparent: true,
-        opacity: 0.8,
+        opacity: 0.9,
         toneMapped: false,
       }),
     []

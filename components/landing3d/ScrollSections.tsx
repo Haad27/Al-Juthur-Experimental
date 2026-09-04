@@ -32,7 +32,7 @@ const SECTIONS: SectionData[] = [
     subtitle: "Full Reading Experience",
     description:
       "Navigate the Quran verse by verse with a pristine and immersive interface. Beautiful Arabic typography with smooth navigation that feels completely natural.",
-    accentColor: "#6df4ce",
+    accentColor: "#C4A574",
     align: "left",
   },
   {
@@ -42,7 +42,7 @@ const SECTIONS: SectionData[] = [
     subtitle: "Classical & Contemporary",
     description:
       "Access over 120 tafsir sources organized by era and methodology. From the classical works of Ibn Kathir to modern scholarly interpretations.",
-    accentColor: "#6df4ce",
+    accentColor: "#C4A574",
     align: "right",
   },
   {
@@ -52,7 +52,7 @@ const SECTIONS: SectionData[] = [
     subtitle: "Root Word Morphology",
     description:
       "Dive into root word morphology and meaning sourced from Lisan al Arab, Mufradat al Raghib and more. Understand every word at its deepest level.",
-    accentColor: "#6df4ce",
+    accentColor: "#C4A574",
     align: "left",
   },
   {
@@ -62,7 +62,7 @@ const SECTIONS: SectionData[] = [
     subtitle: "6 Specialized Modes",
     description:
       "Our AI model is trained directly on classical tafsir and lexicons to answer precise questions. Get intelligent answers backed by traditional scholarly sources.",
-    accentColor: "#6df4ce",
+    accentColor: "#C4A574",
     align: "right",
   },
   {
@@ -72,7 +72,7 @@ const SECTIONS: SectionData[] = [
     subtitle: "Precision Meets Clarity",
     description:
       "Classical Arabic rendered into clear modern language without losing precision. Every nuance preserved and every meaning made accessible.",
-    accentColor: "#6df4ce",
+    accentColor: "#C4A574",
     align: "left",
   },
 ];
@@ -123,20 +123,20 @@ function FeatureCard({ section }: { section: SectionData }) {
         className="
           relative max-w-md p-6 md:p-8 rounded-2xl
           bg-black/40 backdrop-blur-xl
-          border border-emerald-500/20
-          shadow-[0_0_30px_rgba(109,244,206,0.05)]
+          border border-[#C4A574]/20
+          shadow-[0_0_30px_rgba(196,165,116,0.08)]
         "
       >
         {/* Subtle gradient glow behind card */}
-        <div className="absolute -inset-px rounded-2xl bg-gradient-to-b from-emerald-500/10 to-transparent pointer-events-none" />
+        <div className="absolute -inset-px rounded-2xl bg-gradient-to-b from-[#C4A574]/10 to-transparent pointer-events-none" />
 
         <div className="relative z-10">
           {/* Icon + Subtitle row */}
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <div className="w-10 h-10 rounded-xl bg-[#C4A574]/10 border border-[#C4A574]/30 flex items-center justify-center text-[#C4A574]">
               {section.icon}
             </div>
-            <span className="text-xs uppercase tracking-widest text-emerald-400/70 font-medium">
+            <span className="text-xs uppercase tracking-widest text-[#C4A574]/70 font-medium">
               {section.subtitle}
             </span>
           </div>
@@ -192,11 +192,6 @@ function FinalCTA() {
       style={{ opacity: 0 }}
     >
       <div className="mb-8">
-        <img
-          src="/assets/favicon/apple-touch-icon.png"
-          alt="Al Juthur"
-          className="w-16 h-16 mx-auto mb-6 object-contain"
-        />
         <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">
           Start Your Journey
         </h2>
@@ -210,13 +205,13 @@ function FinalCTA() {
         className="
           group relative inline-flex items-center gap-3
           px-8 py-4 md:px-12 md:py-5
-          bg-emerald-500/15 hover:bg-emerald-500/25
+          bg-[#C4A574]/15 hover:bg-[#C4A574]/25
           backdrop-blur-xl
-          text-emerald-400 hover:text-emerald-300
+          text-[#F5E8C7] hover:text-white
           rounded-full font-semibold text-base md:text-xl
           transition-all duration-500
-          border border-emerald-500/40 hover:border-emerald-400/60
-          hover:shadow-[0_0_40px_rgba(16,185,129,0.25)]
+          border border-[#C4A574]/40 hover:border-[#C4A574]/60
+          hover:shadow-[0_0_40px_rgba(196,165,116,0.25)]
         "
       >
         Start Using It
@@ -242,7 +237,7 @@ function ScrollIndicator() {
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="text-emerald-400/60"
+        className="text-[#C4A574]/60"
       >
         <polyline points="6 9 12 15 18 9" />
       </svg>

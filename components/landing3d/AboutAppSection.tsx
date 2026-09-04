@@ -19,30 +19,30 @@ const steps = [
     number: "2",
     title: "Select Lens for Deep Analysis",
     description: "Choose your analytical focus from our classical and modern frameworks.",
-    icon: <Search className="w-6 h-6 text-emerald-400" />,
-    color: "from-emerald-500/20 to-emerald-900/10",
-    border: "border-emerald-500/30",
-    shadow: "shadow-[0_0_30px_rgba(16,185,129,0.15)]",
+    icon: <Search className="w-6 h-6 text-[#C4A574]" />,
+    color: "from-[#C4A574]/20 to-[#8B6914]/10",
+    border: "border-[#C4A574]/30",
+    shadow: "shadow-[0_0_30px_rgba(196,165,116,0.15)]",
     delay: 0.2,
   },
   {
     number: "3",
     title: "Reflect Conversationally",
     description: "Engage in dialogue to understand deeper meanings and connections.",
-    icon: <MessageSquare className="w-6 h-6 text-pink-400" />,
-    color: "from-pink-500/20 to-pink-900/10",
-    border: "border-pink-500/30",
-    shadow: "shadow-[0_0_30px_rgba(236,72,153,0.15)]",
+    icon: <MessageSquare className="w-6 h-6 text-amber-400" />,
+    color: "from-amber-500/20 to-amber-900/10",
+    border: "border-amber-500/30",
+    shadow: "shadow-[0_0_30px_rgba(245,158,11,0.15)]",
     delay: 0.3,
   },
   {
     number: "4",
     title: "Synthesize & Learn",
     description: "Gather insights across lexicons, tafsirs, and translations seamlessly.",
-    icon: <LineChart className="w-6 h-6 text-amber-400" />,
-    color: "from-amber-500/20 to-amber-900/10",
-    border: "border-amber-500/30",
-    shadow: "shadow-[0_0_30px_rgba(245,158,11,0.15)]",
+    icon: <LineChart className="w-6 h-6 text-[#C4A574]" />,
+    color: "from-[#C4A574]/20 to-[#8B6914]/10",
+    border: "border-[#C4A574]/30",
+    shadow: "shadow-[0_0_30px_rgba(196,165,116,0.15)]",
     delay: 0.4,
   },
 ];
@@ -65,8 +65,8 @@ export default function AboutAppSection() {
     <section ref={containerRef} className="relative min-h-screen w-full bg-zinc-950 flex flex-col items-center justify-center py-32 overflow-hidden border-t border-white/5">
       
       {/* Background Ambient Glows */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-900/10 blur-[120px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-900/10 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#C4A574]/10 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-amber-900/10 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-6 relative z-10 w-full flex flex-col items-center">
         
@@ -78,12 +78,12 @@ export default function AboutAppSection() {
           transition={{ duration: 0.8 }}
           className="text-center mb-24 max-w-3xl"
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#C4A574]/10 border border-[#C4A574]/20 text-[#C4A574] text-sm font-medium mb-6">
             <Sparkles className="w-4 h-4" />
             <span>How it Works</span>
           </div>
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-tight">
-            How to Study with <span className="text-emerald-400">Al-Juthur</span>
+            How to Study with <span className="text-[#C4A574]">Al-Juthur</span>
           </h2>
           <p className="text-lg md:text-xl text-gray-400 font-light">
             A simple, guided process to unlock deeper understanding of the Qur'an through AI-powered reflection and classical sources.
@@ -135,7 +135,7 @@ export default function AboutAppSection() {
           transition={{ delay: 0.8, duration: 1 }}
           className="mt-32 text-center"
         >
-          <p className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-blue-400">
+          <p className="text-xl font-bold text-[#C4A574]">
             Scholarly-backed insights. Interactive dialogue. Your reflection journey.
           </p>
         </motion.div>

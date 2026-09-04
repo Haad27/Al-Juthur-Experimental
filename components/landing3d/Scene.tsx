@@ -43,14 +43,14 @@ function SceneContent({
         scrollOffset={scrollOffset}
         frictionRef={frictionRef}
         updateScroll={update}
-        preset="greenScifi"
+        preset="scholarGold"
         debugMode="none"
       />
       <SectionActivations
         scrollProgress={scrollProgress}
         galleryRef={galleryRef}
       />
-      <PostProcessing preset="greenScifi" />
+      <PostProcessing preset="scholarGold" />
     </>
   );
 }

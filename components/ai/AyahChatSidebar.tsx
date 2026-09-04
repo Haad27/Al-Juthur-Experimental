@@ -783,7 +783,7 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                       </div>
                     )}
 
-                    <div className="prose prose-invert prose-emerald max-w-none text-xs sm:text-sm">
+                    <div className="prose dark:prose-invert max-w-none text-xs sm:text-sm">
                       <ReactMarkdown 
                         remarkPlugins={[remarkGfm]}
                         components={{

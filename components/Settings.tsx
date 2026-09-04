@@ -119,9 +119,9 @@ const MUSHAF_LAYOUTS = [
 
 const scriptColorMap: Record<string, string> = {
   emerald: "bg-accent/10 text-accent border-accent/20",
-  amber:   "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  blue:    "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  purple:  "bg-purple-500/10 text-purple-400 border-purple-500/20",
+  amber:   "bg-accent/10 text-accent border-accent/20",
+  blue:    "bg-accent/10 text-accent border-accent/20",
+  purple:  "bg-accent/10 text-accent border-accent/20",
 };
 
 const Settings = () => {

@@ -4,7 +4,6 @@ import React, { useEffect, useState, useMemo, useRef, useCallback, Suspense } fr
 import Link from "next/link";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, ChevronLeft, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check, Bookmark, BookmarkCheck, Lock } from "lucide-react";
-import LogoIcon from "@/components/svg/icons/LogoIcon";
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
 import TafsirTextRenderer from "@/components/tafsir/TafsirTextRenderer";
 import { amiriquran, inter } from "@/app/fonts";
@@ -79,12 +78,14 @@ export function isFreeTafsirAuthor(name?: string, authorName?: string): boolean 
 
 const getTagColorClass = (color?: string) => {
   switch (color) {
-    case "amber": return "bg-amber-500/10 text-amber-400 border-amber-500/30";
-    case "emerald": return "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
-    case "blue": return "bg-blue-500/10 text-blue-400 border-blue-500/30";
-    case "purple": return "bg-purple-500/10 text-purple-400 border-purple-500/30";
-    case "cyan": return "bg-cyan-500/10 text-cyan-400 border-cyan-500/30";
-    default: return "bg-muted text-muted-foreground border-border";
+    case "amber":
+    case "emerald":
+    case "blue":
+    case "purple":
+    case "cyan":
+      return "bg-accent/10 text-accent border-accent/25";
+    default:
+      return "bg-muted text-muted-foreground border-border";
   }
 };
 
@@ -1523,23 +1524,13 @@ function TafsirContent() {
                             </span>
                           </>
                         )}
-                      </div>
-                    </div>
-
-                    {/* Top Right: Al-Juthur Logo */}
-                    <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
-                      <LogoIcon className="size-5 text-accent group-hover:scale-110 transition-transform" />
                     </div>
                   </div>
 
                 {/* Difficulty Level & Pro Badge */}
                 <div className="relative z-10 flex items-center justify-between gap-1.5 pt-1 border-t border-border overflow-hidden">
                   {difficultyLevel && (
-                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border truncate max-w-[140px] ${
-                      difficultyLevel === 'Beginner' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
-                      difficultyLevel === 'Advanced' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
-                      'bg-blue-500/10 text-blue-400 border-blue-500/30'
-                    }`}>
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold border truncate max-w-[140px] bg-accent/10 text-accent border-accent/25">
                       {difficultyLevel}
                     </span>
                   )}

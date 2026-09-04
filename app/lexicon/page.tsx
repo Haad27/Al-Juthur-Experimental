@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import LogoIcon from '@/components/svg/icons/LogoIcon';
 import {
   Search,
   BookOpen,
@@ -682,13 +681,7 @@ function LexiconPageContent() {
                             <h4 className="text-xs font-bold text-foreground">{pdf.name}</h4>
                             <p className="text-[10px] text-muted-foreground mt-0.5">{pdf.author}</p>
                           </div>
-                          <span
-                            className={`text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
-                              pdf.language === 'English'
-                                ? 'bg-blue-500/20 text-blue-300'
-                                : 'bg-accent/15 text-accent'
-                            }`}
-                          >
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0 bg-accent/15 text-accent">
                             {pdf.language}
                           </span>
                         </div>

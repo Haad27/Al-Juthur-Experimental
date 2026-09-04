@@ -14,7 +14,6 @@ import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { useAudioStore } from "@/lib/stores/audioStore";
 import { cn, convertNumberToArabicNumeral, copyToClipboard } from "@/lib/utils";
 import BismillahIcon from "@/components/svg/icons/BismillahIcon";
-import LogoIcon from "@/components/svg/icons/LogoIcon";
 import {
   ArrowLeft,
   Check,
@@ -1026,25 +1025,13 @@ export default function SurahReaderClient({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[99999] bg-background/80 backdrop-blur-md flex items-center justify-center"
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-[99999] bg-background/70 backdrop-blur-sm flex items-center justify-center pointer-events-none"
           >
-            <motion.div
-              initial={{ scale: 0.9, y: 10, opacity: 0 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
-              exit={{ scale: 0.9, y: 10, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="relative flex flex-col items-center gap-6 bg-card border border-accent/30 p-10 rounded-3xl  overflow-hidden"
-            >
-              <div className="absolute inset-0 bg-gradient-to-b from-accent/5 to-transparent animate-pulse" />
-              <div className="relative z-10 flex items-center justify-center">
-                <div className="absolute size-16 border-2 border-accent/20 border-t-accent rounded-full animate-spin" />
-                <LogoIcon className="size-6 text-accent animate-pulse " />
-              </div>
-              <div className="relative z-10 space-y-1.5 text-center mt-2">
-                <p className="text-foreground font-bold tracking-[0.2em] uppercase text-xs">Navigating</p>
-                <p className="text-accent text-[10px] font-mono tracking-wider">LOCATING VERSE...</p>
-              </div>
-            </motion.div>
+            <div className="flex flex-col items-center gap-2 bg-card border border-border px-6 py-4 rounded-xl shadow-lg text-center">
+              <span className="text-xs font-semibold tracking-wider uppercase text-foreground">Al-Juthur</span>
+              <span className="text-[11px] text-muted-foreground font-mono">Locating verse...</span>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -37,7 +37,7 @@ const getTranslationMaps = unstable_cache(
           (_match: string, id: string) => {
             fIds.push(id);
             fIdsCount++;
-            return `<span class="text-emerald-500 font-bold mx-1 cursor-pointer footnote-ref" data-findex="${fIdsCount}" data-fid="${id}">[${fIdsCount}]</span>`;
+            return `<span class="text-accent font-bold mx-1 cursor-pointer footnote-ref" data-findex="${fIdsCount}" data-fid="${id}">[${fIdsCount}]</span>`;
           }
         );
         // Strip any other lingering sup tags without footnote id

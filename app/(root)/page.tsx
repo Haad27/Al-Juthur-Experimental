@@ -104,7 +104,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div ref={mainRef} className="relative w-full bg-black text-white selection:bg-emerald-500/30">
+    <div ref={mainRef} className="relative w-full bg-black text-white selection:bg-accent/30">
       <LoadingScreen />
       {/* Fixed 3D Canvas — persists behind entire page */}
       <div className="fixed inset-0 z-0">
@@ -118,14 +118,9 @@ export default function LandingPage() {
       >
         {/* Header / Hook */}
         <div className="max-w-md pointer-events-auto animate-fade-in-left">
-          <div className="flex items-center gap-3 mb-4">
-            <img
-              src="/assets/favicon/apple-touch-icon.png"
-              alt="Al Juthur Logo"
-              className="w-10 h-10 md:w-14 md:h-14 object-contain shrink-0"
-            />
+          <div className="mb-4">
             <h1 className="text-3xl md:text-5xl font-bold text-white tracking-widest uppercase drop-shadow-md">
-              Al Juthur
+              Al-Juthur
             </h1>
           </div>
           <p className="text-sm md:text-lg text-zinc-300 font-light leading-relaxed">
@@ -137,10 +132,10 @@ export default function LandingPage() {
         <div className="mt-8 flex flex-row gap-3 justify-center md:justify-start pointer-events-auto mb-6 md:mb-0 animate-fade-in-up">
           <button
             onClick={handleStartUsingIt}
-            className="group relative inline-flex items-center gap-2 px-4 py-3 md:px-8 md:py-4 bg-emerald-500/10 hover:bg-emerald-500/20 backdrop-blur-md text-emerald-400 rounded-full font-semibold text-xs md:text-lg transition-all duration-300 border border-emerald-500/50 hover:border-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)]"
+            className="group relative inline-flex items-center gap-2 px-4 py-3 md:px-8 md:py-4 bg-accent/20 hover:bg-accent/30 backdrop-blur-md text-[#F5E8C7] rounded-full font-semibold text-xs md:text-lg transition-all duration-300 border border-accent/50 hover:border-accent hover:shadow-[0_0_25px_rgba(196,165,116,0.35)]"
           >
             Start Using It
-            <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform text-[#F5E8C7]" />
           </button>
 
           <button

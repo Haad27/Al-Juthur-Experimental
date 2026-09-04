@@ -679,7 +679,7 @@ function RagChatContent() {
                 )}
 
                 {/* Markdown Content */}
-                <div className="prose prose-invert prose-emerald max-w-none text-sm md:text-[15px] leading-relaxed">
+                <div className="prose dark:prose-invert max-w-none text-sm md:text-[15px] leading-relaxed">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     components={{

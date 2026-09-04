@@ -58,19 +58,7 @@ export default function AlJuthurLoadingProgress({
     : subtitle;
 
   const content = (
-    <div className={cn("relative flex flex-col items-center gap-6 text-center animate-in fade-in duration-300 py-12", className)}>
-      {/* Ripple Rings & Logo (Identical to homepage loader) */}
-      <div className="relative flex items-center justify-center w-24 h-24">
-        <div className="absolute inset-0 rounded-full border border-accent/35 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" />
-        <div className="absolute inset-0 rounded-full border border-teal-500/25 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" style={{ animationDelay: "1s" }} />
-        <div className="absolute inset-0 rounded-full border border-accent/20 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" style={{ animationDelay: "2s" }} />
-        
-        <img
-          src="/assets/favicon/apple-touch-icon.png"
-          alt="Al Juthur Logo"
-          className="w-16 h-16 object-contain animate-pulse  relative z-10"
-        />
-      </div>
+    <div className={cn("relative flex flex-col items-center gap-4 text-center py-8", className)}>
 
       <div className="flex flex-col items-center gap-2 w-full mt-2">
         <div className="text-center text-[10px] font-bold text-accent uppercase tracking-[0.25em] mb-0.5">

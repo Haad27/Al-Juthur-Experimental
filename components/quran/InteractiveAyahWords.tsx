@@ -136,12 +136,12 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
           if (prevState.currentAyah === ayahNumber) {
              tokens.forEach(t => {
                if (t.wordIndex !== null) {
-                 document.getElementById(`word-${ayahNumber}-${t.wordIndex}`)?.classList.remove('!text-emerald-400', 'scale-110');
-                 document.getElementById(`meaning-${ayahNumber}-${t.wordIndex}`)?.classList.remove('!text-emerald-400', 'font-semibold');
+                 document.getElementById(`word-${ayahNumber}-${t.wordIndex}`)?.classList.remove('!text-accent', 'scale-110');
+                 document.getElementById(`meaning-${ayahNumber}-${t.wordIndex}`)?.classList.remove('!text-accent', 'font-semibold');
                }
              });
              const ayahTextEl = document.getElementById(`atext-${ayahNumber}`);
-             ayahTextEl?.classList.remove('!text-emerald-400');
+             ayahTextEl?.classList.remove('!text-accent');
           }
           return;
        }
@@ -153,33 +153,33 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
              const el = document.getElementById(`word-${ayahNumber}-${t.wordIndex}`);
              if (!el) return;
              if (t.wordIndex === currentWord) {
-               el.classList.add('!text-emerald-400', 'scale-110');
-               document.getElementById(`meaning-${ayahNumber}-${t.wordIndex}`)?.classList.add('!text-emerald-400', 'font-semibold');
+               el.classList.add('!text-accent', 'scale-110');
+               document.getElementById(`meaning-${ayahNumber}-${t.wordIndex}`)?.classList.add('!text-accent', 'font-semibold');
              } else {
-               el.classList.remove('!text-emerald-400', 'scale-110');
-               document.getElementById(`meaning-${ayahNumber}-${t.wordIndex}`)?.classList.remove('!text-emerald-400', 'font-semibold');
+               el.classList.remove('!text-accent', 'scale-110');
+               document.getElementById(`meaning-${ayahNumber}-${t.wordIndex}`)?.classList.remove('!text-accent', 'font-semibold');
              }
            });
          } else {
            // Ayah-by-ayah highlighting fallback (if segments not available)
             tokens.forEach(t => {
              if (t.wordIndex !== null) {
-               document.getElementById(`word-${ayahNumber}-${t.wordIndex}`)?.classList.add('!text-emerald-400');
-               document.getElementById(`meaning-${ayahNumber}-${t.wordIndex}`)?.classList.add('!text-emerald-400');
+               document.getElementById(`word-${ayahNumber}-${t.wordIndex}`)?.classList.add('!text-accent');
+               document.getElementById(`meaning-${ayahNumber}-${t.wordIndex}`)?.classList.add('!text-accent');
              }
            });
            const ayahTextEl = document.getElementById(`atext-${ayahNumber}`);
-           ayahTextEl?.classList.add('!text-emerald-400');
+           ayahTextEl?.classList.add('!text-accent');
          }
        } else {
           tokens.forEach(t => {
              if (t.wordIndex !== null) {
-               document.getElementById(`word-${ayahNumber}-${t.wordIndex}`)?.classList.remove('!text-emerald-400', 'scale-110');
-               document.getElementById(`meaning-${ayahNumber}-${t.wordIndex}`)?.classList.remove('!text-emerald-400', 'font-semibold');
+               document.getElementById(`word-${ayahNumber}-${t.wordIndex}`)?.classList.remove('!text-accent', 'scale-110');
+               document.getElementById(`meaning-${ayahNumber}-${t.wordIndex}`)?.classList.remove('!text-accent', 'font-semibold');
              }
           });
           const ayahTextEl = document.getElementById(`atext-${ayahNumber}`);
-          ayahTextEl?.classList.remove('!text-emerald-400');
+          ayahTextEl?.classList.remove('!text-accent');
        }
     });
 

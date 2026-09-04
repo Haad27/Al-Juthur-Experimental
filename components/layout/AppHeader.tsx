@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bookmark } from "lucide-react";
-import LogoIcon from "@/components/svg/icons/LogoIcon";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -29,8 +28,7 @@ export default function AppHeader({
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/90 backdrop-blur-md">
       <div className="relative mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-3 pr-14 sm:px-6 sm:pr-16">
         <Link href="/home" className="flex min-w-0 items-center gap-2 text-foreground">
-          <LogoIcon className="size-7 shrink-0 rounded-[20%]" />
-          <span className="truncate font-semibold tracking-tight">Al-Juthur</span>
+          <span className="truncate font-semibold tracking-tight text-base sm:text-lg">Al-Juthur</span>
           {subtitle}
         </Link>
 

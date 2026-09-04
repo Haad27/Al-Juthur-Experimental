@@ -9,36 +9,36 @@ const features = [
     title: "Basic Quran with Lexicon",
     description: "Explore the Quran deeply with integrated lexical analysis. Tap into root words, morphological breakdown, and classical meanings seamlessly as you read.",
     image: "/images/features/qura-view.png",
-    icon: <BookOpen className="w-8 h-8 text-emerald-400" />,
-    color: "emerald"
+    icon: <BookOpen className="w-8 h-8 text-[#C4A574]" />,
+    color: "gold"
   },
   {
     title: "120+ Classical & Modern Tafsirs",
     description: "Dive into centuries of Islamic scholarship. Access a vast library of over 120 exegeses across 33 languages ranging from early classical works to contemporary interpretations, all beautifully formatted.",
     image: "/images/features/tafsir.png",
-    icon: <Library className="w-8 h-8 text-blue-400" />,
-    color: "blue"
+    icon: <Library className="w-8 h-8 text-[#C4A574]" />,
+    color: "gold"
   },
   {
     title: "13 Classical Lexicons",
     description: "Uncover the precise linguistic nuances with access to 13 authoritative classical Arabic lexicons and dictionaries, perfectly synchronized with your reading.",
     image: "/images/features/lexicon.png",
-    icon: <BookText className="w-8 h-8 text-purple-400" />,
-    color: "purple"
+    icon: <BookText className="w-8 h-8 text-[#C4A574]" />,
+    color: "gold"
   },
   {
     title: "AI Translation for Accurate Tafsir",
     description: "Leverage advanced AI translation tailored specifically for classical Arabic to understand complex, archaic Tafsir texts with unprecedented accuracy and clarity.",
     image: "/images/features/ai trnalsation.png",
-    icon: <Brain className="w-8 h-8 text-rose-400" />,
-    color: "rose"
+    icon: <Brain className="w-8 h-8 text-[#C4A574]" />,
+    color: "gold"
   },
   {
     title: "6 RAG Modes",
     description: "Utilize Retrieval-Augmented Generation (RAG) across 6 distinct modes to intelligently search, summarize, and synthesize Islamic knowledge from massive datasets instantly.",
     image: "/images/features/6 rag modes.png",
-    icon: <Bot className="w-8 h-8 text-amber-400" />,
-    color: "amber"
+    icon: <Bot className="w-8 h-8 text-[#C4A574]" />,
+    color: "gold"
   },
 ];
 
@@ -57,19 +57,21 @@ const FeatureBlock = ({ feature, index }: { feature: typeof features[0], index: 
   const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.8, 1, 0.8]);
 
   const glowColorMap: Record<string, string> = {
-    emerald: "bg-emerald-500/20",
-    blue: "bg-blue-500/20",
-    purple: "bg-purple-500/20",
-    rose: "bg-rose-500/20",
-    amber: "bg-amber-500/20"
+    gold: "bg-[#C4A574]/20",
+    emerald: "bg-[#C4A574]/20",
+    blue: "bg-[#C4A574]/20",
+    purple: "bg-[#C4A574]/20",
+    rose: "bg-[#C4A574]/20",
+    amber: "bg-[#C4A574]/20"
   };
 
   const borderColorMap: Record<string, string> = {
-    emerald: "border-emerald-500/30",
-    blue: "border-blue-500/30",
-    purple: "border-purple-500/30",
-    rose: "border-rose-500/30",
-    amber: "border-amber-500/30"
+    gold: "border-[#C4A574]/30",
+    emerald: "border-[#C4A574]/30",
+    blue: "border-[#C4A574]/30",
+    purple: "border-[#C4A574]/30",
+    rose: "border-[#C4A574]/30",
+    amber: "border-[#C4A574]/30"
   };
 
   return (

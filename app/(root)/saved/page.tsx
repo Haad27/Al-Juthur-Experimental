@@ -298,21 +298,21 @@ export default function SavedPage() {
 
           <div className="p-4 rounded-2xl bg-card/70 border border-border flex flex-col gap-1">
             <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-              <BookOpen className="size-3.5 text-amber-400" /> Saved Ayahs
+              <BookOpen className="size-3.5 text-accent" /> Saved Ayahs
             </span>
             <span className="text-xl sm:text-2xl font-bold text-foreground">{savedAyahs.length}</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-card/70 border border-border flex flex-col gap-1">
             <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-              <Sparkles className="size-3.5 text-blue-400" /> Scholar Notes
+              <Sparkles className="size-3.5 text-accent" /> Scholar Notes
             </span>
             <span className="text-xl sm:text-2xl font-bold text-foreground">{savedScholarAnswers.length}</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-card/70 border border-border flex flex-col gap-1">
             <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-              <History className="size-3.5 text-purple-400" /> Recent Reads
+              <History className="size-3.5 text-accent" /> Recent Reads
             </span>
             <span className="text-xl sm:text-2xl font-bold text-foreground">{readingHistory.length}</span>
           </div>
@@ -650,7 +650,7 @@ export default function SavedPage() {
                     </div>
 
                     {/* Synthesized Response */}
-                    <div className="prose prose-invert prose-emerald max-w-none text-xs sm:text-sm leading-relaxed text-reading">
+                    <div className="prose dark:prose-invert max-w-none text-xs sm:text-sm leading-relaxed text-reading">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
                         {item.answer}
                       </ReactMarkdown>

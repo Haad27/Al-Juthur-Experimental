@@ -147,16 +147,16 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ duration: 0.25, ease: "easeOut" }}
-          className="relative w-full max-w-5xl max-h-[92vh] flex flex-col rounded-3xl bg-[#090e0b] border border-emerald-500/20 shadow-2xl shadow-emerald-950/40 text-slate-100 overflow-hidden"
+          className="relative w-full max-w-5xl max-h-[92vh] flex flex-col rounded-3xl bg-card border border-border shadow-2xl text-card-foreground overflow-hidden"
         >
           {/* Subtle Ambient Background Gradients */}
-          <div className="absolute top-0 left-1/4 -translate-y-1/2 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 right-1/4 translate-y-1/2 w-96 h-96 bg-emerald-700/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-0 left-1/4 -translate-y-1/2 w-96 h-96 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 right-1/4 translate-y-1/2 w-96 h-96 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
 
           {/* Close Button */}
           <button
             onClick={handleClose}
-            className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all z-20 cursor-pointer border border-white/5"
+            className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 rounded-full bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all z-20 cursor-pointer border border-border"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -166,20 +166,20 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
           <div className="overflow-y-auto p-5 sm:p-8 lg:p-10 space-y-8 custom-scrollbar">
             {/* Header */}
             <div className="text-center max-w-2xl mx-auto space-y-3 pt-2">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-semibold tracking-wide uppercase">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-accent text-xs font-semibold tracking-wide uppercase">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Scholarly Research Plans</span>
               </div>
-              <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white font-serif">
-                Deepen Your Study of the <span className="text-emerald-400">Holy Qur'an</span>
+              <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground font-serif">
+                Deepen Your Study of the <span className="text-accent">Holy Qur'an</span>
               </h2>
-              <p className="text-sm sm:text-base text-slate-300">
+              <p className="text-sm sm:text-base text-muted-foreground">
                 Unlock multi-scholar synthesis, 13 historical lexicons, and 6-mode academic AI analysis.
               </p>
 
               {/* Billing Cycle Switcher */}
               <div className="pt-3 flex items-center justify-center">
-                <div className="inline-flex items-center p-1 rounded-2xl bg-[#121c16] border border-emerald-500/20 shadow-inner">
+                <div className="inline-flex items-center p-1 rounded-2xl bg-muted border border-border shadow-inner">
                   <button
                     onClick={() => {
                       setBillingCycle("monthly");
@@ -187,8 +187,8 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                     }}
                     className={`px-4 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all cursor-pointer ${
                       billingCycle === "monthly"
-                        ? "bg-emerald-600 text-white shadow-md shadow-emerald-950"
-                        : "text-slate-400 hover:text-slate-200"
+                        ? "bg-accent text-accent-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     Monthly
@@ -200,12 +200,12 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                     }}
                     className={`flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all cursor-pointer ${
                       billingCycle === "yearly"
-                        ? "bg-emerald-600 text-white shadow-md shadow-emerald-950"
-                        : "text-slate-400 hover:text-slate-200"
+                        ? "bg-accent text-accent-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     <span>Yearly</span>
-                    <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full bg-emerald-400 text-emerald-950">
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full bg-accent/20 text-accent">
                       Save 20%
                     </span>
                   </button>
@@ -215,15 +215,15 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
 
             {/* Current Active Plan Badge (if Pro or Patron) */}
             {currentTier !== "FREE" && (
-              <div className="max-w-md mx-auto p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-between text-xs text-emerald-300">
+              <div className="max-w-md mx-auto p-3 rounded-2xl bg-accent/10 border border-accent/25 flex items-center justify-between text-xs text-accent">
                 <div className="flex items-center gap-2">
-                  <Crown className="w-4 h-4 text-emerald-400" />
+                  <Crown className="w-4 h-4 text-accent" />
                   <span>
-                    Current Plan: <strong className="text-white uppercase">{currentTier}</strong>
+                    Current Plan: <strong className="text-foreground uppercase">{currentTier}</strong>
                   </span>
                 </div>
                 {store.activePromoCode && (
-                  <span className="font-mono bg-emerald-500/20 px-2 py-0.5 rounded text-[11px] border border-emerald-500/30">
+                  <span className="font-mono bg-accent/15 px-2 py-0.5 rounded text-[11px] border border-accent/30 text-accent">
                     Promo: {store.activePromoCode}
                   </span>
                 )}
@@ -233,46 +233,46 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
             {/* 3-Tier Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch pt-2">
               {/* TIER 1: FREE */}
-              <div className="relative flex flex-col justify-between rounded-3xl p-6 bg-[#0f1712] border border-white/5 hover:border-emerald-500/20 transition-all">
+              <div className="relative flex flex-col justify-between rounded-3xl p-6 bg-card border border-border hover:border-accent/30 transition-all">
                 <div className="space-y-4">
                   <div className="space-y-1">
-                    <h3 className="text-lg font-bold text-white">Free</h3>
-                    <p className="text-xs text-slate-400">For daily recitation & basic inquiry</p>
+                    <h3 className="text-lg font-bold text-foreground">Free</h3>
+                    <p className="text-xs text-muted-foreground">For daily recitation & basic inquiry</p>
                   </div>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-extrabold text-white">$0</span>
-                    <span className="text-xs text-slate-400">/ forever</span>
+                    <span className="text-3xl font-extrabold text-foreground">$0</span>
+                    <span className="text-xs text-muted-foreground">/ forever</span>
                   </div>
 
-                  <hr className="border-white/5" />
+                  <hr className="border-border" />
 
-                  <ul className="space-y-2.5 text-xs text-slate-300">
+                  <ul className="space-y-2.5 text-xs text-muted-foreground">
                     <li className="flex items-start gap-2.5">
-                      <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
                       <span>Full 3D Reader & 6,236 Ayahs</span>
                     </li>
                     <li className="flex items-start gap-2.5">
-                      <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
                       <span>127 Translations & Word-by-Word</span>
                     </li>
                     <li className="flex items-start gap-2.5">
-                      <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
                       <span>
-                        <strong className="text-emerald-300">Surah Al-Fatihah Free</strong> on all 130+ Tafsirs
+                        <strong className="text-accent">Surah Al-Fatihah Free</strong> on all 130+ Tafsirs
                       </span>
                     </li>
                     <li className="flex items-start gap-2.5">
-                      <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
                       <span>3 Core Classics (Ibn Kathir En/Ar/Ur, Jalalayn, As-Sa'di)</span>
                     </li>
                     <li className="flex items-start gap-2.5">
-                      <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
                       <span>
-                        <strong className="text-white">5 AI Queries</strong> per day
+                        <strong className="text-foreground">5 AI Queries</strong> per day
                       </span>
                     </li>
                     <li className="flex items-start gap-2.5">
-                      <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
                       <span>Al-Mufradat & Root Summary Lexicon</span>
                     </li>
                   </ul>
@@ -284,8 +284,8 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                     disabled={currentTier === "FREE"}
                     className={`w-full py-2.5 px-4 rounded-xl text-xs font-semibold transition-all ${
                       currentTier === "FREE"
-                        ? "bg-white/5 text-slate-400 cursor-default border border-white/5"
-                        : "bg-white/10 hover:bg-white/15 text-white cursor-pointer"
+                        ? "bg-muted text-muted-foreground cursor-default border border-border"
+                        : "bg-muted/80 hover:bg-muted text-foreground cursor-pointer"
                     }`}
                   >
                     {currentTier === "FREE" ? "Current Active Plan" : "Downgrade to Free"}
@@ -294,60 +294,60 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
               </div>
 
               {/* TIER 2: PRO (Featured) */}
-              <div className="relative flex flex-col justify-between rounded-3xl p-6 sm:p-7 bg-[#111d16] border-2 border-emerald-500 shadow-xl shadow-emerald-950/60 transition-all scale-[1.02] z-10">
+              <div className="relative flex flex-col justify-between rounded-3xl p-6 sm:p-7 bg-popover border-2 border-accent shadow-xl shadow-accent/10 transition-all scale-[1.02] z-10">
                 {/* Popular Pill */}
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3.5 py-1 rounded-full bg-emerald-500 text-emerald-950 text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md">
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3.5 py-1 rounded-full bg-accent text-accent-foreground text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md">
                   <Zap className="w-3 h-3 fill-current" />
                   <span>Most Popular</span>
                 </div>
 
                 <div className="space-y-4">
                   <div className="space-y-1">
-                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                       <span>Pro</span>
-                      <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                      <span className="text-[11px] font-semibold text-accent bg-accent/10 px-2 py-0.5 rounded-full border border-accent/25">
                         Bahith
                       </span>
                     </h3>
-                    <p className="text-xs text-slate-300">For students of knowledge & researchers</p>
+                    <p className="text-xs text-muted-foreground">For students of knowledge & researchers</p>
                   </div>
 
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl sm:text-4xl font-extrabold text-white">
+                    <span className="text-3xl sm:text-4xl font-extrabold text-foreground">
                       {billingCycle === "monthly" ? "$3.99" : "$39"}
                     </span>
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-muted-foreground">
                       {billingCycle === "monthly" ? "/ month" : "/ year ($3.25/mo)"}
                     </span>
                   </div>
 
-                  <hr className="border-emerald-500/20" />
+                  <hr className="border-border" />
 
-                  <ul className="space-y-2.5 text-xs text-slate-200">
+                  <ul className="space-y-2.5 text-xs text-foreground">
                     <li className="flex items-start gap-2.5">
-                      <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
                       <span>
-                        <strong className="text-emerald-300">50 AI Queries / day</strong> (1,200/mo)
+                        <strong className="text-accent">50 AI Queries / day</strong> (1,200/mo)
                       </span>
                     </li>
                     <li className="flex items-start gap-2.5">
-                      <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                      <span><strong className="text-white">Multiple Powerful Advanced AI Models</strong></span>
+                      <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                      <span><strong className="text-foreground">Multiple Powerful Advanced AI Models</strong></span>
                     </li>
                     <li className="flex items-start gap-2.5">
-                      <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                      <span>All <strong className="text-white">130+ Classical Tafsirs</strong> in 33 languages (Unlocked)</span>
+                      <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                      <span>All <strong className="text-foreground">130+ Classical Tafsirs</strong> in 33 languages (Unlocked)</span>
                     </li>
                     <li className="flex items-start gap-2.5">
-                      <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                      <span>All <strong className="text-white">13 Historical Lexicons</strong> & PDF Viewers (Unlocked)</span>
+                      <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                      <span>All <strong className="text-foreground">13 Historical Lexicons</strong> & PDF Viewers (Unlocked)</span>
                     </li>
                     <li className="flex items-start gap-2.5">
-                      <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
                       <span>Full Grammar & Syntax (I'rab & Sarf) Mode</span>
                     </li>
                     <li className="flex items-start gap-2.5">
-                      <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
                       <span>Export Research Notes (Styled PDF & MD)</span>
                     </li>
                   </ul>
@@ -359,8 +359,8 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                     disabled={checkoutLoading === "PRO" || currentTier === "PRO"}
                     className={`w-full py-3 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg ${
                       currentTier === "PRO"
-                        ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 cursor-default"
-                        : "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-emerald-950 shadow-emerald-950/50"
+                        ? "bg-accent/20 text-accent border border-accent/40 cursor-default"
+                        : "bg-accent hover:bg-accent/90 text-accent-foreground shadow-accent/20"
                     }`}
                   >
                     {checkoutLoading === "PRO" ? (
@@ -381,58 +381,58 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
               </div>
 
               {/* TIER 3: PATRON / VIP */}
-              <div className="relative flex flex-col justify-between rounded-3xl p-6 bg-[#0f1712] border border-amber-500/20 hover:border-amber-500/40 transition-all">
+              <div className="relative flex flex-col justify-between rounded-3xl p-6 bg-card border border-amber-500/20 hover:border-amber-500/40 transition-all">
                 <div className="space-y-4">
                   <div className="space-y-1">
-                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                       <span>Patron</span>
-                      <span className="text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                      <span className="text-[11px] font-semibold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
                         Supporter Tier
                       </span>
                     </h3>
-                    <p className="text-xs text-slate-300">Scholars, Teachers & Community Benefactors</p>
+                    <p className="text-xs text-muted-foreground">Scholars, Teachers & Community Benefactors</p>
                   </div>
 
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl sm:text-4xl font-extrabold text-white">
+                    <span className="text-3xl sm:text-4xl font-extrabold text-foreground">
                       {billingCycle === "monthly" ? "$9.99" : "$99"}
                     </span>
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-muted-foreground">
                       {billingCycle === "monthly" ? "/ month" : "/ year ($8.25/mo)"}
                     </span>
                   </div>
 
-                  <hr className="border-white/5" />
+                  <hr className="border-border" />
 
-                  <ul className="space-y-2.5 text-xs text-slate-200">
+                  <ul className="space-y-2.5 text-xs text-foreground">
                     <li className="flex items-start gap-2.5">
-                      <Check className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                      <Check className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                       <span>
-                        <strong className="text-amber-300">150 AI Queries / day</strong> (3,500/mo)
+                        <strong className="text-amber-500">150 AI Queries / day</strong> (3,500/mo)
                       </span>
                     </li>
                     <li className="flex items-start gap-2.5">
-                      <Check className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                      <Check className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                       <span>
-                        <strong className="text-white">Priority AI Processing Queue</strong>
+                        <strong className="text-foreground">Priority AI Processing Queue</strong>
                       </span>
                     </li>
                     <li className="flex items-start gap-2.5">
-                      <Gift className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                      <span className="text-emerald-300">
+                      <Gift className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                      <span className="text-accent">
                         <strong>🎁 Gift a Friend:</strong> Includes 1 Free Pro Account for a friend or student
                       </span>
                     </li>
                     <li className="flex items-start gap-2.5">
-                      <Check className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                      <Check className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                       <span>Includes all Pro Features & 13 Lexicons</span>
                     </li>
                     <li className="flex items-start gap-2.5">
-                      <Check className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                      <Check className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                       <span>Distinguished Patron Profile Badge</span>
                     </li>
                     <li className="flex items-start gap-2.5">
-                      <Check className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                      <Check className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                       <span>Early access to upcoming AI modes</span>
                     </li>
                   </ul>
@@ -444,8 +444,8 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                     disabled={checkoutLoading === "PATRON" || currentTier === "PATRON"}
                     className={`w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
                       currentTier === "PATRON"
-                        ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 cursor-default"
-                        : "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-amber-950 shadow-md shadow-amber-950/40"
+                        ? "bg-amber-500/20 text-amber-400 border border-amber-500/40 cursor-default"
+                        : "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-900 shadow-md shadow-amber-950/20"
                     }`}
                   >
                     {checkoutLoading === "PATRON" ? (
@@ -471,7 +471,7 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
               {!showPromoInput ? (
                 <button
                   onClick={() => setShowPromoInput(true)}
-                  className="mx-auto flex items-center gap-2 text-xs text-slate-400 hover:text-emerald-400 transition-colors cursor-pointer"
+                  className="mx-auto flex items-center gap-2 text-xs text-muted-foreground hover:text-accent transition-colors cursor-pointer"
                 >
                   <Gift className="w-3.5 h-3.5" />
                   <span>Have a Scholar / Waqf Access Code? Click here to redeem</span>
@@ -482,9 +482,9 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   onSubmit={handleApplyPromo}
-                  className="p-4 rounded-2xl bg-[#121d17] border border-emerald-500/25 space-y-2.5"
+                  className="p-4 rounded-2xl bg-muted/60 border border-border space-y-2.5"
                 >
-                  <div className="flex items-center justify-between text-xs text-emerald-400">
+                  <div className="flex items-center justify-between text-xs text-accent">
                     <span className="font-semibold flex items-center gap-1.5">
                       <Tag className="w-3.5 h-3.5" />
                       Enter Access / Promo Code
@@ -492,7 +492,7 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                     <button
                       type="button"
                       onClick={() => setShowPromoInput(false)}
-                      className="text-slate-400 hover:text-white"
+                      className="text-muted-foreground hover:text-foreground"
                     >
                       Cancel
                     </button>
@@ -503,12 +503,12 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                       placeholder="e.g. ILOVEQURAN, SCHOLAR100"
                       value={promoCodeInput}
                       onChange={(e) => setPromoCodeInput(e.target.value)}
-                      className="flex-1 px-3.5 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-emerald-500 uppercase tracking-widest font-mono"
+                      className="flex-1 px-3.5 py-2 rounded-xl bg-card border border-border text-foreground text-xs placeholder:text-muted-foreground focus:outline-none focus:border-accent uppercase tracking-widest font-mono"
                     />
                     <button
                       type="submit"
                       disabled={isApplyingPromo || !promoCodeInput.trim()}
-                      className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-emerald-950 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                      className="px-4 py-2 rounded-xl bg-accent hover:bg-accent/90 disabled:opacity-50 text-accent-foreground text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
                     >
                       {isApplyingPromo ? (
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -517,7 +517,7 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                       )}
                     </button>
                   </div>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[11px] text-muted-foreground">
                     Valid promo codes grant 100% free lifetime or trial access to Pro / Patron tiers.
                   </p>
                 </motion.form>
@@ -525,9 +525,9 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
             </div>
 
             {/* FAQ Accordion */}
-            <div className="max-w-3xl mx-auto pt-6 border-t border-white/5 space-y-3">
-              <h4 className="text-sm font-bold text-slate-200 text-center flex items-center justify-center gap-1.5 pb-2">
-                <HelpCircle className="w-4 h-4 text-emerald-400" />
+            <div className="max-w-3xl mx-auto pt-6 border-t border-border space-y-3">
+              <h4 className="text-sm font-bold text-foreground text-center flex items-center justify-center gap-1.5 pb-2">
+                <HelpCircle className="w-4 h-4 text-accent" />
                 Frequently Asked Questions
               </h4>
               <div className="space-y-2">
@@ -536,16 +536,16 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                   return (
                     <div
                       key={idx}
-                      className="rounded-2xl bg-white/[0.02] border border-white/5 overflow-hidden transition-all"
+                      className="rounded-2xl bg-muted/30 border border-border overflow-hidden transition-all"
                     >
                       <button
                         onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
-                        className="w-full p-3.5 text-left text-xs sm:text-sm font-medium text-slate-200 flex items-center justify-between gap-3 hover:bg-white/[0.02] cursor-pointer"
+                        className="w-full p-3.5 text-left text-xs sm:text-sm font-medium text-foreground flex items-center justify-between gap-3 hover:bg-muted/50 cursor-pointer"
                       >
                         <span>{faq.q}</span>
                         <ChevronDown
-                          className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${
-                            isOpen ? "rotate-180 text-emerald-400" : ""
+                          className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform ${
+                            isOpen ? "rotate-180 text-accent" : ""
                           }`}
                         />
                       </button>
@@ -556,7 +556,7 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                             animate={{ height: "auto", opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
                             transition={{ duration: 0.2 }}
-                            className="px-3.5 pb-3.5 text-xs text-slate-400 leading-relaxed"
+                            className="px-3.5 pb-3.5 text-xs text-muted-foreground leading-relaxed"
                           >
                             {faq.a}
                           </motion.div>
@@ -569,8 +569,8 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
             </div>
 
             {/* Footer Trust Guarantee */}
-            <div className="text-center pt-2 text-[11px] text-slate-400 flex items-center justify-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-500" />
+            <div className="text-center pt-2 text-[11px] text-muted-foreground flex items-center justify-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-accent" />
               <span>Encrypted Global Payments · Cancel anytime with 1-click</span>
             </div>
           </div>

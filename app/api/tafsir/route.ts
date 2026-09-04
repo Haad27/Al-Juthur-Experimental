@@ -294,7 +294,7 @@ const getVirtualTafsir = unstable_cache(
           if (footnoteTexts[id]) {
             verseFootnotes[id] = footnoteTexts[id];
           }
-          return ` <span class="text-emerald-500 font-bold">[${fIds.length}]</span> `;
+          return ` <span class="text-accent font-bold">[${fIds.length}]</span> `;
         });
         cleanText = cleanText.replace(/<sup[^>]*>.*?<\/sup>/gi, "");
       }

@@ -57,13 +57,13 @@ function ArabicOverlay({
         ref={domRef}
         style={{
           opacity: 0,
-          color: "#6df4ce",
+          color: "#F5E8C7",
           fontSize: "clamp(0.95rem, 4vw, 1.6rem)",
           fontWeight: 700,
           maxWidth: "92vw",
           textAlign: "center",
           textShadow:
-            "0 0 20px #6df4ce, 0 0 40px #6df4ce60, 0 0 80px #6df4ce30",
+            "0 0 20px rgba(212, 175, 55, 0.7), 0 0 40px rgba(196, 165, 116, 0.4), 0 0 80px rgba(196, 165, 116, 0.2)",
           whiteSpace: "nowrap",
           fontFamily: "'Scheherazade New', 'Amiri', serif",
           letterSpacing: "0.05em",
@@ -101,13 +101,13 @@ function EnglishOverlay({
         ref={domRef}
         style={{
           opacity: 0,
-          color: "#a7f3d0",
+          color: "#EDE8E0",
           fontSize: "clamp(0.65rem, 3.1vw, 1.1rem)",
           fontWeight: 600,
           maxWidth: "94vw",
           textAlign: "center",
           textShadow:
-            "0 0 15px #a7f3d060, 0 0 30px #a7f3d030",
+            "0 0 15px rgba(212, 175, 55, 0.5), 0 0 30px rgba(196, 165, 116, 0.25)",
           whiteSpace: "nowrap",
           fontFamily: "'Inter', sans-serif",
           letterSpacing: "0.02em",
@@ -147,7 +147,7 @@ function WordNodes({
   const material = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
-        color: new THREE.Color("#6df4ce"),
+        color: new THREE.Color("#D4AF37"),
         transparent: true,
         toneMapped: false,
       }),

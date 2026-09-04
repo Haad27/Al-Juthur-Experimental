@@ -281,7 +281,7 @@ export default function InlineTranslation({
             ) : error ? (
               <div className="text-red-400 py-2">{error}</div>
             ) : (
-              <div className="prose prose-invert prose-emerald max-w-none">
+              <div className="prose dark:prose-invert max-w-none">
                 {translationText ? (
                   <div>
                     <span>{translationText}</span>
