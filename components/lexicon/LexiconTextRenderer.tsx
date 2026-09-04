@@ -34,7 +34,7 @@ export default function LexiconTextRenderer({
   // Also replace <ul> and <li> to use custom styles if they exist
   content = content
     .replace(/<ul([^>]*)>/gi, '<ul$1 class="space-y-2.5 mt-2 mb-2 ml-1">')
-    .replace(/<li([^>]*)>/gi, '<li$1 class="flex items-start gap-2 before:content-[\'•\'] before:text-emerald-500/70 before:mr-1">');
+    .replace(/<li([^>]*)>/gi, '<li$1 class="flex items-start gap-2 before:content-[\'•\'] before:text-accent before:mr-1">');
 
   const lines = content
     .split(/\n+/)
@@ -46,7 +46,7 @@ export default function LexiconTextRenderer({
   return (
     <div className="relative">
       <div 
-        className={`space-y-3 text-stone-300 ${compact ? 'leading-snug' : 'leading-relaxed'} ${
+        className={`space-y-3 text-reading ${compact ? 'leading-snug' : 'leading-relaxed'} ${
           isLocked ? 'overflow-hidden max-h-[140px] [mask-image:linear-gradient(to_bottom,black_30%,transparent_100%)] select-none pointer-events-none' : ''
         }`}
       >
@@ -72,7 +72,7 @@ export default function LexiconTextRenderer({
             /([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+(?:\s+[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+)*)/g,
             (match) => {
               const cleaned = match.replace(/\u064E\u0670/g, '\u0670').replace(/\u0670\u064E/g, '\u0670');
-              return `<span class="font-arabic text-emerald-200/90 leading-normal inline-block mx-1 ${compact ? 'text-lg md:text-xl' : 'text-xl md:text-2xl'}" dir="rtl">${cleaned}</span>`;
+              return `<span class="font-arabic text-arabic/90 leading-normal inline-block mx-1 ${compact ? 'text-lg md:text-xl' : 'text-xl md:text-2xl'}" dir="rtl">${cleaned}</span>`;
             }
           );
 
@@ -81,7 +81,7 @@ export default function LexiconTextRenderer({
           return (
             <Tag
               key={idx}
-              className={`text-stone-300 whitespace-pre-wrap ${compact ? 'text-sm' : 'text-base md:text-lg'} ${line.includes('<li') ? '' : (compact ? 'leading-snug' : 'leading-relaxed')}`}
+              className={`text-reading whitespace-pre-wrap ${compact ? 'text-sm' : 'text-base md:text-lg'} ${line.includes('<li') ? '' : (compact ? 'leading-snug' : 'leading-relaxed')}`}
               dangerouslySetInnerHTML={{ __html: styledLine }}
             />
           );
@@ -90,22 +90,22 @@ export default function LexiconTextRenderer({
 
       {/* Frosted Glass Blur Lock Overlay for Lexicons */}
       {isLocked && (
-        <div className="relative -mt-16 pt-16 pb-7 px-5 rounded-3xl bg-gradient-to-t from-[#090e0b] via-[#090e0b]/95 to-transparent border border-emerald-500/20 text-center space-y-3.5 shadow-2xl backdrop-blur-md z-10">
-          <div className="mx-auto size-11 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-inner">
-            <Lock className="size-5 text-emerald-400" />
+        <div className="relative -mt-16 pt-16 pb-7 px-5 rounded-3xl bg-gradient-to-t from-background via-background/95 to-transparent border border-accent/20 text-center space-y-3.5 shadow-2xl backdrop-blur-md z-10">
+          <div className="mx-auto size-11 rounded-2xl bg-accent/10 border border-accent/30 flex items-center justify-center text-accent shadow-inner">
+            <Lock className="size-5 text-accent" />
           </div>
           <div className="max-w-md mx-auto space-y-1">
-            <h4 className="text-sm sm:text-base font-bold text-white font-serif">
-              Unlock Complete Entry in <span className="text-emerald-400">{dictName || "Lexicon"}</span>
+            <h4 className="text-sm sm:text-base font-bold text-foreground font-serif">
+              Unlock Complete Entry in <span className="text-accent">{dictName || "Lexicon"}</span>
             </h4>
-            <p className="text-xs text-zinc-400 leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               Upgrade to Al-Juthur Pro to unlock all 13 classical lexicons (including full 8-volume Lane's Lexicon & Lisan al-Arab).
             </p>
           </div>
           <div className="flex justify-center pt-1">
             <button
               onClick={onUpgradeClick || openPricingModal}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-emerald-950 font-bold text-xs shadow-lg shadow-emerald-950 transition-all cursor-pointer flex items-center gap-1.5"
+              className="px-5 py-2.5 rounded-xl bg-accent hover:from-accent hover:to-accent text-accent-foreground font-bold text-xs shadow-lg  transition-all cursor-pointer flex items-center gap-1.5"
             >
               <Sparkles className="size-3.5" />
               <span>Upgrade to Pro ($3.99/mo)</span>

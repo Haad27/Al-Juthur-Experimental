@@ -61,34 +61,34 @@ export default function AlJuthurLoadingProgress({
     <div className={cn("relative flex flex-col items-center gap-6 text-center animate-in fade-in duration-300 py-12", className)}>
       {/* Ripple Rings & Logo (Identical to homepage loader) */}
       <div className="relative flex items-center justify-center w-24 h-24">
-        <div className="absolute inset-0 rounded-full border border-emerald-500/35 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" />
+        <div className="absolute inset-0 rounded-full border border-accent/35 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" />
         <div className="absolute inset-0 rounded-full border border-teal-500/25 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" style={{ animationDelay: "1s" }} />
-        <div className="absolute inset-0 rounded-full border border-emerald-400/20 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" style={{ animationDelay: "2s" }} />
+        <div className="absolute inset-0 rounded-full border border-accent/20 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" style={{ animationDelay: "2s" }} />
         
         <img
           src="/assets/favicon/apple-touch-icon.png"
           alt="Al Juthur Logo"
-          className="w-16 h-16 object-contain animate-pulse drop-shadow-[0_0_20px_rgba(16,185,129,0.5)] relative z-10"
+          className="w-16 h-16 object-contain animate-pulse  relative z-10"
         />
       </div>
 
       <div className="flex flex-col items-center gap-2 w-full mt-2">
-        <div className="text-center text-[10px] font-bold text-emerald-400 uppercase tracking-[0.25em] mb-0.5">
+        <div className="text-center text-[10px] font-bold text-accent uppercase tracking-[0.25em] mb-0.5">
           {title}
         </div>
-        <div className="text-center text-[12px] font-medium text-zinc-300 tracking-wide mb-1 max-w-sm">
+        <div className="text-center text-[12px] font-medium text-reading tracking-wide mb-1 max-w-sm">
           {activeSubtitle}
         </div>
 
         {/* Clean Luminous Emerald Progress Bar */}
         <div className="flex flex-col gap-1.5 w-60 mt-1">
           <div className="flex items-center justify-between w-full text-[10px] font-bold uppercase tracking-[0.2em]">
-            <span className="text-emerald-400/80">Loading</span>
-            <span className="text-emerald-300 font-mono font-bold">{progress}%</span>
+            <span className="text-accent">Loading</span>
+            <span className="text-accent font-mono font-bold">{progress}%</span>
           </div>
-          <div className="w-full h-[2.5px] bg-emerald-950/60 rounded-full relative overflow-hidden">
+          <div className="w-full h-[2.5px] bg-accent/10 rounded-full relative overflow-hidden">
             <div
-              className="absolute top-0 left-0 h-full bg-gradient-to-r from-emerald-500 via-emerald-400 to-[#6df4ce] shadow-[0_0_12px_rgba(16,185,129,0.9)] rounded-full transition-all duration-150 ease-out"
+              className="absolute top-0 left-0 h-full bg-gradient-to-r from-accent via-accent to-primary rounded-full transition-all duration-150 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -99,7 +99,7 @@ export default function AlJuthurLoadingProgress({
 
   if (isOverlay) {
     return (
-      <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-zinc-950/80 backdrop-blur-md text-white animate-in fade-in duration-300">
+      <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background/80 backdrop-blur-md text-foreground animate-in fade-in duration-300">
         {content}
       </div>
     );

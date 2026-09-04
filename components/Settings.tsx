@@ -118,7 +118,7 @@ const MUSHAF_LAYOUTS = [
 ];
 
 const scriptColorMap: Record<string, string> = {
-  emerald: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  emerald: "bg-accent/10 text-accent border-accent/20",
   amber:   "bg-amber-500/10 text-amber-400 border-amber-500/20",
   blue:    "bg-blue-500/10 text-blue-400 border-blue-500/20",
   purple:  "bg-purple-500/10 text-purple-400 border-purple-500/20",
@@ -189,31 +189,31 @@ const Settings = () => {
   return (
     <div className="p-2 sm:p-4 space-y-4 max-w-md w-full min-w-0 max-w-full overflow-y-auto overflow-x-hidden scrollable-container max-h-[calc(100vh-190px)] touch-pan-y">
       {/* Subscription & AI Quota Banner (Temporarily commented out - Full Free mode) */}
-      {/* <div className="p-3.5 rounded-2xl bg-gradient-to-br from-emerald-950/40 via-zinc-900 to-zinc-900 border border-emerald-500/25 space-y-2.5">
+      {/* <div className="p-3.5 rounded-2xl bg-gradient-to-br from-accent/10 via-card to-card border border-accent/25 space-y-2.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <div className="p-1.5 rounded-lg bg-accent/10 text-accent border border-accent/20">
               <Crown className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xs font-bold text-white uppercase tracking-wider">
+                <span className="text-xs font-bold text-foreground uppercase tracking-wider">
                   {tier} Plan
                 </span>
                 {activePromoCode && (
-                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-mono">
+                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-accent/15 text-accent font-mono">
                     VIP
                   </span>
                 )}
               </div>
-              <p className="text-[11px] text-zinc-400">
+              <p className="text-[11px] text-muted-foreground">
                 {dailyQueriesLimit} AI questions per day
               </p>
             </div>
           </div>
           <button
             onClick={openPricingModal}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-emerald-950 text-xs font-bold transition-all shadow-md shadow-emerald-950/40 cursor-pointer"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-accent hover:bg-accent/90 text-accent-foreground text-xs font-bold transition-all shadow-md /40 cursor-pointer"
           >
             <span>{tier === "FREE" ? "Upgrade" : "Manage"}</span>
             <ArrowUpRight className="w-3.5 h-3.5" />
@@ -222,29 +222,29 @@ const Settings = () => {
       </div> */}
 
       <SettingSection
-        icon={<Globe className="w-4 h-4 text-emerald-400" />}
+        icon={<Globe className="w-4 h-4 text-accent" />}
         title="Translation"
         control={<TranslationSelector />}
         description="Search & select from 127 translations grouped by language."
       />
 
       <SettingSection
-        icon={<BookMarked className="w-4 h-4 text-emerald-400" />}
+        icon={<BookMarked className="w-4 h-4 text-accent" />}
         title="Mushaf Script Style"
         control={
           <div className="space-y-3 pt-1 w-full min-w-0 max-w-full">
             {/* Active layout preview */}
-            <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-zinc-800/40 border border-zinc-700/40 w-full min-w-0">
+            <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-muted/60 border border-border w-full min-w-0">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-semibold text-zinc-200 truncate">{activeLayout.name}</span>
+                  <span className="text-xs font-semibold text-foreground truncate">{activeLayout.name}</span>
                   <span className={`text-[10px] px-1.5 py-0.5 rounded-full border font-medium ${scriptColorMap[activeLayout.scriptColor]}`}>
                     {activeLayout.scriptFamily}
                   </span>
                 </div>
-                <span className="text-[11px] text-zinc-500">{activeLayout.subtitle}</span>
+                <span className="text-[11px] text-muted-foreground">{activeLayout.subtitle}</span>
               </div>
-              <span className={`${activeLayout.fontClass} text-emerald-300 text-lg leading-normal shrink-0`} dir="rtl" lang="ar">
+              <span className={`${activeLayout.fontClass} text-accent text-lg leading-normal shrink-0`} dir="rtl" lang="ar">
                 ﷽
               </span>
             </div>
@@ -263,8 +263,8 @@ const Settings = () => {
                     title={`${layout.name} — ${layout.subtitle}`}
                     className={`relative p-2 rounded-xl border text-left flex flex-col gap-1.5 transition-all duration-200 cursor-pointer group ${
                       isSelected
-                        ? "bg-emerald-500/12 border-emerald-500/50 shadow-lg shadow-emerald-500/10"
-                        : "bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800 hover:border-zinc-600"
+                        ? "bg-accent/12 border-accent/40 shadow-lg "
+                        : "bg-muted/70 border-border hover:bg-muted hover:border-border"
                     }`}
                   >
 
@@ -274,7 +274,7 @@ const Settings = () => {
                         {layout.scriptFamily}
                       </span>
                       {isSelected && (
-                        <Check className="w-3 h-3 text-emerald-400 shrink-0" />
+                        <Check className="w-3 h-3 text-accent shrink-0" />
                       )}
                     </div>
 
@@ -289,10 +289,10 @@ const Settings = () => {
                     </span>
 
                     {/* Layout name */}
-                    <span className={`text-[10px] font-semibold leading-tight truncate ${isSelected ? "text-emerald-300" : "text-zinc-400"}`}>
+                    <span className={`text-[10px] font-semibold leading-tight truncate ${isSelected ? "text-accent" : "text-muted-foreground"}`}>
                       {layout.name}
                     </span>
-                    <span className="text-[9px] text-zinc-600 truncate leading-none">{layout.region}</span>
+                    <span className="text-[9px] text-muted-foreground truncate leading-none">{layout.region}</span>
                   </button>
                 );
               })}
@@ -303,18 +303,18 @@ const Settings = () => {
       />
 
       <SettingSection
-        icon={<Headphones className="w-4 h-4 text-emerald-400" />}
+        icon={<Headphones className="w-4 h-4 text-accent" />}
         title="Audio Reciter"
         control={
           <div className="space-y-4 pt-2">
             <div className="space-y-2">
-              <span className="text-xs font-semibold text-emerald-400">Word-by-Word (Recommended)</span>
+              <span className="text-xs font-semibold text-accent">Word-by-Word (Recommended)</span>
               <select
                 value={WBW_RECITERS.includes(selectedReciter) ? selectedReciter : ""}
                 onChange={(e) => {
                   if (e.target.value) setSelectedReciter(Number(e.target.value));
                 }}
-                className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-3 py-2 text-sm text-zinc-200 outline-none focus:border-emerald-500/50"
+                className="w-full bg-muted/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-accent/50"
               >
                 <option value="" disabled>Select a Word-by-Word reciter...</option>
                 {wbwRecitersList.map((r) => (
@@ -326,13 +326,13 @@ const Settings = () => {
             </div>
 
             <div className="space-y-2">
-              <span className="text-xs font-semibold text-zinc-400">Ayat-by-Ayat (Fallback)</span>
+              <span className="text-xs font-semibold text-muted-foreground">Ayat-by-Ayat (Fallback)</span>
               <select
                 value={!WBW_RECITERS.includes(selectedReciter) ? selectedReciter : ""}
                 onChange={(e) => {
                   if (e.target.value) setSelectedReciter(Number(e.target.value));
                 }}
-                className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-3 py-2 text-sm text-zinc-200 outline-none focus:border-emerald-500/50"
+                className="w-full bg-muted/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-accent/50"
               >
                 <option value="" disabled>Select an Ayat-by-Ayat reciter...</option>
                 {ayahRecitersList.map((r) => (
@@ -348,13 +348,13 @@ const Settings = () => {
       />
 
       <SettingSection
-        icon={<Type className="w-4 h-4 text-emerald-400" />}
+        icon={<Type className="w-4 h-4 text-accent" />}
         title="Font & Text Size"
         control={
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-zinc-400 font-medium">Text Scale</span>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+              <span className="text-xs text-muted-foreground font-medium">Text Scale</span>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-accent/10 text-accent border border-accent/30">
                 {fontSize === 0 ? "Default" : `${fontSize}x`}
               </span>
             </div>
@@ -381,8 +381,8 @@ const Settings = () => {
                     onClick={() => setFontSize(preset.val)}
                     className={`py-1 text-[10px] md:text-[11px] px-0.5 truncate font-semibold rounded-lg border transition-all cursor-pointer ${
                       isActive
-                        ? "bg-emerald-500 text-white border-emerald-400 shadow-sm"
-                        : "bg-zinc-800/80 text-zinc-400 border-zinc-700/60 hover:bg-zinc-700/80 hover:text-zinc-200"
+                        ? "bg-accent text-foreground border-accent shadow-sm"
+                        : "bg-muted text-muted-foreground border-border hover:bg-muted hover:text-foreground"
                     }`}
                   >
                     {preset.label}
@@ -391,10 +391,10 @@ const Settings = () => {
               })}
             </div>
 
-            <div className="pt-4 border-t border-zinc-800/60 mt-4">
+            <div className="pt-4 border-t border-border mt-4">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs text-zinc-400 font-medium">Word-by-Word Scale</span>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                <span className="text-xs text-muted-foreground font-medium">Word-by-Word Scale</span>
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-accent/10 text-accent border border-accent/30">
                   {wbwFontSize === 0 ? "Default" : `${wbwFontSize}x`}
                 </span>
               </div>
@@ -414,11 +414,11 @@ const Settings = () => {
       />
 
       <SettingSection
-        icon={<ShieldAlert className="w-4 h-4 text-emerald-400" />}
+        icon={<ShieldAlert className="w-4 h-4 text-accent" />}
         title="Mistake Detection"
         control={
           <div className="flex items-center justify-between">
-            <span className="text-xs text-zinc-300">Recitation Replay</span>
+            <span className="text-xs text-reading">Recitation Replay</span>
             <Switch
               checked={mistakeDetection}
               onCheckedChange={setMistakeDetection}
@@ -429,11 +429,11 @@ const Settings = () => {
       />
 
       <SettingSection
-        icon={<Languages className="w-4 h-4 text-emerald-400" />}
+        icon={<Languages className="w-4 h-4 text-accent" />}
         title="Show Translation"
         control={
           <div className="flex items-center justify-between">
-            <span className="text-xs text-zinc-300">Verse Translation</span>
+            <span className="text-xs text-reading">Verse Translation</span>
             <Switch
               checked={showTranslation}
               onCheckedChange={setShowTranslation}
@@ -444,11 +444,11 @@ const Settings = () => {
       />
 
       <SettingSection
-        icon={<BookOpenCheck className="w-4 h-4 text-emerald-400" />}
+        icon={<BookOpenCheck className="w-4 h-4 text-accent" />}
         title="Word-by-Word Meaning"
         control={
           <div className="flex items-center justify-between">
-            <span className="text-xs text-zinc-300">Word Tooltips & Labels</span>
+            <span className="text-xs text-reading">Word Tooltips & Labels</span>
             <Switch
               checked={showWbw}
               onCheckedChange={setShowWbw}
@@ -459,7 +459,7 @@ const Settings = () => {
       />
 
       <SettingSection
-        icon={<Zap className="w-4 h-4 text-emerald-400" />}
+        icon={<Zap className="w-4 h-4 text-accent" />}
         title="Audio Playback Speed"
         control={
           <div className="flex items-center gap-3 w-full">
@@ -471,7 +471,7 @@ const Settings = () => {
               onValueChange={(val) => setPlaybackRate(val[0])}
               className="flex-1 py-1"
             />
-            <span className="text-xs font-mono font-bold text-emerald-400 min-w-[2.5rem] text-right bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/30">
+            <span className="text-xs font-mono font-bold text-accent min-w-[2.5rem] text-right bg-accent/10 px-2 py-0.5 rounded border border-accent/30">
               {playbackRate}x
             </span>
           </div>
@@ -480,30 +480,30 @@ const Settings = () => {
       />
 
       {/* Subtle Legal & Policy Links Footer */}
-      <div className="pt-4 pb-2 border-t border-zinc-800/60 mt-4 text-center">
-        <div className="flex items-center justify-center gap-3 text-[11px] text-zinc-500 font-medium">
+      <div className="pt-4 pb-2 border-t border-border mt-4 text-center">
+        <div className="flex items-center justify-center gap-3 text-[11px] text-muted-foreground font-medium">
           <Link
             href="/legal?tab=terms"
-            className="hover:text-zinc-300 transition-colors"
+            className="hover:text-reading transition-colors"
           >
             Terms
           </Link>
-          <span className="text-zinc-700">•</span>
+          <span className="text-muted-foreground">•</span>
           <Link
             href="/legal?tab=privacy"
-            className="hover:text-zinc-300 transition-colors"
+            className="hover:text-reading transition-colors"
           >
             Privacy
           </Link>
-          <span className="text-zinc-700">•</span>
+          <span className="text-muted-foreground">•</span>
           <Link
             href="/legal?tab=refund"
-            className="hover:text-zinc-300 transition-colors"
+            className="hover:text-reading transition-colors"
           >
             Refund Policy
           </Link>
         </div>
-        <p className="text-[10px] text-zinc-600 mt-1.5 font-mono">
+        <p className="text-[10px] text-muted-foreground mt-1.5 font-mono">
           Al-Juthur © {new Date().getFullYear()}
         </p>
       </div>

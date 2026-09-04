@@ -44,17 +44,17 @@ const GettingStartedPopup = ({ onStart }: { onStart: () => void }) => {
   return (
     <div
       ref={containerRef}
-      className="fixed top-1/2 left-1/2 z-50 w-11/12 sm:w-10/12 md:w-3/5 lg:w-[400px] xl:w-[450px] transform -translate-x-1/2 -translate-y-1/2 rounded-lg bg-zinc-800 p-4 shadow-lg space-y-4"
+      className="fixed top-1/2 left-1/2 z-50 w-11/12 sm:w-10/12 md:w-3/5 lg:w-[400px] xl:w-[450px] transform -translate-x-1/2 -translate-y-1/2 rounded-lg bg-muted p-4 shadow-lg space-y-4"
     >
       <h1
         // ref={headingRef}
-        className="text-2xl font-semibold text-white text-center"
+        className="text-2xl font-semibold text-foreground text-center"
       >
         Recite Guide
       </h1>
 
       {current === "1" ? (
-        <ul className="space-y-2 bg-emerald-500 bg-opacity-20 border-l-2 border-emerald-400 p-2 rounded-md text-yellow-100 text-sm leading-relaxed shadow-md">
+        <ul className="space-y-2 bg-accent bg-opacity-20 border-l-2 border-accent p-2 rounded-md text-yellow-100 text-sm leading-relaxed shadow-md">
           {steps.map((text, i) => (
             <li
               key={i}
@@ -69,7 +69,7 @@ const GettingStartedPopup = ({ onStart }: { onStart: () => void }) => {
         </ul>
       ) : (
         <>
-          <div className="bg-emerald-500 bg-opacity-20 border-l-2 border-emerald-400 p-4 rounded-md text-yellow-100 text-sm leading-relaxed shadow-md">
+          <div className="bg-accent bg-opacity-20 border-l-2 border-accent p-4 rounded-md text-yellow-100 text-sm leading-relaxed shadow-md">
             <strong className="block mb-2 font-semibold text-orange-50">
               <TriangleAlert className="inline-block mr-2" size={20} /> Beta
               Feature
@@ -79,7 +79,7 @@ const GettingStartedPopup = ({ onStart }: { onStart: () => void }) => {
               perfectly. Please use it as a helpful guide for practice, but not
               as a substitute/replacement for expert recitation or instruction.
             </p>
-            {/* <div className="w-full h-[1px] bg-white"></div> */}
+            {/* <div className="w-full h-[1px] bg-card"></div> */}
             <p className="text-[12px]">
               Sign in to access personalized feedback and track your progress
               for improvement tips.
@@ -94,7 +94,7 @@ const GettingStartedPopup = ({ onStart }: { onStart: () => void }) => {
           if (current === "2") onStart();
           else setCurrent("2");
         }}
-        className="group flex items-center justify-center gap-2 w-full bg-emerald-500 py-4 text-white font-medium rounded-lg shadow hover:bg-emerald-600 border-emerald-400"
+        className="group flex items-center justify-center gap-2 w-full bg-accent py-4 text-foreground font-medium rounded-lg shadow hover:bg-accent/90 border-accent"
       >
         {current !== "2" ? "Next" : "Continue"} {current}/2{" "}
         <ArrowRight

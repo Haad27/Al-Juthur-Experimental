@@ -14,9 +14,9 @@ export const Toaster = (props: ToasterProps) => {
       style={
         {
           // Always produce a color string, never `false`
-          "--normal-bg": isDark ? "#27272A" : "#fff7ebff",
-          "--normal-text": isDark ? "#fff" : "#000",
-          "--normal-border": "transparent",
+          "--normal-bg": isDark ? "#242424" : "#EFE6D0",
+          "--normal-text": isDark ? "#D4D4D4" : "#5B4636",
+          "--normal-border": isDark ? "#3A3A3A" : "#D4C4A8",
         } as React.CSSProperties
       }
       {...props}

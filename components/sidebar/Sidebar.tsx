@@ -111,7 +111,7 @@ const Sidebar = () => {
     <div>
       <div
         className={cn(
-          "min-h-screen lg:block hidden sticky top-0 z-40 border-r dark:border-[#262629ff] border-[var(--sephia-500)] bg-zinc-900 text-white transition-all duration-300 shadow-sm",
+          "min-h-screen lg:block hidden sticky top-0 z-40 border-r border-border bg-sidebar text-sidebar-foreground transition-all duration-300",
           isAudioActive 
             ? "w-0 opacity-0 overflow-hidden border-none pointer-events-none" 
             : isCollapsed ? "w-16" : "md:w-[350px]"
@@ -126,7 +126,7 @@ const Sidebar = () => {
         {/* Creative Animated Tab Switcher */}
         {!isCollapsed && (
           <div className="relative mt-4 mx-4">
-            <div className="relative flex items-center p-1 bg-zinc-950/90 dark:bg-zinc-950/90 border border-zinc-800/80 rounded-2xl shadow-xl backdrop-blur-2xl overflow-hidden">
+            <div className="relative flex items-center p-1 bg-muted border border-border rounded-2xl overflow-hidden">
               {tabs.map((tab) => {
                 const isActive = activeTab === tab.key;
                 return (
@@ -137,24 +137,24 @@ const Sidebar = () => {
                     className={cn(
                       "relative z-10 flex-1 flex items-center justify-center gap-2 py-2.5 px-3 text-xs font-bold transition-all duration-200 cursor-pointer select-none group",
                       isActive
-                        ? "text-white"
-                        : "text-zinc-400 hover:text-zinc-200"
+                        ? "text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground"
                     )}
                   >
                     {isActive && (
                       <motion.div
                         layoutId="sidebar-creative-tab-bg"
-                        className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 rounded-xl border-t border-emerald-300/40 shadow-[0_0_20px_rgba(16,185,129,0.35)] z-0"
+                        className="absolute inset-0 bg-primary rounded-xl z-0"
                         transition={{ type: "spring", stiffness: 450, damping: 30 }}
                       />
                     )}
                     <span className="relative z-10 flex items-center gap-2 tracking-wide">
-                      <span className={cn("transition-transform duration-200 group-hover:scale-110", isActive && "text-emerald-100 drop-shadow-[0_0_6px_rgba(255,255,255,0.7)]")}>
+                      <span className={cn("transition-transform duration-200 group-hover:scale-110", isActive && "text-accent-foreground drop-shadow-[0_0_6px_rgba(255,255,255,0.7)]")}>
                         {tab.icon}
                       </span>
                       <span>{tab.label}</span>
                       {isActive && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse shadow-sm ml-0.5" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse shadow-sm ml-0.5" />
                       )}
                     </span>
                   </button>
@@ -168,19 +168,19 @@ const Sidebar = () => {
         {!isCollapsed && activeTab === "surah" && (
           <div className="mt-4 mx-4 flex flex-col gap-2">
             <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <Input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search Surah by name..."
-                className="pl-9 pr-3 py-2 bg-zinc-900/80 dark:bg-zinc-900/80 dark:text-zinc-100 border border-zinc-800 focus:border-emerald-500/60 rounded-xl text-xs placeholder:text-zinc-500 transition-all shadow-inner"
+                className="pl-9 pr-3 py-2 bg-card/90 dark:bg-card/90 dark:text-foreground border border-border focus:border-accent/50 rounded-xl text-xs placeholder:text-muted-foreground transition-all shadow-inner"
               />
             </div>
 
             {surahNumber > 0 && surahs.length > 0 && (
-              <div className="flex items-center gap-2 bg-zinc-900/50 border border-zinc-800/80 rounded-xl px-3 py-1.5 shadow-inner">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-500 shrink-0">Go to Ayah:</span>
+              <div className="flex items-center gap-2 bg-card/50 border border-border rounded-xl px-3 py-1.5 shadow-inner">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-accent shrink-0">Go to Ayah:</span>
                 <Select
                   value=""
                   onValueChange={(value) => {
@@ -190,15 +190,15 @@ const Sidebar = () => {
                     }
                   }}
                 >
-                  <SelectTrigger className="flex-1 h-7 bg-transparent border-0 shadow-none hover:bg-zinc-800/50 rounded-lg dark:text-zinc-200 text-black font-mono text-xs focus:ring-0">
+                  <SelectTrigger className="flex-1 h-7 bg-transparent border-0 shadow-none hover:bg-muted/70 rounded-lg dark:text-foreground text-foreground font-mono text-xs focus:ring-0">
                     <SelectValue placeholder="Select..." />
                   </SelectTrigger>
-                  <SelectContent className="bg-zinc-900 border-zinc-800 max-h-[300px]">
+                  <SelectContent className="bg-card border-border max-h-[300px]">
                     {Array.from(
                       { length: surahs.find(s => s.number === surahNumber)?.numberOfAyahs || 1 },
                       (_, i) => i + 1
                     ).map(num => (
-                      <SelectItem key={num} value={num.toString()} className="text-zinc-200 focus:bg-emerald-600 focus:text-white cursor-pointer transition-colors">
+                      <SelectItem key={num} value={num.toString()} className="text-foreground focus:bg-accent focus:text-foreground cursor-pointer transition-colors">
                         Ayah {num}
                       </SelectItem>
                     ))}
@@ -223,8 +223,8 @@ const Sidebar = () => {
                   className={cn(
                     "p-3 rounded-2xl border transition-all duration-200 flex items-center justify-between group cursor-pointer",
                     isActive
-                      ? "bg-gradient-to-r from-emerald-950/60 to-zinc-900/90 border-emerald-500/50 shadow-lg shadow-emerald-500/10"
-                      : "bg-zinc-900/40 hover:bg-zinc-800/60 border-zinc-800/60 hover:border-emerald-500/30"
+                      ? "bg-gradient-to-r from-accent/10 to-card border-accent/40 shadow-lg "
+                      : "bg-card/50 hover:bg-muted/80 border-border hover:border-accent/30"
                   )}
                 >
                   <div className="flex items-center gap-3 min-w-0">
@@ -232,8 +232,8 @@ const Sidebar = () => {
                       className={cn(
                         "w-9 h-9 rounded-xl flex items-center justify-center font-mono font-bold text-xs shrink-0 transition-all duration-200 border",
                         isActive
-                          ? "bg-emerald-500 text-white border-emerald-400 shadow-md shadow-emerald-500/30"
-                          : "bg-zinc-800/80 text-zinc-400 group-hover:text-emerald-300 group-hover:bg-emerald-500/10 border-zinc-700/50"
+                          ? "bg-accent text-foreground border-accent shadow-md shadow-sm"
+                          : "bg-muted text-muted-foreground group-hover:text-accent group-hover:bg-accent/10 border-border"
                       )}
                     >
                       {surah.number}
@@ -243,24 +243,24 @@ const Sidebar = () => {
                         className={cn(
                           "text-xs font-semibold truncate transition-colors",
                           isActive
-                            ? "text-emerald-400 font-bold"
-                            : "text-zinc-200 group-hover:text-emerald-300"
+                            ? "text-accent font-bold"
+                            : "text-foreground group-hover:text-accent"
                         )}
                       >
                         {surah.englishName}
                       </span>
-                      <span className="text-[10px] text-zinc-500 truncate">
+                      <span className="text-[10px] text-muted-foreground truncate">
                         {surah.englishNameTranslation}
                       </span>
                     </div>
                   </div>
 
                   <div className="flex flex-col items-end shrink-0 ml-2">
-                    <span className="font-arabic text-base text-emerald-400/90 group-hover:text-emerald-300 transition-colors">
+                    <span className="font-arabic text-base text-accent group-hover:text-accent transition-colors">
                       {surah.name}
                     </span>
                     {surah.numberOfAyahs && (
-                      <span className="text-[9px] text-zinc-500 font-mono">
+                      <span className="text-[9px] text-muted-foreground font-mono">
                         {surah.numberOfAyahs} ayahs
                       </span>
                     )}
@@ -280,7 +280,7 @@ const Sidebar = () => {
           <div className="px-5 py-4">
             <Link
               href="/support"
-              className="block w-full text-center bg-emerald-500 hover:bg-emerald-600 text-white py-2 rounded-xl transition"
+              className="block w-full text-center bg-accent hover:bg-accent/90 text-foreground py-2 rounded-xl transition"
             >
               Support Us ♥
             </Link>

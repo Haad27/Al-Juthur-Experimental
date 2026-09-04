@@ -96,7 +96,7 @@ export default function GeminiInputComposer({
   return (
     <div
       className={cn(
-        "relative flex w-full bg-[#1e1f20] border border-zinc-800/80 hover:border-zinc-700/80 focus-within:border-zinc-600 focus-within:ring-1 focus-within:ring-zinc-600/30 shadow-xl transition-all duration-150 ease-out",
+        "relative flex w-full bg-card border border-border hover:border-accent/40 focus-within:border-ring focus-within:ring-1 focus-within:ring-ring/30 shadow-sm transition-all duration-150 ease-out",
         isMultiline
           ? "flex-col rounded-3xl p-3 sm:p-3.5 gap-2"
           : "flex-row items-center rounded-full h-12 sm:h-[50px] px-4 gap-2",
@@ -113,7 +113,7 @@ export default function GeminiInputComposer({
         rows={1}
         autoFocus={autoFocus}
         className={cn(
-          "bg-transparent border-0 ring-0 focus:ring-0 focus:outline-none placeholder-zinc-500 text-sm sm:text-base text-zinc-100 resize-none",
+          "bg-transparent border-0 ring-0 focus:ring-0 focus:outline-none placeholder-muted-foreground text-sm sm:text-base text-foreground resize-none",
           isMultiline
             ? "w-full min-h-[56px] max-h-[220px] py-1 px-1 leading-relaxed overflow-y-auto custom-scrollbar"
             : "flex-1 h-6 leading-6 py-0 my-0 overflow-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
@@ -129,37 +129,37 @@ export default function GeminiInputComposer({
       >
         {/* Mode Dropdown (Flash-style from Gemini - seamless with container) */}
         <Select value={activeModeId} onValueChange={onSwitchMode}>
-          <SelectTrigger className="!h-auto !py-0 !px-1 !bg-transparent dark:!bg-transparent hover:!bg-transparent dark:hover:!bg-transparent !border-0 dark:!border-0 !shadow-none text-zinc-300 hover:text-white font-normal sm:font-medium text-xs sm:text-sm rounded-none focus:!ring-0 focus-visible:!ring-0 gap-1 inline-flex items-center cursor-pointer transition-colors shrink-0 outline-none">
+          <SelectTrigger className="!h-auto !py-0 !px-1 !bg-transparent dark:!bg-transparent hover:!bg-transparent dark:hover:!bg-transparent !border-0 dark:!border-0 !shadow-none text-muted-foreground hover:text-foreground font-normal sm:font-medium text-xs sm:text-sm rounded-none focus:!ring-0 focus-visible:!ring-0 gap-1 inline-flex items-center cursor-pointer transition-colors shrink-0 outline-none">
             <span className="truncate max-w-[120px] sm:max-w-[170px]">{currentBot.shortName}</span>
           </SelectTrigger>
-          <SelectContent className="bg-zinc-900/95 backdrop-blur-xl border-zinc-800 text-zinc-300 max-h-[440px] w-[310px] sm:w-[370px]">
-            <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-zinc-500 border-b border-zinc-800 mb-1 flex items-center justify-between">
+          <SelectContent className="bg-popover text-popover-foreground border-border max-h-[440px] w-[310px] sm:w-[370px]">
+            <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border mb-1 flex items-center justify-between">
               <span>Select AI Scholar Persona</span>
-              <span className="text-emerald-400 font-semibold">6 Bots Available</span>
+              <span className="text-accent font-semibold">6 Bots Available</span>
             </div>
 
             {/* Core Models (Primary RAG) */}
-            <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400/90 flex items-center justify-between">
+            <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-accent flex items-center justify-between">
               <span>Main Core Models</span>
-              <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Primary RAG</span>
+              <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-accent/10 text-accent border border-accent/30">Primary RAG</span>
             </div>
             {RAG_MODES.filter((b) => b.isPrimary).map((bot) => (
               <SelectItem
                 key={bot.id}
                 value={bot.id}
-                className="focus:bg-zinc-800/80 focus:text-white cursor-pointer py-2.5 border-b border-zinc-800/30"
+                className="focus:bg-muted focus:text-foreground cursor-pointer py-2.5 border-b border-border/30"
               >
                 <div className="flex flex-col gap-1 text-left">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-bold text-xs text-white flex items-center gap-1.5">
-                      <Bot className={`size-3.5 shrink-0 ${bot.id === "lexicon" ? "text-rose-400" : "text-emerald-400"}`} />
+                    <span className="font-bold text-xs text-foreground flex items-center gap-1.5">
+                      <Bot className={`size-3.5 shrink-0 ${bot.id === "lexicon" ? "text-rose-400" : "text-accent"}`} />
                       <span>{bot.shortName}</span>
                     </span>
                     <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded border ${bot.badgeColor}`}>
                       {bot.badge}
                     </span>
                   </div>
-                  <span className="text-[11px] text-zinc-400 leading-snug line-clamp-2">
+                  <span className="text-[11px] text-muted-foreground leading-snug line-clamp-2">
                     {bot.targetIntent}
                   </span>
                 </div>
@@ -167,27 +167,27 @@ export default function GeminiInputComposer({
             ))}
 
             {/* Specialized Models */}
-            <div className="px-3 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-zinc-500 border-t border-zinc-800 mt-1 flex items-center justify-between">
+            <div className="px-3 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-t border-border mt-1 flex items-center justify-between">
               <span>Specialized Perspectives</span>
-              <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-zinc-800/80 text-zinc-400 border border-zinc-700">Specialized</span>
+              <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border">Specialized</span>
             </div>
             {RAG_MODES.filter((b) => !b.isPrimary).map((bot) => (
               <SelectItem
                 key={bot.id}
                 value={bot.id}
-                className="focus:bg-zinc-800/80 focus:text-white cursor-pointer py-2.5 border-b border-zinc-800/30 last:border-none"
+                className="focus:bg-muted focus:text-foreground cursor-pointer py-2.5 border-b border-border/30 last:border-none"
               >
                 <div className="flex flex-col gap-1 text-left">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-bold text-xs text-white flex items-center gap-1.5">
-                      <Bot className="size-3.5 text-zinc-400 shrink-0" />
+                    <span className="font-bold text-xs text-foreground flex items-center gap-1.5">
+                      <Bot className="size-3.5 text-muted-foreground shrink-0" />
                       <span>{bot.shortName}</span>
                     </span>
                     <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded border ${bot.badgeColor}`}>
                       {bot.badge}
                     </span>
                   </div>
-                  <span className="text-[11px] text-zinc-400 leading-snug line-clamp-2">
+                  <span className="text-[11px] text-muted-foreground leading-snug line-clamp-2">
                     {bot.targetIntent}
                   </span>
                 </div>
@@ -204,8 +204,8 @@ export default function GeminiInputComposer({
           className={cn(
             "size-8 sm:size-8.5 rounded-full flex items-center justify-center transition-all shrink-0",
             input.trim() && !isLoading
-              ? "bg-emerald-500 hover:bg-emerald-400 text-white shadow-sm shadow-emerald-500/20 cursor-pointer active:scale-95"
-              : "bg-zinc-800/80 text-zinc-600 cursor-not-allowed"
+              ? "bg-primary hover:opacity-90 text-primary-foreground cursor-pointer active:scale-95"
+              : "bg-muted text-muted-foreground cursor-not-allowed"
           )}
           title="Send Question"
         >

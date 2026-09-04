@@ -1,54 +1,40 @@
 "use client";
 
-import { EclipseIcon } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 
-export default function ThemeToggleButton() {
-  const [isDark, setIsDark] = useState(true);
+export default function ThemeToggleButton({
+  className,
+}: {
+  className?: string;
+}) {
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Only read once on mount: check system or saved preference
-    const savedTheme = localStorage.getItem("theme");
-
-    if (savedTheme === "dark") {
-      document.documentElement.classList.add("dark");
-      setIsDark(true);
-    } else {
-      document.documentElement.classList.remove("dark");
-      setIsDark(false);
-    }
+    setMounted(true);
   }, []);
 
-  const toggleTheme = () => {
-    const newDark = !isDark;
-    setIsDark(newDark);
-
-    if (newDark) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  };
+  const isDark = mounted && resolvedTheme === "dark";
 
   return (
-    <div
-      onClick={toggleTheme}
-      className="group flex flex-col gap-2 cursor-pointer select-none"
+    <button
+      type="button"
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      className={cn(
+        "inline-flex size-9 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        className
+      )}
+      aria-label={isDark ? "Switch to sepia theme" : "Switch to dark theme"}
+      title={isDark ? "Sepia" : "Dark"}
     >
-      <div
-        className="rounded-full border border-gray-300 dark:border-zinc-700 w-24 h-10 flex items-center justify-center 
-          bg-white dark:bg-zinc-800 group-hover:shadow-lg active:scale-95 transition-all duration-300"
-      >
-        <EclipseIcon
-          size={24}
-          className="text-[var(--sephia-700)] dark:text-white transition-colors duration-300"
-        />
-      </div>
-      {/* <span className="text-sm font-medium dark:text-white text-[var(--sephia-700)] transition-colors duration-300">
-        {isDark ? "Dark" : "Light"}
-      </span> */}
-    </div>
+      {isDark ? (
+        <Sun className="size-4" strokeWidth={1.75} />
+      ) : (
+        <Moon className="size-4" strokeWidth={1.75} />
+      )}
+    </button>
   );
 }

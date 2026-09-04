@@ -1,38 +1,22 @@
 "use client";
-// Other -/-Essential Imports ⭐
 import React, { useEffect, useState, useRef } from "react";
-// API ⭐
 import { fetchAllSurahs } from "@/api/api";
-// Next ⭐
 import Link from "next/link";
-// Components ⭐
-import LogoIcon from "@/components/svg/icons/LogoIcon";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-
-// Icons / Lucide React ⭐
-import MenuIcon from "@/components/svg/icons/MenuIcon";
-import { ArchiveIcon, Circle, Sparkle, Trash, X, XIcon, Search, Bookmark } from "lucide-react";
-// Hooks ⭐
+import { ArchiveIcon, XIcon, Search } from "lucide-react";
 import useSurahNavigation from "@/hooks/useSurahNavigation";
-// Fonts ⭐
 import { amiri, amiriquran, inter } from "@/app/fonts";
 import MobileSheet from "@/components/sidebar/MobileSheet";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import AppHeader from "@/components/layout/AppHeader";
+import MenuIcon from "@/components/svg/icons/MenuIcon";
 import { toast } from "sonner";
 
 const SurahsList = () => {
-  // organize later
-  // -ROUTER-
   const router = useRouter();
-  // USE STATES Data: 🔹
   const [surahs, setSurahs] = useState<Surah[]>([]);
-  const [recent, setRecent] = useState<Surah>(); // ‼ ☹
+  const [recent, setRecent] = useState<Surah>();
   const [deletedAyah, setDeletedAyah] = useState<Ayah>();
-  const [savedAyahs, setSavedAyahs] = useState<Ayah[]>(); // ‼ ☹
-  // USE STATES States: 🔹
-  // Active: 🟥
+  const [savedAyahs, setSavedAyahs] = useState<Ayah[]>();
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<
     "Last Read" | "Saved" | "Collections"
@@ -42,7 +26,7 @@ const SurahsList = () => {
   const [homeSearchQuery, setHomeSearchQuery] = useState("");
   const [isHomeSearchFocused, setIsHomeSearchFocused] = useState(false);
   const homeSearchContainerRef = useRef<HTMLDivElement>(null);
-  
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (homeSearchContainerRef.current && !homeSearchContainerRef.current.contains(event.target as Node)) {
@@ -52,26 +36,19 @@ const SurahsList = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-  // const [searchResults, setSearchResults] = useState([]);
   const [amount, setAmount] = useState(21);
-  // Boolean 🔹
-  // const [loading, setLoading] = useState(false);
-  // Hooks 🔹
   const { getSurahNumber } = useSurahNavigation();
 
-  // FETCH HOOK FOR SURAHS, RECENT, SAVED AYAHS!
   useEffect(() => {
     const func = async () => {
-      const resA = await fetchAllSurahs(); //
+      const resA = await fetchAllSurahs();
       const resB = localStorage.getItem("recent");
       const resC = localStorage.getItem("saved-ayahs");
-      setSurahs(resA.data); // Breaking Change Fix
+      setSurahs(resA.data);
 
-      // Parse the LocalStorage Data
-      const parsedRecent = JSON.parse(resB ?? "[]"); // if undefined/null return empty array
+      const parsedRecent = JSON.parse(resB ?? "[]");
       const parsedSaved = JSON.parse(resC ?? "[]");
 
-      // Set the Recent and Saved Ayahs
       setRecent(parsedRecent);
       setSavedAyahs(parsedSaved);
     };
@@ -79,11 +56,11 @@ const SurahsList = () => {
   }, []);
 
   const handleRemoveSavedAyah = (ayah: Ayah) => {
-    const saved = savedAyahs ?? []; // use current state, fallback if needed
+    const saved = savedAyahs ?? [];
     const updated = saved.filter((a: Ayah) => a.number !== ayah.number);
 
     localStorage.setItem("saved-ayahs", JSON.stringify(updated));
-    setSavedAyahs(updated); // <- update the state too
+    setSavedAyahs(updated);
     setDeletedAyah(ayah);
   };
 
@@ -104,212 +81,81 @@ const SurahsList = () => {
         setSearchQuery={setSearchQuery}
         surahs={surahs}
       />
-      {/* Mobile Top Header */}
-      <div className="sticky top-0 z-40 h-16 w-full backdrop-blur-3xl bg-zinc-950/80 border-b border-zinc-800/60 shadow-sm lg:hidden flex items-center justify-between px-4">
-        <div className="flex items-center gap-2.5 text-white">
-          <LogoIcon className="w-7 h-7 rounded-[20%]" />
-          <p className="font-bold text-xl">Al-Juthur</p>
-        </div>
 
-        <div className="flex items-center gap-2">
-          {/* Mobile Saved Library button (commented out for Approach 3)
-          <Link
-            href="/saved"
-            className="flex items-center justify-center p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-emerald-400 hover:border-emerald-500/50 transition"
-            title="Saved Library"
-          >
-            <Bookmark className="size-4 text-emerald-400" />
-          </Link>
-          */}
+      <AppHeader
+        rightSlot={
           <button
             onClick={() => setIsOpen((prev) => !prev)}
-            className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white transition cursor-pointer"
+            className="rounded-full border border-border p-2 text-muted-foreground transition-colors hover:text-foreground lg:hidden"
             aria-label="Open menu"
           >
-            <MenuIcon className="size-5 text-zinc-200" />
+            <MenuIcon className="size-5" />
           </button>
-        </div>
-      </div>
+        }
+      />
 
-      {/* Desktop Top Header */}
-      <div className="sticky top-0 z-50 h-20 w-full backdrop-blur-3xl bg-zinc-950/50 border-b border-zinc-800/40 shadow-sm hidden lg:flex items-center justify-between xl:px-20 lg:px-8 px-4">
-        <div className="flex items-center gap-3 text-white">
-          <LogoIcon className="hidden lg:block w-8 h-8 rounded-[20%]" />
-          <p className="font-bold text-2xl">Al-Juthur</p>
-        </div>
-
-        <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 gap-6 text-zinc-400 lg:text-base text-sm">
-          <Link href="/home" className="cursor-pointer hover:text-gray-300 transition text-white ">
-            Home
-          </Link>
-          <Link href="/tafsir" className="cursor-pointer hover:text-gray-300 transition">
-            Tafsir
-          </Link>
-          <Link href="/lexicon" className="cursor-pointer hover:text-gray-300 transition">
-            Lexicon
-          </Link>
-          <Link href="/ai" className="cursor-pointer hover:text-gray-300 transition text-zinc-400">
-            Translator
-          </Link>
-          <Link href="/rag" className="cursor-pointer hover:text-gray-300 transition">
-            AI Scholar
-          </Link>
-        </nav>
-
-        <div className="hidden lg:flex items-center gap-3 shrink-0">
-          <Link 
-            href="/saved" 
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-emerald-500/50 text-xs font-semibold text-zinc-300 hover:text-emerald-400 transition shadow-sm"
-            title="Saved Verses, Tafsirs & Scholar Notes"
+      <div className={`mx-auto w-full max-w-6xl space-y-14 px-4 pb-36 pt-8 sm:px-6 md:pb-16 ${inter.className}`}>
+        <section className="max-w-2xl space-y-4">
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+            Quran · Tafsir · Lexicon
+          </p>
+          <h1 className="text-3xl font-semibold leading-tight text-foreground md:text-5xl">
+            Read without distraction
+          </h1>
+          <p className="reading-prose max-w-xl text-base text-muted-foreground md:text-lg">
+            A blessed Book revealed so that you might reflect upon its verses — [38:29]
+          </p>
+          <button
+            onClick={() => {
+              document.getElementById("start_reading")?.scrollIntoView({ behavior: "smooth" });
+            }}
+            className="rounded-full border border-border bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
           >
-            <Bookmark className="size-3.5 text-emerald-400" />
-            <span>Saved Library</span>
-          </Link>
-        </div>
-      </div>
+            Start reading
+          </button>
+        </section>
 
-      <div className="space-y-16 w-full flex-col flex-1 text-white xl:px-20 lg:px-8 px-4 pb-36 md:pb-16">
-        <div className="w-full flex flex-col space-y-16 relative">
-          <div className="grid md:grid-cols-2 grid-cols-1 items-center gap-8 pt-2 pb-8 md:pt-0 md:pb-16 relative">
-            {/* 🌟 Left: Text content */}
-            <Sparkle
-              className="fill-emerald-500 text-emerald-500 absolute left-62 top-32 animate-pulse rotate-34 z-10"
-              size={36}
-            />
-            <Sparkle
-              className="fill-emerald-300 text-emerald-300 absolute left-12 sm:bottom-32 -bottom-24 animate-pulse z-10"
-              size={48}
-            />
-            {/* <Circle
-              className="fill-orange-400 text-orange-400 absolute right-56 -bottom-24 z-0 animate-bounce"
-              size={48}
-            /> */}
-
-            {/* 🆕 Extra sparkles */}
-            <Sparkle
-              className="fill-emerald-400 text-emerald-400 absolute right-24 bottom-20 animate-caret-blink z-20"
-              size={36}
-            />
-            <Sparkle
-              className="fill-pink-500 text-pink-500 absolute left-[50%] top-[40%] animate-pulse z-10"
-              size={28}
-            />
-            <Circle
-              className="fill-emerald-400 text-emerald-400 absolute right-[30%] top-[80%] blur-sm opacity-70 z-0"
-              size={32}
-            />
-            <Circle
-              className="animate-spin fill-white text-white absolute left-10 top-10 opacity-10 blur-2xl z-0"
-              size={126}
-            />
-            <div className="space-y-6 relative z-20">
-              <h1 className="md:text-6xl text-4xl font-semibold text-white group">
-                Dive{" "}
-                <span className="text-emerald-500 group-hover:brightness-125 transition-all duration-300">
-                  <button
-                    onClick={() => {
-                      document.getElementById("start_reading")?.scrollIntoView({ behavior: "smooth" });
-                    }}
-                    className="cursor-pointer hover:underline"
-                  >
-                    Deeper
-                  </button>
-                </span>{" "}
-                into <br /> the profound <br /> meanings
-                <span className="text-sm text-zinc-400 block mt-2"> - [38:29]</span>
-              </h1>
-
-              <p className="max-w-md md:text-lg text-base font-medium text-zinc-400 italic">
-                "This is a blessed Book which We have revealed to you, [O Prophet], that they might reflect upon its verses and that those of understanding would be reminded."
-              </p>
-
-              <div className="flex gap-4">
-                <Button
-                  onClick={() => {
-                    document.getElementById("start_reading")?.scrollIntoView({ behavior: "smooth" });
-                  }}
-                  className="bg-emerald-500 text-white hover:bg-emerald-600 transition cursor-pointer"
-                >
-                  Start Exploring
-                </Button>
+        {recent?.number && (
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold text-foreground">Continue reading</h2>
+            <Link href={`/surah/${recent?.number}`} className="block max-w-sm">
+              <div className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3 transition-colors hover:border-accent/40">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground">
+                    {recent?.number}. {recent?.englishName}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {recent?.englishNameTranslation}
+                  </p>
+                </div>
+                <p className={`${amiriquran.className} text-xl text-arabic shrink-0`}>
+                  {recent?.name}
+                </p>
               </div>
-            </div>
+            </Link>
+          </section>
+        )}
 
-            {/* 📖 Right: Quran image with original float-mystic animation */}
-            <div className="flex flex-col items-center justify-center relative">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 md:w-96 md:h-96 bg-emerald-500/30 rounded-full blur-[100px] pointer-events-none z-0" />
-              <Image
-                src="/assets/images/allah-quran.png"
-                alt="Floating Quran"
-                className="w-72 sm:w-96 md:w-[412px] lg:w-[512px] xl:w-[612px] animate-float-mystic pointer-events-none select-none drop-shadow-[0_0_15px_rgba(59,130,246,0.1)]"
-                height={624}
-                width={624}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-12">
-
-            <div className="space-y-6">
-              <h1 className="md:text-4xl text-3xl font-semibold text-white">
-                Continue Reading
-              </h1>
-
-              {recent?.number && (
-                <Link href={`/surah/${recent?.number}`}>
-                  <div className="relative overflow-hidden border border-white/50 hover:border-white bg-gradient-to-r from-emerald-500 via-emerald-600 to-emerald-500 group cursor-pointer rounded-xl h-[86px] backdrop-blur-md px-5 py-4 shadow-md transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg z-4 sm:w-[280px] w-full">
-                    {/* Giant Faded Watermark Number */}
-                    <div className="absolute -right-1 -bottom-4 text-6xl font-black text-white/50 group-hover:text-white transition-colors duration-500 pointer-events-none select-none leading-none">
-                      {recent?.number}
-                    </div>
-
-                    <div className="relative z-10 flex items-center justify-between gap-4">
-                      <div className="flex flex-col flex-1 space-y-0.5 text-sm min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-bold text-emerald-100 whitespace-nowrap">{recent?.number}.</span>
-                          <p className="font-semibold text-white text-base truncate">
-                            {recent?.englishName}
-                          </p>
-                        </div>
-                        <p className="text-xs text-emerald-100/80 pl-4 truncate">
-                          {recent?.englishNameTranslation}
-                        </p>
-                      </div>
-
-                      <p className={`${amiriquran.className} text-xl text-white tracking-wide whitespace-nowrap shrink-0`}>
-                        {recent?.name}
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              )}
-            </div>
-
-
-          </div>
-        </div>
-
-        <div className="space-y-6 scroll-mt-24" id="start_reading">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <h2 className="md:text-4xl text-3xl font-semibold text-white">
-              Explore All Surahs
+        <section className="space-y-5 scroll-mt-24" id="start_reading">
+          <div className="flex flex-col justify-between gap-3 md:flex-row md:items-end">
+            <h2 className="text-lg font-semibold text-foreground md:text-2xl">
+              All surahs
             </h2>
-            <div ref={homeSearchContainerRef} className="relative w-full md:w-72 z-20">
+            <div ref={homeSearchContainerRef} className="relative z-20 w-full md:w-72">
               <input
                 type="text"
-                placeholder="Search Surah (e.g., Baqarah)"
+                placeholder="Search surah"
                 value={homeSearchQuery}
                 onChange={(e) => setHomeSearchQuery(e.target.value)}
                 onFocus={() => setIsHomeSearchFocused(true)}
-                className="w-full bg-zinc-900/50 border border-zinc-800/80 rounded-xl px-4 py-2.5 text-base md:text-sm text-zinc-300 focus:outline-none focus:border-emerald-500/50 transition-colors placeholder:text-zinc-600"
+                className="w-full rounded-xl border border-border bg-card px-4 py-2.5 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
               />
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-zinc-500 pointer-events-none" />
+              <Search className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
 
-              {/* Autocomplete Dropdown */}
               {isHomeSearchFocused && homeSearchQuery.trim().length > 0 && (
-                <div className="absolute top-full mt-2 left-0 right-0 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto custom-scrollbar">
+                <div className="absolute top-full right-0 left-0 z-50 mt-2 max-h-60 overflow-y-auto rounded-xl border border-border bg-popover shadow-lg custom-scrollbar">
                   {filteredHomeSurahs.length > 0 ? (
-                    <div className="p-1.5 flex flex-col gap-1">
+                    <div className="flex flex-col gap-0.5 p-1.5">
                       {filteredHomeSurahs.slice(0, 10).map((surah) => (
                         <button
                           key={`suggest-surah-${surah.number}`}
@@ -318,184 +164,91 @@ const SurahsList = () => {
                             setIsHomeSearchFocused(false);
                             router.push(`/surah/${surah.number}`);
                           }}
-                          className="flex flex-col text-left px-3 py-2 hover:bg-emerald-500/10 rounded-lg transition-colors w-full"
+                          className="w-full rounded-lg px-3 py-2 text-left transition-colors hover:bg-muted"
                         >
-                          <span className="text-sm font-semibold text-zinc-200">{surah.englishName}</span>
-                          <span className="text-[10px] text-zinc-500">{surah.englishNameTranslation}</span>
+                          <span className="block text-sm font-medium text-foreground">{surah.englishName}</span>
+                          <span className="text-[10px] text-muted-foreground">{surah.englishNameTranslation}</span>
                         </button>
                       ))}
                     </div>
                   ) : (
-                    <div className="px-4 py-3 text-xs text-zinc-500 text-center">No matches found</div>
+                    <div className="px-4 py-3 text-center text-xs text-muted-foreground">No matches found</div>
                   )}
                 </div>
               )}
             </div>
           </div>
-          <div
-            className={`w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 min-[1920px]:grid-cols-6 min-[2400px]:grid-cols-7 gap-4 lg:gap-5 relative ${inter.className}`}
-          >
-            <Sparkle
-              className="fill-emerald-500 text-emerald-500 absolute left-56 top-32 animate-pulse rotate-45 -z-1"
-              size={36}
-            />
-            <Circle
-              className="fill-green-600 text-green-600 absolute right-56 top-16 z-0 animate-caret-blink"
-              size={16}
-            />
-            
-            {/* 🌟 Additional scattered background stars */}
-            <Sparkle
-              className="fill-pink-500 text-pink-500 absolute right-[10%] top-[20%] animate-pulse rotate-12 -z-1 opacity-50"
-              size={24}
-            />
-            <Circle
-              className="fill-emerald-500 text-emerald-500 absolute left-[15%] top-[40%] animate-caret-blink -z-1 opacity-60"
-              size={20}
-            />
-            <Sparkle
-              className="fill-emerald-400 text-emerald-400 absolute right-[20%] top-[60%] animate-pulse -rotate-12 -z-1 opacity-50"
-              size={28}
-            />
-            <Sparkle
-              className="fill-emerald-600 text-emerald-600 absolute left-[25%] top-[80%] animate-pulse rotate-45 -z-1 opacity-40"
-              size={32}
-            />
-            <Circle
-              className="fill-yellow-500 text-yellow-500 absolute right-[15%] top-[90%] animate-caret-blink -z-1 opacity-50"
-              size={14}
-            />
 
-            <Circle
-              className="fill-white text-white absolute left-10 top-10 animate-spin opacity-10 blur-2xl z-0"
-              size={120}
-            />
-            <Circle
-              className="fill-emerald-500 text-emerald-500 absolute right-10 top-[50%] animate-spin opacity-10 blur-[100px] z-0"
-              size={180}
-            />
-
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {filteredHomeSurahs.map((surah: Surah) => (
               <Link href={`/surah/${surah.number}`} key={surah.number} prefetch={false}>
-                <div className="relative overflow-hidden border border-emerald-500/50 hover:border-emerald-500 bg-zinc-900/40 group cursor-pointer rounded-xl h-full backdrop-blur-md px-5 py-4 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10 z-4">
-                  {/* Giant Faded Watermark Number */}
-                  <div className="absolute -right-1 -bottom-4 text-6xl font-black text-emerald-500/30 group-hover:text-emerald-500 transition-colors duration-500 pointer-events-none select-none leading-none">
-                    {surah.number}
-                  </div>
-
-                  <div className="relative z-10 flex items-center justify-between gap-4">
-                    <div className="flex flex-col flex-1 space-y-0.5 text-sm min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-bold text-zinc-500 group-hover:text-emerald-400 transition-colors whitespace-nowrap">{surah.number}.</span>
-                        <p className="font-semibold text-white text-base truncate">
-                          {surah.englishName}
-                        </p>
-                      </div>
-                      <p className="text-[11px] sm:text-xs text-zinc-400 pl-4 truncate">
-                        {surah.englishNameTranslation}
-                      </p>
-                    </div>
-
-                    <p className={`${amiriquran.className} text-xl text-zinc-300 group-hover:text-emerald-300 transition-colors tracking-wide whitespace-nowrap shrink-0`}>
-                      {surah.name}
+                <div className="flex h-full items-center justify-between rounded-xl border border-border bg-card px-4 py-3 transition-colors hover:border-accent/40">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-foreground">
+                      {surah.number}. {surah.englishName}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {surah.englishNameTranslation}
                     </p>
                   </div>
+                  <p className={`${amiriquran.className} shrink-0 text-xl text-arabic`}>
+                    {surah.name}
+                  </p>
                 </div>
               </Link>
             ))}
           </div>
-        </div>
+        </section>
 
-        <div className="space-y-6">
-          <h1 className="md:text-4xl text-3xl font-semibold text-white">
-            Your Reflections
-          </h1>
-
-          <div className="w-full pb-2">
-            <div
-              className="flex gap-6 min-w-full overflow-x-auto scroll-smooth px-1"
-              style={{
-                scrollbarWidth: "thin",
-                scrollbarColor: "#3b82f6 #18181b",
-              }}
-            >
-              {savedAyahs?.length ? (
-                savedAyahs.map((a: Ayah, index) => (
+        <section className="space-y-4">
+          <h2 className="text-lg font-semibold text-foreground">Your reflections</h2>
+          <div className="flex gap-4 overflow-x-auto pb-2 custom-scrollbar">
+            {savedAyahs?.length ? (
+              savedAyahs.map((a: Ayah, index) => (
+                <div key={index} className="min-w-[280px] max-w-sm shrink-0">
                   <div
-                    key={index}
-                    className="min-w-[320px] max-w-sm flex-shrink-0"
+                    className="flex cursor-pointer flex-col gap-2 rounded-xl border border-border bg-card p-4 transition-colors hover:border-accent/40"
+                    onClick={() =>
+                      router.push(`/surah/${a.surahNumber}?ayah=${a.numberInSurah}`)
+                    }
                   >
-                    <div
-                      className="bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-500 border border-emerald-500/20 backdrop-blur-lg rounded-2xl p-5 shadow-lg hover:shadow-xl hover:scale-[1.01] transition-all duration-300 ease-in-out gap-2 flex flex-col cursor-pointer"
-                      onClick={() =>
-                        router.push(
-                          `/surah/${a.surahNumber}?ayah=${a.numberInSurah}`
-                        )
-                      }
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="bg-zinc-900/80 text-white px-2 py-0.5 rounded text-xs">
-                          Surah {a.surahNumber}
-                        </span>
-                        <span className="bg-emerald-900/80 text-white px-2 py-0.5 rounded text-xs">
-                          Ayah {a.numberInSurah}
-                        </span>
-                      </div>
-
-                      <p
-                        className={`${amiri.className} text-white leading-relaxed text-lg line-clamp-3 mt-4`}
-                      >
-                        {a.text}
-                      </p>
-                      <p className="text-white mt-1 line-clamp-2 italic">
-                        {a.translation}
-                      </p>
-
-                      <div className="flex justify-between mt-2">
-                        {/* ❌ Delete Icon */}
-                        <XIcon
-                          className="text-emerald-900 size-6 cursor-pointer"
-                          onClick={(e) => {
-                            e.stopPropagation(); // prevent card click
-                            handleRemoveSavedAyah(a);
-                          }}
-                        />
-
-                        {/* 📦 Archive Icon */}
-                        <ArchiveIcon
-                          className="text-emerald-900 size-6 cursor-pointer"
-                          onClick={(e) => {
-                            e.stopPropagation(); // prevent card click
-                            toast.info(
-                              "Sorry, that functionality isn't implemented yet."
-                            );
-                          }}
-                        />
-                      </div>
+                    <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                      <span>Surah {a.surahNumber}</span>
+                      <span>·</span>
+                      <span>Ayah {a.numberInSurah}</span>
+                    </div>
+                    <p className={`${amiri.className} line-clamp-3 text-right text-lg leading-relaxed text-arabic`}>
+                      {a.text}
+                    </p>
+                    <p className="line-clamp-2 text-sm italic leading-[1.7] text-reading">
+                      {a.translation}
+                    </p>
+                    <div className="mt-1 flex justify-between">
+                      <XIcon
+                        className="size-5 cursor-pointer text-muted-foreground hover:text-foreground"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveSavedAyah(a);
+                        }}
+                      />
+                      <ArchiveIcon
+                        className="size-5 cursor-pointer text-muted-foreground hover:text-foreground"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toast.info("Sorry, that functionality isn't implemented yet.");
+                        }}
+                      />
                     </div>
                   </div>
-                ))
-              ) : (
-                <div className="text-zinc-400 text-center py-8 w-full">
-                  No saved ayahs yet.
                 </div>
-              )}
-            </div>
-            <style jsx>{`
-              .flex::-webkit-scrollbar {
-                height: 8px;
-                background: #1e293b;
-                border-radius: 8px;
-              }
-              .flex::-webkit-scrollbar-thumb {
-                background: #3b82f6;
-                border-radius: 8px;
-              }
-            `}</style>
+              ))
+            ) : (
+              <div className="w-full py-6 text-sm text-muted-foreground">
+                No saved ayahs yet.
+              </div>
+            )}
           </div>
-        </div>
-
-
+        </section>
       </div>
     </>
   );

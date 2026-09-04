@@ -149,7 +149,7 @@ function processTranslation(rawTranslation: string) {
       if (footnoteText && !/^\d+$/.test(footnoteText)) {
         footnotes.push(footnoteText);
       }
-      return ` <span class="text-emerald-400 font-semibold cursor-pointer text-xs footnote-indicator">(${footnotes.length || content})</span>`;
+      return ` <span class="text-accent font-semibold cursor-pointer text-xs footnote-indicator">(${footnotes.length || content})</span>`;
     }
   );
 
@@ -212,7 +212,7 @@ const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRAN
   return (
     <div
       className={cn(
-        "hidden md:flex fixed top-0 items-center justify-between md:min-h-14 px-6 py-3 backdrop-blur-3xl dark:bg-zinc-900/60 bg-white/80 border-b dark:border-zinc-800/60 border-black/10 shadow-md transition-all duration-300 ease-out z-50",
+        "hidden md:flex fixed top-0 items-center justify-between md:min-h-14 px-6 py-3 pr-16 backdrop-blur-md bg-background/85 border-b border-border transition-all duration-300 ease-out z-50",
         show ? "translate-y-0" : "-translate-y-full",
         offsetLeftClass,
         widthClass
@@ -220,27 +220,27 @@ const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRAN
     >
       <div className="flex items-center gap-2.5 min-w-0">
         <div className="flex items-center gap-1.5 font-sans min-w-0">
-          <span className="text-emerald-400 font-extrabold text-base md:text-lg tracking-tight truncate drop-shadow-[0_0_8px_rgba(16,185,129,0.25)]">
+          <span className="text-foreground font-semibold text-base md:text-lg tracking-tight truncate">
             {surah?.englishName}
           </span>
           {surah?.englishNameTranslation && (
-            <span className="text-zinc-400 text-xs truncate max-w-[200px]">
+            <span className="text-muted-foreground text-xs truncate max-w-[200px]">
               ({surah?.englishNameTranslation})
             </span>
           )}
         </div>
         {surah?.revelationType && (
-          <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-semibold tracking-wider uppercase shrink-0">
+          <span className="px-2 py-0.5 rounded-full bg-muted border border-border text-muted-foreground text-[10px] font-medium tracking-wider uppercase shrink-0">
             {surah.revelationType}
           </span>
         )}
       </div>
-      <nav className="hidden lg:flex items-center gap-6 text-zinc-400 text-sm">
-        <Link href="/home" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">Home</Link>
-        <Link href="/tafsir" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">Tafsir</Link>
-        <Link href="/lexicon" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">Lexicon</Link>
-        <Link href="/ai" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">Translator</Link>
-        <Link href="/rag" className="cursor-pointer hover:text-gray-300 transition dark:text-zinc-400 text-zinc-600">AI Scholar</Link>
+      <nav className="hidden lg:flex items-center gap-6 text-muted-foreground text-sm">
+        <Link href="/home" className="hover:text-foreground transition">Home</Link>
+        <Link href="/tafsir" className="hover:text-foreground transition">Tafsir</Link>
+        <Link href="/lexicon" className="hover:text-foreground transition">Lexicon</Link>
+        <Link href="/ai" className="hover:text-foreground transition">Translator</Link>
+        <Link href="/rag" className="hover:text-foreground transition">AI Scholar</Link>
       </nav>
     </div>
   );
@@ -463,22 +463,22 @@ const AyahRow = React.memo(({
           ? "my-1.5 sm:my-2 md:my-2 p-3 sm:p-4 md:p-4 lg:p-4"
           : "my-3 sm:my-5 p-3.5 sm:p-6 md:p-7",
         isCurrentlyPlaying
-          ? "border border-emerald-500/60 bg-zinc-900/60 dark:bg-zinc-900/60 backdrop-blur-md shadow-[0_4px_25px_rgba(16,185,129,0.15)] scale-[1.005] z-50 max-h-[80vh] overflow-y-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-transparent"
-          : "border border-emerald-500/25 hover:border-emerald-500/50 bg-zinc-900/40 dark:bg-zinc-900/40 hover:shadow-[0_0_25px_rgba(16,185,129,0.1)]",
+          ? "border border-accent/50 bg-card/70 dark:bg-card/70 backdrop-blur-md  scale-[1.005] z-50 max-h-[80vh] overflow-y-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-transparent"
+          : "border border-accent/25 hover:border-accent/50 bg-card/50 dark:bg-card/50 ",
         isOtherPlaying ? "opacity-35 blur-[1px] scale-[0.995] pointer-events-none" : "opacity-100 blur-none scale-100"
       )}
       id={`ayah-${ayah.numberInSurah}`}
     >
       {isCurrentlyPlaying && (
         <div className="sticky top-0 z-50 flex justify-center w-full mb-4 sm:mb-8 mt-2 sm:mt-0 pointer-events-none">
-          <div className="pointer-events-auto flex items-center gap-3 bg-zinc-900/95 border border-emerald-500/30 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full shadow-2xl backdrop-blur-md">
-          <div className="flex items-center gap-2 pr-2 border-r border-zinc-800">
+          <div className="pointer-events-auto flex items-center gap-3 bg-card border border-accent/30 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full shadow-2xl backdrop-blur-md">
+          <div className="flex items-center gap-2 pr-2 border-r border-border">
             <div className="flex items-end gap-[2px] h-3">
-              <span className="w-[2px] h-full bg-emerald-400 animate-pulse" style={{ animationDelay: '0.1s' }}></span>
-              <span className="w-[2px] h-2/3 bg-emerald-400 animate-pulse" style={{ animationDelay: '0.2s' }}></span>
-              <span className="w-[2px] h-full bg-emerald-400 animate-pulse" style={{ animationDelay: '0.3s' }}></span>
+              <span className="w-[2px] h-full bg-accent animate-pulse" style={{ animationDelay: '0.1s' }}></span>
+              <span className="w-[2px] h-2/3 bg-accent animate-pulse" style={{ animationDelay: '0.2s' }}></span>
+              <span className="w-[2px] h-full bg-accent animate-pulse" style={{ animationDelay: '0.3s' }}></span>
             </div>
-            <span className="text-[9px] font-bold text-emerald-400 tracking-[0.15em] uppercase hidden sm:inline">Now Playing</span>
+            <span className="text-[9px] font-bold text-accent tracking-[0.15em] uppercase hidden sm:inline">Now Playing</span>
           </div>
 
           <div className="flex items-center gap-1.5">
@@ -489,7 +489,7 @@ const AyahRow = React.memo(({
                   window.dispatchEvent(new CustomEvent('changePlayerAyah', { detail: { ayah: ayah.numberInSurah - 1 } }));
                 }
               }} 
-              className="p-1 hover:bg-zinc-800 rounded-full text-zinc-300 transition"
+              className="p-1 hover:bg-muted rounded-full text-reading transition"
               title="Previous Ayah"
             >
               <SkipBack className="size-3.5" />
@@ -500,7 +500,7 @@ const AyahRow = React.memo(({
                 e.stopPropagation();
                 window.dispatchEvent(new CustomEvent('pausePlayerAudio'));
               }} 
-              className="p-1.5 bg-emerald-600 hover:bg-emerald-500 rounded-full text-white shadow-md transition"
+              className="p-1.5 bg-accent hover:bg-accent rounded-full text-foreground shadow-md transition"
               title="Pause & Return to Default Mode"
             >
               <Pause className="size-3.5 fill-current" />
@@ -511,7 +511,7 @@ const AyahRow = React.memo(({
                 e.stopPropagation();
                 window.dispatchEvent(new CustomEvent('changePlayerAyah', { detail: { ayah: ayah.numberInSurah + 1 } }));
               }} 
-              className="p-1 hover:bg-zinc-800 rounded-full text-zinc-300 transition"
+              className="p-1 hover:bg-muted rounded-full text-reading transition"
               title="Next Ayah"
             >
               <SkipForward className="size-3.5" />
@@ -522,22 +522,22 @@ const AyahRow = React.memo(({
       )}
       <div className={cn("flex flex-col items-end justify-end sm:flex-row w-full py-0", isSidebarOpen ? "sm:gap-6 gap-3" : "sm:gap-12 gap-4")}>
       <div className="h-full flex flex-row sm:order-1 order-2 sm:flex-col gap-2 sm:justify-center items-center transition-all duration-300 relative z-10 shrink-0">
-        <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs font-bold text-emerald-400">
+        <span className="px-2.5 py-1 rounded-lg bg-accent/10 border border-accent/30 text-xs font-bold text-accent">
           {surahNumber}:{ayah.numberInSurah}
         </span>
-        <div className="p-2 rounded-full hover:bg-zinc-800 transition-colors cursor-pointer inline-flex items-center justify-center">
+        <div className="p-2 rounded-full hover:bg-muted transition-colors cursor-pointer inline-flex items-center justify-center">
           <Copy
-            className="text-zinc-400"
+            className="text-muted-foreground"
             size={18}
             onClick={() => handleCopyAyah(ayah)}
           />
         </div>
         <div
           onClick={() => handleSaveAyah(ayah)}
-          className="p-2 rounded-full dark:hover:bg-zinc-800 hover:bg-[var(--sephia-500)]/45 transition-colors cursor-pointer inline-flex items-center justify-center"
+          className="p-2 rounded-full dark:hover:bg-muted hover:bg-[var(--sephia-500)]/45 transition-colors cursor-pointer inline-flex items-center justify-center"
           title="Save Ayah"
         >
-          <Save className="text-zinc-400" size={18} />
+          <Save className="text-muted-foreground" size={18} />
         </div>
         <div
           onClick={() => {
@@ -547,25 +547,25 @@ const AyahRow = React.memo(({
               window.dispatchEvent(new CustomEvent('changePlayerAyah', { detail: { ayah: ayah.numberInSurah, openFab: true } }));
             }
           }}
-          className="p-2 rounded-full dark:hover:bg-zinc-800 hover:bg-[var(--sephia-500)]/45 transition-colors cursor-pointer inline-flex items-center justify-center"
+          className="p-2 rounded-full dark:hover:bg-muted hover:bg-[var(--sephia-500)]/45 transition-colors cursor-pointer inline-flex items-center justify-center"
           title={isCurrentlyPlaying ? "Pause Recitation" : `Play Recitation for Ayah ${ayah.numberInSurah}`}
         >
           {isCurrentlyPlaying ? (
-            <Pause size={18} className="text-emerald-400" />
+            <Pause size={18} className="text-accent" />
           ) : (
-            <Play size={18} className="text-zinc-400 hover:text-emerald-400" />
+            <Play size={18} className="text-muted-foreground hover:text-accent" />
           )}
         </div>
         <button
           onClick={() => onOpenTafsirPicker(surahNumber, ayah.numberInSurah)}
-          className="p-2 rounded-full hover:bg-zinc-800 transition-colors cursor-pointer inline-flex items-center justify-center"
+          className="p-2 rounded-full hover:bg-muted transition-colors cursor-pointer inline-flex items-center justify-center"
           title="Read Tafsir"
         >
-          <ScrollText className="text-emerald-500 hover:text-emerald-400" size={18} />
+          <ScrollText className="text-accent hover:text-accent" size={18} />
         </button>
         <Link
           href={`/lexicon?surah=${surahNumber}&ayah=${ayah.numberInSurah}`}
-          className="p-2 rounded-full hover:bg-zinc-800 transition-colors cursor-pointer inline-flex items-center justify-center"
+          className="p-2 rounded-full hover:bg-muted transition-colors cursor-pointer inline-flex items-center justify-center"
           title="Read Lexicon"
         >
           <Library className="text-amber-500 hover:text-amber-400" size={18} />
@@ -603,12 +603,12 @@ const AyahRow = React.memo(({
             "text-left w-full",
             isSidebarOpen ? "pt-2 md:pt-2" : "pt-4",
             isUrduTranslation 
-              ? (isSidebarOpen ? "w-full sm:pr-4 md:pr-6" : "w-full sm:pr-8 md:pr-16 lg:pr-26")
-              : (isSidebarOpen ? "w-full md:pr-4 lg:pr-8" : "md:ml-8 lg:w-2/3 md:w-4/6")
+              ? (isSidebarOpen ? "w-full sm:pr-4 md:pr-6" : "w-full sm:pr-8 md:pr-16")
+              : (isSidebarOpen ? "w-full md:pr-4" : "reading-measure")
           )}>
             <div>
               <span
-                className="text-white md:leading-[1.5] leading-[1.8] translation-content"
+                className="text-reading md:leading-[1.7] leading-[1.7] translation-content reading-prose"
                 style={{ 
                   fontSize: getTranslationFontSize(fontSize, isUrduTranslation),
                   fontFamily: isUrduTranslation ? "var(--font-noto-nastaliq-urdu), 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', serif" : undefined,
@@ -623,25 +623,25 @@ const AyahRow = React.memo(({
             </div>
 
             {(hasFootnotesAvailable && showFootnoteIds) ? (
-              <div className="mt-3 p-4 rounded-xl bg-zinc-950/90 border border-emerald-500/30 text-sm text-zinc-100 max-h-80 overflow-y-auto custom-scrollbar relative shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
-                <div className="font-semibold text-emerald-400 uppercase tracking-wider text-[11px] sticky -top-4 -mx-4 px-4 py-2.5 bg-zinc-950/95 backdrop-blur-md z-10 mb-3 border-b border-emerald-500/20 shadow-sm flex items-center justify-between">
-                  <span className="text-emerald-400 font-bold uppercase tracking-wider text-[11px]">
+              <div className="mt-3 p-4 rounded-xl bg-background/90 border border-accent/30 text-sm text-foreground max-h-80 overflow-y-auto custom-scrollbar relative shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
+                <div className="font-semibold text-accent uppercase tracking-wider text-[11px] sticky -top-4 -mx-4 px-4 py-2.5 bg-popover backdrop-blur-md z-10 mb-3 border-b border-accent/20 shadow-sm flex items-center justify-between">
+                  <span className="text-accent font-bold uppercase tracking-wider text-[11px]">
                     FOOTNOTES & COMMENTARY NOTES
                   </span>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-md border border-emerald-500/30">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider bg-accent/10 text-accent px-2 py-0.5 rounded-md border border-accent/30">
                     {isTafsirEdition ? "EXPLANATIONS" : "FOOTNOTES"}
                   </span>
                 </div>
                 
                 <div className="space-y-4">
                   {loadingFootnotes ? (
-                    <p className="text-emerald-400/80 animate-pulse text-xs py-2">Loading notes...</p>
+                    <p className="text-accent animate-pulse text-xs py-2">Loading notes...</p>
                   ) : (
                     <>
                       {/* Dynamic Tafsir / Explanation Note for Dr. Israr, Maududi, Taqi Usmani */}
                       {fetchedFootnotes["tafsir_note"] && (
                         <div 
-                          className="leading-[2.8] text-zinc-100 text-right p-3 rounded-lg bg-zinc-900/60 border border-zinc-800/80 font-nastaliq"
+                          className="leading-[2.8] text-foreground text-right p-3 rounded-lg bg-card/70 border border-border font-nastaliq"
                           dir={isUrduTranslation ? "rtl" : "auto"}
                           style={{ 
                             fontFamily: isUrduTranslation ? "var(--font-noto-nastaliq-urdu), 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', serif" : undefined,
@@ -655,7 +655,7 @@ const AyahRow = React.memo(({
 
                       {/* Inline/extracted footnotes */}
                       {footnotes.length > 0 && footnotes.map((fn, fIdx) => (
-                        <div key={`inline-${fIdx}`} className="leading-relaxed text-zinc-200 p-2.5 rounded bg-zinc-900/60 border border-zinc-800" dir="auto">
+                        <div key={`inline-${fIdx}`} className="leading-relaxed text-foreground p-2.5 rounded bg-card/70 border border-border" dir="auto">
                           {fn}
                         </div>
                       ))}
@@ -665,7 +665,7 @@ const AyahRow = React.memo(({
                         ayah.footnoteIds.map((fId, idx) => (
                           <div 
                             key={fId} 
-                            className="leading-relaxed p-2.5 rounded bg-zinc-900/60 border border-zinc-800/80 text-zinc-100" 
+                            className="leading-relaxed p-2.5 rounded bg-card/70 border border-border text-foreground" 
                             dir={isUrduTranslation ? "rtl" : "auto"}
                             style={{ 
                               fontFamily: isUrduTranslation ? "var(--font-noto-nastaliq-urdu), 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', serif" : undefined,
@@ -674,7 +674,7 @@ const AyahRow = React.memo(({
                               color: "#f4f4f5"
                             }}
                           >
-                            <span className="text-emerald-400 font-bold mx-2 inline-block" dir="ltr">[{idx + 1}]</span>
+                            <span className="text-accent font-bold mx-2 inline-block" dir="ltr">[{idx + 1}]</span>
                             <span dangerouslySetInnerHTML={{ __html: fetchedFootnotes[fId] || "Footnote unavailable." }} />
                           </div>
                         ))
@@ -695,10 +695,10 @@ const AyahRow = React.memo(({
                   }
                   onOpenAiChat(surahNumber, ayah.numberInSurah);
                 }}
-                className="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-900/60 hover:bg-emerald-950/40 border border-emerald-500/35 hover:border-emerald-400/80 opacity-75 hover:opacity-100 transition-all cursor-pointer shadow-sm"
+                className="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card/70 hover:bg-accent/10 border border-accent/35 hover:border-accent/80 opacity-75 hover:opacity-100 transition-all cursor-pointer shadow-sm"
               >
-                <Bot size={14} className="text-emerald-400 group-hover:text-emerald-300 transition-colors animate-bounce" />
-                <span className="text-[11px] font-semibold tracking-wide text-emerald-300 group-hover:text-white transition-colors">
+                <Bot size={14} className="text-accent group-hover:text-accent transition-colors animate-bounce" />
+                <span className="text-[11px] font-semibold tracking-wide text-accent group-hover:text-foreground transition-colors">
                   Ask Tafsir Scholar
                 </span>
               </button>
@@ -706,11 +706,11 @@ const AyahRow = React.memo(({
               {hasFootnotesAvailable && (
                 <button
                   onClick={handleToggleFootnotes}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-900/60 hover:bg-emerald-950/40 border border-emerald-500/35 hover:border-emerald-400/80 opacity-75 hover:opacity-100 transition-all cursor-pointer group shadow-sm"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card/70 hover:bg-accent/10 border border-accent/35 hover:border-accent/80 opacity-75 hover:opacity-100 transition-all cursor-pointer group shadow-sm"
                   title={showFootnoteIds ? "Hide Footnotes" : "Show Footnotes & Commentary"}
                 >
-                  <MessageSquareText size={14} className="text-emerald-400 group-hover:text-emerald-300 transition-colors" />
-                  <span className="text-[11px] font-semibold tracking-wide text-emerald-300 group-hover:text-white transition-colors">
+                  <MessageSquareText size={14} className="text-accent group-hover:text-accent transition-colors" />
+                  <span className="text-[11px] font-semibold tracking-wide text-accent group-hover:text-foreground transition-colors">
                     {showFootnoteIds ? "Hide Notes" : "Footnotes"}
                   </span>
                 </button>
@@ -994,8 +994,8 @@ export default function SurahReaderClient({
         <div className="flex items-center gap-3">
           <p className="text-3xl">🧾</p>
           <div>
-            <p className="font-semibold text-emerald-500">Already saved</p>
-            <p className="text-sm text-black">
+            <p className="font-semibold text-accent">Already saved</p>
+            <p className="text-sm text-foreground">
               This ayah is already in your saved list.
             </p>
           </div>
@@ -1011,14 +1011,14 @@ export default function SurahReaderClient({
       <div className="flex items-center gap-3">
         <Check size={36} />
         <div>
-          <p className="font-semibold text-emerald-500">Saved Ayah</p>
+          <p className="font-semibold text-accent">Saved Ayah</p>
         </div>
       </div>
     );
   }, [surahNumber]);
 
   return (
-    <div className="flex w-full min-h-[100dvh] relative dark:bg-zinc-900 bg-[var(--sephia-primary)]">
+    <div className="flex w-full min-h-[100dvh] relative bg-background">
       {/* Loading Overlay */}
       <AnimatePresence>
         {isNavigatingAyah && (
@@ -1026,23 +1026,23 @@ export default function SurahReaderClient({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[99999] bg-zinc-950/80 backdrop-blur-md flex items-center justify-center"
+            className="fixed inset-0 z-[99999] bg-background/80 backdrop-blur-md flex items-center justify-center"
           >
             <motion.div
               initial={{ scale: 0.9, y: 10, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.9, y: 10, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="relative flex flex-col items-center gap-6 bg-zinc-900/90 border border-emerald-500/30 p-10 rounded-3xl shadow-[0_0_50px_rgba(16,185,129,0.15)] overflow-hidden"
+              className="relative flex flex-col items-center gap-6 bg-card border border-accent/30 p-10 rounded-3xl  overflow-hidden"
             >
-              <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 to-transparent animate-pulse" />
+              <div className="absolute inset-0 bg-gradient-to-b from-accent/5 to-transparent animate-pulse" />
               <div className="relative z-10 flex items-center justify-center">
-                <div className="absolute size-16 border-2 border-emerald-500/20 border-t-emerald-400 rounded-full animate-spin shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
-                <LogoIcon className="size-6 text-emerald-400 animate-pulse drop-shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
+                <div className="absolute size-16 border-2 border-accent/20 border-t-accent rounded-full animate-spin" />
+                <LogoIcon className="size-6 text-accent animate-pulse " />
               </div>
               <div className="relative z-10 space-y-1.5 text-center mt-2">
-                <p className="text-zinc-100 font-bold tracking-[0.2em] uppercase text-xs">Navigating</p>
-                <p className="text-emerald-500/80 text-[10px] font-mono tracking-wider">LOCATING VERSE...</p>
+                <p className="text-foreground font-bold tracking-[0.2em] uppercase text-xs">Navigating</p>
+                <p className="text-accent text-[10px] font-mono tracking-wider">LOCATING VERSE...</p>
               </div>
             </motion.div>
           </motion.div>
@@ -1050,7 +1050,7 @@ export default function SurahReaderClient({
       </AnimatePresence>
 
       <section className={cn(
-        "flex items-center flex-col dark:bg-zinc-900 bg-[var(--sephia-primary)] dark:text-white text-black relative pb-6 md:pb-6 transition-all duration-300",
+        "flex items-center flex-col bg-background text-foreground relative pb-6 md:pb-6 transition-all duration-300",
         aiChatContext ? "w-full lg:w-[calc(100%-420px)] xl:w-[calc(100%-450px)]" : "w-full flex-1"
       )}>
         <DesktopSurahHeader 
@@ -1061,45 +1061,44 @@ export default function SurahReaderClient({
         />
 
         <div className="flex items-center text-center w-full flex-col pt-16 md:pt-16 mb-1 md:mb-2 relative z-20">
-          <BismillahIcon className="dark:text-white text-black lg:max-w-56 md:max-w-48 max-w-36 sm:max-w-44" />
+          <BismillahIcon className="text-arabic lg:max-w-56 md:max-w-48 max-w-36 sm:max-w-44" />
           
           {surahInfo && (
             <div className="mt-1.5 mb-1 flex flex-col items-center w-full max-w-3xl">
               <button
                 onClick={() => setShowSurahContext(!showSurahContext)}
-                className="group relative inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/50 hover:bg-emerald-500/20 hover:border-emerald-400 cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)] transition-all duration-300"
+                  className="group relative inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-muted border border-border hover:bg-card cursor-pointer transition-colors"
                 title={showSurahContext ? "Hide Context" : "Read Surah Context and Theme"}
               >
-                <div className="absolute inset-0 rounded-full bg-emerald-400/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <Compass size={14} className="text-emerald-400 group-hover:text-emerald-300 transition-colors relative z-10 animate-[spin_4s_linear_infinite]" />
-                <span className="text-[11px] md:text-[12px] font-bold tracking-widest text-emerald-300 group-hover:text-white transition-colors uppercase relative z-10">
+                <Compass size={14} className="text-muted-foreground relative z-10" />
+                <span className="text-[11px] md:text-[12px] font-medium tracking-wide text-muted-foreground hover:text-foreground transition-colors uppercase relative z-10">
                   {showSurahContext ? "Close Context" : "Context & Theme"}
                 </span>
               </button>
 
               {showSurahContext && (
-                <div className="mt-4 p-5 sm:p-6 w-full rounded-2xl bg-zinc-950/95 border border-emerald-500/40 text-sm text-zinc-100 shadow-[0_10px_40px_rgba(16,185,129,0.15)] relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent"></div>
+                <div className="mt-4 p-5 sm:p-6 w-full rounded-xl bg-card border border-border text-sm text-reading relative animate-in fade-in slide-in-from-top-4 duration-500">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent/40 to-transparent"></div>
                   
-                  <div className="font-semibold text-emerald-400 uppercase tracking-wider text-[11px] mb-5 border-b border-emerald-500/20 pb-3 flex items-center justify-between">
-                    <span className="text-emerald-400 font-bold uppercase tracking-wider text-[12px] flex items-center gap-2">
+                  <div className="font-semibold text-accent uppercase tracking-wider text-[11px] mb-5 border-b border-accent/20 pb-3 flex items-center justify-between">
+                    <span className="text-accent font-bold uppercase tracking-wider text-[12px] flex items-center gap-2">
                       <MapIcon size={15} />
                       CONTEXT & THEME OF {surahInfo.surah_name?.toUpperCase() || surah?.englishName?.toUpperCase()}
                     </span>
-                    <button onClick={() => setShowSurahContext(false)} className="hover:bg-zinc-800 p-1.5 rounded-full transition-colors text-zinc-400 hover:text-white">
+                    <button onClick={() => setShowSurahContext(false)} className="hover:bg-muted p-1.5 rounded-full transition-colors text-muted-foreground hover:text-foreground">
                       <span className="sr-only">Close</span>
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                     </button>
                   </div>
                   
-                  <div className="space-y-4 leading-relaxed text-zinc-300">
+                  <div className="space-y-4 leading-relaxed text-reading">
                     {surahInfo.bismillah_pre_ayah && (
-                      <p className="text-xs text-emerald-400/90 italic font-mono bg-emerald-500/5 p-2 rounded-lg border border-emerald-500/10 mb-3">
+                      <p className="text-xs text-accent italic font-mono bg-accent/10 p-2 rounded-lg border border-accent/15 mb-3">
                         Note: Bismillah is included as part of this Surah.
                       </p>
                     )}
                     <div 
-                      className="text-zinc-200 leading-relaxed max-w-none text-xs sm:text-sm [&>h2]:text-emerald-400 [&>h2]:font-bold [&>h2]:text-sm sm:[&>h2]:text-base [&>h2]:mt-4 [&>h2]:mb-1.5 [&>h2:first-child]:mt-0 [&>h3]:text-emerald-300 [&>h3]:font-bold [&>h3]:text-xs sm:[&>h3]:text-sm [&>h3]:mt-3 [&>h3]:mb-1 [&>p]:mb-2.5 [&>ol]:list-decimal [&>ol]:ml-5 [&>ol]:mb-2.5 [&>ul]:list-disc [&>ul]:ml-5 [&>ul]:mb-2.5 [&>li]:mb-1 [&>a]:text-emerald-400 [&>a:hover]:underline [&>strong]:text-zinc-100"
+                      className="text-foreground leading-relaxed max-w-none text-xs sm:text-sm [&>h2]:text-accent [&>h2]:font-bold [&>h2]:text-sm sm:[&>h2]:text-base [&>h2]:mt-4 [&>h2]:mb-1.5 [&>h2:first-child]:mt-0 [&>h3]:text-accent [&>h3]:font-bold [&>h3]:text-xs sm:[&>h3]:text-sm [&>h3]:mt-3 [&>h3]:mb-1 [&>p]:mb-2.5 [&>ol]:list-decimal [&>ol]:ml-5 [&>ol]:mb-2.5 [&>ul]:list-disc [&>ul]:ml-5 [&>ul]:mb-2.5 [&>li]:mb-1 [&>a]:text-accent [&>a:hover]:underline [&>strong]:text-foreground"
                       dangerouslySetInnerHTML={{ __html: surahInfo.heading || surahInfo.text }}
                     />
                   </div>
@@ -1109,7 +1108,7 @@ export default function SurahReaderClient({
           )}
         </div>
 
-        <div className="flex flex-col w-full min-h-[100dvh] px-2 sm:px-4 md:px-6 lg:px-8">
+        <div className="flex flex-col w-full min-h-[100dvh] px-3 sm:px-6 md:px-10 lg:px-16 max-w-4xl mx-auto">
           <Virtuoso
             ref={virtuosoRef}
             useWindowScroll

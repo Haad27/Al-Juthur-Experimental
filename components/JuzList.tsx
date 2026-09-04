@@ -162,14 +162,14 @@ const JuzList = ({ searchQuery }: { searchQuery: string }) => {
           className={cn(
             "block rounded-md py-2 hover:bg-[var(--sephia-300)] transition flex items-center gap-6 w-full",
             juz.juz === Number(selectedJuz) &&
-              "dark:bg-zinc-800 bg-[var(--sephia-300)] font-bold"
+              "dark:bg-muted bg-[var(--sephia-300)] font-bold"
           )}
         >
-          <span className="dark:text-gray-400 text-black w-6 text-right">
+          <span className="dark:text-gray-400 text-foreground w-6 text-right">
             {juz.juz}
           </span>
           <div className="flex flex-col">
-            <span className="dark:text-white text-black">Juz {juz.juz}</span>
+            <span className="text-foreground text-foreground">Juz {juz.juz}</span>
           </div>
         </Link>
       ))}
