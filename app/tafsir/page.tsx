@@ -535,6 +535,16 @@ function TafsirContent() {
     }
   }, [urlSurah]);
 
+  useEffect(() => {
+    if (urlAyah) {
+      const a = parseInt(urlAyah, 10);
+      if (!isNaN(a) && a >= 1) {
+        setTargetAyahToScroll({ surah: activeSurah, ayah: a });
+        pendingScrollAyahRef.current = a;
+      }
+    }
+  }, [urlAyah, activeSurah]);
+
 
 
   // Scroll behavior: headroom hide-on-scroll top nav across modes
@@ -559,18 +569,47 @@ function TafsirContent() {
     };
   }, [activeAuthor]);
 
-  const scrollToAyah = useCallback((num: number) => {
+  const currentAyahIndexRef = useRef<number>(currentAyahIndex);
+  useEffect(() => {
+    currentAyahIndexRef.current = currentAyahIndex;
+  }, [currentAyahIndex]);
+
+  const scrollToAyah = useCallback((num: number, forceInstant?: boolean) => {
     const targetIdx = Math.max(0, num - 1);
     setCurrentAyahIndex(targetIdx);
-    virtuosoRef.current?.scrollToIndex({ index: targetIdx, align: "start", behavior: "smooth" });
+
+    const distance = Math.abs(targetIdx - currentAyahIndexRef.current);
+    // Smooth scrolling across unmeasured virtual items fails in browsers because
+    // dynamic height updates cancel the ongoing smooth scroll (e.g. stops at verse ~38).
+    // Instant jump ("auto") is required for distant jumps to cleanly mount and measure the target!
+    const useSmooth = !forceInstant && distance <= 3;
+    const behavior: ScrollBehavior = useSmooth ? "smooth" : "auto";
+
+    virtuosoRef.current?.scrollToIndex({
+      index: targetIdx,
+      align: "start",
+      behavior,
+    });
+
     const trackerEl = document.getElementById(`ayah-tracker-${num}`);
     if (trackerEl) {
       trackerEl.scrollIntoView({ behavior: "smooth", block: "center" });
     }
-    const cardEl = document.getElementById(`ayah-${num}`);
-    if (cardEl) {
-      cardEl.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+
+    // Ensure the target card is scrolled exactly into view once Virtuoso mounts it into the DOM.
+    // CSS scroll-mt-24 ensures it aligns with comfortable breathing room below sticky top headers.
+    let attempts = 0;
+    const maxAttempts = 8;
+    const ensureCardAligned = () => {
+      attempts++;
+      const cardEl = document.getElementById(`ayah-${num}`);
+      if (cardEl) {
+        cardEl.scrollIntoView({ behavior, block: "start" });
+      } else if (attempts < maxAttempts) {
+        setTimeout(ensureCardAligned, 50);
+      }
+    };
+    ensureCardAligned();
   }, []);
 
   const { setImmersiveMode } = useGlobalState();
@@ -587,40 +626,18 @@ function TafsirContent() {
     };
   }, [activeAuthor, setImmersiveMode]);
 
-  // When async loading completes, execute pending scroll to target ayah
+  // When async loading completes or targetAyahToScroll changes, scroll to target ayah
   useEffect(() => {
-    if (!loadingEntries && Object.keys(loadedTafsir).length > 0) {
-      const targetAyah = targetAyahToScroll?.ayah || pendingScrollAyahRef.current;
-      if (targetAyah && targetAyah > 0) {
-        scrollToAyah(targetAyah);
-        const t1 = setTimeout(() => {
-          scrollToAyah(targetAyah);
-        }, 100);
-        const t2 = setTimeout(() => {
-          scrollToAyah(targetAyah);
-          setTargetAyahToScroll(null);
-          pendingScrollAyahRef.current = null;
-        }, 300);
-        return () => {
-          clearTimeout(t1);
-          clearTimeout(t2);
-        };
-      }
-    }
-  }, [loadingEntries, loadedTafsir, targetAyahToScroll, scrollToAyah]);
+    const targetAyah = targetAyahToScroll?.ayah || pendingScrollAyahRef.current;
+    if (!targetAyah || targetAyah <= 0) return;
+    if (loadingEntries || Object.keys(loadedTafsir).length === 0) return;
 
-  // Auto scroll to target ayah when set by Ayah Picker if already loaded
-  useEffect(() => {
-    if (targetAyahToScroll && targetAyahToScroll.surah === activeSurah && !loadingEntries && Object.keys(loadedTafsir).length > 0) {
-      scrollToAyah(targetAyahToScroll.ayah);
-      const timer = setTimeout(() => {
-        scrollToAyah(targetAyahToScroll.ayah);
-        setTargetAyahToScroll(null);
-        pendingScrollAyahRef.current = null;
-      }, 150);
-      return () => clearTimeout(timer);
-    }
-  }, [targetAyahToScroll, activeSurah, loadingEntries, loadedTafsir, scrollToAyah]);
+    if (targetAyahToScroll && targetAyahToScroll.surah !== activeSurah) return;
+
+    scrollToAyah(targetAyah, true);
+    setTargetAyahToScroll(null);
+    pendingScrollAyahRef.current = null;
+  }, [loadingEntries, loadedTafsir, targetAyahToScroll, activeSurah, scrollToAyah]);
 
   const prevSurahRef = useRef<number>(activeSurah);
   // Reset to Verse 1 at the top of the page when changing Surah (unless a target ayah was selected)
@@ -630,7 +647,7 @@ function TafsirContent() {
       setShowSurahContext(false);
       if (!targetAyahToScroll && !pendingScrollAyahRef.current) {
         setCurrentAyahIndex(0);
-        virtuosoRef.current?.scrollToIndex({ index: 0, align: "start" });
+        virtuosoRef.current?.scrollToIndex({ index: 0, align: "start", behavior: "auto" });
         window.scrollTo({ top: 0, behavior: "smooth" });
         const trackerEl = document.getElementById(`ayah-tracker-1`);
         if (trackerEl) {
@@ -1038,6 +1055,8 @@ function TafsirContent() {
                   ref={virtuosoRef}
                   useWindowScroll
                   totalCount={currentSurahMeta.numberOfAyahs}
+                  defaultItemHeight={600}
+                  overscan={600}
                   initialTopMostItemIndex={parsedUrlAyah && parsedUrlAyah > 0 ? Math.max(0, parsedUrlAyah - 1) : 0}
                   rangeChanged={({ startIndex }) => {
                     if (typeof startIndex === "number" && startIndex >= 0) {
@@ -1048,7 +1067,7 @@ function TafsirContent() {
                     const entry = loadedTafsir[idx];
                     if (!entry) {
                       return (
-                        <div key={`skeleton-${idx}`} className="border border-border bg-card/50 rounded-xl p-6 mb-6 animate-pulse flex flex-col gap-4">
+                        <div key={`skeleton-${idx}`} className="border border-border bg-card/50 rounded-xl p-6 pb-6 animate-pulse flex flex-col gap-4">
                           <div className="flex justify-between items-center border-b border-border pb-3">
                             <div className="w-20 h-6 bg-muted rounded-lg" />
                             <div className="w-16 h-6 bg-muted/80 rounded" />
