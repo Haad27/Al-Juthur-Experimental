@@ -9,7 +9,6 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import LoadingScreen from "@/components/landing3d/LoadingScreen";
 import LogoIcon from "@/components/svg/icons/LogoIcon";
-import ThemeToggleButton from "@/components/ThemeToggleButton";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -108,10 +107,6 @@ export default function LandingPage() {
   return (
     <div ref={mainRef} className="relative w-full bg-black text-white selection:bg-accent/30">
       <LoadingScreen />
-      {/* Floating Theme Toggle (landing page only) */}
-      <div className="fixed top-4 right-4 z-[80]">
-        <ThemeToggleButton />
-      </div>
       {/* Fixed 3D Canvas — persists behind entire page */}
       <div className="fixed inset-0 z-0">
         <Scene avatars={APP_IMAGES} captions={APP_CAPTIONS} scrollProgress={scrollProgress} />

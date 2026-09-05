@@ -147,6 +147,8 @@
 html, body {
   background-color: var(--background);
   color: var(--foreground);
+  overflow-x: clip;
+  max-width: 100vw;
 }
 
 /* Reading measure: ~65–75 characters per line */

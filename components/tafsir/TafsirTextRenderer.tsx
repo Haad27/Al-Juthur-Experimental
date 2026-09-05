@@ -103,7 +103,7 @@ export default function TafsirTextRenderer({
         if (contentInside) {
           return contentInside.replace(
             /([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u08E4-\u08FE\uFB50-\uFDFF\uFE70-\uFEFF]+(?:[\s\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u08E4-\u08FE\uFB50-\uFDFF\uFE70-\uFEFF\d\(\)\[\]«».,;:؟!]+)*[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u08E4-\u08FE\uFB50-\uFDFF\uFE70-\uFEFF]+|[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u08E4-\u08FE\uFB50-\uFDFF\uFE70-\uFEFF]+)/g,
-            '<span style="font-family: \'Noto Naskh Arabic\', \'Amiri\', serif; font-size: 1.25em; line-height: 2.2; font-weight: normal; color: var(--arabic); display: inline-block; text-align: right;" dir="rtl">$1</span>'
+            '<span style="font-family: \'Noto Naskh Arabic\', \'Amiri\', serif; font-size: 1.25em; line-height: 2.2; font-weight: normal; color: var(--arabic); display: inline; unicode-bidi: isolate; text-align: right;" dir="rtl">$1</span>'
           );
         }
         return match;
@@ -238,9 +238,9 @@ export default function TafsirTextRenderer({
   const displayedBlocks = isLocked ? blocks.slice(0, 3) : blocks;
 
   return (
-    <div className="relative">
+    <div className="relative w-full max-w-full overflow-hidden">
       <div
-        className={`space-y-4 ${isRtl ? "text-right" : "text-left"} ${
+        className={`space-y-4 break-words [overflow-wrap:anywhere] ${isRtl ? "text-right" : "text-left"} ${
           isLocked ? "overflow-hidden max-h-[160px] [mask-image:linear-gradient(to_bottom,black_30%,transparent_100%)] select-none pointer-events-none" : ""
         }`}
         dir={isRtl ? "rtl" : "ltr"}

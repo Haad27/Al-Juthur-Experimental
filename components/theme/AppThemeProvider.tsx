@@ -10,7 +10,7 @@ export default function AppThemeProvider({
   return (
     <ThemeProvider
       attribute="class"
-      defaultTheme="light"
+      defaultTheme="dark"
       enableSystem={false}
       storageKey="theme"
       disableTransitionOnChange

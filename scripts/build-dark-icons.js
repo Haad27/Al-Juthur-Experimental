@@ -1,5 +1,10 @@
+const sharp = require('sharp');
+const fs = require('fs');
+const path = require('path');
 
-<svg width="512" height="512" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+// SVG template for dark icon matching Pic 2
+const getSvg = (size, isTransparent = false) => `
+<svg width="${size}" height="${size}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="aljuthur-book-grad" x1="15" y1="15" x2="85" y2="90" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#C4A574"/>
@@ -17,7 +22,7 @@
     </radialGradient>
   </defs>
 
-  <rect width="100" height="100" fill="#121212"/>
+  ${!isTransparent ? '<rect width="100" height="100" fill="#121212"/>' : ''}
   <circle cx="50" cy="55" r="48" fill="url(#aljuthur-glow)"/>
 
   <g transform="translate(10, 10) scale(0.8)">
@@ -49,3 +54,52 @@
     <path d="M 53 74 C 58 79 64 85 70 90.5 C 68 89.5 63.5 85.5 58.5 80.5 Z" fill="url(#aljuthur-roots-grad)"/>
   </g>
 </svg>
+`;
+
+async function generate() {
+  const rootDir = path.join(__dirname, '..');
+  const favDir = path.join(rootDir, 'public', 'assets', 'favicon');
+  
+  // 1. Generate 512x512
+  const svg512 = getSvg(512, false);
+  const buf512 = Buffer.from(svg512);
+  await sharp(buf512).resize(512, 512).png().toFile(path.join(favDir, 'android-chrome-512x512.png'));
+  console.log('Generated android-chrome-512x512.png');
+
+  // 2. Generate 192x192
+  const svg192 = getSvg(192, false);
+  const buf192 = Buffer.from(svg192);
+  await sharp(buf192).resize(192, 192).png().toFile(path.join(favDir, 'android-chrome-192x192.png'));
+  console.log('Generated android-chrome-192x192.png');
+
+  // 3. Generate 180x180 (Apple Touch Icon)
+  const svg180 = getSvg(180, false);
+  const buf180 = Buffer.from(svg180);
+  await sharp(buf180).resize(180, 180).png().toFile(path.join(favDir, 'apple-touch-icon.png'));
+  console.log('Generated apple-touch-icon.png');
+
+  // 4. Generate 32x32
+  const svg32 = getSvg(32, false);
+  const buf32 = Buffer.from(svg32);
+  await sharp(buf32).resize(32, 32).png().toFile(path.join(favDir, 'favicon-32x32.png'));
+  console.log('Generated favicon-32x32.png');
+
+  // 5. Generate 16x16
+  const svg16 = getSvg(16, false);
+  const buf16 = Buffer.from(svg16);
+  await sharp(buf16).resize(16, 16).png().toFile(path.join(favDir, 'favicon-16x16.png'));
+  console.log('Generated favicon-16x16.png');
+
+  // 6. Generate favicon.ico (using 32x32 png)
+  await sharp(buf32).resize(32, 32).png().toFile(path.join(favDir, 'favicon.ico'));
+  await sharp(buf32).resize(32, 32).png().toFile(path.join(rootDir, 'public', 'favicon.ico'));
+  console.log('Generated favicon.ico');
+
+  // 7. Save vector SVGs
+  fs.writeFileSync(path.join(favDir, 'favicon.svg'), svg512);
+  fs.writeFileSync(path.join(rootDir, 'public', 'favicon.svg'), svg512);
+  fs.writeFileSync(path.join(rootDir, 'app', 'icon.svg'), svg512);
+  console.log('Updated favicon.svg and app/icon.svg');
+}
+
+generate().catch(console.error);
