@@ -7,6 +7,7 @@ import { ALL_TRANSLATION_OPTIONS, TranslationOption } from "@/lib/translationsMa
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Search, Check, ChevronDown, Languages, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { isFuzzyMatch } from "@/lib/searchUtils";
 
 const POPULAR_LANGUAGES = [
   "All",
@@ -68,13 +69,13 @@ export default function TranslationSelector() {
 
     // Filter by search text query
     if (search.trim()) {
-      const query = search.toLowerCase();
+      const query = search.trim();
       list = list.filter(
         (opt) =>
-          opt.englishName.toLowerCase().includes(query) ||
-          opt.languageLabel.toLowerCase().includes(query) ||
-          opt.name.toLowerCase().includes(query) ||
-          opt.identifier.toLowerCase().includes(query)
+          isFuzzyMatch(query, opt.englishName) ||
+          isFuzzyMatch(query, opt.languageLabel) ||
+          isFuzzyMatch(query, opt.name) ||
+          isFuzzyMatch(query, opt.identifier)
       );
     }
 

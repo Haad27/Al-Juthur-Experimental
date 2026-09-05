@@ -30,6 +30,7 @@ import { Search, SlidersHorizontal, ChevronRight, ArrowLeft } from "lucide-react
 import { SURAHS_DATA } from "@/lib/surahsData";
 import { useAudioStore } from "@/lib/stores/audioStore";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
+import { isSurahMatch, parseSurahVerseReference } from "@/lib/searchUtils";
 
 const MobileSheet = ({
   isOpen,
@@ -68,8 +69,11 @@ const MobileSheet = ({
     }
   }, [surahNumber, isOpen, activeTab, surahs]);
 
+  const parsedVerseRef = parseSurahVerseReference(searchQuery);
+  const targetAyahFromSearch = parsedVerseRef?.ayahNumber;
+
   const filteredSurahs = surahs?.filter((surah: Surah) =>
-    surah.englishName.toLowerCase().includes(searchQuery.toLowerCase())
+    isSurahMatch(searchQuery, surah)
   );
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -249,7 +253,7 @@ const MobileSheet = ({
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     setSearchQuery(e.target.value);
                   }} // Update search query on input change
-                  placeholder="Search by Surah"
+                  placeholder="Search Surah (e.g. Al-Nur, 24, 2:255)..."
                   className="bg-muted text-foreground border-0"
                 />
               </div>
@@ -262,7 +266,11 @@ const MobileSheet = ({
                   <Link
                     key={surah.number}
                     id={`mobile-surah-${surah.number}`}
-                    href={`/surah/${surah.number}`}
+                    href={
+                      targetAyahFromSearch && targetAyahFromSearch <= (surah.numberOfAyahs || 999)
+                        ? `/surah/${surah.number}?ayah=${targetAyahFromSearch}`
+                        : `/surah/${surah.number}`
+                    }
                     title={`${surah.englishName} — ${surah.englishNameTranslation}`}
                     onClick={() => setIsOpen(false)}
                     className={cn(

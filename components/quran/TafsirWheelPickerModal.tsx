@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { X, Search, Sparkles, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { isFuzzyMatch } from "@/lib/searchUtils";
+import { isFuzzyMatch, isTafsirMatch } from "@/lib/searchUtils";
 import { getTafsirFameRank, getLanguagePriority } from "@/lib/tafsirRanking";
 
 interface Author {
@@ -218,11 +218,8 @@ export default function TafsirWheelPickerModal({
   const filteredAuthors = useMemo(() => {
     if (!searchQuery.trim()) return allAuthors;
     const query = searchQuery.trim();
-    return allAuthors.filter(
-      (a) =>
-        isFuzzyMatch(query, a.author.name) ||
-        (a.author.authorName && isFuzzyMatch(query, a.author.authorName)) ||
-        isFuzzyMatch(query, a.langName)
+    return allAuthors.filter((a) =>
+      isTafsirMatch(query, a.author, { name: a.langName })
     );
   }, [allAuthors, searchQuery]);
 

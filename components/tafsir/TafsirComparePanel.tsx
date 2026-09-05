@@ -11,6 +11,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TafsirTextRenderer from "@/components/tafsir/TafsirTextRenderer";
 import { cn } from "@/lib/utils";
+import { isTafsirMatch } from "@/lib/searchUtils";
 
 interface Author {
   id: number;
@@ -138,13 +139,10 @@ export default function TafsirComparePanel({
   };
 
   const filteredCatalog = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = query.trim();
     if (!q) return catalog.slice(0, 40);
     return catalog
-      .filter((c) => {
-        const hay = `${c.author.name} ${c.author.authorName || ""} ${c.languageName}`.toLowerCase();
-        return hay.includes(q);
-      })
+      .filter((c) => isTafsirMatch(q, c.author, { name: c.languageName }))
       .slice(0, 40);
   }, [catalog, query]);
 

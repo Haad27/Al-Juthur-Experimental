@@ -33,6 +33,7 @@ import { getTafsirFameRank, getLanguagePriority, getTafsirDifficulty } from "@/l
 import { getTafsirWarning } from "@/lib/tafsirWarnings";
 import InlineTranslation from "@/components/shared/InlineTranslation";
 import AlJuthurLoadingProgress from "@/components/shared/AlJuthurLoadingProgress";
+import { isTafsirMatch } from "@/lib/searchUtils";
 
 interface Author {
   id: number;
@@ -114,21 +115,7 @@ const matchesSmartSearch = (
   language: Language,
   query: string
 ): boolean => {
-  if (!query.trim()) return true;
-
-  const normalizedQuery = normalizeText(query);
-  const queryTokens = normalizedQuery.split(" ").filter(Boolean);
-
-  const rawTarget = `${author.name} ${author.authorName || ""} ${language.name} ${
-    author.tags?.map((t) => t.name).join(" ") || ""
-  } ${author.era || ""}`;
-
-  const normalizedTarget = normalizeText(rawTarget);
-  const strippedTarget = rawTarget.toLowerCase().replace(/[^a-z0-9]/g, "");
-
-  return queryTokens.every((token) => {
-    return normalizedTarget.includes(token) || strippedTarget.includes(token);
-  });
+  return isTafsirMatch(query, author, language);
 };
 
 const TafsirFootnotesLoader = ({ 

@@ -5,7 +5,7 @@ import { X, BookOpen, MapPin, Sparkles, Search, Hash } from "lucide-react";
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
 import { amiriquran } from "@/app/fonts";
 import { cn } from "@/lib/utils";
-import { isFuzzyMatch, findSurahMatchIndex, convertEasternToWesternDigits } from "@/lib/searchUtils";
+import { isFuzzyMatch, findSurahMatchIndex, convertEasternToWesternDigits, parseSurahVerseReference } from "@/lib/searchUtils";
 
 interface AyahWheelPickerModalProps {
   isOpen: boolean;
@@ -262,6 +262,14 @@ export default function AyahWheelPickerModal({
                 const foundIdx = findSurahMatchIndex(val, SURAHS_DATA);
                 if (foundIdx !== -1) {
                   setSelectedSurahIndex(foundIdx);
+                  const parsed = parseSurahVerseReference(val);
+                  if (parsed?.ayahNumber) {
+                    const matchedSurah = SURAHS_DATA[foundIdx];
+                    if (parsed.ayahNumber <= matchedSurah.numberOfAyahs) {
+                      setSelectedAyah(parsed.ayahNumber);
+                      setVerseInputQuery(String(parsed.ayahNumber));
+                    }
+                  }
                 }
               }}
               className="w-full bg-card border-2 border-accent/40 hover:border-accent focus:border-accent rounded-xl sm:rounded-2xl pl-9 pr-3 py-2 text-xs sm:text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all "

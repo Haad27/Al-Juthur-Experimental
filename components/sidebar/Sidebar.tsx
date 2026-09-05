@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { motion } from "framer-motion";
 import { BookOpen, SlidersHorizontal, Search } from "lucide-react";
 import { useAudioStore } from "@/lib/stores/audioStore";
+import { isSurahMatch, parseSurahVerseReference } from "@/lib/searchUtils";
 
 type TabKey = "surah" | "settings";
 const tabs: { key: TabKey; label: string; icon: React.ReactNode }[] = [
@@ -98,9 +99,10 @@ const Sidebar = () => {
       return next;
     });
   };
-  const filteredSurahs = surahs.filter((surah) =>
-    surah.englishName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const parsedVerseRef = parseSurahVerseReference(searchQuery);
+  const targetAyahFromSearch = parsedVerseRef?.ayahNumber;
+
+  const filteredSurahs = surahs.filter((surah) => isSurahMatch(searchQuery, surah));
   // calculate pill position & size (three tabs)
   const idx = tabs.findIndex((t) => t.key === activeTab);
   const pillPct = 100 / tabs.length;
@@ -173,7 +175,7 @@ const Sidebar = () => {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search Surah by name..."
+                placeholder="Search Surah (e.g. Al-Nur, 24, 2:255)..."
                 className="pl-9 pr-3 py-2 bg-card/90 dark:bg-card/90 dark:text-foreground border border-border focus:border-accent/50 rounded-xl text-xs placeholder:text-muted-foreground transition-all shadow-inner"
               />
             </div>
@@ -218,7 +220,11 @@ const Sidebar = () => {
                 <Link
                   key={surah.number}
                   id={`sidebar-surah-${surah.number}`}
-                  href={`/surah/${surah.number}`}
+                  href={
+                    targetAyahFromSearch && targetAyahFromSearch <= (surah.numberOfAyahs || 999)
+                      ? `/surah/${surah.number}?ayah=${targetAyahFromSearch}`
+                      : `/surah/${surah.number}`
+                  }
                   title={`${surah.englishName} — ${surah.englishNameTranslation}`}
                   className={cn(
                     "p-3 rounded-2xl border transition-all duration-200 flex items-center justify-between group cursor-pointer",

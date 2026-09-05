@@ -23,6 +23,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { isFuzzyMatch, parseSurahVerseReference } from "@/lib/searchUtils";
 import { 
   getLastReadTafsir, 
   getSavedTafsirs, 
@@ -145,12 +146,14 @@ export default function SavedPage() {
   const filteredTafsirs = useMemo(() => {
     let list = [...savedTafsirs];
     if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
+      const q = searchQuery.trim();
+      const parsedRef = parseSurahVerseReference(q);
       list = list.filter(
         (t) =>
-          t.surahName.toLowerCase().includes(q) ||
-          t.authorName.toLowerCase().includes(q) ||
-          t.tafsirSnippet.toLowerCase().includes(q) ||
+          (parsedRef?.surahNumber && t.surahId === parsedRef.surahNumber && (!parsedRef.ayahNumber || t.ayahNumber === parsedRef.ayahNumber)) ||
+          isFuzzyMatch(q, t.surahName) ||
+          isFuzzyMatch(q, t.authorName) ||
+          t.tafsirSnippet.toLowerCase().includes(q.toLowerCase()) ||
           `${t.surahId}:${t.ayahNumber}`.includes(q)
       );
     }
@@ -170,12 +173,15 @@ export default function SavedPage() {
   const filteredAyahs = useMemo(() => {
     let list = [...savedAyahs];
     if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
+      const q = searchQuery.trim();
+      const parsedRef = parseSurahVerseReference(q);
       list = list.filter(
         (a) =>
-          a.text.toLowerCase().includes(q) ||
-          a.translation.toLowerCase().includes(q) ||
-          `surah ${a.surahNumber}`.includes(q)
+          (parsedRef?.surahNumber && a.surahNumber === parsedRef.surahNumber && (!parsedRef.ayahNumber || a.numberInSurah === parsedRef.ayahNumber)) ||
+          isFuzzyMatch(q, a.text) ||
+          isFuzzyMatch(q, a.translation) ||
+          `surah ${a.surahNumber}`.includes(q.toLowerCase()) ||
+          `${a.surahNumber}:${a.numberInSurah}`.includes(q)
       );
     }
     if (sortBy === "pinned") {
