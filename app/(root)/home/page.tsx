@@ -141,7 +141,7 @@ const SurahsList = () => {
             <div ref={homeSearchContainerRef} className="relative z-20 w-full md:w-72">
               <input
                 type="text"
-                placeholder="Search surah (e.g. Al-Nur, 24, 2:255)..."
+                placeholder="Search surah (e.g. Al-Nur, 24)..."
                 value={homeSearchQuery}
                 onChange={(e) => setHomeSearchQuery(e.target.value)}
                 onFocus={() => setIsHomeSearchFocused(true)}

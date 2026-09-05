@@ -175,7 +175,7 @@ const Sidebar = () => {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search Surah (e.g. Al-Nur, 24, 2:255)..."
+                placeholder="Search Surah (e.g. Al-Nur, 24)..."
                 className="pl-9 pr-3 py-2 bg-card/90 dark:bg-card/90 dark:text-foreground border border-border focus:border-accent/50 rounded-xl text-xs placeholder:text-muted-foreground transition-all shadow-inner"
               />
             </div>
