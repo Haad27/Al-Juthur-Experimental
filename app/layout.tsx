@@ -91,7 +91,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
       </head>
-      <body className={`${inter.className} ${notoNastaliqUrdu.variable} bg-background text-foreground scroll-smooth`} suppressHydrationWarning>
+      <body className={`${inter.className} ${notoNastaliqUrdu.variable} bg-background text-foreground`} suppressHydrationWarning>
         <AppThemeProvider>
           <GlobalStateProvider>
             <NextTopLoader

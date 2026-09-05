@@ -748,6 +748,7 @@ export default function SurahReaderClient({
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const router = useRouter();
   const [visibleAyahNumber, setVisibleAyahNumber] = useState<number>(1);
+  const visibleAyahRef = useRef<number>(1);
   const [aiChatContext, setAiChatContext] = useState<{ surah: number; ayah: number } | null>(null);
   const [tafsirWheelContext, setTafsirWheelContext] = useState<{ surah: number; ayah: number } | null>(null);
 
@@ -840,7 +841,8 @@ export default function SurahReaderClient({
     loadingPagesRef.current = new Set();
     setLoadedAyahs({});
 
-    const targetPage = Math.max(0, Math.floor((visibleAyahNumber - 1) / PAGE_SIZE));
+    const currentVisibleAyah = visibleAyahRef.current || 1;
+    const targetPage = Math.max(0, Math.floor((currentVisibleAyah - 1) / PAGE_SIZE));
 
     fetchPage(targetPage, translationEdition)
       .then(() => {
@@ -852,7 +854,7 @@ export default function SurahReaderClient({
       .catch(() => {
         setIsSwitchingTranslation(false);
       });
-  }, [translationEdition, surahNumber, fetchPage, visibleAyahNumber, totalAyahs]);
+  }, [translationEdition, surahNumber, fetchPage, totalAyahs]);
   // ─────────────────────────────────────────────────────────────────────────────
 
   // Proactively prefetch adjacent Surahs so navigating to Next/Previous Surah is 100% instant
@@ -873,15 +875,15 @@ export default function SurahReaderClient({
   );
 
 
-  const handleOpenAiChat = (surah: number, ayah?: number) => {
-    const targetAyah = typeof ayah === "number" && ayah > 0 ? ayah : visibleAyahNumber;
+  const handleOpenAiChat = useCallback((surah: number, ayah?: number) => {
+    const targetAyah = typeof ayah === "number" && ayah > 0 ? ayah : visibleAyahRef.current;
     React.startTransition(() => {
       setAiChatContext({ surah, ayah: targetAyah });
     });
     if (typeof window !== "undefined") {
       window.dispatchEvent(new Event("close-left-sidebar"));
     }
-  };
+  }, []);
 
   const handleOpenTafsirPicker = useCallback((surah: number, ayah: number) => {
     setTafsirWheelContext({ surah, ayah });
@@ -1025,7 +1027,7 @@ export default function SurahReaderClient({
   }, [surahNumber]);
 
   return (
-    <div className="flex w-full min-h-[100dvh] relative bg-background">
+    <div className="flex w-full min-h-screen relative bg-background">
       {/* Loading Overlay */}
       <AnimatePresence>
         {isNavigatingAyah && (
@@ -1104,15 +1106,20 @@ export default function SurahReaderClient({
           )}
         </div>
 
-        <div className="flex flex-col w-full min-h-[100dvh] px-3 sm:px-6 md:px-10 lg:px-16 max-w-4xl mx-auto">
+        <div className="flex flex-col w-full min-h-screen px-3 sm:px-6 md:px-10 lg:px-16 max-w-4xl mx-auto">
           <Virtuoso
             ref={virtuosoRef}
             useWindowScroll
             totalCount={totalAyahs}
+            defaultItemHeight={280}
+            overscan={{ main: 1000, reverse: 1000 }}
+            increaseViewportBy={{ top: 600, bottom: 600 }}
             rangeChanged={({ startIndex, endIndex }) => {
-              // Update the visible ayah tracker
+              // Update the visible ayah tracker without causing unnecessary churn
               if (typeof startIndex === "number" && startIndex >= 0) {
-                setVisibleAyahNumber(startIndex + 1);
+                const currentAyah = startIndex + 1;
+                visibleAyahRef.current = currentAyah;
+                setVisibleAyahNumber((prev) => (prev !== currentAyah ? currentAyah : prev));
               }
               // Pre-fetch pages that overlap with the visible range + a buffer of 15 items
               const BUFFER = 15;
