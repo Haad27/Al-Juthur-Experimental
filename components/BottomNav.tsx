@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -88,9 +89,9 @@ const BottomNav = () => {
     },
   ];
 
-  if (!mounted || pathname === "/" || pathname === "/rag" || pathname?.startsWith("/rag/") || pathname?.startsWith("/rag?") || isAudioActive || isWordDialogVisible || (pathname?.startsWith("/tafsir") && immersiveMode)) return null;
+  if (!mounted || typeof document === "undefined" || pathname === "/" || pathname === "/rag" || pathname?.startsWith("/rag/") || pathname?.startsWith("/rag?") || isAudioActive || isWordDialogVisible || (pathname?.startsWith("/tafsir") && immersiveMode)) return null;
 
-  return (
+  return createPortal(
     <>
       <AnimatePresence>
         {isAiSheetOpen && (
@@ -100,7 +101,7 @@ const BottomNav = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsAiSheetOpen(false)}
-              className="fixed inset-0 z-40 bg-background/60 backdrop-blur-[2px] md:hidden"
+              className="fixed inset-0 z-[99998] bg-background/60 backdrop-blur-[2px] md:hidden"
             />
 
             <motion.div
@@ -108,7 +109,12 @@ const BottomNav = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 14, scale: 0.92 }}
               transition={{ type: "spring", stiffness: 450, damping: 28 }}
-              className="pointer-events-auto fixed inset-x-0 bottom-[calc(5.1rem+env(safe-area-inset-bottom,0px))] z-50 mx-auto flex w-fit justify-center md:hidden"
+              className="pointer-events-auto fixed inset-x-0 bottom-[calc(5.1rem+env(safe-area-inset-bottom,0px))] z-[99999] mx-auto flex w-fit justify-center md:hidden"
+              style={{
+                position: "fixed",
+                transform: "translate3d(0, 0, 0)",
+                WebkitTransform: "translate3d(0, 0, 0)",
+              }}
             >
               <div className="flex items-center gap-1 rounded-full border border-border bg-card/95 px-2 py-1.5 shadow-lg backdrop-blur-xl">
                 <Link
@@ -154,8 +160,18 @@ const BottomNav = () => {
 
       <div
         suppressHydrationWarning
-        className="pointer-events-none fixed inset-x-0 bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] z-50 mx-auto flex w-fit max-w-[95vw] justify-center md:hidden"
-        style={{ transform: "none", WebkitTransform: "none" }}
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-[99999] flex w-full justify-center pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] md:hidden"
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          width: "100%",
+          transform: "translate3d(0, 0, 0)",
+          WebkitTransform: "translate3d(0, 0, 0)",
+          WebkitBackfaceVisibility: "hidden",
+          backfaceVisibility: "hidden",
+        }}
       >
         <nav className="pointer-events-auto flex items-center gap-0.5 rounded-full border border-border bg-card/90 px-2 py-1.5 shadow-lg backdrop-blur-xl">
           <div className="relative flex items-center gap-0.5">
@@ -212,7 +228,8 @@ const BottomNav = () => {
           </div>
         </nav>
       </div>
-    </>
+    </>,
+    document.body
   );
 };
 
