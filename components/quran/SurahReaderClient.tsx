@@ -214,7 +214,7 @@ const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRAN
   return (
     <div
       className={cn(
-        "hidden md:flex fixed top-0 items-center justify-between md:min-h-14 px-6 py-3 backdrop-blur-md bg-background/85 border-b border-border transition-all duration-300 ease-out z-50",
+        "hidden md:flex fixed top-0 items-center justify-between h-14 px-6 backdrop-blur-md bg-background/85 border-b border-border transition-all duration-300 ease-out z-50",
         show ? "translate-y-0" : "-translate-y-full",
         offsetLeftClass,
         widthClass
