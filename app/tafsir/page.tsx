@@ -363,6 +363,7 @@ function TafsirContent() {
   const tafsirCacheRef = useRef<Map<string, TafsirEntry[]>>(new Map());
 
   const [topNavVisible, setTopNavVisible] = useState<boolean>(true);
+  const ENABLE_BOOK_MODE = false;
   const [readingMode, setReadingMode] = useState<"scroll" | "book">("scroll");
   const [currentAyahIndex, setCurrentAyahIndex] = useState<number>(0);
   const ayahRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -815,15 +816,17 @@ function TafsirContent() {
                   <Compass className="size-3.5 text-accent" />
                   <span className="hidden xs:inline">Picker</span>
                 </button>
-                {/* Book Mode Toggle */}
-                <button
-                  onClick={() => setReadingMode("book")}
-                  className="flex items-center gap-1 px-2 py-1.5 rounded-lg border text-xs font-medium transition-all shrink-0 cursor-pointer border-border bg-card hover:bg-muted text-foreground"
-                  title="Switch to Book Mode"
-                >
-                  <BookOpen className="size-3.5 text-accent" />
-                  <span className="hidden xs:inline">Book Mode</span>
-                </button>
+                {/* Book Mode Toggle (Feature Flagged) */}
+                {ENABLE_BOOK_MODE && (
+                  <button
+                    onClick={() => setReadingMode("book")}
+                    className="flex items-center gap-1 px-2 py-1.5 rounded-lg border text-xs font-medium transition-all shrink-0 cursor-pointer border-border bg-card hover:bg-muted text-foreground"
+                    title="Switch to Book Mode"
+                  >
+                    <BookOpen className="size-3.5 text-accent" />
+                    <span className="hidden xs:inline">Book Mode</span>
+                  </button>
+                )}
                 <ThemeToggleButton />
               </div>
             </div>
@@ -919,15 +922,17 @@ function TafsirContent() {
                   Surahs (1 - 114)
                 </h2>
                 <div className="flex items-center gap-1.5 shrink-0">
-                  {/* Book Mode Toggle */}
-                  <button
-                    onClick={() => setReadingMode("book")}
-                    className="flex items-center gap-1 px-2 py-1 rounded border text-[10px] font-medium transition-all cursor-pointer border-border hover:bg-muted text-foreground"
-                    title="Switch to Book Mode"
-                  >
-                    <BookOpen className="size-3 text-accent" />
-                    <span>Book Mode</span>
-                  </button>
+                  {/* Book Mode Toggle (Feature Flagged) */}
+                  {ENABLE_BOOK_MODE && (
+                    <button
+                      onClick={() => setReadingMode("book")}
+                      className="flex items-center gap-1 px-2 py-1 rounded border text-[10px] font-medium transition-all cursor-pointer border-border hover:bg-muted text-foreground"
+                      title="Switch to Book Mode"
+                    >
+                      <BookOpen className="size-3 text-accent" />
+                      <span>Book Mode</span>
+                    </button>
+                  )}
                   {/* Ayah Picker */}
                   <button
                     onClick={() => {
