@@ -113,8 +113,8 @@ export default function TafsirTextRenderer({
       });
     };
 
-    // Standard mode (Clean Subtle Muted Italic Pill System)
-    // 1. Quranic Verse Citations (<span class="qpc-hafs">) → Subtle muted italic pill / container
+    // Standard mode (Clean Elegant Scholarly Typography - No black boxes, no artificial italics)
+    // 1. Quranic Verse Citations (<span class="qpc-hafs">)
     html = html.replace(
       /<span[^>]*class="qpc-hafs"[^>]*>([\s\S]*?)<\/span>/gi,
       (match, innerText) => {
@@ -122,17 +122,17 @@ export default function TafsirTextRenderer({
         // Standalone long ayah block (>= 80 characters)
         if (trimmed.length >= 80) {
           return `<span class="block my-3 p-3.5 ${
-            isRightToLeft ? "border-r-2 border-border rounded-l-lg pr-3.5" : "border-l-2 border-border rounded-r-lg pl-3.5"
-          } bg-muted/40 text-arabic font-serif text-lg md:text-xl leading-loose italic" style="font-family: 'UthmanicHafs', serif;">${trimmed}</span>`;
+            isRightToLeft ? "border-r-2 border-accent/50 rounded-l-lg pr-3.5" : "border-l-2 border-accent/50 rounded-r-lg pl-3.5"
+          } bg-accent/5 text-arabic font-serif text-lg md:text-xl leading-loose" style="font-family: 'UthmanicHafs', serif;">${trimmed}</span>`;
         }
-        // Subtle inline italic muted chip
-        return `<span class="bg-muted/60 text-arabic border border-border px-2 py-0.5 rounded-md font-serif text-base md:text-lg italic leading-loose inline-block mx-1 my-0.5" style="font-family: 'UthmanicHafs', serif;">${trimmed}</span>`;
+        // Seamless inline citation: upright Uthmanic font in warm accent color, no boxes
+        return `<span class="text-accent font-serif text-base md:text-lg leading-loose inline mx-0.5" style="font-family: 'UthmanicHafs', serif;">${trimmed}</span>`;
       }
     );
     // Fallback for unclosed or isolated qpc-hafs opening tags
     html = html.replace(
       /<span[^>]*class="qpc-hafs"[^>]*>/gi,
-      '<span class="bg-muted/60 text-arabic border border-border px-2 py-0.5 rounded-md font-serif text-base md:text-lg italic leading-loose inline-block mx-1 my-0.5" style="font-family: \'UthmanicHafs\', serif;">'
+      '<span class="text-accent font-serif text-base md:text-lg leading-loose inline mx-0.5" style="font-family: \'UthmanicHafs\', serif;">'
     );
 
     // 2. Arabic Quranic Verses in brackets { ... }, ﴿ ... ﴾, « ... » across Urdu and all languages
@@ -145,10 +145,10 @@ export default function TafsirTextRenderer({
         if (arabicLettersCount >= 3) {
           if (trimmed.length >= 80) {
             return `<span class="block my-3 p-3.5 ${
-              isRightToLeft ? "border-r-2 border-border rounded-l-lg pr-3.5" : "border-l-2 border-border rounded-r-lg pl-3.5"
-            } bg-muted/40 text-arabic font-serif text-lg md:text-xl leading-loose italic" style="font-family: 'UthmanicHafs', 'Amiri', serif;" dir="rtl">﴿${trimmed}﴾</span>`;
+              isRightToLeft ? "border-r-2 border-accent/50 rounded-l-lg pr-3.5" : "border-l-2 border-accent/50 rounded-r-lg pl-3.5"
+            } bg-accent/5 text-arabic font-serif text-lg md:text-xl leading-loose" style="font-family: 'UthmanicHafs', 'Amiri', serif;" dir="rtl">﴿${trimmed}﴾</span>`;
           }
-          return `<span class="bg-muted/60 text-arabic border border-border px-2 py-0.5 rounded-md font-serif text-base md:text-lg italic leading-loose inline-block mx-1 my-0.5" style="font-family: 'UthmanicHafs', 'Amiri', serif;" dir="rtl">﴿${trimmed}﴾</span>`;
+          return `<span class="text-accent font-serif text-base md:text-lg leading-loose inline mx-0.5" style="font-family: 'UthmanicHafs', 'Amiri', serif;" dir="rtl">﴿${trimmed}﴾</span>`;
         }
         return match;
       }
@@ -160,17 +160,17 @@ export default function TafsirTextRenderer({
       '<span class="text-foreground font-semibold">'
     );
 
-    // 4. Footnotes / Gray Text / Translation quotes → Direction-aware green container or muted pill
+    // 4. Footnotes / Gray Text / Translation quotes
     html = html.replace(
       /<span[^>]*class="gray"[^>]*>([\s\S]*?)<\/span>/gi,
       (match, innerText) => {
         const trimmed = innerText.trim();
         if (trimmed.length < 50) {
-          return `<span class="text-muted-foreground italic bg-muted/60 px-1.5 py-0.5 rounded border border-border inline-block my-0.5 text-xs md:text-sm">${trimmed}</span>`;
+          return `<span class="text-muted-foreground text-xs md:text-sm inline mx-0.5">${trimmed}</span>`;
         }
-        return `<span class="block my-4 p-4 ${
-          isRightToLeft ? "border-r-4 rounded-l-xl" : "border-l-4 rounded-r-xl"
-        } border-accent bg-accent/10 text-reading text-sm md:text-base italic shadow-sm">${trimmed}</span>`;
+        return `<span class="block my-3 p-3.5 ${
+          isRightToLeft ? "border-r-2 rounded-l-xl pr-3.5" : "border-l-2 rounded-r-xl pl-3.5"
+        } border-accent/40 bg-accent/5 text-reading text-sm md:text-base">${trimmed}</span>`;
       }
     );
 

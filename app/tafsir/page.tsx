@@ -889,39 +889,40 @@ function TafsirContent() {
               </select>
 
               {/* Sidebar Header */}
-              <div className="flex items-center justify-between pt-2 border-t border-border">
-                <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <div className="flex items-center justify-between gap-2 pt-2 border-t border-border">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground truncate min-w-0 flex-1">
                   Surahs (1 - 114)
                 </h2>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 shrink-0">
                   {/* Book Mode Toggle */}
                   <button
                     onClick={() => setReadingMode(readingMode === "book" ? "scroll" : "book")}
                     className={cn(
-                      "flex items-center gap-1 px-2 py-1 rounded border text-[10px] font-medium transition-all cursor-pointer",
+                      "h-7 px-2.5 rounded-lg border text-xs font-medium transition-all inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer",
                       readingMode === "book"
                         ? "border-accent/50 bg-accent/10 text-accent"
-                        : "border-border hover:bg-muted text-foreground"
+                        : "border-border bg-card/60 hover:bg-muted text-foreground"
                     )}
                     title={readingMode === "book" ? "Switch to Scroll Mode" : "Switch to Book Mode"}
                   >
                     {readingMode === "book" ? (
-                      <Columns2 className="size-3 text-accent" />
+                      <Columns2 className="size-3.5 text-accent" />
                     ) : (
-                      <BookOpen className="size-3 text-accent" />
+                      <BookOpen className="size-3.5 text-accent" />
                     )}
                     <span>{readingMode === "book" ? "Scroll" : "Book"}</span>
                   </button>
+                  {/* Ayah Picker */}
                   <button
                     onClick={() => {
                       setSelectedAuthorForWheel(activeAuthor);
                       setSelectedLangForWheel(activeLangName);
                       setWheelModalOpen(true);
                     }}
-                    className="flex items-center gap-1 px-2 py-1 rounded border border-border hover:bg-muted text-[10px] font-medium text-foreground transition-all cursor-pointer"
+                    className="h-7 px-2.5 rounded-lg border border-border bg-card/60 hover:bg-muted text-xs font-medium text-foreground transition-all inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
                     title="Open Ayah Picker"
                   >
-                    <Compass className="size-3" />
+                    <Compass className="size-3.5 text-accent" />
                     <span>Ayah Picker</span>
                   </button>
                 </div>
