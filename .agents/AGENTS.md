@@ -1,4 +1,7 @@
 # Rules
-- After achieving a major feature, a major fix, or a big milestone, notify the user with a summary and ask them to push the code to their GitHub repository to ensure changes are continuously saved. Do NOT ask them to push on every minor change.
-- When asking the user to push to GitHub, always provide the exact git add command (using `git add .` to ensure the entire project is backed up and no local changes are lost), git commit (with a clear description), and git push commands so they can easily copy and paste them.
+- **Default Auto-Push Rule (Active until explicitly told otherwise):**
+  - On every change or feature completion, automatically push the code to GitHub.
+  - **Do NOT stage all files (Never use `git add .` or `git commit -a`)**: Only stage the specific files that were created or modified for that feature/change (e.g. `git add <file1> <file2>`).
+  - Execute `git add <files>`, `git commit -m "<clear description>"`, and `git push origin main` automatically, and notify the user with the commit summary.
+
 
