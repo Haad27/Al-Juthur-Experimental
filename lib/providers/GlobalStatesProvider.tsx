@@ -21,6 +21,11 @@ interface GlobalState {
   mushafStyle: string;
   setMushafStyle: (style: string) => void;
   
+  englishFont: string;
+  setEnglishFont: (font: string) => void;
+  urduFont: string;
+  setUrduFont: (font: string) => void;
+  
   selectedReciter: number;
   setSelectedReciter: (reciter: number) => void;
 
@@ -124,6 +129,42 @@ export const GlobalStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
     setMushafStyleState(style);
     if (typeof window !== "undefined") {
       document.cookie = `mushaf=${encodeURIComponent(style)}; path=/; max-age=31536000`;
+    }
+  };
+
+  const [englishFont, setEnglishFontState] = useState(() => {
+    if (typeof window !== "undefined") {
+      const match = document.cookie.match(/(?:^|; )en_font=([^;]*)/);
+      if (match) return decodeURIComponent(match[1]);
+      const saved = localStorage.getItem("quran_englishFont");
+      if (saved) return saved;
+    }
+    return "inter";
+  });
+
+  const setEnglishFont = (font: string) => {
+    setEnglishFontState(font);
+    if (typeof window !== "undefined") {
+      document.cookie = `en_font=${encodeURIComponent(font)}; path=/; max-age=31536000`;
+      localStorage.setItem("quran_englishFont", font);
+    }
+  };
+
+  const [urduFont, setUrduFontState] = useState(() => {
+    if (typeof window !== "undefined") {
+      const match = document.cookie.match(/(?:^|; )ur_font=([^;]*)/);
+      if (match) return decodeURIComponent(match[1]);
+      const saved = localStorage.getItem("quran_urduFont");
+      if (saved) return saved;
+    }
+    return "nastaliq";
+  });
+
+  const setUrduFont = (font: string) => {
+    setUrduFontState(font);
+    if (typeof window !== "undefined") {
+      document.cookie = `ur_font=${encodeURIComponent(font)}; path=/; max-age=31536000`;
+      localStorage.setItem("quran_urduFont", font);
     }
   };
 
@@ -498,6 +539,10 @@ function parseMarkdownTable(text: string, originalFragments?: {text: string, del
         setTranslationEdition,
         mushafStyle,
         setMushafStyle,
+        englishFont,
+        setEnglishFont,
+        urduFont,
+        setUrduFont,
         selectedReciter,
         setSelectedReciter,
         

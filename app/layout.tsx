@@ -1,7 +1,16 @@
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { GlobalStateProvider } from "@/lib/providers/GlobalStatesProvider";
-import { inter, notoNastaliqUrdu } from "./fonts";
+import {
+  inter,
+  notoNastaliqUrdu,
+  gulzar,
+  notoSansArabic,
+  lora,
+  playfair,
+  cinzel,
+  plusJakartaSans,
+} from "./fonts";
 import BottomNav from "@/components/BottomNav";
 import AppThemeProvider from "@/components/theme/AppThemeProvider";
 
@@ -91,7 +100,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
       </head>
-      <body className={`${inter.className} ${notoNastaliqUrdu.variable} bg-background text-foreground`} suppressHydrationWarning>
+      <body className={`${inter.className} ${notoNastaliqUrdu.variable} ${gulzar.variable} ${notoSansArabic.variable} ${lora.variable} ${playfair.variable} ${cinzel.variable} ${plusJakartaSans.variable} bg-background text-foreground`} suppressHydrationWarning>
         <AppThemeProvider>
           <GlobalStateProvider>
             <NextTopLoader

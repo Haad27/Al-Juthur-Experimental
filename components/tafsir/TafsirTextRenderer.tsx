@@ -1,5 +1,7 @@
 import { BookOpen, Info, ArrowRight, Lock, Sparkles } from "lucide-react";
 import { useSubscriptionStore } from "@/lib/stores/subscriptionStore";
+import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
+import { getEnglishFont, getUrduFont } from "@/lib/fontsConfig";
 
 interface TafsirTextRendererProps {
   text: string;
@@ -23,6 +25,7 @@ export default function TafsirTextRenderer({
   onUpgradeClick,
 }: TafsirTextRendererProps) {
   const { openPricingModal } = useSubscriptionStore();
+  const { englishFont, urduFont } = useGlobalState();
   if (!text) return null;
 
   const lowerLang = (langName || "").toLowerCase();
@@ -213,18 +216,23 @@ export default function TafsirTextRenderer({
       });
   }
 
+  const selectedUrduFont = getUrduFont(urduFont);
+  const selectedEnglishFont = getEnglishFont(englishFont);
+
   const getFontFamily = () => {
-    if (isUrdu) return "var(--font-noto-nastaliq-urdu), 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', serif";
+    if (isUrdu) return selectedUrduFont.fontFamily;
     if (isPashto) return "'Noto Sans Arabic', 'Noto Naskh Arabic', 'Scheherazade New', 'Amiri', serif";
     if (isPersian) return "'Noto Sans Arabic', 'Noto Naskh Arabic', 'Amiri', serif";
     if (isArabic) return "'UthmanicHafs', 'Amiri', 'Noto Naskh Arabic', serif";
+    if (lowerLang.includes("english") || !isRtl) return selectedEnglishFont.fontFamily;
     return undefined;
   };
 
   const getLineHeight = () => {
-    if (isUrdu) return "2.6";
+    if (isUrdu) return selectedUrduFont.lineHeight || "2.6";
     if (isPashto) return "2.2";
     if (isPersian || isArabic) return "2.1";
+    if (lowerLang.includes("english") || !isRtl) return selectedEnglishFont.lineHeight || "1.75";
     return "1.65";
   };
 

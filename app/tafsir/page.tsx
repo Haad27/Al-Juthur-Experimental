@@ -27,6 +27,7 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
+import { getEnglishFont, getUrduFont } from "@/lib/fontsConfig";
 import { copyToClipboard, cn } from "@/lib/utils";
 import { getTafsirFameRank, getLanguagePriority, getTafsirDifficulty } from "@/lib/tafsirRanking";
 import { getTafsirWarning } from "@/lib/tafsirWarnings";
@@ -139,6 +140,9 @@ const TafsirFootnotesLoader = ({
   initialFootnotes?: Record<string, string>;
   isUrdu?: boolean;
 }) => {
+  const { englishFont, urduFont } = useGlobalState();
+  const selectedUrduFont = getUrduFont(urduFont);
+  const selectedEnglishFont = getEnglishFont(englishFont);
   const [fetchedFootnotes, setFetchedFootnotes] = useState<Record<string, string>>(initialFootnotes || {});
   const [loading, setLoading] = useState(!initialFootnotes || Object.keys(initialFootnotes).length === 0);
 
@@ -213,8 +217,8 @@ const TafsirFootnotesLoader = ({
             className="w-full text-foreground leading-relaxed text-sm md:text-base" 
             dir={isUrdu ? "rtl" : "auto"}
             style={{
-              fontFamily: isUrdu ? "var(--font-noto-nastaliq-urdu), 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', serif" : undefined,
-              lineHeight: isUrdu ? "2.6" : "1.8",
+              fontFamily: isUrdu ? selectedUrduFont.fontFamily : selectedEnglishFont.fontFamily,
+              lineHeight: isUrdu ? (selectedUrduFont.lineHeight || "2.6") : (selectedEnglishFont.lineHeight || "1.8"),
               fontSize: isUrdu ? "1.22rem" : undefined
             }}
             dangerouslySetInnerHTML={{ __html: fetchedFootnotes[fId] || "Explanation loading..." }} 

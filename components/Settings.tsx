@@ -6,6 +6,8 @@ import { Slider } from "./ui/slider";
 import { Switch } from "./ui/switch";
 import SettingSection from "./SettingSection";
 import TranslationSelector from "./TranslationSelector";
+import { ENGLISH_FONTS, URDU_FONTS, getEnglishFont, getUrduFont } from "@/lib/fontsConfig";
+import { ALL_TRANSLATION_OPTIONS } from "@/lib/translationsManifest";
 import {
   Globe,
   Type,
@@ -138,9 +140,33 @@ const Settings = () => {
     setShowWbw,
     mushafStyle,
     setMushafStyle,
+    englishFont,
+    setEnglishFont,
+    urduFont,
+    setUrduFont,
+    translationEdition,
     selectedReciter,
     setSelectedReciter,
   } = useGlobalState();
+
+  const isCurrentTranslationUrdu = React.useMemo(() => {
+    const opt = ALL_TRANSLATION_OPTIONS.find((t) => t.identifier === translationEdition);
+    const code = (opt?.languageCode || "").toLowerCase();
+    const label = (opt?.languageLabel || "").toLowerCase();
+    return code === "ur" || code === "urdu" || label === "urdu";
+  }, [translationEdition]);
+
+  const [translationFontTab, setTranslationFontTab] = React.useState<"english" | "urdu">(() => {
+    return isCurrentTranslationUrdu ? "urdu" : "english";
+  });
+
+  // Keep tab updated if user selects an Urdu translation or English translation
+  React.useEffect(() => {
+    setTranslationFontTab(isCurrentTranslationUrdu ? "urdu" : "english");
+  }, [isCurrentTranslationUrdu]);
+
+  const activeEnglishFont = getEnglishFont(englishFont);
+  const activeUrduFont = getUrduFont(urduFont);
 
   const [reciters, setReciters] = React.useState<any[]>([]);
 
@@ -226,6 +252,155 @@ const Settings = () => {
         title="Translation"
         control={<TranslationSelector />}
         description="Search & select from 127 translations grouped by language."
+      />
+
+      <SettingSection
+        icon={<Type className="w-4 h-4 text-accent" />}
+        title="Translation Font Style"
+        control={
+          <div className="space-y-3 pt-1 w-full min-w-0 max-w-full">
+            {/* Language Tab Switcher */}
+            <div className="flex items-center p-1 rounded-xl bg-muted border border-border">
+              <button
+                type="button"
+                onClick={() => setTranslationFontTab("english")}
+                className={`flex-1 py-1.5 px-3 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                  translationFontTab === "english"
+                    ? "bg-accent text-accent-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <span>English Font</span>
+                <span className="text-[10px] opacity-80 font-mono">({activeEnglishFont.name})</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setTranslationFontTab("urdu")}
+                className={`flex-1 py-1.5 px-3 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                  translationFontTab === "urdu"
+                    ? "bg-accent text-accent-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <span>Urdu Font</span>
+                <span className="text-[10px] opacity-80 font-mono">({activeUrduFont.name})</span>
+              </button>
+            </div>
+
+            {/* Active Font Preview Card */}
+            {translationFontTab === "english" ? (
+              <div className="p-3 rounded-xl bg-muted/60 border border-border w-full min-w-0 space-y-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-xs font-semibold text-foreground truncate">
+                      {activeEnglishFont.name}
+                    </span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full border border-accent/20 bg-accent/10 text-accent font-medium leading-none">
+                      {activeEnglishFont.familyLabel}
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground font-mono">Active Font</span>
+                </div>
+                <p
+                  className="text-xs text-foreground/90 leading-relaxed pt-1"
+                  style={{ fontFamily: activeEnglishFont.fontFamily }}
+                >
+                  &ldquo;{activeEnglishFont.sample}&rdquo;
+                </p>
+                <p className="text-[10px] text-muted-foreground">
+                  {activeEnglishFont.description}
+                </p>
+              </div>
+            ) : (
+              <div className="p-3 rounded-xl bg-muted/60 border border-border w-full min-w-0 space-y-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-xs font-semibold text-foreground truncate">
+                      {activeUrduFont.name}
+                    </span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full border border-accent/20 bg-accent/10 text-accent font-medium leading-none">
+                      {activeUrduFont.familyLabel}
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground font-mono">Active Font</span>
+                </div>
+                <p
+                  className="text-sm text-foreground/90 text-right pt-1"
+                  dir="rtl"
+                  style={{
+                    fontFamily: activeUrduFont.fontFamily,
+                    lineHeight: activeUrduFont.lineHeight || "2.4",
+                  }}
+                >
+                  &ldquo;{activeUrduFont.sample}&rdquo;
+                </p>
+                <p className="text-[10px] text-muted-foreground">
+                  {activeUrduFont.description}
+                </p>
+              </div>
+            )}
+
+            {/* Grid of Font Choices */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+              {(translationFontTab === "english" ? ENGLISH_FONTS : URDU_FONTS).map((font) => {
+                const isSelected =
+                  translationFontTab === "english"
+                    ? englishFont === font.id || (!englishFont && font.id === "inter")
+                    : urduFont === font.id || (!urduFont && font.id === "nastaliq");
+
+                return (
+                  <button
+                    key={font.id}
+                    type="button"
+                    onClick={() => {
+                      if (translationFontTab === "english") {
+                        setEnglishFont(font.id);
+                      } else {
+                        setUrduFont(font.id);
+                      }
+                    }}
+                    title={`${font.name} — ${font.familyLabel}`}
+                    className={`relative p-2.5 rounded-xl border text-left flex flex-col gap-1 transition-all duration-150 cursor-pointer group ${
+                      isSelected
+                        ? "bg-accent/12 border-accent/40 shadow-sm"
+                        : "bg-muted/70 border-border hover:bg-muted hover:border-border"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span
+                          className={`text-[11px] font-semibold truncate ${
+                            isSelected ? "text-accent" : "text-foreground"
+                          }`}
+                        >
+                          {font.name}
+                        </span>
+                        <span className="text-[9px] px-1.5 py-0.2 rounded-full border border-border text-muted-foreground font-mono leading-none">
+                          {font.familyLabel}
+                        </span>
+                      </div>
+                      {isSelected && <Check className="w-3.5 h-3.5 text-accent shrink-0" />}
+                    </div>
+
+                    <p
+                      className={`text-xs truncate w-full pt-0.5 ${
+                        translationFontTab === "urdu" ? "text-right" : "text-left"
+                      } ${isSelected ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"}`}
+                      dir={translationFontTab === "urdu" ? "rtl" : "ltr"}
+                      style={{
+                        fontFamily: font.fontFamily,
+                        lineHeight: translationFontTab === "urdu" ? "2.0" : "1.4",
+                      }}
+                    >
+                      {font.sample}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        }
+        description="Customize the typography for English and Urdu translations. Choose between modern clean sans-serif, classical literary serifs, authentic Nastaliq calligraphy, and clean digital Naskh."
       />
 
       <SettingSection

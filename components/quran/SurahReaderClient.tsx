@@ -44,6 +44,7 @@ import { amiri } from "@/app/fonts";
 import useScrollDirection from "@/hooks/useScrollDirection";
 import { KeyValue } from "@/components/ui/key-value";
 import { ALL_TRANSLATION_OPTIONS } from "@/lib/translationsManifest";
+import { getTranslationFontStyle } from "@/lib/fontsConfig";
 import ThemeToggleButton from "@/components/ThemeToggleButton";
 import AlJuthurLoadingProgress from "@/components/shared/AlJuthurLoadingProgress";
 
@@ -372,7 +373,18 @@ const AyahRow = React.memo(({
     }
   };
 
-  const { mushafStyle } = useGlobalState();
+  const { mushafStyle, englishFont, urduFont } = useGlobalState();
+
+  const isEnglishTranslation = React.useMemo(() => {
+    const opt = ALL_TRANSLATION_OPTIONS.find(t => t.identifier === translationEdition);
+    const code = (opt?.languageCode || "").toLowerCase();
+    const label = (opt?.languageLabel || "").toLowerCase();
+    return code === "en" || code === "english" || label === "english";
+  }, [translationEdition]);
+
+  const activeFontStyle = React.useMemo(() => {
+    return getTranslationFontStyle(isUrduTranslation, isEnglishTranslation, urduFont, englishFont);
+  }, [isUrduTranslation, isEnglishTranslation, urduFont, englishFont]);
 
   const mushafFontClass = React.useMemo(() => {
     switch (mushafStyle) {
@@ -618,8 +630,8 @@ const AyahRow = React.memo(({
                 className="text-reading md:leading-[1.7] leading-[1.7] translation-content reading-prose"
                 style={{ 
                   fontSize: getTranslationFontSize(fontSize, isUrduTranslation),
-                  fontFamily: isUrduTranslation ? "var(--font-noto-nastaliq-urdu), 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', serif" : undefined,
-                  lineHeight: isUrduTranslation ? "2.6" : undefined,
+                  fontFamily: activeFontStyle.fontFamily,
+                  lineHeight: activeFontStyle.lineHeight || (isUrduTranslation ? "2.6" : undefined),
                   textAlign: isUrduTranslation ? "right" : undefined,
                   direction: isUrduTranslation ? "rtl" : undefined,
                   display: "block",
@@ -648,11 +660,11 @@ const AyahRow = React.memo(({
                       {/* Dynamic Tafsir / Explanation Note for Dr. Israr, Maududi, Taqi Usmani */}
                       {fetchedFootnotes["tafsir_note"] && (
                         <div 
-                          className="leading-[2.8] text-foreground text-right p-3 rounded-lg bg-card/70 border border-border font-nastaliq"
+                          className="leading-[2.8] text-foreground text-right p-3 rounded-lg bg-card/70 border border-border"
                           dir={isUrduTranslation ? "rtl" : "auto"}
                           style={{ 
-                            fontFamily: isUrduTranslation ? "var(--font-noto-nastaliq-urdu), 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', serif" : undefined,
-                            lineHeight: isUrduTranslation ? "2.8" : undefined,
+                            fontFamily: activeFontStyle.fontFamily,
+                            lineHeight: activeFontStyle.lineHeight || (isUrduTranslation ? "2.8" : undefined),
                             fontSize: isUrduTranslation ? "1.15rem" : undefined,
                             color: "#f4f4f5"
                           }}
@@ -662,7 +674,15 @@ const AyahRow = React.memo(({
 
                       {/* Inline/extracted footnotes */}
                       {footnotes.length > 0 && footnotes.map((fn, fIdx) => (
-                        <div key={`inline-${fIdx}`} className="leading-relaxed text-foreground p-2.5 rounded bg-card/70 border border-border" dir="auto">
+                        <div 
+                          key={`inline-${fIdx}`} 
+                          className="leading-relaxed text-foreground p-2.5 rounded bg-card/70 border border-border" 
+                          dir={isUrduTranslation ? "rtl" : "auto"}
+                          style={{
+                            fontFamily: activeFontStyle.fontFamily,
+                            lineHeight: activeFontStyle.lineHeight,
+                          }}
+                        >
                           {fn}
                         </div>
                       ))}
@@ -675,8 +695,8 @@ const AyahRow = React.memo(({
                             className="leading-relaxed p-2.5 rounded bg-card/70 border border-border text-foreground" 
                             dir={isUrduTranslation ? "rtl" : "auto"}
                             style={{ 
-                              fontFamily: isUrduTranslation ? "var(--font-noto-nastaliq-urdu), 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', serif" : undefined,
-                              lineHeight: isUrduTranslation ? "2.6" : undefined,
+                              fontFamily: activeFontStyle.fontFamily,
+                              lineHeight: activeFontStyle.lineHeight || (isUrduTranslation ? "2.6" : undefined),
                               fontSize: isUrduTranslation ? "1.1rem" : undefined,
                               color: "#f4f4f5"
                             }}
@@ -941,7 +961,10 @@ export default function SurahReaderClient({
   const [isNavigatingAyah, setIsNavigatingAyah] = useState(false);
 
   const isUrduTranslation = React.useMemo(() => {
-    return ALL_TRANSLATION_OPTIONS.find(t => t.identifier === translationEdition)?.languageCode.toLowerCase() === 'urdu';
+    const opt = ALL_TRANSLATION_OPTIONS.find(t => t.identifier === translationEdition);
+    const code = (opt?.languageCode || "").toLowerCase();
+    const label = (opt?.languageLabel || "").toLowerCase();
+    return code === 'ur' || code === 'urdu' || label === 'urdu';
   }, [translationEdition]);
 
   // Clear audio state on unmount or surah change
