@@ -13,11 +13,15 @@ const SidebarHeader = ({ toggleSidebar, isCollapsed }: SidebarHeaderProps) => {
       <div className="flex items-center gap-3 min-w-0">
         <Link
           href={`/home`}
-          className="group flex items-center gap-2 cursor-pointer shrink-0"
+          className="group flex items-center gap-2 cursor-pointer min-w-0"
           title="Al-Juthur"
-          aria-label="Al-Juthur Home"
         >
-          <LogoIcon size={26} className="text-accent group-hover:scale-105 transition-transform shrink-0" />
+          <LogoIcon size={24} className="text-accent group-hover:scale-105 transition-transform shrink-0" />
+          {!isCollapsed && (
+            <span className="text-lg font-bold tracking-tight text-foreground truncate">
+              Al-Juthur
+            </span>
+          )}
         </Link>
         {!isCollapsed && (
           <div className="flex items-center gap-2">
