@@ -15,6 +15,7 @@ export function getTafsirDifficulty(name: string, authorName?: string | null): T
     text.includes("israr") || text.includes("bayan-ul-quran") || text.includes("بيان القرآن") || text.includes("بیان القرآن") ||
     text.includes("taqi usmani") || text.includes("عثماني") || text.includes("عثمانی") ||
     text.includes("mukhtasar") || text.includes("مختصر") ||
+    text.includes("shaarawi") || text.includes("sha'rawi") || text.includes("شعراوي") ||
     text.includes("tazkirul") || text.includes("wahiduddin") || text.includes("وحيد الدين")
   ) {
     return 'Beginner';
@@ -29,7 +30,10 @@ export function getTafsirDifficulty(name: string, authorName?: string | null): T
     text.includes("alusi") || text.includes("آلوسي") || text.includes("آلوسی") ||
     text.includes("qutb") || text.includes("zilal") || text.includes("ظلال") || text.includes("قطب") ||
     text.includes("shawkani") || text.includes("شوكاني") || text.includes("شوکانی") ||
-    text.includes("samarqandi") || text.includes("سمرقندي") || text.includes("سمرقندی")
+    text.includes("samarqandi") || text.includes("سمرقندي") || text.includes("سمرقندی") ||
+    text.includes("ahkam") || text.includes("أحكام") || text.includes("jassas") || text.includes("جصاص") ||
+    text.includes("maturidi") || text.includes("ماتريدي") || text.includes("naysaburi") || text.includes("نيسابوري") ||
+    text.includes("muqatil") || text.includes("مقاتل") || text.includes("burusawi") || text.includes("بروسوي")
   ) {
     return 'Advanced';
   }
