@@ -221,9 +221,6 @@ const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRAN
       )}
     >
       <div className="flex items-center gap-3 min-w-0">
-        <Link href="/home" className="group flex items-center gap-1.5 shrink-0" title="Al-Juthur - Your Quranic Tafsir & Lexicon Guide">
-          <LogoIcon size={24} className="text-accent group-hover:scale-110 transition-transform" />
-        </Link>
         <div className="flex items-center gap-1.5 font-sans min-w-0">
           <span className="text-foreground font-semibold text-base md:text-lg tracking-tight truncate">
             {surah?.englishName}

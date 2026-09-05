@@ -1,7 +1,6 @@
 import Link from "next/link";
 import MenuIcon from "../svg/icons/MenuIcon";
 import LogoIcon from "../svg/icons/LogoIcon";
-import ThemeToggleButton from "@/components/ThemeToggleButton";
 import { Sparkles, Crown } from "lucide-react";
 import { useSubscriptionStore } from "@/lib/stores/subscriptionStore";
 
@@ -41,7 +40,6 @@ const SidebarHeader = ({ toggleSidebar, isCollapsed }: SidebarHeaderProps) => {
         )}
       </div>
       <div className="flex items-center gap-1.5 shrink-0">
-        {!isCollapsed && <ThemeToggleButton />}
         <MenuIcon onClick={toggleSidebar} />
       </div>
     </div>
