@@ -4,7 +4,9 @@ import React, { useEffect, useState, useMemo, useRef, useCallback, Suspense } fr
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
-import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, ChevronLeft, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check, Bookmark, BookmarkCheck, Lock } from "lucide-react";
+import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, ChevronLeft, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check, Bookmark, BookmarkCheck, Lock, Columns2 } from "lucide-react";
+import dynamic from "next/dynamic";
+const TafsirBookMode = dynamic(() => import("@/components/tafsir/TafsirBookMode"), { ssr: false });
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
 import TafsirTextRenderer from "@/components/tafsir/TafsirTextRenderer";
 import { amiriquran, inter } from "@/app/fonts";
@@ -360,6 +362,7 @@ function TafsirContent() {
   const tafsirCacheRef = useRef<Map<string, TafsirEntry[]>>(new Map());
 
   const [topNavVisible, setTopNavVisible] = useState<boolean>(true);
+  const [readingMode, setReadingMode] = useState<"scroll" | "book">("scroll");
   const [currentAyahIndex, setCurrentAyahIndex] = useState<number>(0);
   const ayahRefs = useRef<(HTMLDivElement | null)[]>([]);
   const lastScrollYRef = useRef<number>(0);
@@ -755,7 +758,7 @@ function TafsirContent() {
                 </div>
               </div>
 
-              {/* Right Side: Ayah Picker Button & Theme Toggle */}
+              {/* Right Side: Ayah Picker Button, Book Mode Toggle & Theme Toggle */}
               <div className="flex items-center gap-1.5 shrink-0">
                 <button
                   onClick={() => {
@@ -768,6 +771,24 @@ function TafsirContent() {
                 >
                   <Compass className="size-3.5 text-accent" />
                   <span className="hidden xs:inline">Picker</span>
+                </button>
+                {/* Book Mode Toggle */}
+                <button
+                  onClick={() => setReadingMode(readingMode === "book" ? "scroll" : "book")}
+                  className={cn(
+                    "flex items-center gap-1 px-2 py-1.5 rounded-lg border text-xs font-medium transition-all shrink-0 cursor-pointer",
+                    readingMode === "book"
+                      ? "border-accent/50 bg-accent/10 text-accent"
+                      : "border-border bg-card hover:bg-muted text-foreground"
+                  )}
+                  title={readingMode === "book" ? "Switch to Scroll Mode" : "Switch to Book Mode"}
+                >
+                  {readingMode === "book" ? (
+                    <Columns2 className="size-3.5 text-accent" />
+                  ) : (
+                    <BookOpen className="size-3.5 text-accent" />
+                  )}
+                  <span className="hidden xs:inline">{readingMode === "book" ? "Scroll" : "Book"}</span>
                 </button>
                 <ThemeToggleButton />
               </div>
@@ -863,18 +884,38 @@ function TafsirContent() {
                 <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Surahs (1 - 114)
                 </h2>
-                <button
-                  onClick={() => {
-                    setSelectedAuthorForWheel(activeAuthor);
-                    setSelectedLangForWheel(activeLangName);
-                    setWheelModalOpen(true);
-                  }}
-                  className="flex items-center gap-1 px-2 py-1 rounded border border-border hover:bg-muted text-[10px] font-medium text-foreground transition-all cursor-pointer"
-                  title="Open Ayah Picker"
-                >
-                  <Compass className="size-3" />
-                  <span>Ayah Picker</span>
-                </button>
+                <div className="flex items-center gap-1.5">
+                  {/* Book Mode Toggle */}
+                  <button
+                    onClick={() => setReadingMode(readingMode === "book" ? "scroll" : "book")}
+                    className={cn(
+                      "flex items-center gap-1 px-2 py-1 rounded border text-[10px] font-medium transition-all cursor-pointer",
+                      readingMode === "book"
+                        ? "border-accent/50 bg-accent/10 text-accent"
+                        : "border-border hover:bg-muted text-foreground"
+                    )}
+                    title={readingMode === "book" ? "Switch to Scroll Mode" : "Switch to Book Mode"}
+                  >
+                    {readingMode === "book" ? (
+                      <Columns2 className="size-3 text-accent" />
+                    ) : (
+                      <BookOpen className="size-3 text-accent" />
+                    )}
+                    <span>{readingMode === "book" ? "Scroll" : "Book"}</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedAuthorForWheel(activeAuthor);
+                      setSelectedLangForWheel(activeLangName);
+                      setWheelModalOpen(true);
+                    }}
+                    className="flex items-center gap-1 px-2 py-1 rounded border border-border hover:bg-muted text-[10px] font-medium text-foreground transition-all cursor-pointer"
+                    title="Open Ayah Picker"
+                  >
+                    <Compass className="size-3" />
+                    <span>Ayah Picker</span>
+                  </button>
+                </div>
               </div>
             </div>
             <div className="p-2 space-y-1">
@@ -1020,7 +1061,7 @@ function TafsirContent() {
               </div>
             </div>
 
-            <div className="flex-1 w-full min-h-0">
+            <div className={cn("flex-1 w-full min-h-0", readingMode === "book" && "flex flex-col")}>
               {loadingEntries || Object.keys(loadedTafsir).length === 0 || (loadedTafsir[0] && loadedTafsir[0].authorId !== activeAuthor.id) ? (
                 <AlJuthurLoadingProgress
                   title={`Loading ${activeAuthor?.name?.replace(/\s*\([^)]*\)\s*$/, '').trim() || "Tafsir"}`}
@@ -1032,7 +1073,29 @@ function TafsirContent() {
                   ]}
                   minDurationMs={400}
                 />
+              ) : readingMode === "book" ? (
+                /* ── Book / Page-Flip Mode ── */
+                <div
+                  style={{
+                    width: "100%",
+                    height: "calc(100vh - 120px)",
+                    minHeight: "520px",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <TafsirBookMode
+                    loadedTafsir={loadedTafsir}
+                    activeSurah={activeSurah}
+                    activeLangName={activeLangName}
+                    activeAuthor={activeAuthor}
+                    totalAyahs={currentSurahMeta.numberOfAyahs}
+                    initialAyah={currentAyahIndex + 1}
+                    onAyahChange={(ayah) => setCurrentAyahIndex(ayah - 1)}
+                  />
+                </div>
               ) : (
+                /* ── Scroll Mode (default) ── */
                 <Virtuoso
                   ref={virtuosoRef}
                   useWindowScroll
