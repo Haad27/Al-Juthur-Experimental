@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useMemo, useRef, useCallback, Suspense } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, ChevronLeft, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check, Bookmark, BookmarkCheck, Lock } from "lucide-react";
@@ -234,6 +235,20 @@ function TafsirContent() {
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("All Levels");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  // Lock body scroll when mobile filter sheet is open
+  useEffect(() => {
+    if (isFilterPanelOpen && typeof window !== "undefined" && window.innerWidth < 768) {
+      const orig = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = orig;
+      };
+    }
+  }, [isFilterPanelOpen]);
+
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const langScrollRef = useRef<HTMLDivElement>(null);
@@ -1272,20 +1287,20 @@ function TafsirContent() {
                     )}
                   </button>
                   
-                  {/* Filter Popover Panel */}
+                  {/* Desktop Filter Popover */}
                   {isFilterPanelOpen && (
-                    <>
-                      <div className="fixed inset-0 z-[70] bg-foreground/30 backdrop-blur-sm transition-opacity" onClick={() => setIsFilterPanelOpen(false)}></div>
-                      <div className="fixed md:absolute inset-x-0 bottom-0 md:inset-auto md:right-0 md:top-full mt-2 w-full md:w-[420px] bg-background md:bg-card border-t md:border border-accent/30 md:border-border shadow-2xl z-[80] overflow-hidden rounded-t-3xl md:rounded-2xl p-5 md:p-6 flex flex-col gap-5 max-h-[80vh] overflow-y-auto custom-scrollbar pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))] md:pb-6 animate-in slide-in-from-bottom-4 md:slide-in-from-top-2 duration-200">
-                        <div className="flex items-center justify-between pb-3 border-b border-border sticky top-0 bg-background md:bg-card z-10">
-                          <h3 className="font-bold text-foreground text-base sm:text-lg flex items-center gap-2">
+                    <div className="hidden md:block">
+                      <div className="fixed inset-0 z-[70]" onClick={() => setIsFilterPanelOpen(false)} />
+                      <div className="absolute right-0 top-full mt-2 w-[420px] bg-card border border-border shadow-2xl z-[80] rounded-2xl p-6 flex flex-col gap-5 max-h-[80vh] overflow-y-auto custom-scrollbar animate-in slide-in-from-top-2 duration-200">
+                        <div className="flex items-center justify-between pb-3 border-b border-border">
+                          <h3 className="font-bold text-foreground text-base flex items-center gap-2">
                             <Filter className="size-4 text-accent" /> Filter Tafsirs
                           </h3>
-                          <button onClick={() => setIsFilterPanelOpen(false)} className="p-1.5 rounded-full bg-card text-muted-foreground hover:text-foreground transition-colors">
-                            <X className="size-5" />
+                          <button onClick={() => setIsFilterPanelOpen(false)} className="p-1.5 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                            <X className="size-4" />
                           </button>
                         </div>
-                        
+
                         {/* Era Selection inside Panel */}
                         <div className="flex flex-col gap-3">
                           <span className="text-xs font-bold text-muted-foreground flex items-center gap-1.5 uppercase tracking-wider">
@@ -1300,10 +1315,10 @@ function TafsirContent() {
                                 <button
                                   key={eraName}
                                   onClick={() => setSelectedEra(eraName)}
-                                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                                     selectedEra === eraName
                                       ? "bg-accent text-accent-foreground shadow-md shadow-sm"
-                                      : "bg-card border border-border text-muted-foreground hover:text-foreground hover:border-border"
+                                      : "bg-card border border-border text-muted-foreground hover:text-foreground hover:border-border hover:bg-muted/50"
                                   }`}
                                 >
                                   {eraName.replace(" & Contemporary", "")} <span className="opacity-60 ml-0.5">({count})</span>
@@ -1314,7 +1329,7 @@ function TafsirContent() {
                         </div>
 
                         {/* Difficulty Selection inside Panel */}
-                        <div className="flex flex-col gap-3 pb-4 md:pb-0">
+                        <div className="flex flex-col gap-3">
                           <span className="text-xs font-bold text-muted-foreground flex items-center gap-1.5 uppercase tracking-wider">
                             <Sparkles className="size-3.5 text-accent" /> Difficulty
                           </span>
@@ -1327,10 +1342,10 @@ function TafsirContent() {
                                 <button
                                   key={level}
                                   onClick={() => setSelectedDifficulty(level)}
-                                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                                     selectedDifficulty === level
                                       ? "bg-accent text-accent-foreground shadow-md shadow-sm"
-                                      : "bg-card border border-border text-muted-foreground hover:text-foreground hover:border-border"
+                                      : "bg-card border border-border text-muted-foreground hover:text-foreground hover:border-border hover:bg-muted/50"
                                   }`}
                                 >
                                   {level} <span className="opacity-60 ml-0.5">({count})</span>
@@ -1340,7 +1355,109 @@ function TafsirContent() {
                           </div>
                         </div>
                       </div>
-                    </>
+                    </div>
+                  )}
+
+                  {/* Mobile Filter Sheet (rendered via createPortal directly into document.body to avoid sticky/backdrop-filter containing block bugs) */}
+                  {mounted && isFilterPanelOpen && createPortal(
+                    <div className="md:hidden">
+                      <div 
+                        className="fixed inset-0 z-[9998] bg-black/60 backdrop-blur-sm transition-opacity" 
+                        onClick={() => setIsFilterPanelOpen(false)}
+                      />
+                      <div 
+                        className="fixed inset-x-0 bottom-0 z-[9999] w-full bg-card border-t border-accent/30 shadow-2xl rounded-t-3xl p-5 flex flex-col gap-4 max-h-[82vh] overflow-y-auto custom-scrollbar pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))] animate-in slide-in-from-bottom-4 duration-200"
+                      >
+                        <div className="flex items-center justify-between pb-3 border-b border-border sticky top-0 bg-card z-10">
+                          <h3 className="font-bold text-foreground text-base flex items-center gap-2">
+                            <Filter className="size-4 text-accent" /> Filter Tafsirs
+                          </h3>
+                          <button 
+                            onClick={() => setIsFilterPanelOpen(false)} 
+                            className="p-1.5 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                            aria-label="Close filters"
+                          >
+                            <X className="size-5" />
+                          </button>
+                        </div>
+                        
+                        {/* Era Selection inside Panel */}
+                        <div className="flex flex-col gap-2.5">
+                          <span className="text-xs font-bold text-muted-foreground flex items-center gap-1.5 uppercase tracking-wider">
+                            <BookOpen className="size-3.5 text-accent" /> Era
+                          </span>
+                          <div className="flex flex-wrap gap-2">
+                            {ERAS.map((eraName) => {
+                              const count = eraName === "All Eras" 
+                                ? allAuthorsWithLang.length 
+                                : allAuthorsWithLang.filter(a => a.author.era === eraName).length;
+                              return (
+                                <button
+                                  key={eraName}
+                                  onClick={() => setSelectedEra(eraName)}
+                                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                                    selectedEra === eraName
+                                      ? "bg-accent text-accent-foreground shadow-sm"
+                                      : "bg-muted/60 border border-border text-muted-foreground hover:text-foreground hover:border-accent/40"
+                                  }`}
+                                >
+                                  {eraName.replace(" & Contemporary", "")} <span className="opacity-60 ml-0.5">({count})</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Difficulty Selection inside Panel */}
+                        <div className="flex flex-col gap-2.5">
+                          <span className="text-xs font-bold text-muted-foreground flex items-center gap-1.5 uppercase tracking-wider">
+                            <Sparkles className="size-3.5 text-accent" /> Difficulty
+                          </span>
+                          <div className="flex flex-wrap gap-2">
+                            {["All Levels", "Beginner", "Intermediate", "Advanced"].map((level) => {
+                              const count = level === "All Levels" 
+                                ? allAuthorsWithLang.length 
+                                : allAuthorsWithLang.filter(a => a.author.difficulty === level).length;
+                              return (
+                                <button
+                                  key={level}
+                                  onClick={() => setSelectedDifficulty(level)}
+                                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                                    selectedDifficulty === level
+                                      ? "bg-accent text-accent-foreground shadow-sm"
+                                      : "bg-muted/60 border border-border text-muted-foreground hover:text-foreground hover:border-accent/40"
+                                  }`}
+                                >
+                                  {level} <span className="opacity-60 ml-0.5">({count})</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Bottom Action Row */}
+                        <div className="pt-2 border-t border-border flex items-center justify-between gap-3 mt-1">
+                          {(selectedEra !== "All Eras" || selectedDifficulty !== "All Levels") ? (
+                            <button
+                              onClick={() => {
+                                setSelectedEra("All Eras");
+                                setSelectedDifficulty("All Levels");
+                              }}
+                              className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 cursor-pointer"
+                            >
+                              Reset filters
+                            </button>
+                          ) : <div />}
+                          <button
+                            onClick={() => setIsFilterPanelOpen(false)}
+                            className="px-5 py-2 rounded-xl bg-accent text-accent-foreground font-semibold text-xs transition-colors hover:bg-accent/90 cursor-pointer shadow-sm"
+                          >
+                            Apply Filters
+                          </button>
+                        </div>
+                      </div>
+                    </div>,
+                    document.body
                   )}
                 </div>
               </div>
