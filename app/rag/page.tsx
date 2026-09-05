@@ -44,6 +44,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import SourceChunkViewer, { SourceItem } from "@/components/ai/SourceChunkViewer";
 import GeminiInputComposer from "@/components/ai/GeminiInputComposer";
 import RagModeChips from "@/components/ai/RagModeChips";
+import ThemeToggleButton from "@/components/ThemeToggleButton";
 
 function getChipIcon(iconName: string) {
   switch (iconName) {
@@ -467,7 +468,7 @@ function RagChatContent() {
 
   return (
     <div className={`flex h-dvh max-h-dvh w-full flex-col overflow-hidden bg-background text-foreground ${inter.className}`}>
-      <header className="shrink-0 z-40 bg-background/90 backdrop-blur-md border-b border-border px-3 sm:px-6 py-3 pr-14">
+      <header className="shrink-0 z-40 bg-background/90 backdrop-blur-md border-b border-border px-3 sm:px-6 py-3">
         <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-3">
           
           <div className="flex items-center gap-2.5 shrink-0">
@@ -521,6 +522,8 @@ function RagChatContent() {
                 <span>Active</span>
               )}
             </div>
+
+            <ThemeToggleButton />
           </div>
         </div>
       </header>

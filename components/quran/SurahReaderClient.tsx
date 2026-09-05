@@ -14,6 +14,7 @@ import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { useAudioStore } from "@/lib/stores/audioStore";
 import { cn, convertNumberToArabicNumeral, copyToClipboard } from "@/lib/utils";
 import BismillahIcon from "@/components/svg/icons/BismillahIcon";
+import LogoIcon from "@/components/svg/icons/LogoIcon";
 import {
   ArrowLeft,
   Check,
@@ -43,6 +44,7 @@ import { amiri } from "@/app/fonts";
 import useScrollDirection from "@/hooks/useScrollDirection";
 import { KeyValue } from "@/components/ui/key-value";
 import { ALL_TRANSLATION_OPTIONS } from "@/lib/translationsManifest";
+import ThemeToggleButton from "@/components/ThemeToggleButton";
 import AlJuthurLoadingProgress from "@/components/shared/AlJuthurLoadingProgress";
 
 interface AyahProps {
@@ -211,13 +213,16 @@ const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRAN
   return (
     <div
       className={cn(
-        "hidden md:flex fixed top-0 items-center justify-between md:min-h-14 px-6 py-3 pr-16 backdrop-blur-md bg-background/85 border-b border-border transition-all duration-300 ease-out z-50",
+        "hidden md:flex fixed top-0 items-center justify-between md:min-h-14 px-6 py-3 backdrop-blur-md bg-background/85 border-b border-border transition-all duration-300 ease-out z-50",
         show ? "translate-y-0" : "-translate-y-full",
         offsetLeftClass,
         widthClass
       )}
     >
-      <div className="flex items-center gap-2.5 min-w-0">
+      <div className="flex items-center gap-3 min-w-0">
+        <Link href="/home" className="group flex items-center gap-1.5 shrink-0" title="Al-Juthur - Your Quranic Tafsir & Lexicon Guide">
+          <LogoIcon size={24} className="text-accent group-hover:scale-110 transition-transform" />
+        </Link>
         <div className="flex items-center gap-1.5 font-sans min-w-0">
           <span className="text-foreground font-semibold text-base md:text-lg tracking-tight truncate">
             {surah?.englishName}
@@ -234,13 +239,16 @@ const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRAN
           </span>
         )}
       </div>
-      <nav className="hidden lg:flex items-center gap-6 text-muted-foreground text-sm">
-        <Link href="/home" className="hover:text-foreground transition">Home</Link>
-        <Link href="/tafsir" className="hover:text-foreground transition">Tafsir</Link>
-        <Link href="/lexicon" className="hover:text-foreground transition">Lexicon</Link>
-        <Link href="/ai" className="hover:text-foreground transition">Translator</Link>
-        <Link href="/rag" className="hover:text-foreground transition">AI Scholar</Link>
-      </nav>
+      <div className="flex items-center gap-5">
+        <nav className="hidden lg:flex items-center gap-6 text-muted-foreground text-sm">
+          <Link href="/home" className="hover:text-foreground transition">Home</Link>
+          <Link href="/tafsir" className="hover:text-foreground transition">Tafsir</Link>
+          <Link href="/lexicon" className="hover:text-foreground transition">Lexicon</Link>
+          <Link href="/ai" className="hover:text-foreground transition">Translator</Link>
+          <Link href="/rag" className="hover:text-foreground transition">AI Scholar</Link>
+        </nav>
+        <ThemeToggleButton />
+      </div>
     </div>
   );
 };
@@ -1029,8 +1037,9 @@ export default function SurahReaderClient({
             className="fixed inset-0 z-[99999] bg-background/70 backdrop-blur-sm flex items-center justify-center pointer-events-none"
           >
             <div className="flex flex-col items-center gap-2 bg-card border border-border px-6 py-4 rounded-xl shadow-lg text-center">
-              <span className="text-xs font-semibold tracking-wider uppercase text-foreground">Al-Juthur</span>
-              <span className="text-[11px] text-muted-foreground font-mono">Locating verse...</span>
+              <LogoIcon size={28} className="text-accent animate-pulse" />
+              <span className="text-xs font-bold tracking-wider uppercase text-foreground">Al-Juthur</span>
+              <span className="text-[11px] text-muted-foreground font-mono mt-0.5">Locating verse...</span>
             </div>
           </motion.div>
         )}

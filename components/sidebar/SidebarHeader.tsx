@@ -1,5 +1,7 @@
 import Link from "next/link";
 import MenuIcon from "../svg/icons/MenuIcon";
+import LogoIcon from "../svg/icons/LogoIcon";
+import ThemeToggleButton from "@/components/ThemeToggleButton";
 import { Sparkles, Crown } from "lucide-react";
 import { useSubscriptionStore } from "@/lib/stores/subscriptionStore";
 
@@ -7,16 +9,19 @@ const SidebarHeader = ({ toggleSidebar, isCollapsed }: SidebarHeaderProps) => {
   const { openPricingModal, tier } = useSubscriptionStore();
 
   return (
-    <div className="text-foreground flex w-full h-[57px] dark:h-14 px-4 justify-between items-center border-b border-border transition-all duration-300 hide-on-scroll">
-      <div className="flex items-center gap-4">
+    <div className="text-foreground flex w-full h-[57px] dark:h-14 px-3 justify-between items-center border-b border-border transition-all duration-300 hide-on-scroll">
+      <div className="flex items-center gap-3 min-w-0">
         <Link
           href={`/home`}
-          className={`text-xl font-bold cursor-pointer ${
-            isCollapsed && "hidden"
-          }`}
-          title="Al-Juthur - Home"
+          className="group flex items-center gap-2 cursor-pointer min-w-0"
+          title="Al-Juthur"
         >
-          Al-Juthur
+          <LogoIcon size={24} className="text-accent group-hover:scale-105 transition-transform shrink-0" />
+          {!isCollapsed && (
+            <span className="text-lg font-bold tracking-tight text-foreground truncate">
+              Al-Juthur
+            </span>
+          )}
         </Link>
         {!isCollapsed && (
           <div className="flex items-center gap-2">
@@ -35,7 +40,10 @@ const SidebarHeader = ({ toggleSidebar, isCollapsed }: SidebarHeaderProps) => {
           </div>
         )}
       </div>
-      <MenuIcon onClick={toggleSidebar} />
+      <div className="flex items-center gap-1.5 shrink-0">
+        {!isCollapsed && <ThemeToggleButton />}
+        <MenuIcon onClick={toggleSidebar} />
+      </div>
     </div>
   );
 };

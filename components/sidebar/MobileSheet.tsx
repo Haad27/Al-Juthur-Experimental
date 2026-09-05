@@ -19,6 +19,7 @@ import {
 // =========== Icons ==============
 import MenuIcon from "../svg/icons/MenuIcon";
 import LogoIcon from "../svg/icons/LogoIcon";
+import ThemeToggleButton from "@/components/ThemeToggleButton";
 
 // =========== Navigation & Routing ==============
 import { useRouter } from "next/navigation";
@@ -119,6 +120,7 @@ const MobileSheet = ({
                       {currentSurahObj.revelationType}
                     </span>
                   )}
+                  <ThemeToggleButton />
                   <button 
                     onClick={() => { setActiveTab("settings"); setIsOpen(true); }} 
                     className="p-1.5 rounded-lg bg-card border border-accent/50  text-accent hover:text-accent  transition-all duration-300"
@@ -190,10 +192,14 @@ const MobileSheet = ({
           <SheetHeader>Menu</SheetHeader>
         </VisuallyHidden>
 
-        {/* <div className="mt-2 px-2">
-          <p className="text-gray-400 text-xl">Menu</p>
-        </div> */}
-        <div className="relative mt-4 mx-1">
+        <div className="pt-2 pb-2 px-1 border-b border-border/60">
+          <div className="flex items-center gap-2">
+            <LogoIcon size={26} className="text-accent shrink-0" />
+            <span className="font-bold tracking-tight text-foreground text-base">Al-Juthur</span>
+          </div>
+        </div>
+
+        <div className="relative mt-3 mx-1">
           <div className="relative flex items-center p-1 bg-background/90 dark:bg-background/90 border border-border rounded-2xl shadow-xl backdrop-blur-2xl overflow-hidden">
             {[
               { key: "search", label: "Search", icon: <Search className="w-4 h-4" /> },

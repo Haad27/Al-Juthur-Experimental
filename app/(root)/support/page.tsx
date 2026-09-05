@@ -1,9 +1,13 @@
 import Link from "next/link";
 import React from "react";
+import ThemeToggleButton from "@/components/ThemeToggleButton";
 
 const Support = () => {
   return (
-    <div className="w-full h-screen flex flex-col items-center justify-center text-center px-6 text-foreground bg-background">
+    <div className="w-full h-screen flex flex-col items-center justify-center text-center px-6 text-foreground bg-background relative">
+      <div className="fixed top-4 right-4 z-50">
+        <ThemeToggleButton />
+      </div>
       <div className="text-6xl mb-4">📖</div>
       <h1 className="text-2xl font-semibold mb-2">Support not available yet</h1>
       {/* <p className="text-muted-foreground max-w-md">

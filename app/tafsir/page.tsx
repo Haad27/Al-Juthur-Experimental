@@ -13,6 +13,7 @@ import AyahWheelPickerModal from "@/components/tafsir/AyahWheelPickerModal";
 import ContinueReadingBanner from "@/components/tafsir/ContinueReadingBanner";
 import AppHeader from "@/components/layout/AppHeader";
 import TafsirComparePanel from "@/components/tafsir/TafsirComparePanel";
+import ThemeToggleButton from "@/components/ThemeToggleButton";
 import { useSubscriptionStore } from "@/lib/stores/subscriptionStore";
 import { 
   getLastReadTafsir, 
@@ -749,6 +750,7 @@ function TafsirContent() {
                   <Compass className="size-3.5" />
                   <span>Ayah Picker</span>
                 </button>
+                <ThemeToggleButton />
               </div>
             </div>
 
@@ -1080,8 +1082,11 @@ function TafsirContent() {
           </main>
 
           {/* Right Sidebar: Compact Ayah Jump Index */}
-          <aside className={cn("flex-col w-16 lg:w-20 shrink-0 border-l border-border bg-background/50 sticky top-0 h-screen overflow-y-auto no-scrollbar py-6 pb-28", aiChatContext ? "hidden xl:flex" : "hidden md:flex")}>
-            <div className="text-[9px] uppercase font-bold text-muted-foreground tracking-widest text-center mb-6">Ayahs</div>
+          <aside className={cn("flex-col items-center w-16 lg:w-20 shrink-0 border-l border-border bg-background/50 sticky top-0 h-screen overflow-y-auto no-scrollbar pt-3.5 pb-28", aiChatContext ? "hidden xl:flex" : "hidden md:flex")}>
+            <div className="mb-4 shrink-0">
+              <ThemeToggleButton />
+            </div>
+            <div className="text-[9px] uppercase font-bold text-muted-foreground tracking-widest text-center mb-3">Ayahs</div>
             <div className="flex flex-col items-center gap-2 pb-24">
               {Array.from({ length: currentSurahMeta.numberOfAyahs }, (_, i) => i + 1).map((num) => {
                 const isCurrent = num === currentAyahIndex + 1;

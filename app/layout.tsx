@@ -4,14 +4,13 @@ import { GlobalStateProvider } from "@/lib/providers/GlobalStatesProvider";
 import { inter, notoNastaliqUrdu } from "./fonts";
 import BottomNav from "@/components/BottomNav";
 import AppThemeProvider from "@/components/theme/AppThemeProvider";
-import FloatingThemeToggle from "@/components/layout/FloatingThemeToggle";
 
 import NextTopLoader from "nextjs-toploader";
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://aljuthur.com"),
   title: {
-    default: "Al-Juthur | 120+ Tafsirs, Classical Roots & Scholarly AI",
+    default: "Al-Juthur | Your Quranic Tafsir & Lexicon Guide",
     template: "%s | Al-Juthur",
   },
   description:
@@ -46,7 +45,7 @@ export const metadata = {
     locale: "en_US",
     url: "https://aljuthur.com",
     siteName: "Al-Juthur",
-    title: "Al-Juthur | 120+ Tafsirs, Classical Roots & Scholarly AI",
+    title: "Al-Juthur | Your Quranic Tafsir & Lexicon Guide",
     description:
       "Explore the depths of classical Arabic with 120+ Tafsirs, 13 historical lexicons, word-by-word root analysis, and custom scholarly AI. Traditional knowledge in a modern interface.",
     images: [
@@ -54,14 +53,14 @@ export const metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Al-Juthur - 120+ Tafsirs, Classical Roots & Scholarly AI",
+        alt: "Al-Juthur - Your Quranic Tafsir & Lexicon Guide",
         type: "image/png",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Al-Juthur | 120+ Tafsirs, Classical Roots & Scholarly AI",
+    title: "Al-Juthur | Your Quranic Tafsir & Lexicon Guide",
     description:
       "Explore the depths of classical Arabic with 120+ Tafsirs, 13 historical lexicons, word-by-word root analysis, and custom scholarly AI. Traditional knowledge in a modern interface.",
     images: ["/og-image.png"],
@@ -100,7 +99,6 @@ export default function RootLayout({
               height={2}
               shadow="none"
             />
-            <FloatingThemeToggle />
             {children}
             <BottomNav />
             <GlobalModals />

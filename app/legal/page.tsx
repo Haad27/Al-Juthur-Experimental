@@ -17,6 +17,7 @@ import {
   AlertTriangle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import ThemeToggleButton from "@/components/ThemeToggleButton";
 
 type LegalTab = "terms" | "privacy" | "refund";
 
@@ -60,6 +61,7 @@ function LegalContent() {
             <span className="text-xs font-mono px-2.5 py-1 rounded-full bg-accent/10 text-accent border border-accent/20 font-semibold">
               Legal Center
             </span>
+            <ThemeToggleButton />
           </div>
         </div>
       </header>

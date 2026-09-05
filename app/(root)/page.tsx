@@ -8,6 +8,8 @@ import { ArrowRight, ChevronDown } from "lucide-react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import LoadingScreen from "@/components/landing3d/LoadingScreen";
+import LogoIcon from "@/components/svg/icons/LogoIcon";
+import ThemeToggleButton from "@/components/ThemeToggleButton";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -106,6 +108,10 @@ export default function LandingPage() {
   return (
     <div ref={mainRef} className="relative w-full bg-black text-white selection:bg-accent/30">
       <LoadingScreen />
+      {/* Floating Theme Toggle (landing page only) */}
+      <div className="fixed top-4 right-4 z-[80]">
+        <ThemeToggleButton />
+      </div>
       {/* Fixed 3D Canvas — persists behind entire page */}
       <div className="fixed inset-0 z-0">
         <Scene avatars={APP_IMAGES} captions={APP_CAPTIONS} scrollProgress={scrollProgress} />
@@ -118,7 +124,8 @@ export default function LandingPage() {
       >
         {/* Header / Hook */}
         <div className="max-w-md pointer-events-auto animate-fade-in-left">
-          <div className="mb-4">
+          <div className="mb-4 flex items-center gap-3.5">
+            <LogoIcon size={46} className="text-[#C4A574] drop-shadow-[0_0_16px_rgba(196,165,116,0.45)] shrink-0" />
             <h1 className="text-3xl md:text-5xl font-bold text-white tracking-widest uppercase drop-shadow-md">
               Al-Juthur
             </h1>

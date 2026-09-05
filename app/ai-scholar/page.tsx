@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { ScholarAssistantModal } from '@/components/ai/ScholarAssistantModal';
 import { Sparkles, BookOpen, ShieldCheck, Search, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import ThemeToggleButton from '@/components/ThemeToggleButton';
 
 export default function AiScholarPage() {
   const [isModalOpen, setIsModalOpen] = useState(true);
@@ -31,13 +32,16 @@ export default function AiScholarPage() {
             </div>
           </div>
         </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-accent hover:opacity-90 text-accent-foreground text-xs font-semibold shadow-lg transition"
-        >
-          <Search className="w-4 h-4" />
-          Launch Research Assistant
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-accent hover:opacity-90 text-accent-foreground text-xs font-semibold shadow-lg transition"
+          >
+            <Search className="w-4 h-4" />
+            Launch Research Assistant
+          </button>
+          <ThemeToggleButton />
+        </div>
       </header>
 
       {/* Main Intro Body */}

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bookmark } from "lucide-react";
 import { cn } from "@/lib/utils";
+import LogoIcon from "@/components/svg/icons/LogoIcon";
+import ThemeToggleButton from "@/components/ThemeToggleButton";
 
 const NAV = [
   { href: "/home", label: "Home", match: (p: string) => p === "/home" || p.startsWith("/surah") },
@@ -26,9 +28,10 @@ export default function AppHeader({
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/90 backdrop-blur-md">
-      <div className="relative mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-3 pr-14 sm:px-6 sm:pr-16">
-        <Link href="/home" className="flex min-w-0 items-center gap-2 text-foreground">
-          <span className="truncate font-semibold tracking-tight text-base sm:text-lg">Al-Juthur</span>
+      <div className="relative mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-3 sm:px-6">
+        <Link href="/home" className="group flex min-w-0 items-center gap-2 text-foreground">
+          <LogoIcon size={28} className="text-accent group-hover:scale-105 transition-transform shrink-0" />
+          <span className="truncate font-bold tracking-tight text-base sm:text-lg">Al-Juthur</span>
           {subtitle}
         </Link>
 
@@ -62,6 +65,7 @@ export default function AppHeader({
             <Bookmark className="size-3.5 text-accent" />
             <span>Saved</span>
           </Link>
+          <ThemeToggleButton />
         </div>
       </div>
     </header>

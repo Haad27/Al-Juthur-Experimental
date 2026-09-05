@@ -24,11 +24,11 @@ export default function ThemeToggleButton({
       type="button"
       onClick={() => setTheme(isDark ? "light" : "dark")}
       className={cn(
-        "inline-flex size-9 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "inline-flex size-9 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer shrink-0",
         className
       )}
-      aria-label={isDark ? "Switch to sepia theme" : "Switch to dark theme"}
-      title={isDark ? "Sepia" : "Dark"}
+      aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
+      title={isDark ? "Light theme" : "Dark theme"}
     >
       {isDark ? (
         <Sun className="size-4" strokeWidth={1.75} />
