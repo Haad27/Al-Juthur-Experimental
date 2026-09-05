@@ -9,6 +9,7 @@ import { amiri, amiriquran, inter } from "@/app/fonts";
 import MobileSheet from "@/components/sidebar/MobileSheet";
 import AppHeader from "@/components/layout/AppHeader";
 import MenuIcon from "@/components/svg/icons/MenuIcon";
+import LogoIcon from "@/components/svg/icons/LogoIcon";
 import { toast } from "sonner";
 
 const SurahsList = () => {
@@ -96,9 +97,10 @@ const SurahsList = () => {
 
       <div className={`mx-auto w-full max-w-6xl space-y-14 px-4 pb-36 pt-8 sm:px-6 md:pb-16 ${inter.className}`}>
         <section className="max-w-2xl space-y-4">
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-            Quran · Tafsir · Lexicon
-          </p>
+          <div className="flex items-center gap-2.5">
+            <LogoIcon size={32} className="text-accent shrink-0" />
+            <span className="text-xl font-bold tracking-tight text-foreground">Al-Juthur</span>
+          </div>
           <h1 className="text-3xl font-semibold leading-tight text-foreground md:text-5xl">
             Read without distraction
           </h1>

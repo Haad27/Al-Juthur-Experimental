@@ -3,6 +3,7 @@
 import { useProgress } from "@react-three/drei";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import LogoIcon from "@/components/svg/icons/LogoIcon";
 
 export default function LoadingScreen() {
   const { progress, active, loaded, total } = useProgress();
@@ -42,13 +43,11 @@ export default function LoadingScreen() {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-96 bg-[#C4A574]/5 blur-[120px] rounded-full" />
           </div>
 
-          <div className="w-64 flex flex-col items-center gap-4 relative z-10 text-center px-4">
+          <div className="w-64 flex flex-col items-center gap-2.5 relative z-10 text-center px-4">
+            <LogoIcon size={44} className="text-[#C4A574] drop-shadow-[0_0_16px_rgba(196,165,116,0.4)]" />
             <h1 className="text-xl sm:text-2xl font-bold tracking-[0.25em] uppercase text-[#F5E8C7]">
               Al-Juthur
             </h1>
-            <p className="text-xs text-[#A8895A] tracking-wider uppercase font-medium">
-              Digital Quranic Workspace
-            </p>
 
             {/* Clean Gold Progress Bar */}
             <div className="w-full flex flex-col gap-2 mt-4">
