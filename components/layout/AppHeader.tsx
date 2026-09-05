@@ -29,9 +29,13 @@ export default function AppHeader({
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/90 backdrop-blur-md">
       <div className="relative mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-3 sm:px-6">
-        <Link href="/home" className="group flex min-w-0 items-center gap-2 text-foreground">
-          <LogoIcon size={28} className="text-accent group-hover:scale-105 transition-transform shrink-0" />
-          <span className="truncate font-bold tracking-tight text-base sm:text-lg">Al-Juthur</span>
+        <Link
+          href="/home"
+          className="group flex min-w-0 items-center gap-2.5 text-foreground"
+          title="Al-Juthur"
+          aria-label="Al-Juthur Home"
+        >
+          <LogoIcon size={30} className="text-accent group-hover:scale-105 transition-transform shrink-0" />
           {subtitle}
         </Link>
 

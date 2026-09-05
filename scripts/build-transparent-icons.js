@@ -1,5 +1,11 @@
+const sharp = require('sharp');
+const fs = require('fs');
+const path = require('path');
 
-<svg width="512" height="512" viewBox="4 10 92 92" fill="none" xmlns="http://www.w3.org/2000/svg">
+// Clean transparent SVG for Al-Juthur logo mark (Book + Roots)
+// Perfectly centered with viewBox '4 10 92 92'
+const getTransparentSvg = (size) => `
+<svg width="${size}" height="${size}" viewBox="4 10 92 92" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="aljuthur-book-grad" x1="15" y1="15" x2="85" y2="90" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#C4A574"/>
@@ -40,3 +46,46 @@
   <path d="M 58 62 C 66 65 76 67 83 72 C 87 75 89 78.5 90 82 C 88 81 84.5 77.5 79.5 75 C 72 72 64 69 59 65 Z" fill="url(#aljuthur-roots-grad)"/>
   <path d="M 53 74 C 58 79 64 85 70 90.5 C 68 89.5 63.5 85.5 58.5 80.5 Z" fill="url(#aljuthur-roots-grad)"/>
 </svg>
+`;
+
+async function generate() {
+  const rootDir = path.join(__dirname, '..');
+  const favDir = path.join(rootDir, 'public', 'assets', 'favicon');
+
+  const svg512 = getTransparentSvg(512);
+  const buf512 = Buffer.from(svg512);
+
+  // 1. Generate transparent 512x512 and 1024x1024
+  const svg1024 = getTransparentSvg(1024);
+  const buf1024 = Buffer.from(svg1024);
+  const logoDir = path.join(rootDir, 'public', 'assets', 'logo');
+  await sharp(buf1024).resize(1024, 1024).png().toFile(path.join(logoDir, 'al_juthur_mark_1024.png'));
+  await sharp(buf1024).resize(1024, 1024).png().toFile(path.join(logoDir, 'al_juthur_mark_transparent.png'));
+  await sharp(buf512).resize(512, 512).png().toFile(path.join(favDir, 'android-chrome-512x512.png'));
+  await sharp(buf512).resize(512, 512).png().toFile(path.join(rootDir, 'public', 'al-juthur-logo.png'));
+  console.log('Generated transparent marks (1024 & 512) & al-juthur-logo.png');
+
+  // 2. Generate transparent 192x192
+  await sharp(buf512).resize(192, 192).png().toFile(path.join(favDir, 'android-chrome-192x192.png'));
+  console.log('Generated android-chrome-192x192.png');
+
+  // 3. Generate transparent 180x180 (Apple Touch Icon)
+  await sharp(buf512).resize(180, 180).png().toFile(path.join(favDir, 'apple-touch-icon.png'));
+  console.log('Generated apple-touch-icon.png');
+
+  // 4. Generate transparent 32x32
+  await sharp(buf512).resize(32, 32).png().toFile(path.join(favDir, 'favicon-32x32.png'));
+  console.log('Generated favicon-32x32.png');
+
+  // 5. Generate transparent 16x16
+  await sharp(buf512).resize(16, 16).png().toFile(path.join(favDir, 'favicon-16x16.png'));
+  console.log('Generated favicon-16x16.png');
+
+  // 6. Save vector SVGs
+  fs.writeFileSync(path.join(favDir, 'favicon.svg'), svg512);
+  fs.writeFileSync(path.join(rootDir, 'public', 'favicon.svg'), svg512);
+  fs.writeFileSync(path.join(rootDir, 'app', 'icon.svg'), svg512);
+  console.log('Updated transparent favicon.svg and app/icon.svg');
+}
+
+generate().catch(console.error);
