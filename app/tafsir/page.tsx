@@ -1524,6 +1524,7 @@ function TafsirContent() {
                             </span>
                           </>
                         )}
+                      </div>
                     </div>
                   </div>
 
