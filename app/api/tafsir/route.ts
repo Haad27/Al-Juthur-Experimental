@@ -164,7 +164,7 @@ const getTafsirLibrary = unstable_cache(
       authors: authorsByLang[l.id] || []
     }));
   },
-  ['tafsir-library-v8'],
+  ['tafsir-library-v9'],
   { revalidate: 2592000 } // 30 days
 );
 
@@ -187,17 +187,19 @@ const getLocalDownloadedTafsir = unstable_cache(
     try {
       const fs = await import('fs');
       const path = await import('path');
-      const tafsirFile = path.join(process.cwd(), 'database', 'downloaded_tafsirs', folder, `${surahId}.json`);
+      const parts = ['data' + 'base', 'downloaded' + '_tafsirs', folder, `${surahId}.json`];
+      const tafsirFile = path.join(/*turbopackIgnore: true*/ process.cwd(), ...parts);
       if (!fs.existsSync(tafsirFile)) return null;
 
       const raw = fs.readFileSync(tafsirFile, 'utf8');
       const parsed = JSON.parse(raw);
       const rawAyahs = Array.isArray(parsed) ? parsed : (parsed.ayahs || []);
       const ayahs = await getAyahsForSurah(surahId);
+      const ayahByNumber = new Map(ayahs.map(a => [a.numberInSurah, a]));
 
       return rawAyahs.map((a: any, idx: number) => {
         const vNum = a.ayah || a.numberInSurah || (idx + 1);
-        const arabicAyah = ayahs.find(ar => ar.numberInSurah === vNum);
+        const arabicAyah = ayahByNumber.get(vNum);
         
         let textFormatted = a.text;
         if (isUrdu) {
@@ -226,7 +228,7 @@ const getLocalDownloadedTafsir = unstable_cache(
       return null;
     }
   },
-  ['local-downloaded-tafsir-v6'],
+  ['local-downloaded-tafsir-v8'],
   { revalidate: 2592000 }
 );
 
@@ -245,17 +247,26 @@ const getSurahDbTafsir = unstable_cache(
       })
     ]);
 
-    const ayahMap = new Map(ayahs.map(a => [a.id, a]));
-    const tafsirs = rawTafsirs.map(t => ({
-      ...t,
-      ayah: ayahMap.get(t.ayahId),
-      author: author
-    }));
+    const ayahById = new Map(ayahs.map(a => [a.id, a]));
+    const ayahByNumber = new Map(ayahs.map(a => [a.numberInSurah, a]));
+    const tafsirs = rawTafsirs.map(t => {
+      const arabicAyah = ayahById.get(t.ayahId) || ayahByNumber.get(t.ayahId) || {
+        id: t.ayahId,
+        surahId: surahId,
+        numberInSurah: t.ayahId,
+        text: "Arabic Text",
+      };
+      return {
+        ...t,
+        ayah: arabicAyah,
+        author: author
+      };
+    });
 
     tafsirs.sort((a, b) => (a.ayah?.numberInSurah || 0) - (b.ayah?.numberInSurah || 0));
     return tafsirs;
   },
-  ['surah-db-tafsir-v6'],
+  ['surah-db-tafsir-v8'],
   { revalidate: 2592000 } // 30 days
 );
 

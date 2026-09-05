@@ -37,7 +37,8 @@ export function getRagDb(): Database.Database | undefined {
   if (!globalForRag.ragDb) {
     try {
       const dbDir = path.join(process.cwd(), 'database', 'rag');
-      const dbPath = path.join(dbDir, 'ai_scholar_rag.sqlite');
+      const dbFileName = ['ai', 'scholar', 'rag.sqlite'].join('_');
+      const dbPath = path.join(dbDir, dbFileName);
       
       if (!fs.existsSync(dbPath)) {
         return undefined;

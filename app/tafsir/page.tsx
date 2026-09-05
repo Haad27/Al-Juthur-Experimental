@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo, useRef, useCallback, Suspense } fr
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
-import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, ChevronLeft, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check, Bookmark, BookmarkCheck, Lock, Columns2 } from "lucide-react";
+import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, ChevronLeft, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check, Bookmark, BookmarkCheck, Lock, Columns2, AlertCircle, RotateCcw } from "lucide-react";
 import dynamic from "next/dynamic";
 const TafsirBookMode = dynamic(() => import("@/components/tafsir/TafsirBookMode"), { ssr: false });
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
@@ -358,6 +358,7 @@ function TafsirContent() {
   const [activeSurah, setActiveSurah] = useState<number>(parsedUrlSurahId);
   const [loadedTafsir, setLoadedTafsir] = useState<Record<number, TafsirEntry>>({});
   const [loadingEntries, setLoadingEntries] = useState<boolean>(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const tafsirCacheRef = useRef<Map<string, TafsirEntry[]>>(new Map());
 
@@ -456,6 +457,7 @@ function TafsirContent() {
   // Load full Surah Tafsir in ONE single fast request and cache in memory
   const loadSurahTafsir = useCallback(async (authorId: number, surahId: number) => {
     const cacheKey = `${authorId}:${surahId}`;
+    setLoadError(null);
     if (tafsirCacheRef.current.has(cacheKey)) {
       const cached = tafsirCacheRef.current.get(cacheKey)!;
       const map: Record<number, TafsirEntry> = {};
@@ -473,15 +475,22 @@ function TafsirContent() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
-        const map: Record<number, TafsirEntry> = {};
-        data.data.forEach((entry: TafsirEntry, i: number) => {
-          map[i] = entry;
-        });
-        setLoadedTafsir(map);
-        tafsirCacheRef.current.set(cacheKey, data.data);
+        if (data.data.length === 0) {
+          setLoadError("No commentary entries found for this Surah in the selected edition.");
+        } else {
+          const map: Record<number, TafsirEntry> = {};
+          data.data.forEach((entry: TafsirEntry, i: number) => {
+            map[i] = entry;
+          });
+          setLoadedTafsir(map);
+          tafsirCacheRef.current.set(cacheKey, data.data);
+        }
+      } else {
+        setLoadError(data.error || "Failed to retrieve commentary for this Surah.");
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(`[TafsirReader] Failed to load tafsir for author ${authorId}, surah ${surahId}:`, e);
+      setLoadError("Unable to load commentary. Please check your connection or retry.");
     } finally {
       setLoadingEntries(false);
     }
@@ -1062,7 +1071,22 @@ function TafsirContent() {
             </div>
 
             <div className={cn("flex-1 w-full min-h-0", readingMode === "book" && "flex flex-col")}>
-              {loadingEntries || Object.keys(loadedTafsir).length === 0 || (loadedTafsir[0] && loadedTafsir[0].authorId !== activeAuthor.id) ? (
+              {loadError ? (
+                <div className="flex flex-col items-center justify-center p-8 sm:p-12 text-center my-12 border border-border/40 rounded-2xl bg-card/40 backdrop-blur max-w-lg mx-auto">
+                  <div className="w-12 h-12 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center mb-4">
+                    <AlertCircle className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground mb-2">Commentary Unavailable</h3>
+                  <p className="text-sm text-muted-foreground mb-6 leading-relaxed">{loadError}</p>
+                  <button
+                    onClick={() => activeAuthor && loadSurahTafsir(activeAuthor.id, activeSurah)}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-accent/10 border border-accent/40 text-accent hover:bg-accent/20 transition-colors cursor-pointer"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    Retry Loading
+                  </button>
+                </div>
+              ) : loadingEntries || Object.keys(loadedTafsir).length === 0 || (loadedTafsir[0] && loadedTafsir[0].authorId !== activeAuthor.id) ? (
                 <AlJuthurLoadingProgress
                   title={`Loading ${activeAuthor?.name?.replace(/\s*\([^)]*\)\s*$/, '').trim() || "Tafsir"}`}
                   subtitle={`Surah ${currentSurahMeta.englishName} (${activeLangName || "Scholarly Exegesis"})`}

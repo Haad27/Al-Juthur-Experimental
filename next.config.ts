@@ -2,11 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
-    '/*': ['./database/**/*'],
-    '/api/**/*': ['./database/**/*'],
-    '/(root)/**/*': ['./database/**/*'],
-    '/tafsir/**/*': ['./database/**/*'],
-    '/lexicon/**/*': ['./database/**/*'],
+    '/api/**/*': ['./database/surah-meta/**/*', './database/word-by-word-translation/**/*'],
+  },
+  outputFileTracingExcludes: {
+    '*': ['./database/**/*.sqlite', './database/**/*.db', './database/rag/**/*', './database/lexicon/**/*', './database/downloaded_tafsirs/**/*'],
   },
 };
 
