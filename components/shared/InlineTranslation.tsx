@@ -196,13 +196,15 @@ export default function InlineTranslation({
         <button
           onClick={handleTranslate}
           className={cn(
-            "flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl transition-all duration-300 font-medium text-xs sm:text-sm shadow-sm cursor-pointer",
+            "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full transition-colors duration-200 font-normal text-xs cursor-pointer select-none",
             isOpen
-              ? "bg-accent/10 text-accent border border-accent/30"
-              : "bg-accent/15 text-accent border border-accent/50 hover:bg-accent/20 hover:-translate-y-0.5 "
+              ? "bg-accent/15 text-accent border border-accent/40"
+              : translationText
+              ? "bg-accent/10 text-accent border border-accent/30 hover:bg-accent/15"
+              : "bg-muted/50 text-muted-foreground hover:text-foreground border border-border/80 hover:border-accent/40 hover:bg-muted/80"
           )}
         >
-          <Languages className="size-4 shrink-0" />
+          <Languages className="size-3.5 shrink-0 opacity-80" />
           <span>{isOpen ? "Hide Translation" : translationText ? "View Translation" : "Quick Translate"}</span>
         </button>
       </div>
