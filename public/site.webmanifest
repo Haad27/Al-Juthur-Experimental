@@ -1,11 +1,11 @@
 {
-  "name": "Al-Juthur - Classical Quranic Morphology & Tafsir",
+  "name": "Al-Juthur",
   "short_name": "Al-Juthur",
   "description": "Explore the depths of classical Arabic with 120+ Tafsirs, 13 historical lexicons, word-by-word root analysis, and custom scholarly AI. Traditional knowledge in a modern interface.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#09090b",
-  "theme_color": "#10b981",
+  "background_color": "#F4ECD8",
+  "theme_color": "#8B6914",
   "icons": [
     {
       "src": "/assets/favicon/android-chrome-192x192.png",
