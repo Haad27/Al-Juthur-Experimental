@@ -204,7 +204,7 @@ const getTafsirLibrary = unstable_cache(
       authors: authorsByLang[l.id] || []
     }));
   },
-  ['tafsir-library-v10'],
+  ['tafsir-library-v11'],
   { revalidate: 2592000 } // 30 days
 );
 
@@ -306,7 +306,7 @@ const getSurahDbTafsir = unstable_cache(
     tafsirs.sort((a, b) => (a.ayah?.numberInSurah || 0) - (b.ayah?.numberInSurah || 0));
     return tafsirs;
   },
-  ['surah-db-tafsir-v8'],
+  ['surah-db-tafsir-v9'],
   { revalidate: 2592000 } // 30 days
 );
 

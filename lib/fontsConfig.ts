@@ -60,6 +60,26 @@ export const ENGLISH_FONTS: TranslationFontOption[] = [
     fontFamily: "var(--font-plus-jakarta), system-ui, -apple-system, sans-serif",
     lineHeight: "1.7",
   },
+  {
+    id: "arial",
+    name: "Arial",
+    familyLabel: "Universal Sans",
+    category: "Sans-Serif",
+    description: "Clean, ubiquitous neo-grotesque sans-serif with timeless neutral clarity.",
+    sample: "In the name of Allah, the Entirely Merciful, the Especially Merciful.",
+    fontFamily: "Arial, 'Helvetica Neue', Helvetica, sans-serif",
+    lineHeight: "1.7",
+  },
+  {
+    id: "rockwell",
+    name: "Rockwell",
+    familyLabel: "Slab Serif",
+    category: "Serif",
+    description: "Architectural geometric slab serif with distinct, bold mechanical serifs.",
+    sample: "In the name of Allah, the Entirely Merciful, the Especially Merciful.",
+    fontFamily: "Rockwell, 'Rockwell Nova', var(--font-roboto-slab), 'DejaVu Serif', 'Sitka Small', serif",
+    lineHeight: "1.75",
+  },
 ];
 
 export const URDU_FONTS: TranslationFontOption[] = [

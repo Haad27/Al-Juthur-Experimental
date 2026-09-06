@@ -197,7 +197,7 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
               key={idx} 
               className={`inline-flex flex-col items-center justify-end px-0.5 py-0.5 text-muted-foreground select-none min-w-0 -mx-1.5 ${mushafFontClass}`}
             >
-              <span className="text-[0.85em] leading-none mb-1">{word}</span>
+              <span className="text-[0.85em] leading-none mb-1">{cleanQuranText(word)}</span>
               {showWbw && (
                 <span 
                   className="mt-0.5 block opacity-0 pointer-events-none select-none text-[0.6rem]"
@@ -268,7 +268,7 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
                       {surahNumber}:{ayahNumber}:{wordIdx}
                     </span>
                     <span className="font-arabic text-2xl font-bold text-foreground">
-                      {word}
+                      {displayWord}
                     </span>
                   </div>
 

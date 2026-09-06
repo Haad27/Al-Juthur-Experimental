@@ -10,6 +10,7 @@ import {
   playfair,
   cinzel,
   plusJakartaSans,
+  robotoSlab,
 } from "./fonts";
 import BottomNav from "@/components/BottomNav";
 import AppThemeProvider from "@/components/theme/AppThemeProvider";
@@ -100,7 +101,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
       </head>
-      <body className={`${inter.className} ${notoNastaliqUrdu.variable} ${gulzar.variable} ${notoSansArabic.variable} ${lora.variable} ${playfair.variable} ${cinzel.variable} ${plusJakartaSans.variable} bg-background text-foreground`} suppressHydrationWarning>
+      <body className={`${inter.className} ${notoNastaliqUrdu.variable} ${gulzar.variable} ${notoSansArabic.variable} ${lora.variable} ${playfair.variable} ${cinzel.variable} ${plusJakartaSans.variable} ${robotoSlab.variable} bg-background text-foreground`} suppressHydrationWarning>
         <AppThemeProvider>
           <GlobalStateProvider>
             <NextTopLoader

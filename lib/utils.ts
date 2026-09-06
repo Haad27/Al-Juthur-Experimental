@@ -85,6 +85,7 @@ export function cleanQuranText(text: string): string {
   if (!text) return "";
   return text
     .replace(/\u06ED/g, "") // Remove Tanzil sequential tanween marker (U+06ED Small Low Meem) which mistakenly renders as a literal meem
+    .replace(/\u06DF/g, "\u0652") // Map Arabic Small High Rounded Zero (U+06DF) to Sukun (U+0652) to guarantee consistent small-circle rendering across all font engines
     .replace(/\u064E\u0670/g, "\u0670") // Normalize redundant fatha + dagger alif
     .replace(/\u0670\u064E/g, "\u0670");
 }

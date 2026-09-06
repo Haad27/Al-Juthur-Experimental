@@ -248,6 +248,83 @@ const Settings = () => {
       </div> */}
 
       <SettingSection
+        icon={<BookMarked className="w-4 h-4 text-accent" />}
+        title="Mushaf Script Style"
+        control={
+          <div className="space-y-3 pt-1 w-full min-w-0 max-w-full">
+            {/* Active layout preview */}
+            <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-muted/60 border border-border w-full min-w-0">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-semibold text-foreground truncate">{activeLayout.name}</span>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full border font-medium ${scriptColorMap[activeLayout.scriptColor]}`}>
+                    {activeLayout.scriptFamily}
+                  </span>
+                </div>
+                <span className="text-[11px] text-muted-foreground">{activeLayout.subtitle}</span>
+              </div>
+              <span className={`${activeLayout.fontClass} text-accent text-lg leading-normal shrink-0`} dir="rtl" lang="ar">
+                ﷽
+              </span>
+            </div>
+
+            {/* 3-column grid of layout options */}
+            <div className="grid grid-cols-3 gap-1.5">
+              {MUSHAF_LAYOUTS.map((layout) => {
+                const isSelected =
+                  currentStyle === layout.id ||
+                  (currentStyle === "uthmani" && layout.id === "v2");
+                return (
+                  <button
+                    key={layout.id}
+                    type="button"
+                    onClick={() => setMushafStyle(layout.id)}
+                    title={`${layout.name} — ${layout.subtitle}`}
+                    className={`relative p-2 rounded-xl border text-left flex flex-col gap-1.5 transition-all duration-200 cursor-pointer group ${
+                      isSelected
+                        ? "bg-accent/12 border-accent/40 shadow-sm"
+                        : "bg-muted/70 border-border hover:bg-muted hover:border-border"
+                    }`}
+                  >
+
+                    {/* Script family badge */}
+                    <div className="flex items-center justify-between w-full">
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full border font-semibold leading-none ${scriptColorMap[layout.scriptColor]}`}>
+                        {layout.scriptFamily}
+                      </span>
+                      {isSelected && (
+                        <Check className="w-3 h-3 text-accent shrink-0" />
+                      )}
+                    </div>
+
+                    {/* Arabic sample in the layout's font */}
+                    <span
+                      className={`${layout.fontClass} text-right block w-full text-sm leading-relaxed truncate transition-colors ${
+                        isSelected
+                          ? "text-accent font-medium"
+                          : "text-foreground/75 group-hover:text-foreground"
+                      }`}
+                      dir="rtl"
+                      lang="ar"
+                    >
+                      {layout.sample}
+                    </span>
+
+                    {/* Layout name */}
+                    <span className={`text-[10px] font-semibold leading-tight truncate ${isSelected ? "text-accent" : "text-muted-foreground"}`}>
+                      {layout.name}
+                    </span>
+                    <span className="text-[9px] text-muted-foreground truncate leading-none">{layout.region}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        }
+        description="Choose from 9 authentic Mushaf editions: Uthmanic Hafs (Madani), Indo-Pak Nastaleeq, Digital Naskh, and Warsh script."
+      />
+
+      <SettingSection
         icon={<Globe className="w-4 h-4 text-accent" />}
         title="Translation"
         control={<TranslationSelector />}
@@ -401,80 +478,6 @@ const Settings = () => {
           </div>
         }
         description="Customize the typography for English and Urdu translations. Choose between modern clean sans-serif, classical literary serifs, authentic Nastaliq calligraphy, and clean digital Naskh."
-      />
-
-      <SettingSection
-        icon={<BookMarked className="w-4 h-4 text-accent" />}
-        title="Mushaf Script Style"
-        control={
-          <div className="space-y-3 pt-1 w-full min-w-0 max-w-full">
-            {/* Active layout preview */}
-            <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-muted/60 border border-border w-full min-w-0">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-semibold text-foreground truncate">{activeLayout.name}</span>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full border font-medium ${scriptColorMap[activeLayout.scriptColor]}`}>
-                    {activeLayout.scriptFamily}
-                  </span>
-                </div>
-                <span className="text-[11px] text-muted-foreground">{activeLayout.subtitle}</span>
-              </div>
-              <span className={`${activeLayout.fontClass} text-accent text-lg leading-normal shrink-0`} dir="rtl" lang="ar">
-                ﷽
-              </span>
-            </div>
-
-            {/* 3-column grid of layout options */}
-            <div className="grid grid-cols-3 gap-1.5">
-              {MUSHAF_LAYOUTS.map((layout) => {
-                const isSelected =
-                  currentStyle === layout.id ||
-                  (currentStyle === "uthmani" && layout.id === "v2");
-                return (
-                  <button
-                    key={layout.id}
-                    type="button"
-                    onClick={() => setMushafStyle(layout.id)}
-                    title={`${layout.name} — ${layout.subtitle}`}
-                    className={`relative p-2 rounded-xl border text-left flex flex-col gap-1.5 transition-all duration-200 cursor-pointer group ${
-                      isSelected
-                        ? "bg-accent/12 border-accent/40 shadow-lg "
-                        : "bg-muted/70 border-border hover:bg-muted hover:border-border"
-                    }`}
-                  >
-
-                    {/* Script family badge */}
-                    <div className="flex items-center justify-between w-full">
-                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full border font-semibold leading-none ${scriptColorMap[layout.scriptColor]}`}>
-                        {layout.scriptFamily}
-                      </span>
-                      {isSelected && (
-                        <Check className="w-3 h-3 text-accent shrink-0" />
-                      )}
-                    </div>
-
-                    {/* Arabic sample in the layout's font */}
-                    <span
-                      className={`${layout.fontClass} text-right block w-full leading-relaxed truncate`}
-                      style={{ fontSize: "0.85rem", color: isSelected ? "#6ee7b7" : "#a1a1aa" }}
-                      dir="rtl"
-                      lang="ar"
-                    >
-                      {layout.sample}
-                    </span>
-
-                    {/* Layout name */}
-                    <span className={`text-[10px] font-semibold leading-tight truncate ${isSelected ? "text-accent" : "text-muted-foreground"}`}>
-                      {layout.name}
-                    </span>
-                    <span className="text-[9px] text-muted-foreground truncate leading-none">{layout.region}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        }
-        description="Choose from 9 authentic Mushaf editions: Uthmanic Hafs (Madani), Indo-Pak Nastaleeq, Digital Naskh, and Warsh script."
       />
 
       <SettingSection
