@@ -246,6 +246,20 @@ function TafsirContent() {
     y: number;
   } | null>(null);
 
+  // When highlight mode is on, we inject a style to change the text selection color to amber/gold
+  const highlightModeStyle = isHighlightMode ? (
+    <style dangerouslySetInnerHTML={{__html: `
+      ::selection {
+        background-color: rgba(245, 158, 11, 0.4) !important;
+        color: inherit !important;
+      }
+      *::selection {
+        background-color: rgba(245, 158, 11, 0.4) !important;
+        color: inherit !important;
+      }
+    `}} />
+  ) : null;
+
   useEffect(() => { setMounted(true); }, []);
 
   // Lock body scroll when mobile filter sheet is open
@@ -1405,7 +1419,7 @@ function TafsirContent() {
             
             <button
               onClick={() => setIsToolsMenuOpen(!isToolsMenuOpen)}
-              className="flex items-center justify-center size-14 rounded-full bg-foreground text-background shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:scale-105 transition-all duration-300"
+              className="flex items-center justify-center size-12 rounded-full bg-foreground text-background shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:scale-105 transition-all duration-300"
               title="Reading Tools"
             >
               {isToolsMenuOpen ? <X className="size-6" /> : <PenTool className="size-5" />}
