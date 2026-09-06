@@ -48,6 +48,7 @@ import { ALL_TRANSLATION_OPTIONS } from "@/lib/translationsManifest";
 import { getTranslationFontStyle } from "@/lib/fontsConfig";
 import ThemeToggleButton from "@/components/ThemeToggleButton";
 import AlJuthurLoadingProgress from "@/components/shared/AlJuthurLoadingProgress";
+import AyahSkeleton from "@/components/quran/AyahSkeleton";
 
 interface AyahProps {
   number: number;

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, ChevronLeft, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check, Bookmark, BookmarkCheck, Lock, Columns2, AlertCircle, RotateCcw } from "lucide-react";
 import dynamic from "next/dynamic";
-const TafsirBookMode = dynamic(() => import("@/components/tafsir/TafsirBookMode"), { ssr: false });
+import TafsirHorizontalReader from "@/components/tafsir/TafsirHorizontalReader";
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
 import TafsirTextRenderer from "@/components/tafsir/TafsirTextRenderer";
 import { amiriquran, inter } from "@/app/fonts";
@@ -363,8 +363,7 @@ function TafsirContent() {
   const tafsirCacheRef = useRef<Map<string, TafsirEntry[]>>(new Map());
 
   const [topNavVisible, setTopNavVisible] = useState<boolean>(true);
-  const ENABLE_BOOK_MODE = false;
-  const [readingMode, setReadingMode] = useState<"scroll" | "book">("scroll");
+  const [readingMode, setReadingMode] = useState<"vertical" | "horizontal">("vertical");
   const [currentAyahIndex, setCurrentAyahIndex] = useState<number>(0);
   const ayahRefs = useRef<(HTMLDivElement | null)[]>([]);
   const lastScrollYRef = useRef<number>(0);
@@ -724,45 +723,14 @@ function TafsirContent() {
 
     const authorWarning = getTafsirWarning(activeAuthor.name, activeAuthor.authorName);
 
-    // ── BOOK MODE (full-screen immersive) ──────────────────────
-    if (readingMode === "book") {
-      if (loadingEntries || Object.keys(loadedTafsir).length === 0) {
-        return (
-          <div className={`min-h-screen w-full flex items-center justify-center bg-background text-foreground ${inter.className}`}>
-            <AlJuthurLoadingProgress
-              title={`Loading ${activeAuthor?.name?.replace(/\s*\([^)]*\)\s*$/, '').trim() || "Tafsir"}`}
-              subtitle={`Surah ${currentSurahMeta.englishName} — Book Mode`}
-              statusMessages={[
-                "Preparing book pages...",
-                "Formatting tafsir content...",
-              ]}
-              minDurationMs={300}
-            />
-          </div>
-        );
-      }
-
-      return (
-        <TafsirBookMode
-          loadedTafsir={loadedTafsir}
-          activeSurah={activeSurah}
-          activeLangName={activeLangName}
-          activeAuthor={activeAuthor}
-          totalAyahs={currentSurahMeta.numberOfAyahs}
-          initialAyah={currentAyahIndex + 1}
-          onAyahChange={(ayah) => setCurrentAyahIndex(ayah - 1)}
-          onExitBookMode={() => setReadingMode("scroll")}
-          onBackToLibrary={() => { setReadingMode("scroll"); setActiveAuthor(null); }}
-          allAuthorsWithLang={allAuthorsWithLang}
-          onSwitchAuthor={(author, langName) => { setActiveAuthor(author as any); setActiveLangName(langName); }}
-          onSurahChange={(surahId) => setActiveSurah(surahId)}
-        />
-      );
-    }
-
-    // ── SCROLL MODE (default) ──────────────────────────────────
     return (
-      <div className={`min-h-screen w-full max-w-full overflow-x-clip bg-background text-foreground ${inter.className} transition-colors touch-pan-y`}>
+      <div
+        className={cn(
+          "w-full max-w-full overflow-x-clip bg-background text-foreground transition-colors touch-pan-y",
+          inter.className,
+          readingMode === "horizontal" ? "h-screen overflow-hidden flex flex-col" : "min-h-screen"
+        )}
+      >
         {/* Top Navigation Bar (Mobile Only) */}
         <div className={`md:hidden sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border px-3 py-2.5 transition-all duration-300 ${topNavVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}>
           <div className="max-w-[1700px] mx-auto">
@@ -816,17 +784,20 @@ function TafsirContent() {
                   <Compass className="size-3.5 text-accent" />
                   <span className="hidden xs:inline">Picker</span>
                 </button>
-                {/* Book Mode Toggle (Feature Flagged) */}
-                {ENABLE_BOOK_MODE && (
-                  <button
-                    onClick={() => setReadingMode("book")}
-                    className="flex items-center gap-1 px-2 py-1.5 rounded-lg border text-xs font-medium transition-all shrink-0 cursor-pointer border-border bg-card hover:bg-muted text-foreground"
-                    title="Switch to Book Mode"
-                  >
-                    <BookOpen className="size-3.5 text-accent" />
-                    <span className="hidden xs:inline">Book Mode</span>
-                  </button>
-                )}
+                {/* Reader Mode (Horizontal) Toggle */}
+                <button
+                  onClick={() => setReadingMode(readingMode === "horizontal" ? "vertical" : "horizontal")}
+                  className={cn(
+                    "flex items-center gap-1 px-2 py-1.5 rounded-lg border text-xs font-medium transition-all shrink-0 cursor-pointer",
+                    readingMode === "horizontal"
+                      ? "border-accent bg-accent/15 text-accent font-semibold"
+                      : "border-border bg-card hover:bg-muted text-foreground"
+                  )}
+                  title={readingMode === "horizontal" ? "Switch to Vertical Scroll Mode" : "Switch to Horizontal Reader Mode"}
+                >
+                  <BookOpenText className="size-3.5 text-accent" />
+                  <span className="hidden xs:inline">{readingMode === "horizontal" ? "Vertical" : "Reader"}</span>
+                </button>
                 <ThemeToggleButton />
               </div>
             </div>
@@ -922,17 +893,20 @@ function TafsirContent() {
                   Surahs (1 - 114)
                 </h2>
                 <div className="flex items-center gap-1.5 shrink-0">
-                  {/* Book Mode Toggle (Feature Flagged) */}
-                  {ENABLE_BOOK_MODE && (
-                    <button
-                      onClick={() => setReadingMode("book")}
-                      className="flex items-center gap-1 px-2 py-1 rounded border text-[10px] font-medium transition-all cursor-pointer border-border hover:bg-muted text-foreground"
-                      title="Switch to Book Mode"
-                    >
-                      <BookOpen className="size-3 text-accent" />
-                      <span>Book Mode</span>
-                    </button>
-                  )}
+                  {/* Reader Mode (Horizontal) Toggle */}
+                  <button
+                    onClick={() => setReadingMode(readingMode === "horizontal" ? "vertical" : "horizontal")}
+                    className={cn(
+                      "h-7 px-2 rounded-lg border text-xs font-medium transition-all inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer",
+                      readingMode === "horizontal"
+                        ? "border-accent bg-accent/15 text-accent font-semibold"
+                        : "border-border bg-card/60 hover:bg-muted text-foreground"
+                    )}
+                    title={readingMode === "horizontal" ? "Switch to Vertical Scroll Mode" : "Switch to Horizontal Reader Mode"}
+                  >
+                    <BookOpenText className="size-3.5 text-accent" />
+                    <span>{readingMode === "horizontal" ? "Vertical" : "Reader"}</span>
+                  </button>
                   {/* Ayah Picker */}
                   <button
                     onClick={() => {
@@ -998,101 +972,141 @@ function TafsirContent() {
           </aside>
 
           {/* Main Content Area */}
-          <main className="flex-1 w-full p-4 md:p-8 space-y-8 min-w-0 transition-all duration-300 max-w-3xl mx-auto overflow-x-clip">
+          <main
+            className={cn(
+              "flex-1 w-full min-w-0 transition-all duration-300 mx-auto",
+              readingMode === "horizontal"
+                ? "h-full flex flex-col p-2 sm:p-4 max-w-5xl overflow-hidden space-y-2"
+                : "p-4 md:p-8 space-y-8 max-w-3xl overflow-x-clip"
+            )}
+          >
 
             {authorWarning.hasWarning && (
-              <div className="bg-amber-500/10 border border-amber-500/40 rounded-xl p-4 flex gap-3 text-amber-200 text-sm">
-                <Sparkles className="size-5 shrink-0 text-amber-400 mt-0.5" />
+              <div className="bg-amber-500/10 border border-amber-500/40 rounded-xl p-3 sm:p-4 flex gap-3 text-amber-200 text-xs sm:text-sm shrink-0">
+                <Sparkles className="size-4 sm:size-5 shrink-0 text-amber-400 mt-0.5" />
                 <div>
-                  <h4 className="font-bold text-amber-400 mb-1">Methodological Note</h4>
+                  <h4 className="font-bold text-amber-400 mb-0.5">Methodological Note</h4>
                   <p>{authorWarning.message}</p>
                 </div>
               </div>
             )}
 
             {/* Surah Banner Header */}
-            <div className={cn(
-              "relative rounded-xl border border-border bg-card transition-all duration-300 overflow-hidden",
-              aiChatContext ? "p-4 sm:p-5" : "p-4 sm:p-6"
-            )}>
-              <div className="absolute -right-10 -bottom-10 size-48 rounded-full bg-accent/10 blur-3xl" />
-              <div className={cn(
-                "relative z-10 min-w-0 transition-all flex flex-col items-center justify-center text-center gap-2",
-                aiChatContext ? "gap-2" : "gap-3"
-              )}>
-                <div className="min-w-0 flex-1 flex flex-col items-center">
-                  <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[10px] sm:text-xs font-medium uppercase tracking-wider text-accent mb-1">
-                    <span>Surah {currentSurahMeta.number}</span>
-                    <span>•</span>
-                    <span>{currentSurahMeta.revelationType}</span>
-                    <span>•</span>
-                    <span>{currentSurahMeta.numberOfAyahs} Ayahs</span>
-                  </div>
-                  <h2 className={cn(
-                    "font-extrabold text-foreground leading-tight transition-all [word-break:break-word] text-center",
-                    aiChatContext ? "text-base sm:text-lg" : "text-lg sm:text-xl lg:text-2xl xl:text-3xl"
-                  )}>
-                    {currentSurahMeta.englishName} ({currentSurahMeta.englishNameTranslation})
-                  </h2>
-                </div>
-                <div className="shrink-0 transition-all mt-1">
-                  <h3 className={cn(
-                    "font-mushaf-uthmani text-accent leading-relaxed transition-all text-center",
-                    aiChatContext ? "text-xl sm:text-2xl" : "text-2xl sm:text-3xl xl:text-[2.75rem]"
-                  )}>
+            {readingMode === "horizontal" ? (
+              <div className="shrink-0 flex items-center justify-between gap-3 px-3.5 py-2 rounded-xl border border-border bg-card/70 backdrop-blur-sm">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="font-mushaf-uthmani text-accent text-xl leading-none shrink-0">
                     {currentSurahMeta.name}
-                  </h3>
+                  </span>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-xs font-bold text-foreground truncate">
+                      {currentSurahMeta.number}. {currentSurahMeta.englishName} ({currentSurahMeta.englishNameTranslation})
+                    </span>
+                    <span className="text-[10px] text-muted-foreground truncate">
+                      {currentSurahMeta.revelationType} • {currentSurahMeta.numberOfAyahs} Ayahs
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => setShowSurahContext(!showSurahContext)}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-accent/10 border border-accent/30 hover:bg-accent/20 text-accent text-[11px] font-semibold cursor-pointer transition-colors"
+                    title={showSurahContext ? "Hide Context" : "Read Surah Context and Theme"}
+                  >
+                    <Compass size={13} className="text-accent" />
+                    <span className="hidden sm:inline">{showSurahContext ? "Close Context" : "Context & Theme"}</span>
+                  </button>
                 </div>
               </div>
-
-              {/* Context & Theme Button */}
-              <div className="mt-3 flex flex-col items-center w-full max-w-3xl mx-auto">
-                <button
-                  onClick={() => setShowSurahContext(!showSurahContext)}
-                  className="group relative inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-accent/10 border border-accent/40 hover:bg-accent/15 hover:border-accent cursor-pointer transition-colors"
-                  title={showSurahContext ? "Hide Context" : "Read Surah Context and Theme"}
-                >
-                  <Compass size={14} className="text-accent relative z-10" />
-                  <span className="text-[11px] md:text-[12px] font-bold tracking-widest text-accent group-hover:text-foreground transition-colors uppercase relative z-10">
-                    {showSurahContext ? "Close Context" : "Context & Theme"}
-                  </span>
-                </button>
-
-                {showSurahContext && surahInfo && (
-                  <div className="mt-4 p-5 sm:p-6 w-full rounded-2xl bg-popover border border-accent/40 text-sm text-foreground  relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500 text-left">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent/40 to-transparent"></div>
-                    
-                    <div className="font-semibold text-accent uppercase tracking-wider text-[11px] mb-5 border-b border-accent/20 pb-3 flex items-center justify-between">
-                      <span className="text-accent font-bold uppercase tracking-wider text-[12px] flex items-center gap-2">
-                        <Compass size={15} />
-                        CONTEXT & THEME OF {currentSurahMeta.englishName.toUpperCase()} ({currentSurahMeta.name})
-                      </span>
-                      <button 
-                        onClick={() => setShowSurahContext(false)} 
-                        className="hover:bg-muted p-1.5 rounded-full transition-colors text-muted-foreground hover:text-foreground cursor-pointer"
-                      >
-                        <span className="sr-only">Close</span>
-                        <X size={16} />
-                      </button>
+            ) : (
+              <div className={cn(
+                "relative rounded-xl border border-border bg-card transition-all duration-300 overflow-hidden",
+                aiChatContext ? "p-4 sm:p-5" : "p-4 sm:p-6"
+              )}>
+                <div className="absolute -right-10 -bottom-10 size-48 rounded-full bg-accent/10 blur-3xl" />
+                <div className={cn(
+                  "relative z-10 min-w-0 transition-all flex flex-col items-center justify-center text-center gap-2",
+                  aiChatContext ? "gap-2" : "gap-3"
+                )}>
+                  <div className="min-w-0 flex-1 flex flex-col items-center">
+                    <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[10px] sm:text-xs font-medium uppercase tracking-wider text-accent mb-1">
+                      <span>Surah {currentSurahMeta.number}</span>
+                      <span>•</span>
+                      <span>{currentSurahMeta.revelationType}</span>
+                      <span>•</span>
+                      <span>{currentSurahMeta.numberOfAyahs} Ayahs</span>
                     </div>
-                    
-                    <div className="space-y-4 leading-relaxed text-reading">
-                      {surahInfo.bismillah_pre_ayah && (
-                        <p className="text-xs text-accent italic font-mono bg-accent/10 p-2 rounded-lg border border-accent/15 mb-3">
-                          Note: Bismillah is included as part of this Surah.
-                        </p>
-                      )}
-                      <div 
-                        className="text-foreground leading-relaxed max-w-none text-xs sm:text-sm [&>h2]:text-accent [&>h2]:font-bold [&>h2]:text-sm sm:[&>h2]:text-base [&>h2]:mt-4 [&>h2]:mb-1.5 [&>h2:first-child]:mt-0 [&>h3]:text-accent [&>h3]:font-bold [&>h3]:text-xs sm:[&>h3]:text-sm [&>h3]:mt-3 [&>h3]:mb-1 [&>p]:mb-2.5 [&>ol]:list-decimal [&>ol]:ml-5 [&>ol]:mb-2.5 [&>ul]:list-disc [&>ul]:ml-5 [&>ul]:mb-2.5 [&>li]:mb-1 [&>a]:text-accent [&>a:hover]:underline [&>strong]:text-foreground"
-                        dangerouslySetInnerHTML={{ __html: surahInfo.heading || surahInfo.text }}
-                      />
-                    </div>
+                    <h2 className={cn(
+                      "font-extrabold text-foreground leading-tight transition-all [word-break:break-word] text-center",
+                      aiChatContext ? "text-base sm:text-lg" : "text-lg sm:text-xl lg:text-2xl xl:text-3xl"
+                    )}>
+                      {currentSurahMeta.englishName} ({currentSurahMeta.englishNameTranslation})
+                    </h2>
                   </div>
-                )}
-              </div>
-            </div>
+                  <div className="shrink-0 transition-all mt-1">
+                    <h3 className={cn(
+                      "font-mushaf-uthmani text-accent leading-relaxed transition-all text-center",
+                      aiChatContext ? "text-xl sm:text-2xl" : "text-2xl sm:text-3xl xl:text-[2.75rem]"
+                    )}>
+                      {currentSurahMeta.name}
+                    </h3>
+                  </div>
+                </div>
 
-            <div className="flex-1 w-full min-h-0">
+                {/* Context & Theme Button */}
+                <div className="mt-3 flex flex-col items-center w-full max-w-3xl mx-auto">
+                  <button
+                    onClick={() => setShowSurahContext(!showSurahContext)}
+                    className="group relative inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-accent/10 border border-accent/40 hover:bg-accent/15 hover:border-accent cursor-pointer transition-colors"
+                    title={showSurahContext ? "Hide Context" : "Read Surah Context and Theme"}
+                  >
+                    <Compass size={14} className="text-accent relative z-10" />
+                    <span className="text-[11px] md:text-[12px] font-bold tracking-widest text-accent group-hover:text-foreground transition-colors uppercase relative z-10">
+                      {showSurahContext ? "Close Context" : "Context & Theme"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Context & Theme Popover / Drawer Content */}
+            {showSurahContext && surahInfo && (
+              <div className={cn(
+                "p-5 sm:p-6 w-full rounded-2xl bg-popover border border-accent/40 text-sm text-foreground relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500 text-left",
+                readingMode === "horizontal" ? "max-h-60 overflow-y-auto custom-scrollbar shrink-0" : "mt-4"
+              )}>
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent/40 to-transparent"></div>
+                
+                <div className="font-semibold text-accent uppercase tracking-wider text-[11px] mb-5 border-b border-accent/20 pb-3 flex items-center justify-between">
+                  <span className="text-accent font-bold uppercase tracking-wider text-[12px] flex items-center gap-2">
+                    <Compass size={15} />
+                    CONTEXT & THEME OF {currentSurahMeta.englishName.toUpperCase()} ({currentSurahMeta.name})
+                  </span>
+                  <button 
+                    onClick={() => setShowSurahContext(false)} 
+                    className="hover:bg-muted p-1.5 rounded-full transition-colors text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    <span className="sr-only">Close</span>
+                    <X size={16} />
+                  </button>
+                </div>
+                
+                <div className="space-y-4 leading-relaxed text-reading">
+                  {surahInfo.bismillah_pre_ayah && (
+                    <p className="text-xs text-accent italic font-mono bg-accent/10 p-2 rounded-lg border border-accent/15 mb-3">
+                      Note: Bismillah is included as part of this Surah.
+                    </p>
+                  )}
+                  <div 
+                    className="text-foreground leading-relaxed max-w-none text-xs sm:text-sm [&>h2]:text-accent [&>h2]:font-bold [&>h2]:text-sm sm:[&>h2]:text-base [&>h2]:mt-4 [&>h2]:mb-1.5 [&>h2:first-child]:mt-0 [&>h3]:text-accent [&>h3]:font-bold [&>h3]:text-xs sm:[&>h3]:text-sm [&>h3]:mt-3 [&>h3]:mb-1 [&>p]:mb-2.5 [&>ol]:list-decimal [&>ol]:ml-5 [&>ol]:mb-2.5 [&>ul]:list-disc [&>ul]:ml-5 [&>ul]:mb-2.5 [&>li]:mb-1 [&>a]:text-accent [&>a:hover]:underline [&>strong]:text-foreground"
+                    dangerouslySetInnerHTML={{ __html: surahInfo.heading || surahInfo.text }}
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className={cn("flex-1 w-full min-h-0", readingMode === "horizontal" && "flex flex-col overflow-hidden")}>
               {loadError ? (
                 <div className="flex flex-col items-center justify-center p-8 sm:p-12 text-center my-12 border border-border/40 rounded-2xl bg-card/40 backdrop-blur max-w-lg mx-auto">
                   <div className="w-12 h-12 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center mb-4">
@@ -1119,6 +1133,33 @@ function TafsirContent() {
                   ]}
                   minDurationMs={400}
                 />
+              ) : readingMode === "horizontal" ? (
+                <TafsirHorizontalReader
+                  currentAyahIndex={currentAyahIndex}
+                  totalAyahs={currentSurahMeta.numberOfAyahs}
+                  onAyahChange={(idx) => scrollToAyah(idx + 1)}
+                  activeSurah={activeSurah}
+                  activeLangName={activeLangName}
+                  currentSurahMeta={currentSurahMeta}
+                >
+                  {loadedTafsir[currentAyahIndex] ? (
+                    <TafsirCard 
+                      key={loadedTafsir[currentAyahIndex].id || currentAyahIndex}
+                      entry={loadedTafsir[currentAyahIndex]}
+                      idx={currentAyahIndex}
+                      activeSurah={activeSurah}
+                      activeLangName={activeLangName}
+                      activeAuthor={activeAuthor}
+                      aiChatContext={aiChatContext}
+                      scrollToAyah={scrollToAyah}
+                      languages={languages}
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center p-12 text-muted-foreground text-sm">
+                      Loading commentary...
+                    </div>
+                  )}
+                </TafsirHorizontalReader>
               ) : (
                 <Virtuoso
                   ref={virtuosoRef}
