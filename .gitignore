@@ -54,4 +54,5 @@ database/*
 !database/surah-meta
 !database/word-by-word-translation
 !database/pdf
+!database/topics
 localtunnel_output.txt

@@ -840,6 +840,26 @@ export default function SurahReaderClient({
     }
   }, [surahNumber]);
 
+  const handleSelectTopicAyah = useCallback((ayahNum: number) => {
+    const index = ayahNum - 1;
+    setIsNavigatingAyah(true);
+    virtuosoRef.current?.scrollToIndex({ index, align: "center", behavior: "smooth" });
+    const targetPage = Math.floor(index / PAGE_SIZE);
+    fetchPage(targetPage, translationEdition).then(() => {
+      setTimeout(() => {
+        setIsNavigatingAyah(false);
+        const element = document.getElementById(`ayah-${ayahNum}`);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
+          element.classList.add("ring-2", "ring-accent", "bg-accent/10");
+          setTimeout(() => {
+            element.classList.remove("ring-2", "ring-accent", "bg-accent/10");
+          }, 3000);
+        }
+      }, 150);
+    });
+  }, [fetchPage, translationEdition]);
+
   // When translation edition changes:
   // 1. If in cache -> 0ms instant swap
   // 2. If not -> trigger immediate fetch of visible pages and show progress bar
