@@ -160,19 +160,13 @@ export default function TafsirTextRenderer({
       '<span class="text-foreground font-semibold">'
     );
 
-    // 4. Footnotes / Gray Text / Translation quotes
-    html = html.replace(
-      /<span[^>]*class="gray"[^>]*>([\s\S]*?)<\/span>/gi,
-      (match, innerText) => {
-        const trimmed = innerText.trim();
-        if (trimmed.length < 50) {
-          return `<span class="text-muted-foreground text-xs md:text-sm inline mx-0.5">${trimmed}</span>`;
-        }
-        return `<span class="block my-3 p-3.5 ${
-          isRightToLeft ? "border-r-2 rounded-l-xl pr-3.5" : "border-l-2 rounded-r-xl pl-3.5"
-        } border-accent/40 bg-accent/5 text-reading text-sm md:text-base">${trimmed}</span>`;
-      }
-    );
+    // 4. Footnotes / Parenthetical Dialogue & Quotes:
+    // Unwrap <span class="gray"> completely so phrases/quotes/translations
+    // have NO artificial darkening or font shrinking, keeping natural reading flow.
+    while (/<span[^>]*class=["']gray["'][^>]*>/i.test(html)) {
+      html = html.replace(/<span[^>]*class=["']gray["'][^>]*>([\s\S]*?)<\/span>/gi, "$1");
+    }
+    html = html.replace(/<span[^>]*class=["']gray["'][^>]*>/gi, "");
 
     // Only apply Arabic snippet font wrapper if this is an LTR translation (e.g. English, French)
     if (!isRightToLeft) {
@@ -248,7 +242,7 @@ export default function TafsirTextRenderer({
   return (
     <div className="relative w-full max-w-full overflow-hidden">
       <div
-        className={`space-y-4 break-words [overflow-wrap:anywhere] ${isRtl ? "text-right" : "text-left"} ${
+        className={`tafsir-content space-y-4 break-words [overflow-wrap:anywhere] ${isRtl ? "text-right" : "text-left"} ${
           isLocked ? "overflow-hidden max-h-[160px] [mask-image:linear-gradient(to_bottom,black_30%,transparent_100%)] select-none pointer-events-none" : ""
         }`}
         dir={isRtl ? "rtl" : "ltr"}
@@ -273,21 +267,19 @@ export default function TafsirTextRenderer({
 
           const transformedHtml = transformHtmlForTailwind(block.text, isRtl);
 
-          // Only genuine text headers get header styling
+          // Only genuine text headers get header styling - clean, dignified heading without yellowish bar
           if (block.type.startsWith("h") && hasLetters && cleanTextOnly.length >= 2) {
             return (
               <h3
                 key={idx}
-                className={`font-bold text-accent text-base md:text-lg my-4 leading-snug ${
-                  isRtl ? "border-r-2 border-accent/50 pr-3" : "border-l-2 border-accent/50 pl-3"
-                }`}
+                className="font-bold text-foreground text-lg md:text-xl font-serif mt-6 mb-3 leading-snug tracking-tight"
                 style={{ fontSize: getFontSize(), lineHeight: getLineHeight() }}
                 dangerouslySetInnerHTML={{ __html: transformedHtml }}
               />
             );
           }
 
-          // Check for Arabic section labels
+          // Check for Arabic section labels - clean heading without yellowish bar
           const hasArabicLetters = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(cleanTextOnly);
           const isArabicHeader =
             hasArabicLetters &&
@@ -298,10 +290,25 @@ export default function TafsirTextRenderer({
 
           if (isArabicHeader) {
             return (
-              <p
+              <h4
                 key={idx}
-                className="font-bold text-accent text-base md:text-lg mt-4 pb-1 border-r-2 border-accent/50 pr-3 inline-block"
+                className="font-bold text-foreground text-lg md:text-xl mt-6 mb-2 block font-serif"
                 style={{ fontSize: getFontSize(), lineHeight: getLineHeight() }}
+                dangerouslySetInnerHTML={{ __html: transformedHtml }}
+              />
+            );
+          }
+
+          // Check if this block is a standalone translation/hadith quote card
+          const isStandaloneQuote =
+            cleanTextOnly.startsWith("(") && cleanTextOnly.endsWith(")") && cleanTextOnly.length >= 25;
+
+          if (isStandaloneQuote) {
+            return (
+              <div
+                key={idx}
+                className="my-3.5 p-4 rounded-2xl border border-border/80 bg-card/60 text-reading text-base md:text-lg leading-relaxed shadow-sm"
+                style={{ lineHeight: getLineHeight(), fontSize: getFontSize() }}
                 dangerouslySetInnerHTML={{ __html: transformedHtml }}
               />
             );

@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo, useRef, useCallback, Suspense } fr
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
-import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, ChevronLeft, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check, Bookmark, BookmarkCheck, Lock, Columns2, AlertCircle, RotateCcw } from "lucide-react";
+import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, ChevronLeft, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check, Bookmark, BookmarkCheck, Lock, Columns2, AlertCircle, RotateCcw, Edit3 } from "lucide-react";
 import dynamic from "next/dynamic";
 import TafsirHorizontalReader from "@/components/tafsir/TafsirHorizontalReader";
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
@@ -23,7 +23,8 @@ import {
   setLastReadTafsir, 
   saveTafsirItem, 
   isTafsirSaved, 
-  LastReadTafsir 
+  LastReadTafsir,
+  saveUserHighlight
 } from "@/lib/readerStorage";
 
 import { useRouter, useSearchParams } from "next/navigation";
@@ -31,6 +32,7 @@ import { toast } from "sonner";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 import { getEnglishFont, getUrduFont } from "@/lib/fontsConfig";
 import { copyToClipboard, cn } from "@/lib/utils";
+import AyahNoteModal from "@/components/quran/AyahNoteModal";
 import { getTafsirFameRank, getLanguagePriority, getTafsirDifficulty } from "@/lib/tafsirRanking";
 import { getTafsirWarning } from "@/lib/tafsirWarnings";
 import InlineTranslation from "@/components/shared/InlineTranslation";
@@ -229,6 +231,17 @@ function TafsirContent() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
+  
+  const [highlightSelection, setHighlightSelection] = useState<{
+    text: string;
+    surahNumber: number;
+    ayahNumber: number;
+    type: "arabic" | "translation";
+    x: number;
+    y: number;
+  } | null>(null);
+
   useEffect(() => { setMounted(true); }, []);
 
   // Lock body scroll when mobile filter sheet is open
@@ -241,6 +254,7 @@ function TafsirContent() {
       };
     }
   }, [isFilterPanelOpen]);
+
 
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
@@ -1785,7 +1799,6 @@ function TafsirContent() {
         )}
       </div>
 
-      {/* Ayah Wheel Picker Modal */}
       <AyahWheelPickerModal
         isOpen={wheelModalOpen}
         onClose={() => setWheelModalOpen(false)}
@@ -1803,6 +1816,38 @@ function TafsirContent() {
           pendingScrollAyahRef.current = ayahNum;
         }}
       />
+
+      {highlightSelection && (
+        <div
+          className="fixed z-[999] flex gap-2 p-1.5 bg-card border border-accent/30 rounded-lg shadow-xl"
+          style={{
+            top: highlightSelection.y,
+            left: highlightSelection.x,
+            transform: 'translate(-50%, -100%)',
+          }}
+        >
+          <button
+            onClick={async (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const { text, surahNumber, ayahNumber, type } = highlightSelection;
+              const res = await saveUserHighlight(surahNumber, ayahNumber, text, type);
+              if (res) {
+                toast.success("Highlight saved.");
+              } else {
+                toast.error("Failed to save highlight.");
+              }
+              setHighlightSelection(null);
+              window.getSelection()?.removeAllRanges();
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-accent/10 text-xs font-semibold text-accent transition"
+          >
+            <Edit3 className="size-3.5" />
+            Save Highlight
+          </button>
+        </div>
+      )}
+
     </div>
   );
 }
@@ -1852,6 +1897,7 @@ function TafsirCard({
 
   const savedKey = `tafsir_${authorId}_${activeSurah}_${ayahNumber}`;
   const [isSaved, setIsSaved] = useState<boolean>(() => isTafsirSaved(savedKey));
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
 
   const handleToggleSave = () => {
     const surahMeta = SURAHS_DATA.find((s) => s.number === activeSurah);
@@ -1879,6 +1925,12 @@ function TafsirCard({
 
   return (
     <div className="pb-10">
+      <AyahNoteModal
+        isOpen={isNoteModalOpen}
+        onClose={() => setIsNoteModalOpen(false)}
+        surahNumber={activeSurah}
+        ayahNumber={ayahNumber}
+      />
       <div
         id={`ayah-${ayahNumber}`}
         data-ayah-idx={idx}
@@ -1933,6 +1985,17 @@ function TafsirCard({
             </button>
 
             <button
+              onClick={() => setIsNoteModalOpen(true)}
+              className={cn(
+                "flex items-center rounded-lg bg-muted hover:bg-muted transition font-medium text-teal-600 dark:text-teal-500 whitespace-nowrap gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs cursor-pointer",
+                aiChatContext && "lg:gap-1 lg:px-2 lg:text-[10px]"
+              )}
+              title="Add Note"
+            >
+              <Edit3 className={cn("shrink-0 size-3.5", aiChatContext && "lg:size-3")} />
+              <span className={cn("hidden sm:inline", aiChatContext && "lg:hidden")}>Note</span>
+            </button>
+            <button
               onClick={() => {
                 copyToClipboard(cleanText, "Tafsir explanation copied to clipboard!");
               }}
@@ -1951,7 +2014,7 @@ function TafsirCard({
         {/* Arabic Verse */}
         {arabicText && (
           <div className="py-2">
-            <p className={`font-mushaf-indopak-16 text-[1.65rem] md:text-4xl text-right leading-loose text-arabic font-normal`} dir="rtl" style={{ lineHeight: '2.4' }}>
+            <p lang="ar" className={`font-mushaf-indopak-16 text-[1.65rem] md:text-4xl text-right leading-loose text-arabic font-normal`} dir="rtl" style={{ lineHeight: '2.4' }}>
               {arabicText}
             </p>
           </div>
