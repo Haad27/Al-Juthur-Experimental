@@ -232,7 +232,7 @@ function TafsirContent() {
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
-  const [isHighlightMode, setIsHighlightMode] = useState(false);
+
   
   const [highlightSelection, setHighlightSelection] = useState<{
     text: string;
@@ -410,19 +410,14 @@ function TafsirContent() {
       }
 
       if (type && targetAyahNum) {
-        if (isHighlightMode) {
-          // Immediately save
-          saveUserHighlight(targetSurahNum || activeSurah, targetAyahNum, text, type)
-            .then(res => {
-              if (res) toast.success("Highlight saved to library.");
-              else toast.error("Failed to save highlight.");
-            });
-          window.getSelection()?.removeAllRanges();
-          setIsHighlightMode(false); // turn off after 1 highlight? or keep on? let's turn off
-          setHighlightSelection(null);
-        } else {
-          setHighlightSelection(null); // No popup anymore!
-        }
+        setHighlightSelection({
+          text,
+          surahNumber: targetSurahNum || activeSurah,
+          ayahNumber: targetAyahNum,
+          type,
+          x: rect.left + rect.width / 2,
+          y: rect.top - 10
+        });
       } else {
         setHighlightSelection(null);
       }
@@ -434,7 +429,7 @@ function TafsirContent() {
       document.removeEventListener("mouseup", handleSelection);
       document.removeEventListener("touchend", handleSelection);
     };
-  }, [activeSurah, isHighlightMode]);
+  }, [activeSurah]);
   const [loadedTafsir, setLoadedTafsir] = useState<Record<number, TafsirEntry>>({});
   const [loadingEntries, setLoadingEntries] = useState<boolean>(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -1232,8 +1227,6 @@ function TafsirContent() {
                       aiChatContext={aiChatContext} 
                       scrollToAyah={scrollToAyah}
                       languages={languages}
-                      isHighlightMode={isHighlightMode}
-                      setIsHighlightMode={setIsHighlightMode}
                     />
                   ) : (
                     <div className="flex flex-col items-center justify-center p-12 text-muted-foreground text-sm">
@@ -1283,8 +1276,6 @@ function TafsirContent() {
                         aiChatContext={aiChatContext}
                         scrollToAyah={scrollToAyah}
                         languages={languages}
-                        isHighlightMode={isHighlightMode}
-                        setIsHighlightMode={setIsHighlightMode}
                       />
                     );
                   }}
@@ -1886,7 +1877,51 @@ function TafsirContent() {
         }}
       />
 
+      {highlightSelection && (
+        <div
+          className="fixed z-[999] flex items-center bg-[#2d2d2d] dark:bg-[#1a1a1a] border border-[#3a3a3a] rounded-lg shadow-2xl py-1 px-1.5 gap-0.5"
+          style={{
+            top: highlightSelection.y,
+            left: highlightSelection.x,
+            transform: 'translate(-50%, -100%)',
+          }}
+        >
+          <button
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={async (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const { text, surahNumber, ayahNumber, type } = highlightSelection;
+              const res = await saveUserHighlight(surahNumber, ayahNumber, text, type);
+              if (res) toast.success("Highlight saved.");
+              else toast.error("Failed to save highlight.");
+              setHighlightSelection(null);
+              window.getSelection()?.removeAllRanges();
+            }}
+            className="flex items-center justify-center p-2 rounded-md hover:bg-white/10 text-[#d4d4d4] hover:text-white transition group"
+            title="Highlight"
+          >
+            <Highlighter className="size-4" />
+          </button>
 
+          <div className="w-[1px] h-4 bg-white/10 mx-1" />
+
+          <button
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              copyToClipboard(highlightSelection.text, "Copied selection to clipboard!");
+              setHighlightSelection(null);
+              window.getSelection()?.removeAllRanges();
+            }}
+            className="flex items-center justify-center p-2 rounded-md hover:bg-white/10 text-[#d4d4d4] hover:text-white transition"
+            title="Copy"
+          >
+            <Copy className="size-4" />
+          </button>
+        </div>
+      )}
 
     </div>
   );
@@ -1909,8 +1944,6 @@ function TafsirCard({
   aiChatContext, 
   scrollToAyah,
   languages = [],
-  isHighlightMode,
-  setIsHighlightMode,
 }: {
   entry: any;
   idx: number;
@@ -1920,8 +1953,6 @@ function TafsirCard({
   aiChatContext: any;
   scrollToAyah: (num: number) => void;
   languages?: Language[];
-  isHighlightMode?: boolean;
-  setIsHighlightMode?: (val: boolean) => void;
 }) {
   const ayahNumber = entry.ayah?.numberInSurah || idx + 1;
   const arabicText = entry.ayah?.text && entry.ayah.text !== "Arabic Text" ? entry.ayah.text : null;
@@ -2050,20 +2081,7 @@ function TafsirCard({
               <Edit3 className={cn("shrink-0 size-3.5", aiChatContext && "lg:size-3")} />
               <span className={cn("hidden sm:inline", aiChatContext && "lg:hidden")}>Note</span>
             </button>
-            <button
-              onClick={() => setIsHighlightMode?.(!isHighlightMode)}
-              className={cn(
-                "flex items-center rounded-lg transition font-medium whitespace-nowrap gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs cursor-pointer",
-                isHighlightMode 
-                  ? "bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30" 
-                  : "bg-muted hover:bg-muted text-reading",
-                aiChatContext && "lg:gap-1 lg:px-2 lg:text-[10px]"
-              )}
-              title={isHighlightMode ? "Highlight Mode: ON (Select text to save)" : "Turn on Highlight Mode"}
-            >
-              <Highlighter className={cn("shrink-0 size-3.5", aiChatContext && "lg:size-3")} />
-              <span className={cn("hidden sm:inline", aiChatContext && "lg:hidden")}>Highlight</span>
-            </button>
+
             <button
               onClick={() => {
                 copyToClipboard(cleanText, "Tafsir explanation copied to clipboard!");
