@@ -822,6 +822,7 @@ function TafsirContent() {
           readingMode === "horizontal" ? "h-screen overflow-hidden flex flex-col" : "min-h-screen"
         )}
       >
+        {highlightModeStyle}
         {/* Top Navigation Bar (Mobile Only) */}
         <div className={`md:hidden sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border px-3 py-2.5 transition-all duration-300 ${topNavVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}>
           <div className="max-w-[1700px] mx-auto">
