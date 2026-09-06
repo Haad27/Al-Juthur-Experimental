@@ -370,6 +370,65 @@ function TafsirContent() {
   });
   const [activeLangName, setActiveLangName] = useState<string>("");
   const [activeSurah, setActiveSurah] = useState<number>(parsedUrlSurahId);
+
+  useEffect(() => {
+    const handleSelection = () => {
+      const selection = window.getSelection();
+      if (!selection || selection.isCollapsed) {
+        setHighlightSelection(null);
+        return;
+      }
+      
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+      const text = selection.toString().trim();
+      if (!text || text.length < 2) {
+        setHighlightSelection(null);
+        return;
+      }
+
+      let node = selection.anchorNode;
+      let type: "arabic" | "translation" | null = null;
+      let targetAyahNum: number | null = null;
+      let targetSurahNum: number | null = null;
+
+      while (node && node !== document.body) {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const el = node as HTMLElement;
+          if (!targetAyahNum && el.getAttribute("data-ayah-num")) {
+            targetAyahNum = parseInt(el.getAttribute("data-ayah-num") || "0", 10);
+            targetSurahNum = parseInt(el.getAttribute("data-surah-num") || "0", 10);
+          }
+          if (el.lang === "ar" || el.id?.startsWith("atext-")) {
+            type = "arabic";
+          } else if (el.classList?.contains("tafsir-content") || el.closest(".tafsir-content")) {
+            type = "translation";
+          }
+        }
+        node = node.parentNode;
+      }
+
+      if (type && targetAyahNum) {
+        setHighlightSelection({
+          text,
+          surahNumber: targetSurahNum || activeSurah,
+          ayahNumber: targetAyahNum,
+          type,
+          x: rect.left + rect.width / 2,
+          y: rect.top - 40 // above selection
+        });
+      } else {
+        setHighlightSelection(null);
+      }
+    };
+
+    document.addEventListener("mouseup", handleSelection);
+    document.addEventListener("touchend", handleSelection);
+    return () => {
+      document.removeEventListener("mouseup", handleSelection);
+      document.removeEventListener("touchend", handleSelection);
+    };
+  }, [activeSurah]);
   const [loadedTafsir, setLoadedTafsir] = useState<Record<number, TafsirEntry>>({});
   const [loadingEntries, setLoadingEntries] = useState<boolean>(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -1895,12 +1954,13 @@ function TafsirCard({
   const isLocked = false; // Full free mode for now
   const isPreviewInSurahOne = false; // Full free mode for now
 
+  const surahMeta = SURAHS_DATA.find((s) => s.number === activeSurah);
+
   const savedKey = `tafsir_${authorId}_${activeSurah}_${ayahNumber}`;
   const [isSaved, setIsSaved] = useState<boolean>(() => isTafsirSaved(savedKey));
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
 
   const handleToggleSave = () => {
-    const surahMeta = SURAHS_DATA.find((s) => s.number === activeSurah);
     const snippet = cleanText.slice(0, 280);
     const newlySaved = saveTafsirItem({
       id: savedKey,
@@ -1934,6 +1994,8 @@ function TafsirCard({
       <div
         id={`ayah-${ayahNumber}`}
         data-ayah-idx={idx}
+        data-surah-num={activeSurah}
+        data-ayah-num={ayahNumber}
         className="space-y-6 scroll-mt-24 border-b border-border pb-10"
       >
         {/* Free Preview Banner for Surah 1 on Locked Authors */}
@@ -1949,20 +2011,28 @@ function TafsirCard({
               onClick={openPricingModal}
               className="px-2.5 py-1 rounded-lg bg-accent hover:bg-accent/90 text-accent-foreground font-bold text-[11px] transition-all cursor-pointer shrink-0 ml-2"
             >
-              Unlock All Surahs
+              Unlock All
             </button>
           </div>
         )}
 
-        {/* Top Ayah Header */}
-        <div className="flex items-center justify-between border-b border-border pb-3 gap-2 min-w-0">
-          <div className="flex items-center gap-1.5 min-w-0 shrink-0">
-            <span className="shrink-0 h-7 px-1.5 min-w-[1.75rem] rounded-md bg-muted border border-border flex items-center justify-center text-xs font-semibold text-foreground whitespace-nowrap">
+        {/* Floating Top Ayah Pill & Action Controls */}
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-card p-3 rounded-2xl border border-border sticky top-14 z-10 shadow-sm backdrop-blur">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center justify-center font-mono text-xs font-bold text-accent bg-accent/10 border border-accent/25 px-2.5 py-1 rounded-full shrink-0">
               {activeSurah}:{ayahNumber}
             </span>
-            <span className="text-xs sm:text-sm font-medium text-muted-foreground whitespace-nowrap">Ayah {ayahNumber}</span>
+            <div className="flex flex-col">
+              <span className="text-xs font-bold text-foreground">
+                {surahMeta?.englishName || `Surah ${activeSurah}`} • Verse {ayahNumber}
+              </span>
+              <span className="text-[10px] text-muted-foreground">
+                {authorName}
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5 shrink-0">
+
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <button
               onClick={handleToggleSave}
               className={cn(
@@ -1987,7 +2057,7 @@ function TafsirCard({
             <button
               onClick={() => setIsNoteModalOpen(true)}
               className={cn(
-                "flex items-center rounded-lg bg-muted hover:bg-muted transition font-medium text-teal-600 dark:text-teal-500 whitespace-nowrap gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs cursor-pointer",
+                "flex items-center rounded-lg bg-muted hover:bg-muted transition font-medium text-accent hover:text-accent whitespace-nowrap gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs cursor-pointer",
                 aiChatContext && "lg:gap-1 lg:px-2 lg:text-[10px]"
               )}
               title="Add Note"
