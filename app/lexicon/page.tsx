@@ -529,14 +529,14 @@ function LexiconPageContent() {
                       <strong className="text-accent font-semibold block mb-1 text-xs sm:text-sm">
                         Root Meaning:
                       </strong>
-                      <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-slate-200 prose-em:text-slate-400 text-xs sm:text-sm" dangerouslySetInnerHTML={{ __html: formatArabicWithIndoPak(result.ai_summary.root_meaning_html) }} />
+                      <div className="prose prose-sm dark:prose-invert max-w-none text-reading prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-foreground prose-em:text-muted-foreground text-xs sm:text-sm" dangerouslySetInnerHTML={{ __html: formatArabicWithIndoPak(result.ai_summary.root_meaning_html) }} />
                     </div>
                     
                     <div className="border-t border-border pt-3">
-                      <strong className="text-amber-400 font-semibold block mb-1 text-xs sm:text-sm">
+                      <strong className="text-accent font-semibold block mb-1 text-xs sm:text-sm">
                         Quranic Usage:
                       </strong>
-                      <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-slate-200 prose-em:text-slate-400 text-xs sm:text-sm" dangerouslySetInnerHTML={{ __html: formatArabicWithIndoPak(result.ai_summary.quranic_usage_html) }} />
+                      <div className="prose prose-sm dark:prose-invert max-w-none text-reading prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-foreground prose-em:text-muted-foreground text-xs sm:text-sm" dangerouslySetInnerHTML={{ __html: formatArabicWithIndoPak(result.ai_summary.quranic_usage_html) }} />
                     </div>
                   </div>
                 </div>
@@ -571,7 +571,7 @@ function LexiconPageContent() {
                             </span>
                           )}
                           {entry.isModern && (
-                            <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                            <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-accent/10 text-accent border border-accent/25">
                               Modern (MSA)
                             </span>
                           )}
@@ -590,8 +590,8 @@ function LexiconPageContent() {
                       </div>
 
                       {entry.isModern && (
-                        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 flex gap-3 text-xs md:text-sm text-amber-200/90 leading-relaxed mb-4">
-                          <AlertTriangle className="size-4 md:size-5 shrink-0 text-amber-400 mt-0.5" />
+                        <div className="bg-accent/10 border border-accent/25 rounded-xl p-3 flex gap-3 text-xs md:text-sm text-reading leading-relaxed mb-4">
+                          <AlertTriangle className="size-4 md:size-5 shrink-0 text-accent mt-0.5" />
                           <p>
                             <strong>Important Note:</strong> This is a modern lexicon (Modern Standard Arabic). It is provided here only for learning purposes and recognizing basic verb forms. <strong>Do not use it</strong> for determining the root meaning of classical Quranic words, as modern usage often differs entirely from 7th-century usage.
                           </p>

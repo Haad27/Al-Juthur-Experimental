@@ -415,14 +415,14 @@ export default function SurahPlayer({
       <motion.button
         type="button"
         onClick={() => setMobileFabOpen((prev) => !prev)}
-        whileTap={{ scale: 0.85, rotate: mobileFabOpen ? -90 : 90 }}
-        animate={{ rotate: mobileFabOpen ? 90 : 0, scale: mobileFabOpen ? 1.05 : 1 }}
-        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+        whileTap={{ scale: 0.92 }}
         className={cn(
-          "fixed bottom-[calc(6.75rem+env(safe-area-inset-bottom,0px))] md:bottom-8 z-[9999] size-12 md:size-14 rounded-full text-foreground shadow-2xl flex items-center justify-center transition-all duration-300 cursor-pointer select-none border",
+          "fixed bottom-[calc(6.75rem+env(safe-area-inset-bottom,0px))] md:bottom-8 z-[9999] size-11 md:size-12 rounded-full backdrop-blur-md flex items-center justify-center transition-all duration-200 cursor-pointer select-none border shadow-md",
           mobileFabOpen
-            ? "bg-accent border-accent  ring-4 ring-accent/30"
-            : "bg-accent border-accent/40 hover:scale-105 active:scale-95 ",
+            ? "bg-card border-accent text-accent ring-2 ring-accent/25"
+            : playing
+            ? "bg-accent/15 border-accent/60 text-accent shadow-accent/10"
+            : "bg-card/90 border-border hover:border-accent/50 text-muted-foreground hover:text-accent hover:bg-card",
           aiChatContext ? "max-lg:hidden right-4 lg:right-[440px] xl:right-[470px]" : "right-4 md:right-8",
           isWordDialogVisible ? "max-md:hidden" : ""
         )}
@@ -432,32 +432,32 @@ export default function SurahPlayer({
           {mobileFabOpen ? (
             <motion.div
               key="close"
-              initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
-              animate={{ rotate: 0, opacity: 1, scale: 1 }}
-              exit={{ rotate: 90, opacity: 0, scale: 0.5 }}
-              transition={{ duration: 0.18 }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.15 }}
             >
-              <X className="size-5 md:size-6 text-foreground stroke-[2.5]" />
+              <X className="size-4.5 md:size-5 text-accent stroke-[2.2]" />
             </motion.div>
           ) : playing ? (
             <motion.div
               key="pause"
-              initial={{ opacity: 0, scale: 0.5 }}
+              initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.5 }}
-              transition={{ duration: 0.18 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.15 }}
             >
-              <Pause className="size-5 md:size-6 text-foreground" />
+              <Pause className="size-4.5 md:size-5 text-accent" />
             </motion.div>
           ) : (
             <motion.div
               key="mic"
-              initial={{ opacity: 0, scale: 0.5 }}
+              initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.5 }}
-              transition={{ duration: 0.18 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.15 }}
             >
-              <Mic className={`size-5 md:size-6 ${recording ? "text-accent animate-pulse" : "text-foreground"}`} />
+              <Mic className={`size-4.5 md:size-5 ${recording ? "text-accent animate-pulse" : "currentColor"}`} />
             </motion.div>
           )}
         </AnimatePresence>

@@ -227,7 +227,7 @@ export function ScholarAssistantModal({
                       }
                       if (line.startsWith('#### ')) {
                         return (
-                          <h4 key={idx} className="text-sm font-semibold text-amber-300 mt-3">
+                          <h4 key={idx} className="text-sm font-semibold text-accent mt-3">
                             {cleanLine.replace('#### ', '')}
                           </h4>
                         );
@@ -236,14 +236,14 @@ export function ScholarAssistantModal({
                         return (
                           <blockquote
                             key={idx}
-                            className="p-3 my-2 border-l-4 border-accent bg-neutral-900/60 rounded-r-lg text-neutral-300 text-xs italic"
+                            className="p-3 my-2 border-l-4 border-accent bg-card rounded-r-lg text-reading text-xs italic"
                           >
                             {cleanLine.replace('> ', '')}
                           </blockquote>
                         );
                       }
                       return (
-                        <p key={idx} className="leading-relaxed">
+                        <p key={idx} className="leading-relaxed text-reading">
                           {cleanLine}
                         </p>
                       );
@@ -251,9 +251,9 @@ export function ScholarAssistantModal({
                   </div>
 
                   {/* Clickable Citations Bar */}
-                  <div className="pt-6 border-t border-neutral-800">
-                    <h4 className="text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-3 flex items-center gap-1.5">
-                      <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+                  <div className="pt-6 border-t border-border">
+                    <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-1.5">
+                      <BookOpen className="w-3.5 h-3.5 text-accent" />
                       Retrieved Classical Sources ({result.sources.length})
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -264,17 +264,17 @@ export function ScholarAssistantModal({
                           className={`flex items-start justify-between p-3 rounded-xl border text-left transition ${
                             selectedSource?.id === src.id
                               ? 'bg-accent/10 border-accent/40 text-foreground'
-                              : 'bg-neutral-900/70 border-neutral-800 hover:border-neutral-700 text-neutral-300'
+                              : 'bg-card border-border hover:border-accent/40 text-foreground'
                           }`}
                         >
                           <div className="flex flex-col gap-0.5">
-                            <span className="text-xs font-semibold text-amber-400 flex items-center gap-1.5">
+                            <span className="text-xs font-semibold text-accent flex items-center gap-1.5">
                               {src.workTitle}
-                              <span className="text-[10px] px-1.5 py-0.2 rounded bg-neutral-800 text-neutral-400 uppercase">
+                              <span className="text-[10px] px-1.5 py-0.2 rounded bg-muted text-muted-foreground uppercase">
                                 {src.language}
                               </span>
                             </span>
-                            <span className="text-[11px] text-neutral-400">
+                            <span className="text-[11px] text-muted-foreground">
                               {src.surahId && src.ayahId
                                 ? `Surah ${src.surahId}:${src.ayahId}`
                                 : src.rootWord
@@ -282,7 +282,7 @@ export function ScholarAssistantModal({
                                 : 'Classical Entry'}
                             </span>
                           </div>
-                          <ChevronRight className="w-4 h-4 text-neutral-500 flex-shrink-0 mt-1" />
+                          <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-1" />
                         </button>
                       ))}
                     </div>
@@ -304,24 +304,24 @@ export function ScholarAssistantModal({
 
           {/* Side Drawer for Full Classical Source Text */}
           {selectedSource && (
-            <div className="w-full md:w-96 border-l border-neutral-800 bg-neutral-900/80 flex flex-col h-full animate-slideLeft">
-              <div className="p-4 border-b border-neutral-800 flex items-center justify-between">
+            <div className="w-full md:w-96 border-l border-border bg-card/95 flex flex-col h-full animate-slideLeft">
+              <div className="p-4 border-b border-border flex items-center justify-between">
                 <div>
                   <h4 className="text-sm font-bold text-foreground">{selectedSource.workTitle}</h4>
-                  <p className="text-xs text-amber-400">
+                  <p className="text-xs text-muted-foreground">
                     {selectedSource.authorName} • Language: {selectedSource.language.toUpperCase()}
                   </p>
                 </div>
                 <button
                   onClick={() => setSelectedSource(null)}
-                  className="p-1 rounded text-neutral-400 hover:text-foreground"
+                  className="p-1 rounded text-muted-foreground hover:text-foreground"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
               <div className="p-4 flex-1 overflow-y-auto space-y-4">
-                <div className="flex items-center gap-2 text-xs text-neutral-400">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <FileText className="w-3.5 h-3.5 text-accent" />
                   <span>
                     {selectedSource.surahId && selectedSource.ayahId
@@ -336,7 +336,7 @@ export function ScholarAssistantModal({
                 </div>
 
                 <div
-                  className={`p-4 rounded-xl bg-neutral-950 border border-neutral-800 text-xs leading-relaxed text-neutral-200 ${
+                  className={`p-4 rounded-xl bg-background/80 border border-border text-xs leading-relaxed text-reading ${
                     selectedSource.language === 'ur'
                       ? 'font-urdu text-right text-base leading-loose'
                       : selectedSource.language === 'ar'

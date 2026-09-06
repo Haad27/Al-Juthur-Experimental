@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo, useRef, useCallback, Suspense } fr
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
-import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, ChevronLeft, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check, Bookmark, BookmarkCheck, Lock, Columns2, AlertCircle, RotateCcw, Edit3, Highlighter } from "lucide-react";
+import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, ChevronLeft, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check, Bookmark, BookmarkCheck, Lock, Columns2, AlertCircle, RotateCcw, Edit3, Highlighter, PenTool, Wrench } from "lucide-react";
 import dynamic from "next/dynamic";
 import TafsirHorizontalReader from "@/components/tafsir/TafsirHorizontalReader";
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
@@ -37,6 +37,7 @@ import { getTafsirFameRank, getLanguagePriority, getTafsirDifficulty } from "@/l
 import { getTafsirWarning } from "@/lib/tafsirWarnings";
 import InlineTranslation from "@/components/shared/InlineTranslation";
 import AlJuthurLoadingProgress from "@/components/shared/AlJuthurLoadingProgress";
+import TopicSearchModal from "@/components/shared/TopicSearchModal";
 import { isTafsirMatch } from "@/lib/searchUtils";
 
 interface Author {
@@ -232,7 +233,9 @@ function TafsirContent() {
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
-
+  
+  const [isHighlightMode, setIsHighlightMode] = useState(false);
+  const [isToolsMenuOpen, setIsToolsMenuOpen] = useState(false);
   
   const [highlightSelection, setHighlightSelection] = useState<{
     text: string;
@@ -409,7 +412,7 @@ function TafsirContent() {
         node = node.parentNode;
       }
 
-      if (type && targetAyahNum) {
+      if (type && targetAyahNum && isHighlightMode) {
         setHighlightSelection({
           text,
           surahNumber: targetSurahNum || activeSurah,
@@ -429,7 +432,7 @@ function TafsirContent() {
       document.removeEventListener("mouseup", handleSelection);
       document.removeEventListener("touchend", handleSelection);
     };
-  }, [activeSurah]);
+  }, [activeSurah, isHighlightMode]);
   const [loadedTafsir, setLoadedTafsir] = useState<Record<number, TafsirEntry>>({});
   const [loadingEntries, setLoadingEntries] = useState<boolean>(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -450,6 +453,7 @@ function TafsirContent() {
 
   // Ayah Wheel Picker Modal & Scroll Target State
   const [wheelModalOpen, setWheelModalOpen] = useState<boolean>(false);
+  const [isTopicModalOpen, setIsTopicModalOpen] = useState<boolean>(false);
   const [selectedAuthorForWheel, setSelectedAuthorForWheel] = useState<Author | null>(null);
   const [selectedLangForWheel, setSelectedLangForWheel] = useState<string>("");
   const [targetAyahToScroll, setTargetAyahToScroll] = useState<{ surah: number; ayah: number } | null>(() => {
@@ -704,6 +708,19 @@ function TafsirContent() {
     ensureCardAligned();
   }, []);
 
+  const handleSelectTopicAyahInTafsir = useCallback((ayahNum: number) => {
+    scrollToAyah(ayahNum, false);
+    setTimeout(() => {
+      const cardEl = document.getElementById(`ayah-${ayahNum}`);
+      if (cardEl) {
+        cardEl.classList.add("ring-2", "ring-accent", "bg-accent/10");
+        setTimeout(() => {
+          cardEl.classList.remove("ring-2", "ring-accent", "bg-accent/10");
+        }, 3000);
+      }
+    }, 200);
+  }, [scrollToAyah]);
+
   const { setImmersiveMode } = useGlobalState();
 
   // Hide mobile bottom nav when in Tafsir reading mode
@@ -844,8 +861,16 @@ function TafsirContent() {
                 </div>
               </div>
 
-              {/* Right Side: Ayah Picker Button, Book Mode Toggle & Theme Toggle */}
+              {/* Right Side: Topics Button, Ayah Picker Button, Book Mode Toggle & Theme Toggle */}
               <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  onClick={() => setIsTopicModalOpen(true)}
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-border bg-card hover:bg-muted text-xs font-medium text-foreground transition-all shrink-0 cursor-pointer"
+                  title="Search topics & subjects in this Tafsir"
+                >
+                  <Search className="size-3.5 text-accent" />
+                  <span className="hidden xs:inline">Topics</span>
+                </button>
                 <button
                   onClick={() => {
                     setSelectedAuthorForWheel(activeAuthor);
@@ -980,6 +1005,15 @@ function TafsirContent() {
                   >
                     <BookOpenText className="size-3.5 text-accent" />
                     <span>{readingMode === "horizontal" ? "Vertical" : "Reader"}</span>
+                  </button>
+                  {/* Topics Button */}
+                  <button
+                    onClick={() => setIsTopicModalOpen(true)}
+                    className="h-7 px-2 rounded-lg border border-border bg-card/60 hover:bg-muted text-xs font-medium text-foreground transition-all inline-flex items-center justify-center gap-1 whitespace-nowrap shrink-0 cursor-pointer"
+                    title="Search topics & subjects in this Tafsir"
+                  >
+                    <Search className="size-3.5 text-accent" />
+                    <span>Topics</span>
                   </button>
                   {/* Ayah Picker */}
                   <button
@@ -1329,6 +1363,55 @@ function TafsirContent() {
           className="bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))]"
         />
 
+        <AyahNoteModal
+          isOpen={isNoteModalOpen}
+          onClose={() => setIsNoteModalOpen(false)}
+          surahNumber={activeSurah}
+          ayahNumber={currentAyahIndex + 1}
+        />
+
+        {!aiChatContext && (
+          <div className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] left-4 sm:left-6 md:left-8 z-40 flex flex-col items-start gap-3">
+            {isToolsMenuOpen && (
+              <div className="flex flex-col gap-2 bg-card border border-border shadow-2xl rounded-2xl p-2 animate-in fade-in slide-in-from-bottom-4 zoom-in-95">
+                <button 
+                  onClick={() => {
+                    setIsHighlightMode(!isHighlightMode);
+                    setIsToolsMenuOpen(false);
+                  }}
+                  className={cn("flex items-center gap-3 px-3 py-2 rounded-xl transition font-medium", isHighlightMode ? "bg-amber-500/20 text-amber-600 dark:text-amber-400" : "hover:bg-muted text-foreground")}
+                >
+                  <div className={cn("p-1.5 rounded-lg", isHighlightMode ? "bg-amber-500 text-white" : "bg-muted")}>
+                    <Highlighter className="size-4" />
+                  </div>
+                  <span className="text-sm pr-2">Highlight Mode {isHighlightMode ? "(ON)" : ""}</span>
+                </button>
+                <div className="h-[1px] w-full bg-border" />
+                <button 
+                  onClick={() => {
+                    setIsNoteModalOpen(true);
+                    setIsToolsMenuOpen(false);
+                  }}
+                  className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-muted text-foreground transition font-medium"
+                >
+                  <div className="p-1.5 rounded-lg bg-muted text-foreground">
+                    <Edit3 className="size-4" />
+                  </div>
+                  <span className="text-sm pr-2">Add Note to Verse</span>
+                </button>
+              </div>
+            )}
+            
+            <button
+              onClick={() => setIsToolsMenuOpen(!isToolsMenuOpen)}
+              className="flex items-center justify-center size-14 rounded-full bg-foreground text-background shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:scale-105 transition-all duration-300"
+              title="Reading Tools"
+            >
+              {isToolsMenuOpen ? <X className="size-6" /> : <PenTool className="size-5" />}
+            </button>
+          </div>
+        )}
+
         <AyahWheelPickerModal
           isOpen={wheelModalOpen}
           onClose={() => setWheelModalOpen(false)}
@@ -1345,6 +1428,17 @@ function TafsirContent() {
             setTargetAyahToScroll({ surah: surahNum, ayah: ayahNum });
             pendingScrollAyahRef.current = ayahNum;
           }}
+        />
+
+        <TopicSearchModal
+          isOpen={isTopicModalOpen}
+          onClose={() => setIsTopicModalOpen(false)}
+          mode="tafsir"
+          surahId={activeSurah}
+          surahName={currentSurahMeta?.englishName || `Surah ${activeSurah}`}
+          authorName={activeAuthor?.name}
+          loadedTafsir={loadedTafsir}
+          onSelectAyah={(ayahNum) => handleSelectTopicAyahInTafsir(ayahNum)}
         />
       </div>
     );

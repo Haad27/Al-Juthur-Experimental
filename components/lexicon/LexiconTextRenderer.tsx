@@ -26,10 +26,10 @@ export default function LexiconTextRenderer({
     .replace(/<\/div>/gi, "")
     .trim();
 
-  // Transform raw HTML tags for 3-Role Color System (soft amber chips for root terms & quotes)
+  // Transform raw HTML tags for 3-Role Color System (soft accent chips for root terms & quotes)
   content = content
-    .replace(/<b([^>]*)>(.*?)<\/b>/gi, '<b$1 class="bg-amber-950/60 text-amber-200/90 border border-amber-500/30 px-2 py-0.5 rounded-md font-bold shadow-sm inline-block mx-1">$2</b>')
-    .replace(/<span class="text-amber-500 font-bold">/gi, '<span class="bg-amber-950/60 text-amber-200/90 border border-amber-500/30 px-2 py-0.5 rounded-md font-bold shadow-sm inline-block mx-1">');
+    .replace(/<b([^>]*)>(.*?)<\/b>/gi, '<b$1 class="bg-accent/10 text-accent border border-accent/25 px-2 py-0.5 rounded-md font-bold shadow-sm inline-block mx-1">$2</b>')
+    .replace(/<span class="text-amber-500 font-bold">/gi, '<span class="bg-accent/10 text-accent border border-accent/25 px-2 py-0.5 rounded-md font-bold shadow-sm inline-block mx-1">');
 
   // Also replace <ul> and <li> to use custom styles if they exist
   content = content
@@ -60,7 +60,7 @@ export default function LexiconTextRenderer({
             return (
               <p
                 key={idx}
-                className={`font-arabic text-stone-200 text-right my-2 ${compact ? 'text-xl md:text-2xl leading-relaxed' : 'text-2xl md:text-3xl leading-loose md:leading-[2.5]'}`}
+                className={`font-arabic text-arabic text-right my-2 ${compact ? 'text-xl md:text-2xl leading-relaxed' : 'text-2xl md:text-3xl leading-loose md:leading-[2.5]'}`}
                 dir="rtl"
                 dangerouslySetInnerHTML={{ __html: displayLine }}
               />

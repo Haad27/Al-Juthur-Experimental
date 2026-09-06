@@ -616,8 +616,8 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
 
             {/* Warning banner */}
             {currentModeInfo.warning && (
-              <div className="w-full shrink-0 bg-amber-500/10 border-b border-amber-500/30 px-3 py-1.5 text-[10px] sm:text-xs text-amber-200 flex items-center gap-2">
-                <AlertTriangle className="size-3.5 text-amber-400 shrink-0" />
+              <div className="w-full shrink-0 bg-accent/10 border-b border-accent/25 px-3 py-1.5 text-[10px] sm:text-xs text-reading flex items-center gap-2">
+                <AlertTriangle className="size-3.5 text-accent shrink-0" />
                 <span className="line-clamp-2"><strong>Guardrail:</strong> {currentModeInfo.warning}</span>
               </div>
             )}
@@ -727,7 +727,7 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                     msg.role === "user" 
                       ? "max-w-[88%] sm:max-w-[85%] bg-muted border border-border text-foreground pr-8" 
                       : msg.isScopeInvalid
-                      ? "w-full bg-amber-950/30 border border-amber-500/40 text-amber-100"
+                      ? "w-full bg-accent/10 border border-accent/30 text-reading"
                       : "w-full bg-card border border-border text-foreground"
                   )}>
                     {msg.role === "assistant" && idx > 0 && (
@@ -777,7 +777,7 @@ export default function AyahChatSidebar({ surahNumber, ayahNumber, isOpen, onClo
                       </button>
                     )}
                     {msg.isScopeInvalid && (
-                      <div className="flex items-center gap-1.5 pb-2 mb-2 border-b border-amber-500/30 text-[11px] font-bold text-amber-300 uppercase tracking-wider">
+                      <div className="flex items-center gap-1.5 pb-2 mb-2 border-b border-accent/25 text-[11px] font-bold text-accent uppercase tracking-wider">
                         <ShieldAlert className="size-3.5" />
                         <span>Scope Guardrail</span>
                       </div>

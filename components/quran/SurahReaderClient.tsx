@@ -37,6 +37,7 @@ import {
 import SurahPlayer from "@/components/SurahPlayer";
 import AyahChatSidebar from "@/components/ai/AyahChatSidebar";
 import TafsirWheelPickerModal from "@/components/quran/TafsirWheelPickerModal";
+import TopicSearchModal from "@/components/shared/TopicSearchModal";
 import FloatingAskScholarButton from "@/components/ai/FloatingAskScholarButton";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 import { amiri } from "@/app/fonts";
@@ -173,7 +174,7 @@ function processTranslation(rawTranslation: string) {
   return { mainText: clean, footnotes };
 }
 
-const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRANSLATION_OPTIONS }: any) => {
+const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRANSLATION_OPTIONS, onOpenTopics }: any) => {
   const show = useScrollDirection();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     if (typeof window !== "undefined") {
@@ -245,6 +246,16 @@ const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRAN
           <Link href="/ai" className="hover:text-foreground transition">Translator</Link>
           <Link href="/rag" className="hover:text-foreground transition">AI Scholar</Link>
         </nav>
+        {onOpenTopics && (
+          <button
+            onClick={onOpenTopics}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border bg-card hover:bg-muted text-xs font-medium text-foreground transition-all shrink-0 cursor-pointer"
+            title="Explore Topics in this Surah"
+          >
+            <Compass className="size-3.5 text-accent" />
+            <span className="hidden sm:inline">Topics</span>
+          </button>
+        )}
         <ThemeToggleButton />
       </div>
     </div>
@@ -639,12 +650,12 @@ const AyahRow = React.memo(({
             </div>
 
             {(hasFootnotesAvailable && showFootnoteIds) ? (
-              <div className="mt-3 p-4 rounded-xl bg-background/90 border border-accent/30 text-sm text-foreground max-h-80 overflow-y-auto custom-scrollbar relative shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
-                <div className="font-semibold text-accent uppercase tracking-wider text-[11px] sticky -top-4 -mx-4 px-4 py-2.5 bg-popover backdrop-blur-md z-10 mb-3 border-b border-accent/20 shadow-sm flex items-center justify-between">
+              <div className="mt-3 p-4 rounded-xl bg-card border border-border text-sm text-foreground max-h-80 overflow-y-auto custom-scrollbar relative shadow-md">
+                <div className="font-semibold text-accent uppercase tracking-wider text-[11px] sticky -top-4 -mx-4 px-4 py-2.5 bg-card/95 backdrop-blur-md z-10 mb-3 border-b border-border shadow-sm flex items-center justify-between">
                   <span className="text-accent font-bold uppercase tracking-wider text-[11px]">
                     FOOTNOTES & COMMENTARY NOTES
                   </span>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider bg-accent/10 text-accent px-2 py-0.5 rounded-md border border-accent/30">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider bg-accent/10 text-accent px-2 py-0.5 rounded-md border border-accent/25">
                     {isTafsirEdition ? "EXPLANATIONS" : "FOOTNOTES"}
                   </span>
                 </div>
@@ -663,7 +674,6 @@ const AyahRow = React.memo(({
                             fontFamily: activeFontStyle.fontFamily,
                             lineHeight: activeFontStyle.lineHeight || (isUrduTranslation ? "2.8" : undefined),
                             fontSize: isUrduTranslation ? "1.15rem" : undefined,
-                            color: "#f4f4f5"
                           }}
                           dangerouslySetInnerHTML={{ __html: cleanUrduFootnoteText(fetchedFootnotes["tafsir_note"]) }}
                         />
@@ -695,7 +705,6 @@ const AyahRow = React.memo(({
                               fontFamily: activeFontStyle.fontFamily,
                               lineHeight: activeFontStyle.lineHeight || (isUrduTranslation ? "2.6" : undefined),
                               fontSize: isUrduTranslation ? "1.1rem" : undefined,
-                              color: "#f4f4f5"
                             }}
                           >
                             <span className="text-accent font-bold mx-2 inline-block" dir="ltr">[{idx + 1}]</span>
@@ -768,6 +777,7 @@ export default function SurahReaderClient({
   const visibleAyahRef = useRef<number>(1);
   const [aiChatContext, setAiChatContext] = useState<{ surah: number; ayah: number } | null>(null);
   const [tafsirWheelContext, setTafsirWheelContext] = useState<{ surah: number; ayah: number } | null>(null);
+  const [isTopicModalOpen, setIsTopicModalOpen] = useState<boolean>(false);
 
   const currentTranslationOption = useMemo(() => {
     return ALL_TRANSLATION_OPTIONS.find(t => t.identifier === translationEdition);
@@ -1076,16 +1086,17 @@ export default function SurahReaderClient({
           translationEdition={translationEdition} 
           aiChatContext={aiChatContext} 
           ALL_TRANSLATION_OPTIONS={ALL_TRANSLATION_OPTIONS} 
+          onOpenTopics={() => setIsTopicModalOpen(true)}
         />
 
         <div className="flex items-center text-center w-full flex-col pt-16 md:pt-16 mb-1 md:mb-2 relative z-20">
           <BismillahIcon className="text-arabic lg:max-w-56 md:max-w-48 max-w-36 sm:max-w-44" />
           
-          {surahInfo && (
-            <div className="mt-1.5 mb-1 flex flex-col items-center w-full max-w-3xl">
+          <div className="mt-2.5 mb-1 flex items-center justify-center gap-2 flex-wrap max-w-3xl">
+            {surahInfo && (
               <button
                 onClick={() => setShowSurahContext(!showSurahContext)}
-                  className="group relative inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-muted border border-border hover:bg-card cursor-pointer transition-colors"
+                className="group relative inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-card border border-border hover:border-accent/40 cursor-pointer transition-colors"
                 title={showSurahContext ? "Hide Context" : "Read Surah Context and Theme"}
               >
                 <Compass size={14} className="text-muted-foreground relative z-10" />
@@ -1093,6 +1104,22 @@ export default function SurahReaderClient({
                   {showSurahContext ? "Close Context" : "Context & Theme"}
                 </span>
               </button>
+            )}
+
+            <button
+              onClick={() => setIsTopicModalOpen(true)}
+              className="group relative inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-accent/10 border border-accent/25 hover:bg-accent/20 cursor-pointer transition-colors"
+              title="Search topics & subjects in this Surah"
+            >
+              <BookOpen size={14} className="text-accent relative z-10" />
+              <span className="text-[11px] md:text-[12px] font-medium tracking-wide text-accent uppercase relative z-10">
+                Explore Topics
+              </span>
+            </button>
+          </div>
+
+          {surahInfo && (
+            <div className="flex flex-col items-center w-full max-w-3xl">
 
               {showSurahContext && (
                 <div className="mt-4 p-5 sm:p-6 w-full rounded-xl bg-card border border-border text-sm text-reading relative animate-in fade-in slide-in-from-top-4 duration-500">
@@ -1232,6 +1259,16 @@ export default function SurahReaderClient({
             router.push(`/tafsir?surah=${tafsirWheelContext.surah}&ayah=${tafsirWheelContext.ayah}&author=${authorId}`);
           }
         }}
+      />
+
+      <TopicSearchModal
+        isOpen={isTopicModalOpen}
+        onClose={() => setIsTopicModalOpen(false)}
+        mode="surah"
+        surahId={surahNumber}
+        surahName={surah?.englishName || `Surah ${surahNumber}`}
+        loadedAyahs={Object.values(loadedAyahs)}
+        onSelectAyah={(ayahNum) => handleSelectTopicAyah(ayahNum)}
       />
 
     </div>
