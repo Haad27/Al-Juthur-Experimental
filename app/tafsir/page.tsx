@@ -1375,7 +1375,7 @@ function TafsirContent() {
           onClick={() => setAiChatContext({ surah: activeSurah, ayah: currentAyahIndex + 1 })}
           label="Ask Tafsir Scholar"
           isVisible={!aiChatContext}
-          className="bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))]"
+          className="bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] right-4 sm:right-6 md:right-[calc(4rem+1.25rem)] lg:right-[calc(5rem+1.5rem)]"
         />
 
         <AyahNoteModal
@@ -1386,7 +1386,7 @@ function TafsirContent() {
         />
 
         {!aiChatContext && (
-          <div className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] left-4 sm:left-6 md:left-8 z-40 flex flex-col items-start gap-3">
+          <div className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] left-4 sm:left-6 md:left-[calc(16rem+1.25rem)] lg:left-[calc(18rem+1.5rem)] z-40 flex flex-col items-start gap-3 transition-all duration-200">
             {isToolsMenuOpen && (
               <div className="flex flex-col gap-2 bg-card border border-border shadow-2xl rounded-2xl p-2 animate-in fade-in slide-in-from-bottom-4 zoom-in-95">
                 <button 
@@ -1394,9 +1394,9 @@ function TafsirContent() {
                     setIsHighlightMode(!isHighlightMode);
                     setIsToolsMenuOpen(false);
                   }}
-                  className={cn("flex items-center gap-3 px-3 py-2 rounded-xl transition font-medium", isHighlightMode ? "bg-amber-500/20 text-amber-600 dark:text-amber-400" : "hover:bg-muted text-foreground")}
+                  className={cn("flex items-center gap-3 px-3 py-2 rounded-xl transition font-medium", isHighlightMode ? "bg-accent/15 text-accent" : "hover:bg-muted text-foreground")}
                 >
-                  <div className={cn("p-1.5 rounded-lg", isHighlightMode ? "bg-amber-500 text-white" : "bg-muted")}>
+                  <div className={cn("p-1.5 rounded-lg", isHighlightMode ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground")}>
                     <Highlighter className="size-4" />
                   </div>
                   <span className="text-sm pr-2">Highlight Mode {isHighlightMode ? "(ON)" : ""}</span>
@@ -1409,7 +1409,7 @@ function TafsirContent() {
                   }}
                   className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-muted text-foreground transition font-medium"
                 >
-                  <div className="p-1.5 rounded-lg bg-muted text-foreground">
+                  <div className="p-1.5 rounded-lg bg-muted text-muted-foreground">
                     <Edit3 className="size-4" />
                   </div>
                   <span className="text-sm pr-2">Add Note to Verse</span>
@@ -1419,10 +1419,13 @@ function TafsirContent() {
             
             <button
               onClick={() => setIsToolsMenuOpen(!isToolsMenuOpen)}
-              className="flex items-center justify-center size-12 rounded-full bg-foreground text-background shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:scale-105 transition-all duration-300"
+              className={cn(
+                "flex items-center justify-center size-12 rounded-full border border-border bg-card/90 hover:bg-muted backdrop-blur-xl shadow-md transition-all duration-200 cursor-pointer",
+                isToolsMenuOpen ? "border-accent text-accent ring-2 ring-accent/20" : "text-foreground hover:border-accent/40 hover:text-accent"
+              )}
               title="Reading Tools"
             >
-              {isToolsMenuOpen ? <X className="size-6" /> : <PenTool className="size-5" />}
+              {isToolsMenuOpen ? <X className="size-5" /> : <PenTool className="size-4.5" />}
             </button>
           </div>
         )}

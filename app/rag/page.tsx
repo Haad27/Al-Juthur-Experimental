@@ -1045,7 +1045,7 @@ function RagChatContent() {
         <div className="px-5 py-3 border-t border-border bg-card/50 flex justify-end shrink-0">
           <button
             onClick={() => setShowDisclaimers(false)}
-            className="px-4 py-2 rounded-xl bg-accent hover:bg-accent text-foreground text-xs font-semibold transition cursor-pointer"
+            className="px-5 py-2 rounded-xl bg-accent hover:opacity-90 text-accent-foreground text-xs font-semibold shadow-sm transition-all cursor-pointer"
           >
             Got it
           </button>

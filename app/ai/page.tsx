@@ -177,34 +177,39 @@ function AiTranslatorContent() {
               )}
             </div>
 
-            <div className="w-full flex flex-col gap-4 relative group">
-              {/* Decorative glows behind input */}
-              <div className={`absolute -inset-1 rounded-[2.2rem] bg-accent/10 transition-opacity duration-500 ${aiIsTranslating ? "opacity-80" : "opacity-0 group-hover:opacity-50"}`} />
-              
-              <div className="relative flex flex-col bg-background/90 backdrop-blur-2xl border-2 border-accent/50 sm:border-border group-hover:border-accent/50 rounded-3xl p-[min(0.5rem,1vh)] transition-all duration-500  sm:shadow-2xl">
-                <div className="flex justify-between items-center px-6 pt-[min(1rem,2vh)] pb-[min(0.5rem,1vh)] border-b border-border/50">
-                  <label className="text-xs font-bold text-muted-foreground tracking-widest uppercase">Source Text</label>
-                  <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-accent bg-accent/10 px-3 py-1 rounded-full border border-accent/20">
-                    <ShieldAlert className="w-3.5 h-3.5" />
+            <div className="w-full relative">
+              <div className="relative flex flex-col bg-card border border-border hover:border-accent/40 focus-within:border-accent/60 rounded-3xl p-3 sm:p-4 shadow-sm transition-all duration-200">
+                {/* Header info */}
+                <div className="flex justify-between items-center px-2 pt-1 pb-2 border-b border-border/60 mb-2">
+                  <span className="text-[11px] font-bold text-muted-foreground tracking-wider uppercase">
+                    Source Text
+                  </span>
+                  <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-accent bg-accent/10 px-2.5 py-0.5 rounded-full border border-accent/25">
+                    <ShieldAlert className="w-3 h-3" />
                     Secure
                   </div>
                 </div>
+
+                {/* Sleek, responsive textarea */}
                 <textarea
-                  className="w-full h-[25vh] min-h-[100px] max-h-[300px] bg-transparent p-[min(1.5rem,3vh)] text-foreground placeholder-muted-foreground focus:outline-none resize-none font-serif text-base sm:text-[clamp(1.25rem,3vh,1.875rem)] leading-loose"
+                  className="w-full min-h-[100px] sm:min-h-[130px] max-h-[260px] bg-transparent p-2 text-foreground placeholder-muted-foreground focus:outline-none resize-none font-sans text-sm sm:text-base leading-relaxed"
                   dir="auto"
                   placeholder="Paste classical Arabic text here..."
                   value={aiInputText}
                   onChange={(e) => setAiInputText(e.target.value)}
                 />
-                <div className="flex justify-between items-center px-4 pb-[min(1rem,2vh)] pt-[min(0.5rem,1vh)]">
+
+                {/* Footer action bar */}
+                <div className="flex justify-between items-center pt-2 px-1 border-t border-border/40 mt-1">
                   <button
                     onClick={() => clearAiTranslation()}
                     disabled={!aiInputText.trim()}
-                    className="group flex items-center justify-center gap-2 px-5 py-[min(0.625rem,1.5vh)] bg-transparent hover:bg-card/50 disabled:opacity-50 disabled:hover:bg-transparent text-muted-foreground hover:text-reading font-medium rounded-xl transition-all duration-300 cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground text-xs font-medium transition-colors cursor-pointer disabled:opacity-40 disabled:hover:bg-transparent"
                   >
-                    <Trash className="w-4 h-4" />
+                    <Trash className="w-3.5 h-3.5" />
                     Clear
                   </button>
+
                   <button
                     onClick={() => {
                       if (aiIsTranslating) return;
@@ -212,22 +217,21 @@ function AiTranslatorContent() {
                     }}
                     disabled={aiIsTranslating || !aiInputText.trim()}
                     className={cn(
-                      "group relative overflow-hidden flex items-center justify-center gap-3 px-8 py-[min(1rem,2vh)] font-bold rounded-2xl transition-all duration-300 transform active:translate-y-0 text-foreground   cursor-pointer hover:-translate-y-1",
+                      "inline-flex items-center justify-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 shadow-sm cursor-pointer",
                       aiIsTranslating
-                        ? "bg-card border border-accent/40 text-accent opacity-90 cursor-not-allowed shadow-none hover:translate-y-0 hover:shadow-none"
-                        : "bg-accent disabled:bg-muted disabled:text-muted-foreground disabled:border-border disabled:border disabled:shadow-none disabled:hover:translate-y-0"
+                        ? "bg-accent/15 border border-accent/40 text-accent opacity-90 cursor-not-allowed"
+                        : "bg-accent text-accent-foreground hover:opacity-90 disabled:bg-muted disabled:text-muted-foreground disabled:border-border disabled:border disabled:shadow-none disabled:cursor-not-allowed"
                     )}
                   >
-                    <div className="absolute inset-0 bg-accent/30 backdrop-blur-sm translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out" />
                     {aiIsTranslating ? (
                       <>
-                        <Loader2 className="w-[min(1.25rem,2.5vh)] h-[min(1.25rem,2.5vh)] text-accent animate-spin relative z-10 shrink-0" />
-                        <span className="relative z-10 text-[clamp(1rem,2vh,1.125rem)] text-accent font-semibold">Translating...</span>
+                        <Loader2 className="w-4 h-4 text-accent animate-spin shrink-0" />
+                        <span>Translating...</span>
                       </>
                     ) : (
                       <>
-                        <Sparkles className="w-[min(1.25rem,2.5vh)] h-[min(1.25rem,2.5vh)] relative z-10" />
-                        <span className="relative z-10 text-[clamp(1rem,2vh,1.125rem)]">Translate Text</span>
+                        <Sparkles className="w-4 h-4" />
+                        <span>Translate Text</span>
                       </>
                     )}
                   </button>

@@ -29,8 +29,8 @@ export default function FloatingAskScholarButton({
           exit={{ opacity: 0, y: 30, scale: 0.85 }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
           className={cn(
-            "fixed right-4 md:right-6 z-[90] flex items-center justify-center",
-            className || "bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:bottom-6"
+            "fixed right-4 md:right-6 bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:bottom-6 z-[90] flex items-center justify-center",
+            className
           )}
         >
           <button
