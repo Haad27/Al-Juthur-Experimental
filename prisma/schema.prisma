@@ -167,3 +167,32 @@ model Subscription {
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 }
+
+// ----------------------------------------------------
+// NOTES & HIGHLIGHTS
+// ----------------------------------------------------
+
+model UserNote {
+  id          String   @id @default(cuid())
+  identifier  String   // e.g. local UUID or email to map to the user device
+  surahId     Int
+  ayahNumber  Int
+  text        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([identifier])
+}
+
+model UserHighlight {
+  id          String   @id @default(cuid())
+  identifier  String
+  surahId     Int
+  ayahNumber  Int
+  text        String
+  type        String   @default("arabic") // "arabic" or "translation"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([identifier])
+}

@@ -9,10 +9,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import NavigatorButton from "@/components/NavigatorButton";
 import { InteractiveAyahWords } from "@/components/quran/InteractiveAyahWords";
-import AyahSkeleton from "@/components/quran/AyahSkeleton";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { useAudioStore } from "@/lib/stores/audioStore";
 import { cn, convertNumberToArabicNumeral, copyToClipboard } from "@/lib/utils";
+import { saveUserHighlight } from "@/lib/readerStorage";
 import BismillahIcon from "@/components/svg/icons/BismillahIcon";
 import LogoIcon from "@/components/svg/icons/LogoIcon";
 import {
@@ -34,6 +34,7 @@ import {
   Map as MapIcon,
   Compass,
   ChevronRight,
+  Edit3,
 } from "lucide-react";
 import SurahPlayer from "@/components/SurahPlayer";
 import AyahChatSidebar from "@/components/ai/AyahChatSidebar";
@@ -99,6 +100,8 @@ interface SurahReaderClientProps {
   surahWbwTranslation?: Record<string, string>;
   surahInfo?: any;
 }
+
+import AyahNoteModal from "@/components/quran/AyahNoteModal";
 
 interface AyahRowProps {
   ayah: AyahProps;
@@ -276,6 +279,7 @@ const AyahRow = React.memo(({
   const [fetchedFootnotes, setFetchedFootnotes] = useState<Record<string, string>>({});
   const [loadingFootnotes, setLoadingFootnotes] = useState(false);
   const [pulseAi, setPulseAi] = useState(false);
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -586,6 +590,13 @@ const AyahRow = React.memo(({
         >
           <Library className="text-amber-500 hover:text-amber-400" size={18} />
         </Link>
+        <button
+          onClick={() => setIsNoteModalOpen(true)}
+          className="p-2 rounded-full hover:bg-muted transition-colors cursor-pointer inline-flex items-center justify-center"
+          title="Add Note"
+        >
+          <Edit3 className="text-teal-500 hover:text-teal-400" size={18} />
+        </button>
       </div>
 
       <div className="text-right sm:order-2 order-1 flex flex-col w-full">
@@ -744,6 +755,12 @@ const AyahRow = React.memo(({
         )}
       </div>
       </div>
+      <AyahNoteModal
+        isOpen={isNoteModalOpen}
+        onClose={() => setIsNoteModalOpen(false)}
+        surahNumber={surahNumber}
+        ayahNumber={ayah.numberInSurah}
+      />
     </div>
   );
 });
@@ -768,6 +785,73 @@ export default function SurahReaderClient({
   const visibleAyahRef = useRef<number>(1);
   const [aiChatContext, setAiChatContext] = useState<{ surah: number; ayah: number } | null>(null);
   const [tafsirWheelContext, setTafsirWheelContext] = useState<{ surah: number; ayah: number } | null>(null);
+
+  const [highlightSelection, setHighlightSelection] = useState<{
+    text: string;
+    surahNumber: number;
+    ayahNumber: number;
+    type: "arabic" | "translation";
+    x: number;
+    y: number;
+  } | null>(null);
+
+  useEffect(() => {
+    const handleSelection = () => {
+      const selection = window.getSelection();
+      if (!selection || selection.isCollapsed) {
+        setHighlightSelection(null);
+        return;
+      }
+      
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+      const text = selection.toString().trim();
+      if (!text || text.length < 2) {
+        setHighlightSelection(null);
+        return;
+      }
+
+      let node = selection.anchorNode;
+      let ayahNumber: number | null = null;
+      let type: "arabic" | "translation" | null = null;
+
+      while (node && node !== document.body) {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const el = node as HTMLElement;
+          if (el.id?.startsWith("ayah-")) {
+            ayahNumber = parseInt(el.id.replace("ayah-", ""));
+          }
+          if (el.lang === "ar" || el.id?.startsWith("atext-")) {
+            type = "arabic";
+          } else if (el.classList?.contains("translation-content") || el.closest(".translation-content")) {
+            type = "translation";
+          }
+        }
+        node = node.parentNode;
+      }
+
+      if (ayahNumber && type) {
+        setHighlightSelection({
+          text,
+          surahNumber: surah?.number || 1,
+          ayahNumber,
+          type,
+          x: rect.left + rect.width / 2,
+          y: rect.top - 40 // above selection
+        });
+      } else {
+        setHighlightSelection(null);
+      }
+    };
+
+    // Use mouseup and touchend for better stability than selectionchange which fires constantly
+    document.addEventListener("mouseup", handleSelection);
+    document.addEventListener("touchend", handleSelection);
+    return () => {
+      document.removeEventListener("mouseup", handleSelection);
+      document.removeEventListener("touchend", handleSelection);
+    };
+  }, [surah]);
 
   const currentTranslationOption = useMemo(() => {
     return ALL_TRANSLATION_OPTIONS.find(t => t.identifier === translationEdition);
@@ -1233,6 +1317,37 @@ export default function SurahReaderClient({
           }
         }}
       />
+
+      {highlightSelection && (
+        <div
+          className="fixed z-[999] flex gap-2 p-1.5 bg-card border border-accent/30 rounded-lg shadow-xl"
+          style={{
+            top: highlightSelection.y,
+            left: highlightSelection.x,
+            transform: 'translate(-50%, -100%)',
+          }}
+        >
+          <button
+            onClick={async (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const { text, surahNumber, ayahNumber, type } = highlightSelection;
+              const res = await saveUserHighlight(surahNumber, ayahNumber, text, type);
+              if (res) {
+                toast.success("Highlight saved.");
+              } else {
+                toast.error("Failed to save highlight.");
+              }
+              setHighlightSelection(null);
+              window.getSelection()?.removeAllRanges();
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-accent/10 text-xs font-semibold text-accent transition"
+          >
+            <Edit3 className="size-3.5" />
+            Save Highlight
+          </button>
+        </div>
+      )}
 
     </div>
   );

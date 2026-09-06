@@ -227,3 +227,81 @@ function recordReadingHistory(item: ReadingHistoryItem): void {
     console.error("Error recording reading history:", e);
   }
 }
+
+// -------------------------------------------------------------
+// 5. Notes & Highlights (Database backed via API)
+// -------------------------------------------------------------
+export function getDeviceId(): string {
+  if (typeof window === "undefined") return "server";
+  let deviceId = localStorage.getItem("aljuthur-device-id");
+  if (!deviceId) {
+    deviceId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2) + Date.now().toString(36);
+    localStorage.setItem("aljuthur-device-id", deviceId);
+  }
+  return deviceId;
+}
+
+export interface UserNote {
+  id: string;
+  surahId: number;
+  ayahNumber: number;
+  text: string;
+  createdAt: string;
+}
+
+export interface UserHighlight {
+  id: string;
+  surahId: number;
+  ayahNumber: number;
+  text: string;
+  type: string;
+  createdAt: string;
+}
+
+export async function fetchUserNotes(): Promise<UserNote[]> {
+  const id = getDeviceId();
+  const res = await fetch(`/api/notes?identifier=${id}`);
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export async function saveUserNote(surahId: number, ayahNumber: number, text: string): Promise<UserNote | null> {
+  const id = getDeviceId();
+  const res = await fetch('/api/notes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ identifier: id, surahId, ayahNumber, text })
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export async function deleteUserNote(noteId: string): Promise<boolean> {
+  const id = getDeviceId();
+  const res = await fetch(`/api/notes?identifier=${id}&id=${noteId}`, { method: 'DELETE' });
+  return res.ok;
+}
+
+export async function fetchUserHighlights(): Promise<UserHighlight[]> {
+  const id = getDeviceId();
+  const res = await fetch(`/api/highlights?identifier=${id}`);
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export async function saveUserHighlight(surahId: number, ayahNumber: number, text: string, type: 'arabic'|'translation'): Promise<UserHighlight | null> {
+  const id = getDeviceId();
+  const res = await fetch('/api/highlights', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ identifier: id, surahId, ayahNumber, text, type })
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export async function deleteUserHighlight(highlightId: string): Promise<boolean> {
+  const id = getDeviceId();
+  const res = await fetch(`/api/highlights?identifier=${id}&id=${highlightId}`, { method: 'DELETE' });
+  return res.ok;
+}

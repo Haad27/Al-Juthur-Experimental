@@ -36,7 +36,13 @@ import {
   LastReadTafsir,
   SavedTafsirItem,
   SavedScholarAnswer,
-  ReadingHistoryItem
+  ReadingHistoryItem,
+  UserNote,
+  UserHighlight,
+  fetchUserNotes,
+  fetchUserHighlights,
+  deleteUserNote,
+  deleteUserHighlight
 } from "@/lib/readerStorage";
 import { copyToClipboard, cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -57,7 +63,7 @@ interface Ayah {
   pinned?: boolean;
 }
 
-type TabType = "tafsirs" | "ayahs" | "scholar" | "history";
+type TabType = "tafsirs" | "ayahs" | "scholar" | "history" | "notes";
 type SortOption = "pinned" | "surah" | "ayah" | "recent";
 
 export default function SavedPage() {
@@ -72,6 +78,8 @@ export default function SavedPage() {
   const [savedTafsirs, setSavedTafsirs] = useState<SavedTafsirItem[]>([]);
   const [savedScholarAnswers, setSavedScholarAnswers] = useState<SavedScholarAnswer[]>([]);
   const [readingHistory, setReadingHistory] = useState<ReadingHistoryItem[]>([]);
+  const [savedNotes, setSavedNotes] = useState<UserNote[]>([]);
+  const [savedHighlights, setSavedHighlights] = useState<UserHighlight[]>([]);
 
   // Load all local data on mount
   useEffect(() => {
@@ -88,6 +96,9 @@ export default function SavedPage() {
         console.error("Invalid saved ayah data");
       }
     }
+
+    fetchUserNotes().then(setSavedNotes);
+    fetchUserHighlights().then(setSavedHighlights);
   }, []);
 
   // Handlers for Ayahs
@@ -377,6 +388,19 @@ export default function SavedPage() {
             >
               <History className="size-4" />
               <span>Reading History</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("notes")}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer shrink-0",
+                activeTab === "notes"
+                  ? "bg-accent text-accent-foreground shadow-md shadow-sm"
+                  : "bg-card/90 border border-border text-muted-foreground hover:text-foreground hover:border-border"
+              )}
+            >
+              <BookOpenText className="size-4" />
+              <span>Notes & Highlights ({savedNotes.length + savedHighlights.length})</span>
             </button>
           </div>
 
@@ -748,6 +772,99 @@ export default function SavedPage() {
                 <p className="text-base font-semibold text-reading">No reading history yet.</p>
               </div>
             )}
+          </div>
+        )}
+
+      {/* Tab 5: Notes & Highlights */}
+        {activeTab === "notes" && (
+          <div className="space-y-6">
+            
+            {/* Notes Section */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-accent uppercase tracking-wider flex items-center gap-2 border-b border-border pb-2">
+                <BookOpenText className="size-4" /> Personal Notes
+              </h3>
+              {savedNotes.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {savedNotes.map((note) => (
+                    <div key={note.id} className="p-5 rounded-2xl bg-card border border-border hover:border-accent/40 transition flex flex-col gap-3 group shadow-sm">
+                      <div className="flex items-center justify-between">
+                        <Link href={`/surah/${note.surahId}?ayah=${note.ayahNumber}`} className="inline-flex items-center gap-2 hover:opacity-80 transition">
+                          <span className="h-6 px-2.5 rounded bg-accent/10 border border-accent/30 text-accent font-bold text-xs flex items-center">
+                            Surah {note.surahId} : {note.ayahNumber}
+                          </span>
+                        </Link>
+                        <button
+                          onClick={async () => {
+                            if (await deleteUserNote(note.id)) {
+                              setSavedNotes(savedNotes.filter(n => n.id !== note.id));
+                              toast.info("Note deleted");
+                            }
+                          }}
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-muted transition"
+                        >
+                          <Trash2 className="size-3.5" />
+                        </button>
+                      </div>
+                      <p className="text-sm text-reading whitespace-pre-wrap">{note.text}</p>
+                      <span className="text-[10px] text-muted-foreground self-end mt-auto pt-2">{new Date(note.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-muted-foreground py-6 px-4 bg-muted/30 rounded-xl text-center border border-border border-dashed">
+                  No notes saved yet. Add notes while reading any verse.
+                </div>
+              )}
+            </div>
+
+            {/* Highlights Section */}
+            <div className="space-y-3 pt-6">
+              <h3 className="text-sm font-semibold text-accent uppercase tracking-wider flex items-center gap-2 border-b border-border pb-2">
+                <Sparkles className="size-4" /> Text Highlights
+              </h3>
+              {savedHighlights.length > 0 ? (
+                <div className="grid grid-cols-1 gap-4">
+                  {savedHighlights.map((hl) => (
+                    <div key={hl.id} className="p-5 rounded-2xl bg-card border border-border hover:border-accent/40 transition flex flex-col gap-3 group shadow-sm">
+                      <div className="flex items-center justify-between">
+                        <Link href={`/surah/${hl.surahId}?ayah=${hl.ayahNumber}`} className="inline-flex items-center gap-2 hover:opacity-80 transition">
+                          <span className="h-6 px-2.5 rounded bg-accent/10 border border-accent/30 text-accent font-bold text-xs flex items-center">
+                            Surah {hl.surahId} : {hl.ayahNumber}
+                          </span>
+                          <span className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider bg-muted px-2 py-0.5 rounded">
+                            {hl.type}
+                          </span>
+                        </Link>
+                        <button
+                          onClick={async () => {
+                            if (await deleteUserHighlight(hl.id)) {
+                              setSavedHighlights(savedHighlights.filter(h => h.id !== hl.id));
+                              toast.info("Highlight deleted");
+                            }
+                          }}
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-muted transition"
+                        >
+                          <Trash2 className="size-3.5" />
+                        </button>
+                      </div>
+                      <blockquote className={cn(
+                        "pl-4 border-l-2 border-accent/50 text-sm py-1 bg-accent/5 rounded-r-lg pr-4",
+                        hl.type === "arabic" ? "font-mushaf-indopak-16 text-right text-lg text-amber-100/90 leading-loose border-r-2 border-l-0 pl-4 border-accent/50" : "text-reading italic"
+                      )} dir={hl.type === "arabic" ? "rtl" : "ltr"}>
+                        {hl.text}
+                      </blockquote>
+                      <span className="text-[10px] text-muted-foreground self-end">{new Date(hl.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-muted-foreground py-6 px-4 bg-muted/30 rounded-xl text-center border border-border border-dashed">
+                  No highlights saved yet. Select text while reading to highlight it.
+                </div>
+              )}
+            </div>
+
           </div>
         )}
 
