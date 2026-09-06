@@ -265,12 +265,31 @@ export default function TafsirBookMode({
           column-gap: 4rem;
           padding: 2rem;
         }
+        .page-num-left, .page-num-right, .page-num-mobile {
+          position: absolute;
+          bottom: 0.5rem;
+          color: inherit;
+          font-size: 0.65rem;
+          font-variant-numeric: tabular-nums;
+          opacity: 0.4;
+          z-index: 10;
+        }
+        .page-num-left { left: 2rem; }
+        .page-num-right { right: 2rem; }
+        .page-num-mobile { left: 50%; transform: translateX(-50%); }
+
         @media (max-width: 768px) {
           .book-columns {
             column-width: calc(100vw - 3rem);
             column-gap: 3rem;
             padding: 1.5rem;
           }
+          .page-num-left, .page-num-right { display: none; }
+          .page-num-mobile { display: block; }
+        }
+        @media (min-width: 769px) {
+          .page-num-left, .page-num-right { display: block; }
+          .page-num-mobile { display: none; }
         }
         .book-columns p, .book-columns div {
           word-wrap: break-word;
@@ -293,6 +312,21 @@ export default function TafsirBookMode({
               Flowing text...
             </span>
           </div>
+        )}
+
+        {/* Floating Page Numbers */}
+        {isReady && (
+          <>
+            <div className="page-num-left text-foreground">
+               {isRtl ? (currentPage * 2) + 2 : (currentPage * 2) + 1}
+            </div>
+            <div className="page-num-right text-foreground">
+               {isRtl ? (currentPage * 2) + 1 : (currentPage * 2) + 2}
+            </div>
+            <div className="page-num-mobile text-foreground">
+               {currentPage + 1}
+            </div>
+          </>
         )}
 
         <div
