@@ -1909,6 +1909,8 @@ function TafsirCard({
   aiChatContext, 
   scrollToAyah,
   languages = [],
+  isHighlightMode,
+  setIsHighlightMode,
 }: {
   entry: any;
   idx: number;
@@ -2049,7 +2051,7 @@ function TafsirCard({
               <span className={cn("hidden sm:inline", aiChatContext && "lg:hidden")}>Note</span>
             </button>
             <button
-              onClick={() => setIsHighlightMode && setIsHighlightMode(!isHighlightMode)}
+              onClick={() => setIsHighlightMode?.(!isHighlightMode)}
               className={cn(
                 "flex items-center rounded-lg transition font-medium whitespace-nowrap gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs cursor-pointer",
                 isHighlightMode 
