@@ -401,7 +401,7 @@ function TafsirContent() {
   const [activeSurah, setActiveSurah] = useState<number>(parsedUrlSurahId);
 
   useEffect(() => {
-    const handleSelection = () => {
+    const handleSelection = async () => {
       const selection = window.getSelection();
       if (!selection || selection.isCollapsed) {
         setHighlightSelection(null);
@@ -438,14 +438,17 @@ function TafsirContent() {
       }
 
       if (type && targetAyahNum && isHighlightMode) {
-        setHighlightSelection({
-          text,
-          surahNumber: targetSurahNum || activeSurah,
-          ayahNumber: targetAyahNum,
-          type,
-          x: rect.left + rect.width / 2,
-          y: rect.top - 10
-        });
+        // Auto-save highlight
+        const sNum = targetSurahNum || activeSurah;
+        const res = await saveUserHighlight(sNum, targetAyahNum, text, type);
+        if (res) {
+          toast.success("Highlight saved.");
+          setHighlights(prev => [...prev, res]);
+        } else {
+          toast.error("Failed to save highlight.");
+        }
+        selection.removeAllRanges();
+        setHighlightSelection(null);
       } else {
         setHighlightSelection(null);
       }
@@ -1472,7 +1475,7 @@ function TafsirContent() {
                   </button>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed mb-3">
-                  Select any text with your cursor. A small "Save" button will appear to instantly save it to your library!
+                  Select any text with your cursor. It will be instantly highlighted and saved to your library!
                 </p>
                 <label className="flex items-center gap-2 cursor-pointer group">
                   <input 
