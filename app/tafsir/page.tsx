@@ -2363,7 +2363,7 @@ function TafsirCard({
             ayahNumber={ayahNumber}
             surahId={activeSurah}
             currentAuthorId={authorId}
-            languages={languages} highlights={highlights}
+            languages={languages}
           />
         )}
       </div>
