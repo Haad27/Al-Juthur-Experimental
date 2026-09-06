@@ -259,6 +259,24 @@ export default function TafsirBookMode({
       </div>
 
       {/* ── Book area ────────────────────────────────────────────── */}
+      <style>{`
+        .book-columns {
+          column-width: calc(50vw - 4rem);
+          column-gap: 4rem;
+          padding: 2rem;
+        }
+        @media (max-width: 768px) {
+          .book-columns {
+            column-width: calc(100vw - 3rem);
+            column-gap: 3rem;
+            padding: 1.5rem;
+          }
+        }
+        .book-columns p, .book-columns div {
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+        }
+      `}</style>
       <div
         ref={containerRef}
         style={{
@@ -280,12 +298,10 @@ export default function TafsirBookMode({
         <div
           ref={contentRef}
           dir={isRtl ? "rtl" : "ltr"}
+          className="book-columns"
           style={{
             height: "100%",
-            columnWidth: "calc(100vw - 4rem)",
-            columnGap: "4rem",
             columnFill: "auto",
-            padding: "2rem",
             boxSizing: "border-box",
             transform: `translateX(${isRtl ? currentPage * 100 : -currentPage * 100}vw)`,
             transition: "transform 0.4s cubic-bezier(0.4, 0.0, 0.2, 1)",
