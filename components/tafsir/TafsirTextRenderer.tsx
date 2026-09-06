@@ -2,6 +2,7 @@ import { BookOpen, Info, ArrowRight, Lock, Sparkles } from "lucide-react";
 import { useSubscriptionStore } from "@/lib/stores/subscriptionStore";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 import { getEnglishFont, getUrduFont } from "@/lib/fontsConfig";
+import { UserHighlight } from "@/lib/readerStorage";
 
 interface TafsirTextRendererProps {
   text: string;
@@ -12,6 +13,7 @@ interface TafsirTextRendererProps {
   authorName?: string;
   onNavigateToAyah?: (ayahNum: number) => void;
   onUpgradeClick?: () => void;
+  highlights?: UserHighlight[];
 }
 
 export default function TafsirTextRenderer({ 
@@ -23,6 +25,7 @@ export default function TafsirTextRenderer({
   authorName = "",
   onNavigateToAyah,
   onUpgradeClick,
+  highlights = [],
 }: TafsirTextRendererProps) {
   const { openPricingModal } = useSubscriptionStore();
   const { englishFont, urduFont } = useGlobalState();
@@ -171,6 +174,19 @@ export default function TafsirTextRenderer({
     // Only apply Arabic snippet font wrapper if this is an LTR translation (e.g. English, French)
     if (!isRightToLeft) {
       html = applyArabicFont(html);
+    }
+
+    // 5. Apply User Highlights
+    if (highlights && highlights.length > 0) {
+      highlights.forEach(h => {
+        if (!h.text || h.text.trim() === '') return;
+        try {
+          const escaped = h.text.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+          html = html.replace(new RegExp(escaped, "g"), `<mark class="bg-amber-500/40 text-inherit rounded-sm px-0.5">$&</mark>`);
+        } catch (e) {
+          console.error("Failed to highlight", e);
+        }
+      });
     }
 
     return html;

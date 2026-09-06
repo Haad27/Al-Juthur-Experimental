@@ -66,6 +66,46 @@ const LOCAL_TAFSIR_MAP: Record<number, { folder: string; isUrdu?: boolean; isPas
   223: { folder: "ar-hashiyat-al-sawi", authorName: "Ahmad ibn Muhammad al-Sawi", name: "Hashiyat al-Sawi (حاشية الصاوي على الجلالين)" },
   224: { folder: "ar-tafsir-sufyan-al-thawri", authorName: "Imam Sufyan al-Thawri", name: "Tafsir Sufyan al-Thawri (تفسير سفيان الثوري)" },
   225: { folder: "ar-gharaib-al-quran-naysaburi", authorName: "Nizam al-Din al-Naysaburi", name: "Ghara'ib al-Quran (غرائب القرآن للنيسابوري)" },
+  // Additional Authentic Ahl al-Sunnah Tafsirs (IDs 226-264)
+  226: { folder: "ar-tafsir-yahya-ibn-sallam", authorName: "Yahya ibn Sallam al-Taymi", name: "Tafsir Yahya ibn Sallam (تفسير يحيى بن سلام)" },
+  227: { folder: "ar-tafsir-abd-al-razzaq-al-sanani", authorName: "Imam Abd al-Razzaq al-San'ani", name: "Tafsir Abd al-Razzaq (تفسير عبد الرزاق الصنعاني)" },
+  228: { folder: "ar-tafsir-ibn-khuwayz-mandad", authorName: "Abu Bakr Muhammad ibn Khuwayz Mandad al-Maliki", name: "Tafsir Ibn Khuwayz Mandad (تفسير ابن خويز منداد)" },
+  229: { folder: "ar-majaz-al-quran-abu-ubaida", authorName: "Abu Ubaida Ma'mar ibn al-Muthanna", name: "Majaz al-Quran (مجاز القرآن لأبي عبيدة)" },
+  230: { folder: "ar-maani-al-quran-farra", authorName: "Abu Zakariya Yahya ibn Ziyad al-Farra'", name: "Ma'ani al-Quran (معاني القرآن للفراء)" },
+  231: { folder: "ar-maani-al-quran-akhfash", authorName: "Abu al-Hasan al-Akhfash al-Awsat", name: "Ma'ani al-Quran (معاني القرآن للأخفش)" },
+  232: { folder: "ar-gharib-al-quran-ibn-qutaybah", authorName: "Abu Muhammad Abdullah ibn Muslim ibn Qutaybah al-Dinawari", name: "Gharib al-Quran (غريب القرآن لابن قتيبة)" },
+  233: { folder: "ar-gharib-al-quran-zayd-ibn-ali", authorName: "Imam Zayd ibn Ali ibn al-Husayn", name: "Gharib al-Quran (غريب القرآن لزيد بن علي)" },
+  234: { folder: "ar-nuzhat-al-qulub-sijistani", authorName: "Abu Bakr Muhammad ibn Aziz al-Sijistani", name: "Nuzhat al-Qulub fi Gharib al-Quran (نزهة القلوب للسجستاني)" },
+  235: { folder: "ar-tafsir-al-izz-ibn-abd-al-salam", authorName: "Sultan al-Ulama Izz al-Din Abd al-Aziz ibn Abd al-Salam", name: "Tafsir al-Izz ibn Abd al-Salam (تفسير العز بن عبد السلام)" },
+  236: { folder: "ar-maani-al-quran-wa-irabuh-zajjaj", authorName: "Abu Ishaq Ibrahim ibn al-Sari al-Zajjaj", name: "Ma'ani al-Quran wa I'rabuh (معاني القرآن وإعرابه للزجاج)" },
+  237: { folder: "ar-tafsir-al-raghib-al-isfahani", authorName: "Abu al-Qasim al-Husayn ibn Muhammad al-Raghib al-Isfahani", name: "Tafsir al-Raghib al-Isfahani (تفسير الراغب الأصفهاني)" },
+  238: { folder: "ar-al-nahr-al-madd-abu-hayyan", authorName: "Abu Hayyan al-Gharnati al-Andalusi", name: "Al-Nahr al-Madd min al-Bahr al-Muhit (النهر الماد لأبي حيان)" },
+  239: { folder: "ar-tadhkirat-al-arib-ibn-al-jawzi", authorName: "Jamal al-Din Abu al-Faraj Ibn al-Jawzi", name: "Tadhkirat al-Arib fi Tafsir al-Gharib (تذكرة الأريب لابن الجوزي)" },
+  240: { folder: "ar-ijaz-al-bayan-naysaburi", authorName: "Mahmud ibn Abi al-Hasan al-Naysaburi al-Ghaznawi", name: "I'jaz al-Bayan an Ma'ani al-Quran (إيجاز البيان للنيسابوري)" },
+  241: { folder: "ar-al-sirat-al-mustaqim-khidr", authorName: "Nur al-Din Ahmad ibn Muhammad ibn Khidr", name: "Al-Sirat al-Mustaqim fi Tibyan al-Quran (الصراط المستقيم للرازي)" },
+  242: { folder: "ar-ara-ibn-hazm-fi-al-tafsir", authorName: "Abu Muhammad Ali ibn Ahmad ibn Hazm al-Andalusi", name: "Ara' Ibn Hazm fi al-Tafsir (آراء ابن حزم في التفسير)" },
+  243: { folder: "ar-juhud-ibn-abd-al-barr", authorName: "Abu Umar Yusuf ibn Abd Allah Ibn Abd al-Barr al-Qurtubi", name: "Juhud Ibn Abd al-Barr fi al-Tafsir (جهود ابن عبد البر في التفسير)" },
+  244: { folder: "ar-juhud-al-imam-al-ghazali", authorName: "Hujjat al-Islam Abu Hamid Muhammad al-Ghazali", name: "Juhud al-Imam al-Ghazali fi al-Tafsir (جهود الغزالي في التفسير)" },
+  245: { folder: "ar-juhud-al-qarafi-fi-al-tafsir", authorName: "Abu al-Abbas Shihab al-Din Ahmad al-Qarafi al-Maliki", name: "Juhud al-Qarafi fi al-Tafsir (جهود القرافي في التفسير)" },
+  246: { folder: "ar-tafsir-ibn-arafa-al-maliki", authorName: "Abu Abd Allah Muhammad ibn Muhammad Ibn Arafa al-Warghami", name: "Tafsir Ibn Arafa (تفسير ابن عرفة المالكي)" },
+  247: { folder: "ar-al-taqyid-al-kabir-basili", authorName: "Abu al-Abbas Ahmad ibn Muhammad al-Basili al-Tunisi", name: "Al-Taqyid al-Kabir (التقييد الكبير للبسيلي)" },
+  248: { folder: "ar-al-tibyan-fi-gharib-al-quran-ibn-al-haim", authorName: "Shihab al-Din Ahmad ibn Muhammad Ibn al-Ha'im", name: "Al-Tibyan fi Tafsir Gharib al-Quran (التبيان لابن الهائم)" },
+  249: { folder: "ar-fath-al-rahman-zakariya-al-ansari", authorName: "Shaykh al-Islam Zakariya ibn Muhammad al-Ansari", name: "Fath al-Rahman bi-Kashf ma Yaltabis fi al-Quran (فتح الرحمن لشيخ الإسلام الأنصاري)" },
+  250: { folder: "ar-ghayat-al-amani-al-kurani", authorName: "Shihab al-Din Ahmad ibn Isma'il al-Kurani", name: "Ghayat al-Amani fi Tafsir al-Kalam al-Rabbani (غاية الأماني للكوراني)" },
+  251: { folder: "ar-hadaiq-al-ruh-wa-al-rayhan-harari", authorName: "Allamah Muhammad al-Amin al-Harari al-Shafi'i", name: "Hadaiq al-Ruh wa al-Rayhan (حدائق الروح والريحان للهرري)" },
+  252: { folder: "ar-majalis-al-tadhkir-ibn-badis", authorName: "Shaykh Abd al-Hamid Ibn Badis al-Sanhaji", name: "Majalis al-Tadhkir min Kalam al-Hakim al-Khabir (مجالس التذكير لابن باديس)" },
+  253: { folder: "ar-al-adhb-al-namir-shinqiti", authorName: "Shaykh Muhammad al-Amin al-Shinqiti", name: "Al-Adhb al-Namir min Majalis al-Shinqiti (العذب النمير للشنقيطي)" },
+  254: { folder: "ar-safwat-al-bayan-hasanein-makhlouf", authorName: "Shaykh Hasanein Muhammad Makhlouf", name: "Safwat al-Bayan li-Ma'ani al-Quran (صفوة البيان لمخلوف)" },
+  255: { folder: "ar-al-taysir-fi-ahadith-al-tafsir-nasiri", authorName: "Shaykh Muhammad al-Makki al-Nasiri", name: "Al-Taysir fi Ahadith al-Tafsir (التيسير في أحاديث التفسير للمكي الناصري)" },
+  256: { folder: "ar-aysar-al-tafasir-humad", authorName: "As'ad Mahmud Humad", name: "Aysar al-Tafasir (أيسر التفاسير لأسعد حومد)" },
+  257: { folder: "ar-al-mushaf-al-mufassar-farid-wajdi", authorName: "Muhammad Farid Wajdi", name: "Al-Mushaf al-Mufassar (المصحف المفسر لفريد وجدي)" },
+  258: { folder: "ar-awdah-al-tafasir-khatib", authorName: "Muhammad Muhammad Abd al-Latif (Ibn al-Khatib)", name: "Awdah al-Tafasir (أوضح التفاسير لمحمد فريد الخطيب)" },
+  259: { folder: "ar-al-tafsir-al-qurani-lil-quran-khatib", authorName: "Abd al-Karim Yunus al-Khatib", name: "Al-Tafsir al-Qur'ani lil-Qur'an (التفسير القرآني للقرآن)" },
+  260: { folder: "ar-bayan-al-maani-al-ani", authorName: "Abd al-Qadir ibn Mulla Huwaysh al-Ani", name: "Bayan al-Ma'ani (بيان المعاني لعبد القادر ملا حويش)" },
+  261: { folder: "ar-al-tafsir-al-shamil-amir-abd-al-aziz", authorName: "Dr. Amir Abd al-Aziz", name: "Al-Tafsir al-Shamil (التفسير الشامل لأمير عبد العزيز)" },
+  262: { folder: "ar-al-mawsooah-al-quraniyyah-abyari", authorName: "Ibrahim ibn Isma'il al-Abyari", name: "Al-Mawsoo'ah al-Qur'aniyyah (الموسوعة القرآنية للأبياري)" },
+  263: { folder: "ar-gharib-al-quran-kamila-kuwari", authorName: "Dr. Kamila bint Muhammad al-Kuwari", name: "Tafsir Gharib al-Quran (تفسير غريب القرآن لكاملة الكواري)" },
+  264: { folder: "ar-al-tafsir-al-bayani-al-qaddumi", authorName: "Dr. Sami Wadi' Abd al-Fattah al-Qaddumi", name: "Al-Tafsir al-Bayani (التفسير البياني لقدومي)" },
 };
 
 // 1. Cached library loader (languages + authors with tags & difficulty)
@@ -164,7 +204,7 @@ const getTafsirLibrary = unstable_cache(
       authors: authorsByLang[l.id] || []
     }));
   },
-  ['tafsir-library-v9'],
+  ['tafsir-library-v10'],
   { revalidate: 2592000 } // 30 days
 );
 

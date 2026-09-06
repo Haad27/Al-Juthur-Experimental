@@ -24,7 +24,10 @@ import {
   saveTafsirItem, 
   isTafsirSaved, 
   LastReadTafsir,
-  saveUserHighlight
+  saveUserHighlight,
+  fetchUserHighlights,
+  deleteUserHighlight,
+  UserHighlight
 } from "@/lib/readerStorage";
 
 import { useRouter, useSearchParams } from "next/navigation";
@@ -244,7 +247,15 @@ function TafsirContent() {
     type: "arabic" | "translation";
     x: number;
     y: number;
+    isExisting?: boolean;
   } | null>(null);
+
+  const [highlights, setHighlights] = useState<UserHighlight[]>([]);
+  const [showHighlightOnboarding, setShowHighlightOnboarding] = useState(false);
+
+  useEffect(() => {
+    fetchUserHighlights().then(setHighlights).catch(console.error);
+  }, []);
 
   // When highlight mode is on, we inject a style to change the text selection color to amber/gold
   const highlightModeStyle = isHighlightMode ? (
@@ -440,11 +451,36 @@ function TafsirContent() {
       }
     };
 
+    const handleMarkClick = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName.toLowerCase() === 'mark') {
+        const text = target.textContent || "";
+        const surahNum = parseInt(target.closest('[data-surah-num]')?.getAttribute('data-surah-num') || "0", 10);
+        const ayahNum = parseInt(target.closest('[data-ayah-num]')?.getAttribute('data-ayah-num') || "0", 10);
+        const rect = target.getBoundingClientRect();
+        
+        if (text && (surahNum || activeSurah) && ayahNum) {
+          setHighlightSelection({
+            text,
+            surahNumber: surahNum || activeSurah,
+            ayahNumber: ayahNum,
+            type: "translation",
+            x: rect.left + rect.width / 2,
+            y: rect.top - 10,
+            isExisting: true
+          });
+        }
+      }
+    };
+
     document.addEventListener("mouseup", handleSelection);
     document.addEventListener("touchend", handleSelection);
+    document.addEventListener("click", handleMarkClick);
+
     return () => {
       document.removeEventListener("mouseup", handleSelection);
       document.removeEventListener("touchend", handleSelection);
+      document.removeEventListener("click", handleMarkClick);
     };
   }, [activeSurah, isHighlightMode]);
   const [loadedTafsir, setLoadedTafsir] = useState<Record<number, TafsirEntry>>({});
@@ -1275,7 +1311,7 @@ function TafsirContent() {
                       activeAuthor={activeAuthor} 
                       aiChatContext={aiChatContext} 
                       scrollToAyah={scrollToAyah}
-                      languages={languages}
+                      languages={languages} highlights={highlights}
                     />
                   ) : (
                     <div className="flex flex-col items-center justify-center p-12 text-muted-foreground text-sm">
@@ -1324,7 +1360,7 @@ function TafsirContent() {
                         activeAuthor={activeAuthor}
                         aiChatContext={aiChatContext}
                         scrollToAyah={scrollToAyah}
-                        languages={languages}
+                        languages={languages} highlights={highlights}
                       />
                     );
                   }}
@@ -1391,10 +1427,17 @@ function TafsirContent() {
               <div className="flex flex-col gap-2 bg-card border border-border shadow-2xl rounded-2xl p-2 animate-in fade-in slide-in-from-bottom-4 zoom-in-95">
                 <button 
                   onClick={() => {
-                    setIsHighlightMode(!isHighlightMode);
+                    const newMode = !isHighlightMode;
+                    setIsHighlightMode(newMode);
                     setIsToolsMenuOpen(false);
+                    if (newMode && typeof window !== 'undefined' && localStorage.getItem('hide_highlight_onboarding') !== 'true') {
+                      setShowHighlightOnboarding(true);
+                      setTimeout(() => {
+                        setShowHighlightOnboarding(false);
+                      }, 8000);
+                    }
                   }}
-                  className={cn("flex items-center gap-3 px-3 py-2 rounded-xl transition font-medium", isHighlightMode ? "bg-accent/15 text-accent" : "hover:bg-muted text-foreground")}
+                  className={cn("flex items-center gap-3 px-3 py-2 rounded-xl transition font-medium", isHighlightMode ? "bg-amber-500/20 text-amber-600 dark:text-amber-400" : "hover:bg-muted text-foreground")}
                 >
                   <div className={cn("p-1.5 rounded-lg", isHighlightMode ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground")}>
                     <Highlighter className="size-4" />
@@ -1416,16 +1459,45 @@ function TafsirContent() {
                 </button>
               </div>
             )}
+
+            {showHighlightOnboarding && !isToolsMenuOpen && (
+              <div className="absolute bottom-[4.5rem] left-0 w-64 p-3.5 bg-card border border-amber-500/30 shadow-2xl rounded-2xl animate-in fade-in slide-in-from-bottom-2">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-bold text-sm">
+                    <Highlighter className="size-4" />
+                    Highlighter is ON
+                  </div>
+                  <button onClick={() => setShowHighlightOnboarding(false)} className="text-muted-foreground hover:text-foreground">
+                    <X className="size-4" />
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+                  Select any text with your cursor. A small "Save" button will appear to instantly save it to your library!
+                </p>
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <input 
+                    type="checkbox" 
+                    className="size-3.5 rounded-sm border-muted-foreground text-amber-500 focus:ring-amber-500 cursor-pointer"
+                    onChange={(e) => {
+                      if (e.target.checked) localStorage.setItem('hide_highlight_onboarding', 'true');
+                      else localStorage.removeItem('hide_highlight_onboarding');
+                    }}
+                  />
+                  <span className="text-[10px] text-muted-foreground group-hover:text-foreground transition-colors">Don't show this again</span>
+                </label>
+              </div>
+            )}
             
             <button
               onClick={() => setIsToolsMenuOpen(!isToolsMenuOpen)}
               className={cn(
-                "flex items-center justify-center size-12 rounded-full border border-border bg-card/90 hover:bg-muted backdrop-blur-xl shadow-md transition-all duration-200 cursor-pointer",
-                isToolsMenuOpen ? "border-accent text-accent ring-2 ring-accent/20" : "text-foreground hover:border-accent/40 hover:text-accent"
+                "flex items-center justify-center size-12 rounded-full border border-border backdrop-blur-xl shadow-md transition-all duration-200 cursor-pointer",
+                isToolsMenuOpen ? "border-accent text-accent ring-2 ring-accent/20 bg-card/90" : 
+                isHighlightMode ? "bg-amber-500 text-amber-50 border-amber-600 hover:bg-amber-600" : "bg-card/90 text-foreground hover:border-accent/40 hover:text-accent hover:bg-muted"
               )}
               title="Reading Tools"
             >
-              {isToolsMenuOpen ? <X className="size-5" /> : <PenTool className="size-4.5" />}
+              {isToolsMenuOpen ? <X className="size-5" /> : (isHighlightMode ? <Highlighter className="size-5" /> : <PenTool className="size-5" />)}
             </button>
           </div>
         )}
@@ -1998,24 +2070,54 @@ function TafsirContent() {
             transform: 'translate(-50%, -100%)',
           }}
         >
-          <button
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={async (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              const { text, surahNumber, ayahNumber, type } = highlightSelection;
-              const res = await saveUserHighlight(surahNumber, ayahNumber, text, type);
-              if (res) toast.success("Highlight saved.");
-              else toast.error("Failed to save highlight.");
-              setHighlightSelection(null);
-              window.getSelection()?.removeAllRanges();
-            }}
-            className="flex items-center justify-center p-2 rounded-md hover:bg-white/10 text-[#d4d4d4] hover:text-white transition group"
-            title="Highlight"
-          >
-            <Highlighter className="size-4" />
-          </button>
-
+          {highlightSelection.isExisting ? (
+            <button
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const { text, surahNumber, ayahNumber } = highlightSelection;
+                const match = highlights.find(h => h.text === text && h.surahId === surahNumber && h.ayahNumber === ayahNumber);
+                if (match) {
+                  const success = await deleteUserHighlight(match.id);
+                  if (success) {
+                    toast.success("Highlight removed.");
+                    setHighlights(prev => prev.filter(h => h.id !== match.id));
+                  } else {
+                    toast.error("Failed to remove highlight.");
+                  }
+                }
+                setHighlightSelection(null);
+                window.getSelection()?.removeAllRanges();
+              }}
+              className="flex items-center justify-center p-2 rounded-md hover:bg-white/10 text-red-400 hover:text-red-300 transition group"
+              title="Remove Highlight"
+            >
+              <X className="size-4" />
+            </button>
+          ) : (
+            <button
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const { text, surahNumber, ayahNumber, type } = highlightSelection;
+                const res = await saveUserHighlight(surahNumber, ayahNumber, text, type);
+                if (res) {
+                  toast.success("Highlight saved.");
+                  setHighlights(prev => [...prev, res]);
+                } else {
+                  toast.error("Failed to save highlight.");
+                }
+                setHighlightSelection(null);
+                window.getSelection()?.removeAllRanges();
+              }}
+              className="flex items-center justify-center p-2 rounded-md hover:bg-white/10 text-[#d4d4d4] hover:text-white transition group"
+              title="Highlight"
+            >
+              <Highlighter className="size-4" />
+            </button>
+          )}
           <div className="w-[1px] h-4 bg-white/10 mx-1" />
 
           <button
@@ -2056,6 +2158,7 @@ function TafsirCard({
   aiChatContext, 
   scrollToAyah,
   languages = [],
+  highlights = [],
 }: {
   entry: any;
   idx: number;
@@ -2065,6 +2168,7 @@ function TafsirCard({
   aiChatContext: any;
   scrollToAyah: (num: number) => void;
   languages?: Language[];
+  highlights?: UserHighlight[];
 }) {
   const ayahNumber = entry.ayah?.numberInSurah || idx + 1;
   const arabicText = entry.ayah?.text && entry.ayah.text !== "Arabic Text" ? entry.ayah.text : null;
@@ -2259,7 +2363,7 @@ function TafsirCard({
             ayahNumber={ayahNumber}
             surahId={activeSurah}
             currentAuthorId={authorId}
-            languages={languages}
+            languages={languages} highlights={highlights}
           />
         )}
       </div>
