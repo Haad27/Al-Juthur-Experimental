@@ -998,20 +998,43 @@ export default function SurahReaderClient({
     };
     const handleJump = (e: any) => {
       const index = e.detail?.index;
-      if (typeof index === 'number') {
+      if (typeof index === 'number' && index >= 0 && index < totalAyahs) {
         setIsNavigatingAyah(true);
-        setTimeout(() => {
-          virtuosoRef.current?.scrollToIndex({ index, align: 'center', behavior: 'smooth' });
-          setTimeout(() => {
-            const element = document.getElementById(`ayah-${index + 1}`);
+        const targetAyahNum = index + 1;
+        const targetPage = Math.floor(index / PAGE_SIZE);
+
+        const performScroll = () => {
+          virtuosoRef.current?.scrollToIndex({ index, align: 'center', behavior: 'auto' });
+          
+          const checkAndHighlight = (attempts = 0) => {
+            const element = document.getElementById(`ayah-${targetAyahNum}`);
             if (element) {
-              const c = ["dark:bg-[#1c1c1cff]", "bg-[var(--sephia-300)]"];
+              element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              const c = ["ring-2", "ring-accent", "bg-accent/10", "transition-all"];
               element.classList.add(...c);
-              setTimeout(() => element.classList.remove(...c), 2000);
+              setTimeout(() => element.classList.remove(...c), 2500);
+              setIsNavigatingAyah(false);
+            } else if (attempts < 8) {
+              setTimeout(() => checkAndHighlight(attempts + 1), 80);
+            } else {
+              setIsNavigatingAyah(false);
             }
-            setIsNavigatingAyah(false);
-          }, 300);
-        }, 100);
+          };
+
+          setTimeout(() => checkAndHighlight(), 60);
+        };
+
+        if (loadedPagesRef.current.has(targetPage)) {
+          performScroll();
+        } else {
+          fetchPage(targetPage, translationEdition)
+            .then(() => {
+              performScroll();
+            })
+            .catch(() => {
+              setIsNavigatingAyah(false);
+            });
+        }
       }
     };
     const handleOpenTopics = () => setIsTopicModalOpen(true);
@@ -1023,7 +1046,7 @@ export default function SurahReaderClient({
       window.removeEventListener('jumpToAyah', handleJump);
       window.removeEventListener('open-topic-modal', handleOpenTopics);
     }
-  }, []);
+  }, [totalAyahs, fetchPage, translationEdition]);
 
   const [collapsed, setCollapsed] = useState(true);
   const [isNavigatingAyah, setIsNavigatingAyah] = useState(false);
