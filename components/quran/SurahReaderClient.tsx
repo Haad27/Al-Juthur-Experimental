@@ -892,7 +892,9 @@ export default function SurahReaderClient({
   useEffect(() => {
     if (isFirstEditionMount.current) {
       isFirstEditionMount.current = false;
-      return;
+      if (translationEdition === initialEdition) {
+        return;
+      }
     }
 
     const cacheKey = `${surahNumber}:${translationEdition}`;
