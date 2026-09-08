@@ -11,7 +11,7 @@ const SidebarHeader = ({ toggleSidebar, isCollapsed }: SidebarHeaderProps) => {
   return (
     <div
       className={cn(
-        "text-foreground flex w-full h-14 px-3 items-center border-b border-border transition-all duration-300 shrink-0",
+        "text-foreground flex w-full h-14 px-3 items-center border-b border-border transition-all duration-300 hide-on-scroll",
         isCollapsed ? "justify-center" : "justify-between"
       )}
     >

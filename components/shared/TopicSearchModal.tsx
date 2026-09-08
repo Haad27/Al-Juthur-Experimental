@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, useRef } from "react";
-import { Search, X, Compass, BookOpen, Layers, Sparkles, ChevronRight, ArrowRight, BookOpenText } from "lucide-react";
+import { Search, X, Compass, BookOpen, Layers, ChevronRight, ArrowRight, BookOpenText } from "lucide-react";
 import { 
   getSurahThematicOutline, 
   searchSurahTopics, 
@@ -120,27 +120,27 @@ export default function TopicSearchModal({
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-[100000] flex items-center justify-center p-2.5 sm:p-4 md:p-6 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div 
-        className="relative w-full max-w-2xl max-h-[88vh] flex flex-col bg-card text-card-foreground border border-border rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+        className="relative w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] flex flex-col bg-card text-card-foreground border border-border rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-card/90">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-accent/10 border border-accent/25 flex items-center justify-center text-accent">
+        <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-border bg-card/90">
+          <div className="flex items-center gap-2.5 min-w-0 mr-2">
+            <div className="w-8 h-8 rounded-lg bg-accent/10 border border-accent/25 flex items-center justify-center text-accent shrink-0">
               <Compass className="w-4 h-4" />
             </div>
-            <div>
-              <h2 className="text-base sm:text-lg font-semibold tracking-tight text-foreground flex items-center gap-2">
-                <span>Topic &amp; Subject Explorer</span>
-                <span className="text-xs px-2 py-0.5 rounded bg-accent/10 text-accent border border-accent/25 font-medium">
+            <div className="min-w-0">
+              <h2 className="text-sm sm:text-base md:text-lg font-semibold tracking-tight text-foreground flex items-center gap-1.5 sm:gap-2">
+                <span className="truncate">Topic &amp; Subject Explorer</span>
+                <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded bg-accent/10 text-accent border border-accent/25 font-medium shrink-0">
                   {mode === "tafsir" ? "Tafsir Mode" : "Surah Mode"}
                 </span>
               </h2>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[11px] sm:text-xs text-muted-foreground truncate">
                 {surahName} (Surah {surahId}) {authorName ? `· ${authorName}` : ""}
               </p>
             </div>
@@ -148,7 +148,7 @@ export default function TopicSearchModal({
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors shrink-0"
             title="Close (Esc)"
           >
             <X className="w-5 h-5" />
@@ -156,7 +156,7 @@ export default function TopicSearchModal({
         </div>
 
         {/* Search Input Bar */}
-        <div className="px-5 py-3 border-b border-border bg-background/50">
+        <div className="px-4 sm:px-5 py-2.5 sm:py-3 border-b border-border bg-background/50">
           <div className="relative flex items-center">
             <Search className="absolute left-3 w-4 h-4 text-muted-foreground pointer-events-none" />
             <input
@@ -246,7 +246,6 @@ export default function TopicSearchModal({
                 <span className="font-medium text-foreground">
                   Found <strong className="text-accent">{results.length}</strong> {results.length === 1 ? "discussion" : "discussions"} for &ldquo;{query}&rdquo;
                 </span>
-                <span className="text-[11px] text-muted-foreground/80">Sub-millisecond local index</span>
               </div>
 
               {results.length > 0 ? (
@@ -254,7 +253,7 @@ export default function TopicSearchModal({
                   {results.map((res) => (
                     <div
                       key={res.id}
-                      className="p-3.5 rounded-lg border border-border bg-card/80 hover:border-accent/50 hover:bg-accent/5 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                      className="p-3.5 rounded-xl border border-border bg-card/80 hover:border-accent/50 hover:bg-accent/5 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                     >
                       <div className="space-y-1.5 flex-1 pr-2">
                         <div className="flex items-center gap-2 flex-wrap">
@@ -279,7 +278,7 @@ export default function TopicSearchModal({
 
                       <button
                         onClick={() => handleSelectResult(res.ayahNumber, res.toAyah)}
-                        className="self-end sm:self-center shrink-0 flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-accent/15 text-accent hover:bg-accent hover:text-white dark:hover:text-black border border-accent/30 transition-colors"
+                        className="self-stretch sm:self-center shrink-0 flex items-center justify-center gap-1.5 text-xs font-medium px-3.5 py-2 sm:py-1.5 rounded-lg bg-accent/15 text-accent hover:bg-accent hover:text-white dark:hover:text-black border border-accent/30 transition-colors cursor-pointer"
                       >
                         <span>{mode === "tafsir" ? "Jump to Commentary" : "Jump to Ayah"}</span>
                         <ChevronRight className="w-3.5 h-3.5" />
@@ -301,14 +300,10 @@ export default function TopicSearchModal({
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3 border-t border-border bg-card/90 flex items-center justify-between text-xs text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <Sparkles className="w-3.5 h-3.5 text-accent" />
-            <span>100% Deterministic &amp; Zero-Runtime AI</span>
-          </div>
+        <div className="px-4 sm:px-5 py-2.5 sm:py-3 border-t border-border bg-card/90 flex items-center justify-end text-xs text-muted-foreground">
           <button
             onClick={onClose}
-            className="px-3 py-1 rounded border border-border hover:bg-muted text-foreground transition-colors"
+            className="px-4 py-1.5 rounded-lg border border-border hover:bg-muted text-foreground transition-colors font-medium text-xs cursor-pointer"
           >
             Close
           </button>
