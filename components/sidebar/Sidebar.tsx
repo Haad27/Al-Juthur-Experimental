@@ -13,7 +13,7 @@ import Settings from "../Settings";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { motion } from "framer-motion";
-import { BookOpen, SlidersHorizontal, Search } from "lucide-react";
+import { BookOpen, SlidersHorizontal, Search, Compass, ChevronRight } from "lucide-react";
 import { useAudioStore } from "@/lib/stores/audioStore";
 import { isSurahMatch, parseSurahVerseReference } from "@/lib/searchUtils";
 
@@ -179,6 +179,25 @@ const Sidebar = () => {
                 className="pl-9 pr-3 py-2 bg-card/90 dark:bg-card/90 dark:text-foreground border border-border focus:border-accent/50 rounded-xl text-xs placeholder:text-muted-foreground transition-all shadow-inner"
               />
             </div>
+
+            {surahNumber > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent("open-topic-modal"));
+                  }
+                }}
+                className="flex items-center justify-between px-3 py-2 bg-card/60 hover:bg-card border border-border hover:border-accent/40 rounded-xl text-xs font-medium text-foreground transition-all shadow-inner group cursor-pointer"
+                title="Explore Topics & Subjects in this Surah"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <Compass className="w-4 h-4 text-accent shrink-0 group-hover:rotate-45 transition-transform duration-300" />
+                  <span className="truncate">Explore Topics in Surah</span>
+                </div>
+                <ChevronRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-accent group-hover:translate-x-0.5 transition-all shrink-0" />
+              </button>
+            )}
 
             {surahNumber > 0 && surahs.length > 0 && (
               <div className="flex items-center gap-2 bg-card/50 border border-border rounded-xl px-3 py-1.5 shadow-inner">
