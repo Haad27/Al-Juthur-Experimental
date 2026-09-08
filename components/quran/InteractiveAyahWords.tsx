@@ -187,7 +187,7 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
   }, [ayahNumber, tokens]);
 
   return (
-    <span className="inline-flex flex-wrap gap-x-2.5 gap-y-4 sm:gap-y-5 leading-relaxed items-start" dir="rtl">
+    <span className="inline-flex flex-wrap gap-x-2.5 gap-y-2 leading-relaxed" dir="rtl">
       {tokens.map((item, idx) => {
         const { wordIndex: wordIdx, word, isClickable } = item;
 
@@ -195,7 +195,7 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
           return (
             <span 
               key={idx} 
-              className={`inline-flex flex-col items-center justify-start px-0.5 py-0.5 text-muted-foreground select-none min-w-0 -mx-1.5 ${mushafFontClass}`}
+              className={`inline-flex flex-col items-center justify-end px-0.5 py-0.5 text-muted-foreground select-none min-w-0 -mx-1.5 ${mushafFontClass}`}
             >
               <span className="text-[0.85em] leading-none mb-1">{cleanQuranText(word)}</span>
               {showWbw && (
@@ -223,7 +223,7 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
           }}>
             <DialogTrigger asChild>
               <span
-                className="group inline-flex flex-col items-center justify-start cursor-pointer px-1 py-0.5 rounded-lg hover:bg-accent/20 transition-colors duration-150 select-none min-w-[2.5rem]"
+                className="group inline-flex flex-col items-center justify-end cursor-pointer px-1 py-0.5 rounded-lg hover:bg-accent/20 transition-colors duration-150 select-none min-w-[2.5rem]"
                 onClick={(e) => {
                   if (useAudioStore.getState().isPlaying) {
                     e.preventDefault();
@@ -240,7 +240,7 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
                 {showWbw && meaning && (
                   <span 
                     id={`meaning-${ayahNumber}-${wordIdx}`} 
-                    className="text-muted-foreground group-hover:text-foreground font-sans tracking-tight mt-0.5 block whitespace-normal max-w-[4.5rem] leading-tight text-center select-none transition-colors duration-150" 
+                    className="text-muted-foreground group-hover:text-foreground font-sans tracking-tight mt-0.5 block whitespace-nowrap text-center select-none transition-colors duration-150" 
                     dir="ltr"
                     style={{ fontSize: `${0.5 + (wbwFontSize * 0.1)}rem` }}
                   >
