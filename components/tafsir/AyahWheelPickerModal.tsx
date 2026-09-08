@@ -38,6 +38,16 @@ function WheelColumn<T>({
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isProgrammaticScrollRef = useRef(false);
 
+  const selectedIndexRef = useRef(selectedIndex);
+  useEffect(() => {
+    selectedIndexRef.current = selectedIndex;
+  }, [selectedIndex]);
+
+  const itemsLengthRef = useRef(items.length);
+  useEffect(() => {
+    itemsLengthRef.current = items.length;
+  }, [items.length]);
+
   const updateStyles = useCallback(() => {
     if (!containerRef.current) return;
     const currentScrollTop = containerRef.current.scrollTop;
@@ -60,6 +70,61 @@ function WheelColumn<T>({
     // Initial style update
     updateStyles();
   }, [items.length, updateStyles]);
+
+  // Intercept wheel events on mouse and laptop trackpad to step exactly 1 item at a time without jumping
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    let accumulatedDelta = 0;
+    let lastStepTime = 0;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const now = performance.now();
+      accumulatedDelta += e.deltaY;
+
+      // DELTA THRESHOLD: Standard mouse wheel notch produces ~100px.
+      // Trackpad produces continuous small values. 35px threshold triggers 1 step cleanly.
+      const THRESHOLD = 35;
+      const COOLDOWN_MS = 80;
+
+      if (Math.abs(accumulatedDelta) >= THRESHOLD && now - lastStepTime >= COOLDOWN_MS) {
+        const direction = accumulatedDelta > 0 ? 1 : -1;
+        accumulatedDelta = 0;
+        lastStepTime = now;
+
+        const currentIdx = selectedIndexRef.current;
+        const nextIdx = Math.max(0, Math.min(itemsLengthRef.current - 1, currentIdx + direction));
+        if (nextIdx !== currentIdx) {
+          selectedIndexRef.current = nextIdx;
+          onSelect(nextIdx);
+
+          if (containerRef.current) {
+            isProgrammaticScrollRef.current = true;
+            containerRef.current.scrollTo({
+              top: nextIdx * ITEM_HEIGHT,
+              behavior: "smooth",
+            });
+            if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+            scrollTimeoutRef.current = setTimeout(() => {
+              isProgrammaticScrollRef.current = false;
+              updateStyles();
+            }, 200);
+          }
+        }
+      } else if (now - lastStepTime >= 250) {
+        accumulatedDelta = 0;
+      }
+    };
+
+    container.addEventListener("wheel", handleWheel, { passive: false });
+    return () => {
+      container.removeEventListener("wheel", handleWheel);
+    };
+  }, [onSelect, updateStyles]);
 
   useEffect(() => {
     if (containerRef.current) {

@@ -723,43 +723,85 @@ function TafsirContent() {
     currentAyahIndexRef.current = currentAyahIndex;
   }, [currentAyahIndex]);
 
+  const isNavigatingRef = useRef(false);
+  const navTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const scrollToAyah = useCallback((num: number, forceInstant?: boolean) => {
     const targetIdx = Math.max(0, num - 1);
     setCurrentAyahIndex(targetIdx);
 
+    // Lock navigation so rangeChanged doesn't overwrite currentAyahIndex during scroll
+    isNavigatingRef.current = true;
+    if (navTimeoutRef.current) clearTimeout(navTimeoutRef.current);
+    navTimeoutRef.current = setTimeout(() => {
+      isNavigatingRef.current = false;
+    }, 800);
+
+    // 1. Center the tracker button inside the right sidebar WITHOUT scrolling window
+    const trackerEl = document.getElementById(`ayah-tracker-${num}`);
+    if (trackerEl) {
+      const asideEl = trackerEl.closest("aside");
+      if (asideEl) {
+        const asideRect = asideEl.getBoundingClientRect();
+        const elRect = trackerEl.getBoundingClientRect();
+        const relativeTop = elRect.top - asideRect.top + asideEl.scrollTop;
+        asideEl.scrollTo({
+          top: relativeTop - asideEl.clientHeight / 2 + trackerEl.clientHeight / 2,
+          behavior: "smooth",
+        });
+      }
+    }
+
+    if (readingMode === "horizontal") return;
+
+    // 2. Scroll the main reading commentary view
     const distance = Math.abs(targetIdx - currentAyahIndexRef.current);
-    // Smooth scrolling across unmeasured virtual items fails in browsers because
-    // dynamic height updates cancel the ongoing smooth scroll (e.g. stops at verse ~38).
-    // Instant jump ("auto") is required for distant jumps to cleanly mount and measure the target!
     const useSmooth = !forceInstant && distance <= 3;
     const behavior: ScrollBehavior = useSmooth ? "smooth" : "auto";
 
-    virtuosoRef.current?.scrollToIndex({
-      index: targetIdx,
-      align: "start",
-      behavior,
-    });
+    const existingCard = document.getElementById(`ayah-${num}`);
+    if (existingCard) {
+      existingCard.scrollIntoView({ behavior, block: "start" });
+    } else {
+      virtuosoRef.current?.scrollToIndex({
+        index: targetIdx,
+        align: "start",
+        behavior: "auto",
+      });
 
+      let attempts = 0;
+      const maxAttempts = 16;
+      const ensureCardAligned = () => {
+        attempts++;
+        const cardEl = document.getElementById(`ayah-${num}`);
+        if (cardEl) {
+          cardEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else if (attempts < maxAttempts) {
+          setTimeout(ensureCardAligned, 50);
+        }
+      };
+      requestAnimationFrame(ensureCardAligned);
+    }
+  }, [readingMode]);
+
+  // Keep the right sidebar tracker centered on the current ayah during manual scrolling
+  useEffect(() => {
+    if (isNavigatingRef.current) return;
+    const num = currentAyahIndex + 1;
     const trackerEl = document.getElementById(`ayah-tracker-${num}`);
     if (trackerEl) {
-      trackerEl.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-
-    // Ensure the target card is scrolled exactly into view once Virtuoso mounts it into the DOM.
-    // CSS scroll-mt-24 ensures it aligns with comfortable breathing room below sticky top headers.
-    let attempts = 0;
-    const maxAttempts = 8;
-    const ensureCardAligned = () => {
-      attempts++;
-      const cardEl = document.getElementById(`ayah-${num}`);
-      if (cardEl) {
-        cardEl.scrollIntoView({ behavior, block: "start" });
-      } else if (attempts < maxAttempts) {
-        setTimeout(ensureCardAligned, 50);
+      const asideEl = trackerEl.closest("aside");
+      if (asideEl) {
+        const asideRect = asideEl.getBoundingClientRect();
+        const elRect = trackerEl.getBoundingClientRect();
+        const relativeTop = elRect.top - asideRect.top + asideEl.scrollTop;
+        asideEl.scrollTo({
+          top: relativeTop - asideEl.clientHeight / 2 + trackerEl.clientHeight / 2,
+          behavior: "smooth",
+        });
       }
-    };
-    ensureCardAligned();
-  }, []);
+    }
+  }, [currentAyahIndex]);
 
   const handleSelectTopicAyahInTafsir = useCallback((ayahNum: number) => {
     scrollToAyah(ayahNum, false);
@@ -813,7 +855,10 @@ function TafsirContent() {
         window.scrollTo({ top: 0, behavior: "smooth" });
         const trackerEl = document.getElementById(`ayah-tracker-1`);
         if (trackerEl) {
-          trackerEl.scrollIntoView({ behavior: "smooth", block: "center" });
+          const asideEl = trackerEl.closest("aside");
+          if (asideEl) {
+            asideEl.scrollTo({ top: 0, behavior: "smooth" });
+          }
         }
       }
     }
@@ -825,7 +870,16 @@ function TafsirContent() {
       const timer = setTimeout(() => {
         const el = document.getElementById(`tafsir-surah-${activeSurah}`);
         if (el) {
-          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          const asideEl = el.closest("aside");
+          if (asideEl) {
+            const asideRect = asideEl.getBoundingClientRect();
+            const elRect = el.getBoundingClientRect();
+            const relativeTop = elRect.top - asideRect.top + asideEl.scrollTop;
+            asideEl.scrollTo({
+              top: relativeTop - asideEl.clientHeight / 2 + el.clientHeight / 2,
+              behavior: "smooth",
+            });
+          }
         }
       }, 150);
       return () => clearTimeout(timer);
@@ -1328,9 +1382,11 @@ function TafsirContent() {
                   useWindowScroll
                   totalCount={currentSurahMeta.numberOfAyahs}
                   defaultItemHeight={600}
-                  overscan={600}
+                  overscan={{ main: 1000, reverse: 600 }}
+                  increaseViewportBy={{ top: 600, bottom: 600 }}
                   initialTopMostItemIndex={parsedUrlAyah && parsedUrlAyah > 0 ? Math.max(0, parsedUrlAyah - 1) : 0}
                   rangeChanged={({ startIndex }) => {
+                    if (isNavigatingRef.current) return;
                     if (typeof startIndex === "number" && startIndex >= 0) {
                       setCurrentAyahIndex(startIndex);
                     }
