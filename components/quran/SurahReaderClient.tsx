@@ -237,17 +237,21 @@ const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRAN
             {surah.revelationType}
           </span>
         )}
-        {onOpenTopics && (
+      </div>
+
+      {onOpenTopics && (
+        <div className="flex items-center justify-center px-4">
           <button
             onClick={onOpenTopics}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-border/80 bg-card hover:bg-muted text-xs font-medium text-foreground transition-all shrink-0 cursor-pointer ml-1"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-border/80 bg-card hover:bg-muted text-xs font-medium text-foreground transition-all shrink-0 cursor-pointer shadow-xs hover:border-accent/40"
             title="Explore Topics in this Surah"
           >
             <Compass className="size-3.5 text-accent" />
             <span>Topics</span>
           </button>
-        )}
-      </div>
+        </div>
+      )}
+
       <div className="flex items-center gap-5">
         <nav className="hidden lg:flex items-center gap-6 text-muted-foreground text-sm">
           <Link href="/home" className="hover:text-foreground transition">Home</Link>
@@ -1010,11 +1014,14 @@ export default function SurahReaderClient({
         }, 100);
       }
     };
+    const handleOpenTopics = () => setIsTopicModalOpen(true);
     window.addEventListener('scrollToAyah', handleScroll);
     window.addEventListener('jumpToAyah', handleJump);
+    window.addEventListener('open-topic-modal', handleOpenTopics);
     return () => {
       window.removeEventListener('scrollToAyah', handleScroll);
       window.removeEventListener('jumpToAyah', handleJump);
+      window.removeEventListener('open-topic-modal', handleOpenTopics);
     }
   }, []);
 

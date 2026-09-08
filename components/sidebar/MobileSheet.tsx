@@ -26,7 +26,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import useScrollDirection from "@/hooks/useScrollDirection";
 import { motion } from "framer-motion";
-import { Search, SlidersHorizontal, ChevronRight, ArrowLeft } from "lucide-react";
+import { Search, SlidersHorizontal, ChevronRight, ArrowLeft, Compass } from "lucide-react";
 import { SURAHS_DATA } from "@/lib/surahsData";
 import { useAudioStore } from "@/lib/stores/audioStore";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
@@ -118,7 +118,20 @@ const MobileSheet = ({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof window !== "undefined") {
+                        window.dispatchEvent(new CustomEvent("open-topic-modal"));
+                      }
+                    }}
+                    className="flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-border/80 bg-card hover:bg-muted text-[11px] font-medium text-foreground transition-all shrink-0 cursor-pointer shadow-xs"
+                    title="Explore Topics in this Surah"
+                  >
+                    <Compass className="size-3 text-accent" />
+                    <span>Topics</span>
+                  </button>
                   {currentSurahObj?.revelationType && (
                     <span className="px-2 py-0.5 rounded-full bg-accent/10 border border-accent/30 text-accent text-[10px] font-semibold tracking-wider uppercase">
                       {currentSurahObj.revelationType}
