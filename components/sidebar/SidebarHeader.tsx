@@ -27,20 +27,6 @@ const SidebarHeader = ({ toggleSidebar, isCollapsed }: SidebarHeaderProps) => {
               Al-Juthur
             </span>
           </Link>
-          <div className="flex items-center gap-2">
-            <Link
-              href="/lexicon"
-              className="text-xs font-medium px-2.5 py-1 rounded-full bg-muted text-foreground border border-border hover:bg-card transition-all"
-            >
-              Lexicon
-            </Link>
-            <Link
-              href="/tafsir"
-              className="text-xs font-medium px-2.5 py-1 rounded-full bg-muted text-foreground border border-border hover:bg-card transition-all"
-            >
-              Tafsir
-            </Link>
-          </div>
         </div>
       )}
       <div className="flex items-center gap-1.5 shrink-0">

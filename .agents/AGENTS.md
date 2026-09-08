@@ -1,8 +1,8 @@
 # Rules
 
 ## Git & Milestones
-- After achieving a major feature, a major fix, or a big milestone, notify the user with a summary and ask them to push the code to their GitHub repository to ensure changes are continuously saved. Do NOT ask them to push on every minor change.
-- When asking the user to push to GitHub, always provide the exact git add command specifying the exact files in which changes were made (e.g., `git add <file1> <file2> ...`), git commit (with a clear description), and git push commands so they can easily copy and paste them.
+- **Automatic GitHub Push**: Whenever any change, feature, bugfix, or milestone is completed and verified, automatically stage, commit, and push the changes directly to GitHub (`git add <files>`, `git commit -m "..."`, and `git push origin main`).
+- Provide the user with a concise summary of the changes made and confirm that they have been committed and pushed to the repository.
 
 ## UI/UX Design System & Architectural Rules
 

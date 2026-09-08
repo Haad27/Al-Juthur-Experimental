@@ -23,7 +23,6 @@ import {
   Play,
   Save,
   ScrollText,
-  BookOpen,
   Library,
   MessageSquareText,
   Bot,
@@ -238,6 +237,16 @@ const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRAN
             {surah.revelationType}
           </span>
         )}
+        {onOpenTopics && (
+          <button
+            onClick={onOpenTopics}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-border/80 bg-card hover:bg-muted text-xs font-medium text-foreground transition-all shrink-0 cursor-pointer ml-1"
+            title="Explore Topics in this Surah"
+          >
+            <Compass className="size-3.5 text-accent" />
+            <span>Topics</span>
+          </button>
+        )}
       </div>
       <div className="flex items-center gap-5">
         <nav className="hidden lg:flex items-center gap-6 text-muted-foreground text-sm">
@@ -247,16 +256,6 @@ const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRAN
           <Link href="/ai" className="hover:text-foreground transition">Translator</Link>
           <Link href="/rag" className="hover:text-foreground transition">AI Scholar</Link>
         </nav>
-        {onOpenTopics && (
-          <button
-            onClick={onOpenTopics}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border bg-card hover:bg-muted text-xs font-medium text-foreground transition-all shrink-0 cursor-pointer"
-            title="Explore Topics in this Surah"
-          >
-            <Compass className="size-3.5 text-accent" />
-            <span className="hidden sm:inline">Topics</span>
-          </button>
-        )}
         <ThemeToggleButton />
       </div>
     </div>
@@ -1297,17 +1296,6 @@ export default function SurahReaderClient({
                 </span>
               </button>
             )}
-
-            <button
-              onClick={() => setIsTopicModalOpen(true)}
-              className="group relative inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-accent/10 border border-accent/25 hover:bg-accent/20 cursor-pointer transition-colors"
-              title="Search topics & subjects in this Surah"
-            >
-              <BookOpen size={14} className="text-accent relative z-10" />
-              <span className="text-[11px] md:text-[12px] font-medium tracking-wide text-accent uppercase relative z-10">
-                Explore Topics
-              </span>
-            </button>
           </div>
 
           {surahInfo && (
