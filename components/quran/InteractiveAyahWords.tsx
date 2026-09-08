@@ -250,26 +250,28 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
               </span>
             </DialogTrigger>
             <DialogContent
-              className="max-w-[95vw] sm:max-w-xl md:max-w-2xl lg:max-w-3xl w-full max-h-[90vh] overflow-y-auto overflow-x-hidden bg-popover border border-border text-popover-foreground p-5 rounded-2xl shadow-lg flex flex-col custom-scrollbar z-[100]"
+              className="max-w-[92vw] sm:max-w-lg md:max-w-xl w-full max-h-[85vh] overflow-y-auto overflow-x-hidden bg-card/95 backdrop-blur-md border border-border/60 text-card-foreground p-5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col custom-scrollbar z-[100]"
             >
               <DialogHeader className="sr-only">
                 <DialogTitle>Root Word Analysis</DialogTitle>
               </DialogHeader>
               {loadingIndex === wordIdx && !data ? (
-                <div className="flex items-center justify-center py-6 gap-2 text-muted-foreground">
+                <div className="flex items-center justify-center py-8 gap-2.5 text-muted-foreground">
                   <Loader2 className="w-5 h-5 animate-spin text-accent" />
-                  <span className="text-sm">Analyzing root & morphology...</span>
+                  <span className="text-xs sm:text-sm">Analyzing root & morphology...</span>
                 </div>
               ) : data ? (
-                <div className="space-y-3.5">
-                  {/* Header: Clicked Word + Location */}
-                  <div className="flex items-center justify-between border-b border-border pb-2.5 pr-8">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-accent bg-accent/10 border border-accent/25 px-2.5 py-0.5 rounded-full">
+                <div className="space-y-4">
+                  {/* Header: Clicked Word + Location with clean clearance for close button */}
+                  <div className="flex items-center justify-between border-b border-border/50 pb-3 pr-10">
+                    <span className="text-[11px] font-mono font-bold text-accent bg-accent/10 border border-accent/25 px-2.5 py-1 rounded-full">
                       {surahNumber}:{ayahNumber}:{wordIdx}
                     </span>
-                    <span className="font-arabic text-2xl font-bold text-foreground">
-                      {displayWord}
-                    </span>
+                    <span 
+                      className="font-arabic text-2xl sm:text-3xl font-bold text-arabic leading-none"
+                      dir="rtl"
+                      dangerouslySetInnerHTML={{ __html: displayWord }}
+                    />
                   </div>
 
                   {/* Morphology details */}
@@ -285,25 +287,25 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
 
                     return (
                       <>
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                          <div className="p-2.5 rounded-xl bg-card border border-border">
-                            <span className="text-muted-foreground text-[11px] block mb-0.5">Root Word</span>
-                            <span className={`text-base font-bold text-accent ${isMuqattaat ? 'font-sans text-sm' : 'font-arabic'}`}>
+                        <div className="grid grid-cols-2 gap-2.5 text-xs">
+                          <div className="p-3 rounded-xl bg-muted/30 border border-border/40">
+                            <span className="text-muted-foreground text-[11px] font-medium block mb-1">Root Word</span>
+                            <span className={`text-base font-bold text-accent ${isMuqattaat ? 'font-sans text-xs' : 'font-arabic'}`}>
                               {isMuqattaat ? 'None' : (data.morphology.root || 'N/A')}
                             </span>
                           </div>
-                          <div className="p-2.5 rounded-xl bg-card border border-border">
-                            <span className="text-muted-foreground text-[11px] block mb-0.5">Sarf (Morphology)</span>
-                            <span className="font-arabic text-xs font-medium text-foreground leading-relaxed line-clamp-3">
+                          <div className="p-3 rounded-xl bg-muted/30 border border-border/40">
+                            <span className="text-muted-foreground text-[11px] font-medium block mb-1">Sarf (Morphology)</span>
+                            <span className="font-arabic text-xs font-medium text-foreground leading-relaxed line-clamp-2">
                               {isMuqattaat ? 'Quranic Initials (حروف مقطعة)' : (data.morphology.stem || 'N/A')}
                             </span>
                           </div>
                         </div>
 
                         {data.morphology.irab && !isMuqattaat && (
-                          <div className="text-xs text-reading bg-accent/10 p-2.5 rounded-xl border border-accent/25 leading-relaxed font-arabic text-right dir-rtl">
-                            <strong className="text-accent font-semibold block mb-1 font-sans text-left dir-ltr">
-                              I'rab (Grammar):
+                          <div className="text-xs text-reading bg-accent/5 p-3 rounded-xl border border-accent/20 leading-relaxed font-arabic text-right dir-rtl">
+                            <strong className="text-accent font-semibold block mb-1 font-sans text-left dir-ltr text-[11px] uppercase tracking-wider">
+                              I&apos;rab (Grammar):
                             </strong>
                             {data.morphology.irab}
                           </div>
@@ -320,35 +322,35 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
                             </p>
                           </div>
                         ) : data.aiSummary ? (
-                          <div className="text-xs text-reading bg-card p-3 rounded-xl border border-border leading-relaxed space-y-3">
+                          <div className="text-xs sm:text-[13px] text-reading bg-muted/20 p-4 rounded-xl border border-border/40 leading-relaxed space-y-3.5">
                             <div>
-                              <strong className="text-accent font-semibold block mb-1">
-                                Root Meaning:
-                              </strong>
-                              <div className="prose prose-sm dark:prose-invert max-w-none text-reading prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-foreground prose-em:text-muted-foreground" dangerouslySetInnerHTML={{ __html: formatArabicWithIndoPak(data.aiSummary.root_meaning_html) }} />
+                              <span className="text-[11px] font-bold text-accent tracking-wider uppercase block mb-1.5">
+                                Root Meaning
+                              </span>
+                              <div className="prose prose-sm dark:prose-invert max-w-none text-reading leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-foreground prose-em:text-muted-foreground" dangerouslySetInnerHTML={{ __html: formatArabicWithIndoPak(data.aiSummary.root_meaning_html) }} />
                             </div>
-                            <div className="border-t border-border pt-2.5">
-                              <strong className="text-accent font-semibold block mb-1">
-                                Quranic Usage:
-                              </strong>
-                              <div className="prose prose-sm dark:prose-invert max-w-none text-reading prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-foreground prose-em:text-muted-foreground" dangerouslySetInnerHTML={{ __html: formatArabicWithIndoPak(data.aiSummary.quranic_usage_html) }} />
+                            <div className="border-t border-border/40 pt-3">
+                              <span className="text-[11px] font-bold text-accent tracking-wider uppercase block mb-1.5">
+                                Quranic Usage
+                              </span>
+                              <div className="prose prose-sm dark:prose-invert max-w-none text-reading leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-foreground prose-em:text-muted-foreground" dangerouslySetInnerHTML={{ __html: formatArabicWithIndoPak(data.aiSummary.quranic_usage_html) }} />
                             </div>
                           </div>
                         ) : data.rootSummary ? (
-                          <div className="text-xs text-reading bg-card p-3 rounded-xl border border-border leading-relaxed">
-                            <strong className="text-accent font-semibold block mb-1">
-                              Lane&apos;s Lexicon Summary:
-                            </strong>
+                          <div className="text-xs sm:text-[13px] text-reading bg-muted/20 p-4 rounded-xl border border-border/40 leading-relaxed">
+                            <span className="text-[11px] font-bold text-accent tracking-wider uppercase block mb-1.5">
+                              Lane&apos;s Lexicon Summary
+                            </span>
                             {data.rootSummary}
                           </div>
                         ) : null}
 
                         {/* Deep Lexicon CTA buttons (hidden for Muqatta'at) */}
                         {!isMuqattaat && data.rootQuery ? (
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5 mt-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5 pt-1">
                             <Link
                               href={`/lexicon?root=${encodeURIComponent(data.rootQuery)}`}
-                              className="w-full px-3 py-2 rounded-xl bg-accent text-accent-foreground text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm hover:opacity-90 transition-all text-center"
+                              className="w-full px-3.5 py-2.5 rounded-xl bg-accent hover:bg-accent/90 text-accent-foreground text-xs font-semibold flex items-center justify-center gap-1.5 transition-all text-center shadow-sm"
                             >
                               <BookOpen className="w-3.5 h-3.5 shrink-0" />
                               <span className="truncate">Explore Root [{data.rootQuery}] in Lexicons</span>
@@ -357,7 +359,7 @@ export const InteractiveAyahWords: React.FC<InteractiveAyahWordsProps> = React.m
                             
                             <Link
                               href={`/rag?mode=lexicon&q=${encodeURIComponent(`What does the root ${data.rootQuery} mean?`)}`}
-                              className="w-full px-3 py-2 rounded-xl bg-card hover:bg-muted border border-border text-foreground text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-all text-center"
+                              className="w-full px-3.5 py-2.5 rounded-xl bg-accent/10 hover:bg-accent/15 border border-accent/25 text-accent text-xs font-semibold flex items-center justify-center gap-1.5 transition-all text-center"
                             >
                               <Bot className="w-3.5 h-3.5 text-accent shrink-0" />
                               <span className="truncate">Ask our Lexicon RAG</span>

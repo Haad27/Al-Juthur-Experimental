@@ -53,7 +53,60 @@ const STORAGE_KEYS = {
   SAVED_TAFSIRS: "saved-tafsirs",
   SAVED_SCHOLAR_ANSWERS: "saved-scholar-answers",
   READING_HISTORY: "aljuthur-reading-history",
+  RECENT_QURAN: "recent",
 };
+
+export interface RecentQuranReading {
+  number: number;
+  name: string;
+  englishName: string;
+  englishNameTranslation: string;
+  numberOfAyahs: number;
+  revelationType: string;
+  lastReadAyah?: number;
+  ayah?: number;
+  updatedAt?: number;
+}
+
+export function getRecentQuranReading(): RecentQuranReading | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.RECENT_QURAN);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (data && typeof data === "object" && data.number) {
+      return data;
+    }
+    return null;
+  } catch (e) {
+    console.error("Error reading recent quran reading:", e);
+    return null;
+  }
+}
+
+export function setRecentQuranReading(
+  surahData: Partial<RecentQuranReading> & { number: number; lastReadAyah: number }
+): void {
+  if (typeof window === "undefined") return;
+  try {
+    const existing = getRecentQuranReading();
+    const payload: RecentQuranReading = {
+      name: "",
+      englishName: "",
+      englishNameTranslation: "",
+      numberOfAyahs: 0,
+      revelationType: "",
+      ...existing,
+      ...surahData,
+      ayah: surahData.lastReadAyah,
+      lastReadAyah: surahData.lastReadAyah,
+      updatedAt: Date.now(),
+    };
+    localStorage.setItem(STORAGE_KEYS.RECENT_QURAN, JSON.stringify(payload));
+  } catch (e) {
+    console.error("Error saving recent quran reading:", e);
+  }
+}
 
 // -------------------------------------------------------------
 // 1. Last Read Tracking

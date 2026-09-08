@@ -175,9 +175,20 @@ export default async function SurahPage({
     }
   }
 
-  // 6. Paginated loading: send first PAGE_SIZE (20) ayahs to the client
+  // 6. Paginated loading: send first PAGE_SIZE (20) ayahs to the client.
+  // If an ayahParam is provided that falls outside page 0, also pre-populate that page
+  // so the client can mount directly at the target ayah with 0ms network latency.
   const PAGE_SIZE = 20;
-  const initialAyahs = combinedAyahs.slice(0, PAGE_SIZE);
+  let initialAyahs = combinedAyahs.slice(0, PAGE_SIZE);
+  if (ayahParam) {
+    const targetAyahNum = Number(ayahParam);
+    if (!isNaN(targetAyahNum) && targetAyahNum > PAGE_SIZE && targetAyahNum <= combinedAyahs.length) {
+      const targetPage = Math.floor((targetAyahNum - 1) / PAGE_SIZE);
+      const targetPageStart = targetPage * PAGE_SIZE;
+      const targetPageAyahs = combinedAyahs.slice(targetPageStart, targetPageStart + PAGE_SIZE);
+      initialAyahs = [...initialAyahs, ...targetPageAyahs];
+    }
+  }
   const allArabicTexts = localAyahs.map((a) => stripBismillahPrefix(a.text, surahNumber, a.numberInSurah));
 
   return (

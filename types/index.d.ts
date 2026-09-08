@@ -6,6 +6,8 @@ interface Surah {
   englishNameTranslation: string;
   numberOfAyahs: number;
   revelationType: string;
+  lastReadAyah?: number;
+  ayah?: number;
 }
 
 interface Ayah {

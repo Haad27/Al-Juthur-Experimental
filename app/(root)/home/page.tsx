@@ -11,11 +11,12 @@ import AppHeader from "@/components/layout/AppHeader";
 import MenuIcon from "@/components/svg/icons/MenuIcon";
 import { toast } from "sonner";
 import { isSurahMatch, parseSurahVerseReference } from "@/lib/searchUtils";
+import { getRecentQuranReading, RecentQuranReading } from "@/lib/readerStorage";
 
 const SurahsList = () => {
   const router = useRouter();
   const [surahs, setSurahs] = useState<Surah[]>([]);
-  const [recent, setRecent] = useState<Surah>();
+  const [recent, setRecent] = useState<RecentQuranReading | null>(null);
   const [deletedAyah, setDeletedAyah] = useState<Ayah>();
   const [savedAyahs, setSavedAyahs] = useState<Ayah[]>();
   const [isOpen, setIsOpen] = useState(false);
@@ -40,21 +41,41 @@ const SurahsList = () => {
   const [amount, setAmount] = useState(21);
   const { getSurahNumber } = useSurahNavigation();
 
-  useEffect(() => {
-    const func = async () => {
-      const resA = await fetchAllSurahs();
-      const resB = localStorage.getItem("recent");
+  const refreshRecent = React.useCallback(() => {
+    const r = getRecentQuranReading();
+    setRecent(r);
+    try {
       const resC = localStorage.getItem("saved-ayahs");
-      setSurahs(resA.data);
-
-      const parsedRecent = JSON.parse(resB ?? "[]");
-      const parsedSaved = JSON.parse(resC ?? "[]");
-
-      setRecent(parsedRecent);
-      setSavedAyahs(parsedSaved);
-    };
-    func();
+      if (resC) {
+        setSavedAyahs(JSON.parse(resC));
+      }
+    } catch {}
   }, []);
+
+  useEffect(() => {
+    fetchAllSurahs().then((resA) => {
+      setSurahs(resA.data);
+    });
+    refreshRecent();
+
+    // Critical: Listen for BFCache restore (when user hits browser Back button), tab focus, and storage events
+    window.addEventListener("pageshow", refreshRecent);
+    window.addEventListener("focus", refreshRecent);
+    window.addEventListener("storage", refreshRecent);
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        refreshRecent();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      window.removeEventListener("pageshow", refreshRecent);
+      window.removeEventListener("focus", refreshRecent);
+      window.removeEventListener("storage", refreshRecent);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [refreshRecent]);
 
   const handleRemoveSavedAyah = (ayah: Ayah) => {
     const saved = savedAyahs ?? [];
@@ -112,26 +133,40 @@ const SurahsList = () => {
           </button>
         </section>
 
-        {recent?.number && (
-          <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-foreground">Continue reading</h2>
-            <Link href={`/surah/${recent?.number}`} className="block max-w-sm">
-              <div className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3 transition-colors hover:border-accent/40">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground">
-                    {recent?.number}. {recent?.englishName}
-                  </p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {recent?.englishNameTranslation}
+        {recent?.number && (() => {
+          const lastAyah = recent.lastReadAyah || recent.ayah;
+          const targetUrl = lastAyah && lastAyah > 1 
+            ? `/surah/${recent.number}?ayah=${lastAyah}` 
+            : `/surah/${recent.number}`;
+
+          return (
+            <section className="space-y-3">
+              <h2 className="text-lg font-semibold text-foreground">Continue reading</h2>
+              <Link href={targetUrl} className="block max-w-sm group">
+                <div className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3 transition-colors hover:border-accent/40">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-semibold text-foreground">
+                        {recent?.number}. {recent?.englishName}
+                      </p>
+                      {lastAyah && lastAyah > 1 && (
+                        <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-accent/15 text-accent border border-accent/25">
+                          Ayah {lastAyah}
+                        </span>
+                      )}
+                    </div>
+                    <p className="truncate text-xs text-muted-foreground mt-0.5">
+                      {recent?.englishNameTranslation}
+                    </p>
+                  </div>
+                  <p className={`${amiriquran.className} text-xl text-arabic shrink-0 mr-1`}>
+                    {recent?.name}
                   </p>
                 </div>
-                <p className={`${amiriquran.className} text-xl text-arabic shrink-0`}>
-                  {recent?.name}
-                </p>
-              </div>
-            </Link>
-          </section>
-        )}
+              </Link>
+            </section>
+          );
+        })()}
 
         <section className="space-y-5 scroll-mt-24" id="start_reading">
           <div className="flex flex-col justify-between gap-3 md:flex-row md:items-end">

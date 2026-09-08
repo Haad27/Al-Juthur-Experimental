@@ -48,6 +48,7 @@ import { getTranslationFontStyle } from "@/lib/fontsConfig";
 import ThemeToggleButton from "@/components/ThemeToggleButton";
 import AlJuthurLoadingProgress from "@/components/shared/AlJuthurLoadingProgress";
 import AyahSkeleton from "@/components/quran/AyahSkeleton";
+import { setRecentQuranReading } from "@/lib/readerStorage";
 
 interface AyahProps {
   number: number;
@@ -773,8 +774,23 @@ export default function SurahReaderClient({
   const [showSurahContext, setShowSurahContext] = useState(false);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const router = useRouter();
-  const [visibleAyahNumber, setVisibleAyahNumber] = useState<number>(1);
-  const visibleAyahRef = useRef<number>(1);
+  const targetAyahFromParam = useMemo(() => {
+    if (ayahParam) {
+      const num = Number(ayahParam);
+      if (!isNaN(num) && num >= 1 && num <= totalAyahs) return num;
+    }
+    return 1;
+  }, [ayahParam, totalAyahs]);
+
+  const [visibleAyahNumber, setVisibleAyahNumber] = useState<number>(targetAyahFromParam);
+  const visibleAyahRef = useRef<number>(targetAyahFromParam);
+
+  useEffect(() => {
+    if (targetAyahFromParam > 1) {
+      visibleAyahRef.current = targetAyahFromParam;
+      setVisibleAyahNumber(targetAyahFromParam);
+    }
+  }, [targetAyahFromParam]);
   const [aiChatContext, setAiChatContext] = useState<{ surah: number; ayah: number } | null>(null);
   const [tafsirWheelContext, setTafsirWheelContext] = useState<{ surah: number; ayah: number } | null>(null);
   const [isTopicModalOpen, setIsTopicModalOpen] = useState<boolean>(false);
@@ -784,10 +800,25 @@ export default function SurahReaderClient({
   }, [translationEdition]);
 
   // ─── Paginated loading state & Instant Translation Cache ─────────────────────
-  // Keyed by 0-based index. Starts pre-populated with the server-rendered first page.
+  // Pre-calculate initial loaded pages from SSR initialAyahs
+  const initialLoadedPages = useMemo(() => {
+    const pages = new Set<number>([0]);
+    if (ayahParam) {
+      const targetAyahNum = Number(ayahParam);
+      if (!isNaN(targetAyahNum) && targetAyahNum > 0 && targetAyahNum <= totalAyahs) {
+        pages.add(Math.floor((targetAyahNum - 1) / PAGE_SIZE));
+      }
+    }
+    return pages;
+  }, [ayahParam, totalAyahs]);
+
+  // Keyed by 0-based index. Starts pre-populated with the server-rendered pages.
   const [loadedAyahs, setLoadedAyahs] = useState<Record<number, AyahProps>>(() => {
     const map: Record<number, AyahProps> = {};
-    initialAyahs.forEach((a, i) => { map[i] = a; });
+    initialAyahs.forEach((a, i) => {
+      const idx = typeof a.numberInSurah === "number" && a.numberInSurah > 0 ? a.numberInSurah - 1 : i;
+      map[idx] = a;
+    });
     return map;
   });
 
@@ -797,14 +828,18 @@ export default function SurahReaderClient({
   const translationCacheRef = useRef<Map<string, { ayahs: Record<number, AyahProps>; pages: Set<number> }>>(
     new Map([
       [`${surah?.number || 1}:${initialEdition}`, {
-        ayahs: initialAyahs.reduce((acc, a, i) => { acc[i] = a; return acc; }, {} as Record<number, AyahProps>),
-        pages: new Set([0])
+        ayahs: initialAyahs.reduce((acc, a, i) => {
+          const idx = typeof a.numberInSurah === "number" && a.numberInSurah > 0 ? a.numberInSurah - 1 : i;
+          acc[idx] = a;
+          return acc;
+        }, {} as Record<number, AyahProps>),
+        pages: new Set(initialLoadedPages)
       }]
     ])
   );
 
   // Which page numbers are already loaded / currently in-flight (avoid duplicate fetches)
-  const loadedPagesRef = useRef<Set<number>>(new Set([0]));
+  const loadedPagesRef = useRef<Set<number>>(new Set(initialLoadedPages));
   const loadingPagesRef = useRef<Set<number>>(new Set());
 
   const surahNumber = surah?.number || 1;
@@ -1000,35 +1035,172 @@ export default function SurahReaderClient({
     return () => clearAudio();
   }, [surahNumber]);
 
-  useEffect(() => {
-    if (surah) {
-      localStorage.setItem("recent", JSON.stringify(surah));
-    }
+  // Save current reading position to localStorage["recent"]
+  const saveRecentPosition = useCallback((ayahNum: number) => {
+    if (!surah || !surah.number) return;
+    setRecentQuranReading({
+      ...surah,
+      lastReadAyah: ayahNum,
+    });
   }, [surah]);
+
+  const debouncedSaveRecent = useMemo(() => {
+    let timer: NodeJS.Timeout | null = null;
+    const fn = (ayahNum: number) => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        saveRecentPosition(ayahNum);
+      }, 300);
+    };
+    fn.cancel = () => {
+      if (timer) clearTimeout(timer);
+    };
+    return fn;
+  }, [saveRecentPosition]);
+
+  // Accurately detect the ayah currently in the user's reading line (~35% of viewport)
+  const getVisibleAyahInViewport = useCallback((): number | null => {
+    if (typeof window === "undefined" || typeof document === "undefined") return null;
+    const ayahElements = document.querySelectorAll<HTMLElement>('[id^="ayah-"]');
+    if (!ayahElements || ayahElements.length === 0) return null;
+
+    const readingLine = window.innerHeight * 0.35;
+    let closestAyah: number | null = null;
+    let minDistance = Infinity;
+
+    for (let i = 0; i < ayahElements.length; i++) {
+      const el = ayahElements[i];
+      const rect = el.getBoundingClientRect();
+      const numStr = el.id.replace("ayah-", "");
+      const ayahNum = parseInt(numStr, 10);
+      if (isNaN(ayahNum)) continue;
+
+      // Direct hit: the ayah element spans across the reading line
+      if (rect.top <= readingLine && rect.bottom >= readingLine) {
+        return ayahNum;
+      }
+
+      // Check distance for elements visible or nearest to reading line
+      if (rect.bottom > 0 && rect.top < window.innerHeight) {
+        const distance = Math.abs(rect.top - readingLine);
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestAyah = ayahNum;
+        }
+      }
+    }
+
+    return closestAyah;
+  }, []);
+
+  // Real-time viewport scroll tracking to detect exact ayah in reader view
+  useEffect(() => {
+    let rAF: number | null = null;
+
+    const handleScroll = () => {
+      if (isNavigatingAyah) return;
+      if (rAF) return;
+      rAF = requestAnimationFrame(() => {
+        rAF = null;
+        const currentAyah = getVisibleAyahInViewport();
+        if (currentAyah && currentAyah !== visibleAyahRef.current) {
+          visibleAyahRef.current = currentAyah;
+          setVisibleAyahNumber(currentAyah);
+          debouncedSaveRecent(currentAyah);
+        }
+      });
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (rAF) cancelAnimationFrame(rAF);
+    };
+  }, [getVisibleAyahInViewport, debouncedSaveRecent, isNavigatingAyah]);
+
+  // Record reading position on mount
+  useEffect(() => {
+    if (surah && surah.number) {
+      if (ayahParam) {
+        const targetAyah = Number(ayahParam);
+        if (!isNaN(targetAyah) && targetAyah >= 1 && targetAyah <= totalAyahs) {
+          saveRecentPosition(targetAyah);
+        }
+      } else {
+        saveRecentPosition(1);
+      }
+    }
+  }, [surah, ayahParam, totalAyahs, saveRecentPosition]);
+
+  // Flush reading position before unload, pagehide (BFCache navigation), or unmount
+  useEffect(() => {
+    const handleFlush = () => {
+      const activeAyah = getVisibleAyahInViewport() || visibleAyahRef.current;
+      if (activeAyah) {
+        saveRecentPosition(activeAyah);
+      }
+    };
+
+    window.addEventListener("beforeunload", handleFlush);
+    window.addEventListener("pagehide", handleFlush);
+    return () => {
+      window.removeEventListener("beforeunload", handleFlush);
+      window.removeEventListener("pagehide", handleFlush);
+      debouncedSaveRecent.cancel();
+      handleFlush();
+    };
+  }, [getVisibleAyahInViewport, saveRecentPosition, debouncedSaveRecent]);
+
+  // Sync active reading position when recitation audio advances
+  useEffect(() => {
+    const unsubscribe = useAudioStore.subscribe((state) => {
+      if (state.isPlaying && state.currentSurah === surahNumber && state.currentAyah) {
+        visibleAyahRef.current = state.currentAyah;
+        setVisibleAyahNumber(state.currentAyah);
+        debouncedSaveRecent(state.currentAyah);
+      }
+    });
+    return () => unsubscribe();
+  }, [surahNumber, debouncedSaveRecent]);
 
   // Scroll to the selected ayah (if provided via the "ayah" search param).
   // Pre-fetch the page containing the target ayah so it’s ready when we scroll.
   useEffect(() => {
     if (ayahParam && totalAyahs > 0) {
-      const ayahIndex = Number(ayahParam) - 1; // 0-based
+      const targetAyahNum = Number(ayahParam);
+      const ayahIndex = targetAyahNum - 1; // 0-based
       if (ayahIndex >= 0 && ayahIndex < totalAyahs) {
         setIsNavigatingAyah(true);
         const targetPage = Math.floor(ayahIndex / PAGE_SIZE);
-        // Ensure the target page is fetched
-        fetchPage(targetPage, translationEdition).then(() => {
-          setTimeout(() => {
-            virtuosoRef.current?.scrollToIndex({ index: ayahIndex, align: 'center', behavior: 'smooth' });
-            setTimeout(() => {
-              const element = document.getElementById(`ayah-${ayahParam}`);
-              if (element) {
-                const c = ["dark:bg-[#1c1c1cff]", "bg-[var(--sephia-300)]"];
-                element.classList.add(...c);
-                setTimeout(() => element.classList.remove(...c), 2000);
-              }
+
+        const performScroll = () => {
+          virtuosoRef.current?.scrollToIndex({ index: ayahIndex, align: 'center', behavior: 'auto' });
+          
+          const checkAndHighlight = (attempts = 0) => {
+            const element = document.getElementById(`ayah-${targetAyahNum}`);
+            if (element) {
+              element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              const c = ["ring-2", "ring-accent", "bg-accent/10", "transition-all"];
+              element.classList.add(...c);
+              setTimeout(() => element.classList.remove(...c), 2500);
               setIsNavigatingAyah(false);
-            }, 300);
-          }, 100);
-        });
+            } else if (attempts < 5) {
+              setTimeout(() => checkAndHighlight(attempts + 1), 100);
+            } else {
+              setIsNavigatingAyah(false);
+            }
+          };
+
+          setTimeout(() => checkAndHighlight(), 80);
+        };
+
+        if (loadedPagesRef.current.has(targetPage)) {
+          performScroll();
+        } else {
+          fetchPage(targetPage, translationEdition).then(() => {
+            performScroll();
+          });
+        }
       } else {
         toast("Requested ayah was not found");
       }
@@ -1177,17 +1349,25 @@ export default function SurahReaderClient({
           <Virtuoso
             ref={virtuosoRef}
             useWindowScroll
+            initialTopMostItemIndex={
+              ayahParam && Number(ayahParam) > 1 && Number(ayahParam) <= totalAyahs
+                ? Number(ayahParam) - 1
+                : 0
+            }
             totalCount={totalAyahs}
             defaultItemHeight={280}
             overscan={{ main: 1000, reverse: 1000 }}
             increaseViewportBy={{ top: 600, bottom: 600 }}
             rangeChanged={({ startIndex, endIndex }) => {
-              // Update the visible ayah tracker without causing unnecessary churn
-              if (typeof startIndex === "number" && startIndex >= 0) {
-                const currentAyah = startIndex + 1;
-                visibleAyahRef.current = currentAyah;
-                setVisibleAyahNumber((prev) => (prev !== currentAyah ? currentAyah : prev));
+              if (!isNavigatingAyah) {
+                const detected = getVisibleAyahInViewport();
+                if (detected && detected !== visibleAyahRef.current) {
+                  visibleAyahRef.current = detected;
+                  setVisibleAyahNumber(detected);
+                  debouncedSaveRecent(detected);
+                }
               }
+
               // Pre-fetch pages that overlap with the visible range + a buffer of 15 items
               const BUFFER = 15;
               const firstNeeded = Math.max(0, startIndex - BUFFER);
