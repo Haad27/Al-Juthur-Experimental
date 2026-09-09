@@ -308,6 +308,7 @@ export interface UserHighlight {
   ayahNumber: number;
   text: string;
   type: string;
+  authorName?: string;
   createdAt: string;
 }
 
@@ -342,12 +343,12 @@ export async function fetchUserHighlights(): Promise<UserHighlight[]> {
   return res.json();
 }
 
-export async function saveUserHighlight(surahId: number, ayahNumber: number, text: string, type: 'arabic'|'translation'): Promise<UserHighlight | null> {
+export async function saveUserHighlight(surahId: number, ayahNumber: number, text: string, type: 'arabic'|'translation', authorName?: string): Promise<UserHighlight | null> {
   const id = getDeviceId();
   const res = await fetch('/api/highlights', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ identifier: id, surahId, ayahNumber, text, type })
+    body: JSON.stringify({ identifier: id, surahId, ayahNumber, text, type, authorName })
   });
   if (!res.ok) return null;
   return res.json();

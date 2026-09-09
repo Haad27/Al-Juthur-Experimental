@@ -191,6 +191,7 @@ model UserHighlight {
   ayahNumber  Int
   text        String
   type        String   @default("arabic") // "arabic" or "translation"
+  authorName  String?  // The name of the tafsir author if highlighted from a tafsir
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

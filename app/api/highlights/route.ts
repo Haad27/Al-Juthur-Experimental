@@ -23,7 +23,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { identifier, surahId, ayahNumber, text, type } = body;
+    const { identifier, surahId, ayahNumber, text, type, authorName } = body;
 
     if (!identifier || !surahId || !ayahNumber || !text) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -35,7 +35,8 @@ export async function POST(request: Request) {
         surahId: Number(surahId),
         ayahNumber: Number(ayahNumber),
         text,
-        type: type || 'arabic'
+        type: type || 'arabic',
+        authorName
       }
     });
 

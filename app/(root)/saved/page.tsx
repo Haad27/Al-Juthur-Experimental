@@ -68,7 +68,7 @@ type SortOption = "pinned" | "surah" | "ayah" | "recent";
 
 export default function SavedPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<TabType>("tafsirs");
+  const [activeTab, setActiveTab] = useState<TabType>("notes");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("pinned");
 
@@ -292,6 +292,17 @@ export default function SavedPage() {
         <div className="flex flex-col gap-4 mb-6">
           <div className="w-full bg-card/40 rounded-full p-1 flex items-center justify-between border border-border/30">
             <button
+              onClick={() => setActiveTab("notes")}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-2 py-2 rounded-full text-xs sm:text-sm font-medium transition cursor-pointer",
+                activeTab === "notes"
+                  ? "bg-card text-foreground shadow-sm border border-border/50"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Notes
+            </button>
+            <button
               onClick={() => setActiveTab("tafsirs")}
               className={cn(
                 "flex-1 flex items-center justify-center gap-2 py-2 rounded-full text-xs sm:text-sm font-medium transition cursor-pointer",
@@ -334,17 +345,6 @@ export default function SavedPage() {
               )}
             >
               Reading History
-            </button>
-            <button
-              onClick={() => setActiveTab("notes")}
-              className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-2 rounded-full text-xs sm:text-sm font-medium transition cursor-pointer",
-                activeTab === "notes"
-                  ? "bg-card text-foreground shadow-sm border border-border/50"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              Notes
             </button>
           </div>
 
@@ -757,6 +757,12 @@ export default function SavedPage() {
                           <Link href={`/surah/${hl.surahId}?ayah=${hl.ayahNumber}`} className="hover:text-foreground transition">
                             Surah {hl.surahId} : {hl.ayahNumber}
                           </Link>
+                          {hl.authorName && (
+                            <>
+                              <span>•</span>
+                              <span className="font-medium text-foreground/80">{hl.authorName}</span>
+                            </>
+                          )}
                           <span>•</span>
                           <span className="uppercase">{hl.type}</span>
                           <span>•</span>

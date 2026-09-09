@@ -13,6 +13,7 @@ const NAV = [
   { href: "/lexicon", label: "Lexicon", match: (p: string) => p.startsWith("/lexicon") },
   { href: "/ai", label: "Translator", match: (p: string) => p.startsWith("/ai") },
   { href: "/rag", label: "AI Scholar", match: (p: string) => p.startsWith("/rag") },
+  { href: "/saved", label: "Library", match: (p: string) => p.startsWith("/saved") },
 ];
 
 export default function AppHeader({
@@ -61,14 +62,6 @@ export default function AppHeader({
 
         <div className="flex shrink-0 items-center gap-2">
           {rightSlot}
-          <Link
-            href="/saved"
-            className="hidden items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-accent/40 hover:text-foreground md:flex"
-            title="Saved verses, tafsirs & scholar notes"
-          >
-            <Bookmark className="size-3.5 text-accent" />
-            <span>Saved</span>
-          </Link>
           <ThemeToggleButton />
         </div>
       </div>

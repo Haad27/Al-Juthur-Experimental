@@ -41,13 +41,11 @@ export const metadata = {
   publisher: "Al-Juthur",
   icons: {
     icon: [
-      { url: "/assets/favicon/favicon.svg", type: "image/svg+xml" },
-      { url: "/assets/favicon/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/assets/favicon/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/al-juthur-logo.png", type: "image/png" },
     ],
-    shortcut: "/assets/favicon/favicon.ico",
+    shortcut: "/al-juthur-logo.png",
     apple: [
-      { url: "/assets/favicon/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      { url: "/al-juthur-logo.png", type: "image/png" },
     ],
   },
   manifest: "/site.webmanifest",
