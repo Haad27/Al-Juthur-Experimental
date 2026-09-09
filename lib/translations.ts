@@ -19,16 +19,12 @@ function getBundledTranslation(id: string, surahNumber: number): any[] | null {
   if (id === "131") {
     if (!cached131Data) {
       try {
-        cached131Data = require('@/database/translations/131.json');
-      } catch {
-        try {
-          const filePath = path.join(process.cwd(), 'database', 'translations', '131.json');
-          if (fs.existsSync(filePath)) {
-            cached131Data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-          }
-        } catch (e) {
-          console.error("Could not load local 131.json translation:", e);
+        const filePath = path.join(process.cwd(), 'database', 'translations', '131.json');
+        if (fs.existsSync(filePath)) {
+          cached131Data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
         }
+      } catch (e) {
+        console.error("Could not load local 131.json translation:", e);
       }
     }
     if (cached131Data && (cached131Data[surahNumber] || cached131Data[surahKey])) {
@@ -39,16 +35,12 @@ function getBundledTranslation(id: string, surahNumber: number): any[] | null {
   if (id === "20") {
     if (!cached20Data) {
       try {
-        cached20Data = require('@/database/translations/20.json');
-      } catch {
-        try {
-          const filePath = path.join(process.cwd(), 'database', 'translations', '20.json');
-          if (fs.existsSync(filePath)) {
-            cached20Data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-          }
-        } catch (e) {
-          console.error("Could not load local 20.json translation:", e);
+        const filePath = path.join(process.cwd(), 'database', 'translations', '20.json');
+        if (fs.existsSync(filePath)) {
+          cached20Data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
         }
+      } catch (e) {
+        console.error("Could not load local 20.json translation:", e);
       }
     }
     if (cached20Data && (cached20Data[surahNumber] || cached20Data[surahKey])) {

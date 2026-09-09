@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
+const isVercel = process.env.VERCEL === "1" || !!process.env.VERCEL;
+
 const nextConfig: NextConfig = {
-  output: "standalone",
+  ...(isVercel ? {} : { output: "standalone" }),
   outputFileTracingIncludes: {
     '/api/**/*': ['./database/surah-meta/**/*', './database/word-by-word-translation/**/*', './database/translations/**/*'],
     '/**/*': ['./database/surah-meta/**/*', './database/word-by-word-translation/**/*', './database/translations/**/*'],
