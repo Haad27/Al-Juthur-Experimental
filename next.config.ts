@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   outputFileTracingIncludes: {
     '/api/**/*': ['./database/surah-meta/**/*', './database/word-by-word-translation/**/*', './database/translations/**/*'],
     '/**/*': ['./database/surah-meta/**/*', './database/word-by-word-translation/**/*', './database/translations/**/*'],

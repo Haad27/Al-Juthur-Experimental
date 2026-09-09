@@ -1,13 +1,36 @@
 {
   "name": "al-juthur",
   "version": "0.1.0",
-  "private": true,
+  "main": "electron/main.js",
   "scripts": {
     "dev": "next dev -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "dev:electron": "concurrently -k \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
+    "build:electron": "npm run build && node scripts/copy-standalone.js && electron-builder build --dir",
+    "package": "electron-builder build"
+  },
+  "build": {
+    "appId": "com.aljuthur.app",
+    "productName": "Al-Juthur",
+    "files": [
+      "electron/**/*",
+      ".next/standalone/**/*",
+      "public/**/*",
+      "database/**/*",
+      "prisma/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": ".next/standalone",
+        "to": "standalone",
+        "filter": ["**/*"]
+      }
+    ]
   },
   "dependencies": {
     "@google/genai": "^2.12.0",
@@ -68,10 +91,14 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "^0.185.1",
+    "concurrently": "^10.0.5",
     "dotenv": "^17.4.2",
+    "electron": "^44.3.0",
+    "electron-builder": "^26.15.3",
     "prisma": "^5.22.0",
     "tailwindcss": "^4",
     "tsx": "^4.23.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wait-on": "^9.1.0"
   }
 }
