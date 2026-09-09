@@ -440,7 +440,8 @@ function TafsirContent() {
       if (type && targetAyahNum && isHighlightMode) {
         // Auto-save highlight
         const sNum = targetSurahNum || activeSurah;
-        const res = await saveUserHighlight(sNum, targetAyahNum, text, type);
+        const authorStr = type === 'translation' && activeAuthor?.authorName ? activeAuthor.authorName : undefined;
+        const res = await saveUserHighlight(sNum, targetAyahNum, text, type, authorStr);
         if (res) {
           toast.success("Highlight saved.");
           setHighlights(prev => [...prev, res]);
