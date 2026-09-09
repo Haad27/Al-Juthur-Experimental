@@ -2162,7 +2162,8 @@ function TafsirContent() {
                 e.preventDefault();
                 e.stopPropagation();
                 const { text, surahNumber, ayahNumber, type } = highlightSelection;
-                const res = await saveUserHighlight(surahNumber, ayahNumber, text, type);
+                const authorStr = type === 'translation' && activeAuthor?.authorName ? activeAuthor.authorName : undefined;
+                const res = await saveUserHighlight(surahNumber, ayahNumber, text, type, authorStr);
                 if (res) {
                   toast.success("Highlight saved.");
                   setHighlights(prev => [...prev, res]);
