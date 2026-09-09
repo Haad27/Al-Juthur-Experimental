@@ -259,162 +259,106 @@ export default function SavedPage() {
           </div>
         </div>
 
-        {/* Profile / Reading Progress Header Banner */}
-        <div className="relative overflow-hidden rounded-3xl border border-accent/30 bg-gradient-to-br from-accent/10 via-card to-background p-6 sm:p-8 shadow-xl">
-          <div className="absolute top-0 right-0 -mt-10 -mr-10 size-56 rounded-full bg-accent/10 blur-3xl pointer-events-none" />
-          
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent/10 border border-accent/30 text-accent text-xs font-semibold uppercase tracking-wider">
-                <Bookmark className="size-3" />
-                Personal Quran & Tafsir Library
+        {/* Profile Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">
+              Library
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Your saved verses, exegesis, and scholarly inquiries.
+            </p>
+          </div>
+
+          {/* Resume Last Read */}
+          {lastRead && (
+            <Link
+              href={`/tafsir?author=${lastRead.authorId}&surah=${lastRead.surahId}&ayah=${lastRead.ayahNumber}`}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-card/50 hover:bg-card border border-border hover:border-accent/40 transition group"
+            >
+              <div className="flex items-center gap-2 border-r border-border/50 pr-2">
+                <Clock className="size-3.5 text-accent" />
+                <span className="text-xs font-medium text-foreground">Last Read</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
-                Saved Knowledge & Progress
-              </h1>
-              <p className="text-xs sm:text-sm text-muted-foreground max-w-xl leading-relaxed">
-                Continue your daily reading streak, review bookmarked exegesis, and revisit your scholarly AI inquiries.
-              </p>
-            </div>
-
-            {/* Resume Last Read Card */}
-            {lastRead && (
-              <div className="flex flex-col gap-2 p-4 rounded-2xl bg-card border border-accent/40 shadow-md sm:min-w-[260px]">
-                <div className="flex items-center justify-between text-[11px] font-semibold text-accent uppercase tracking-wider">
-                  <span className="flex items-center gap-1">
-                    <Clock className="size-3" /> Last Read
-                  </span>
-                  <span className="text-muted-foreground lowercase font-normal">{timeAgo(lastRead.timestamp)}</span>
-                </div>
-                <div className="font-bold text-foreground text-sm sm:text-base">
-                  {lastRead.surahName} : Ayah {lastRead.ayahNumber}
-                </div>
-                <p className="text-xs text-muted-foreground truncate">
-                  {lastRead.authorName.replace(/\s*\([^)]*\)\s*$/, '').trim()}
-                </p>
-                <Link
-                  href={`/tafsir?author=${lastRead.authorId}&surah=${lastRead.surahId}&ayah=${lastRead.ayahNumber}`}
-                  className="mt-2 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-accent hover:bg-accent/90 text-accent-foreground font-bold text-xs shadow-sm transition"
-                >
-                  <span>Resume Reading</span>
-                  <ArrowRight className="size-3.5" />
-                </Link>
+              <div className="text-xs text-muted-foreground group-hover:text-foreground transition">
+                {lastRead.surahName} : Ayah {lastRead.ayahNumber}
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Stats Row */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-          <div className="p-4 rounded-2xl bg-card/70 border border-border flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-              <BookOpenText className="size-3.5 text-accent" /> Saved Tafsirs
-            </span>
-            <span className="text-xl sm:text-2xl font-bold text-foreground">{savedTafsirs.length}</span>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-card/70 border border-border flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-              <BookOpen className="size-3.5 text-accent" /> Saved Ayahs
-            </span>
-            <span className="text-xl sm:text-2xl font-bold text-foreground">{savedAyahs.length}</span>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-card/70 border border-border flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-              <Sparkles className="size-3.5 text-accent" /> Scholar Notes
-            </span>
-            <span className="text-xl sm:text-2xl font-bold text-foreground">{savedScholarAnswers.length}</span>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-card/70 border border-border flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-              <History className="size-3.5 text-accent" /> Recent Reads
-            </span>
-            <span className="text-xl sm:text-2xl font-bold text-foreground">{readingHistory.length}</span>
-          </div>
+              <ArrowRight className="size-3 text-muted-foreground group-hover:text-accent transition ml-1" />
+            </Link>
+          )}
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full sm:w-auto">
+        <div className="flex flex-col gap-4 mb-6">
+          <div className="w-full bg-card/40 rounded-full p-1 flex items-center justify-between border border-border/30">
             <button
               onClick={() => setActiveTab("tafsirs")}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer shrink-0",
+                "flex-1 flex items-center justify-center gap-2 py-2 rounded-full text-xs sm:text-sm font-medium transition cursor-pointer",
                 activeTab === "tafsirs"
-                  ? "bg-accent text-accent-foreground shadow-md shadow-sm"
-                  : "bg-card/90 border border-border text-muted-foreground hover:text-foreground hover:border-border"
+                  ? "bg-card text-foreground shadow-sm border border-border/50"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <BookOpenText className="size-4" />
-              <span>Saved Tafsirs ({savedTafsirs.length})</span>
+              Saved Tafsirs
             </button>
-
             <button
               onClick={() => setActiveTab("ayahs")}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer shrink-0",
+                "flex-1 flex items-center justify-center gap-2 py-2 rounded-full text-xs sm:text-sm font-medium transition cursor-pointer",
                 activeTab === "ayahs"
-                  ? "bg-accent text-accent-foreground shadow-md shadow-sm"
-                  : "bg-card/90 border border-border text-muted-foreground hover:text-foreground hover:border-border"
+                  ? "bg-card text-foreground shadow-sm border border-border/50"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <BookOpen className="size-4" />
-              <span>Saved Ayahs ({savedAyahs.length})</span>
+              Saved Ayahs
             </button>
-
             <button
               onClick={() => setActiveTab("scholar")}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer shrink-0",
+                "flex-1 flex items-center justify-center gap-2 py-2 rounded-full text-xs sm:text-sm font-medium transition cursor-pointer",
                 activeTab === "scholar"
-                  ? "bg-accent text-accent-foreground shadow-md shadow-sm"
-                  : "bg-card/90 border border-border text-muted-foreground hover:text-foreground hover:border-border"
+                  ? "bg-card text-foreground shadow-sm border border-border/50"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <Sparkles className="size-4" />
-              <span>Scholar Q&A ({savedScholarAnswers.length})</span>
+              Scholar Q&A
             </button>
-
             <button
               onClick={() => setActiveTab("history")}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer shrink-0",
+                "flex-1 flex items-center justify-center gap-2 py-2 rounded-full text-xs sm:text-sm font-medium transition cursor-pointer",
                 activeTab === "history"
-                  ? "bg-accent text-accent-foreground shadow-md shadow-sm"
-                  : "bg-card/90 border border-border text-muted-foreground hover:text-foreground hover:border-border"
+                  ? "bg-card text-foreground shadow-sm border border-border/50"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <History className="size-4" />
-              <span>Reading History</span>
+              Reading History
             </button>
-
             <button
               onClick={() => setActiveTab("notes")}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer shrink-0",
+                "flex-1 flex items-center justify-center gap-2 py-2 rounded-full text-xs sm:text-sm font-medium transition cursor-pointer",
                 activeTab === "notes"
-                  ? "bg-accent text-accent-foreground shadow-md shadow-sm"
-                  : "bg-card/90 border border-border text-muted-foreground hover:text-foreground hover:border-border"
+                  ? "bg-card text-foreground shadow-sm border border-border/50"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <BookOpenText className="size-4" />
-              <span>Notes & Highlights ({savedNotes.length + savedHighlights.length})</span>
+              Notes
             </button>
           </div>
 
           {/* Search Bar and Sort */}
           {activeTab !== "history" && (
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <div className="relative flex-1 sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+            <div className="flex items-center gap-4 w-full justify-end px-2">
+              <div className="relative w-48 sm:w-64">
+                <Search className="absolute left-0 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
                 <input
                   type="text"
-                  placeholder="Search saved..."
+                  placeholder="Search..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-card border border-border rounded-xl pl-9 pr-3 py-1.5 text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-accent/50"
+                  className="w-full bg-transparent border-b border-border/40 pl-6 pr-2 py-1 text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-accent/50 transition"
                 />
               </div>
 
@@ -422,7 +366,7 @@ export default function SavedPage() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortOption)}
-                  className="bg-card border border-border rounded-xl px-2.5 py-1.5 text-xs text-reading focus:outline-none focus:border-accent/50 shrink-0"
+                  className="bg-transparent border-b border-border/40 pb-1 text-xs text-muted-foreground focus:outline-none focus:border-accent/50 focus:text-foreground transition cursor-pointer"
                 >
                   <option value="pinned">Pinned First</option>
                   <option value="recent">Most Recent</option>
@@ -438,87 +382,57 @@ export default function SavedPage() {
         {activeTab === "tafsirs" && (
           <div className="space-y-4">
             {filteredTafsirs.length > 0 ? (
-              <div className="grid grid-cols-1 gap-4">
+              <div className="flex flex-col">
                 {filteredTafsirs.map((t) => (
                   <div
                     key={t.id}
-                    className="relative rounded-2xl border border-border bg-card/70 p-5 sm:p-6 transition hover:border-accent/40 space-y-4 group"
+                    className="group flex gap-4 py-3 border-b border-border/30 hover:bg-card/20 transition px-2 rounded-xl last:border-0"
                   >
-                    <div className="flex items-center justify-between gap-2 border-b border-border pb-3">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="h-6 px-2 rounded-md bg-accent/10 border border-accent/30 flex items-center justify-center text-xs font-bold text-accent">
-                          {t.surahId}:{t.ayahNumber}
-                        </span>
-                        <span className="text-sm font-bold text-foreground">{t.surahName}</span>
-                        <span className="text-xs text-muted-foreground">•</span>
-                        <span className="text-xs text-muted-foreground flex items-center gap-1 font-medium">
-                          <User className="size-3 text-accent" />
-                          {t.authorName.replace(/\s*\([^)]*\)\s*$/, '').trim()}
-                        </span>
-                        {t.langName && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground uppercase font-semibold">
-                            {t.langName}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Card Actions */}
-                      <div className="flex items-center gap-1 shrink-0">
-                        <button
-                          onClick={() => handleTogglePinTafsir(t.id)}
-                          className={cn(
-                            "p-1.5 rounded-lg transition cursor-pointer",
-                            t.pinned
-                              ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
-                              : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                          )}
-                          title={t.pinned ? "Unpin Tafsir" : "Pin Tafsir to Top"}
-                        >
-                          <Pin className={cn("size-3.5", t.pinned && "rotate-45")} />
-                        </button>
-
-                        <button
-                          onClick={() => copyToClipboard(t.fullTafsirText || t.tafsirSnippet, "Tafsir copied to clipboard!")}
-                          className="p-1.5 rounded-lg text-muted-foreground hover:text-accent hover:bg-muted transition cursor-pointer"
-                          title="Copy Tafsir"
-                        >
-                          <Copy className="size-3.5" />
-                        </button>
-
-                        <button
-                          onClick={() => handleRemoveTafsir(t.id)}
-                          className="p-1.5 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-muted transition cursor-pointer"
-                          title="Remove from Saved"
-                        >
-                          <X className="size-3.5" />
-                        </button>
-                      </div>
+                    {/* Left Icon */}
+                    <div className="pt-0.5 shrink-0">
+                      <BookOpenText className={cn("size-4 transition", t.pinned ? "text-accent" : "text-muted-foreground group-hover:text-accent/70")} />
                     </div>
 
-                    {/* Arabic Text if present */}
-                    {t.arabicText && (
-                      <p className="font-mushaf-indopak-16 text-lg sm:text-xl text-right leading-loose text-amber-100/90" dir="rtl">
-                        {t.arabicText}
-                      </p>
-                    )}
-
-                    {/* Tafsir Snippet */}
-                    <div className="text-xs sm:text-sm text-reading leading-relaxed max-h-36 overflow-hidden relative">
-                      <p className="line-clamp-4">{t.tafsirSnippet}...</p>
-                    </div>
-
-                    {/* Bottom Link to Reader */}
-                    <div className="pt-2 border-t border-border/40 flex items-center justify-between">
-                      <span className="text-[11px] text-muted-foreground flex items-center gap-1">
-                        <Clock className="size-3" /> Saved {timeAgo(t.timestamp)}
-                      </span>
-                      <Link
-                        href={`/tafsir?author=${t.authorId}&surah=${t.surahId}&ayah=${t.ayahNumber}`}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-muted hover:bg-accent/15 hover:text-accent hover:border-accent/40 border border-border text-xs font-semibold text-foreground transition"
-                      >
-                        <span>Open in Tafsir Reader</span>
-                        <ArrowRight className="size-3.5" />
+                    {/* Middle Content */}
+                    <div className="flex-1 min-w-0">
+                      <Link href={`/tafsir?author=${t.authorId}&surah=${t.surahId}&ayah=${t.ayahNumber}`} className="block">
+                        <div className="text-sm font-medium text-foreground truncate">
+                          {t.surahName} : Ayah {t.ayahNumber}
+                        </div>
+                        <div className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                          <span>{t.authorName.replace(/\s*\([^)]*\)\s*$/, '').trim()}</span>
+                          {t.langName && <span>• {t.langName}</span>}
+                          <span>• {timeAgo(t.timestamp)}</span>
+                        </div>
+                        <div className="text-xs text-reading line-clamp-1 mt-1 opacity-70 group-hover:opacity-100 transition">
+                          {t.tafsirSnippet}
+                        </div>
                       </Link>
+                    </div>
+
+                    {/* Right Actions */}
+                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition shrink-0 gap-1">
+                      <button
+                        onClick={() => copyToClipboard(t.fullTafsirText || t.tafsirSnippet, "Tafsir copied to clipboard!")}
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground transition cursor-pointer"
+                        title="Copy Tafsir"
+                      >
+                        <Copy className="size-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleTogglePinTafsir(t.id)}
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground transition cursor-pointer"
+                        title={t.pinned ? "Unpin Tafsir" : "Pin Tafsir to Top"}
+                      >
+                        <Pin className="size-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleRemoveTafsir(t.id)}
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-red-400 transition cursor-pointer"
+                        title="Remove from Saved"
+                      >
+                        <X className="size-3.5" />
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -548,50 +462,56 @@ export default function SavedPage() {
         {activeTab === "ayahs" && (
           <div className="space-y-4">
             {filteredAyahs.length > 0 ? (
-              <div className="space-y-4">
+              <div className="flex flex-col">
                 {filteredAyahs.map((ayah) => (
                   <div
                     key={ayah.number}
-                    className="relative rounded-2xl border border-border bg-card/70 p-5 transition hover:border-accent/40 space-y-3 group"
+                    className="group flex gap-4 py-3 border-b border-border/30 hover:bg-card/20 transition px-2 rounded-xl last:border-0"
                   >
-                    <div className="flex items-center justify-between border-b border-border pb-2.5">
-                      <span className="h-6 px-2 rounded-md bg-accent/10 border border-accent/30 flex items-center justify-center text-xs font-bold text-accent">
-                        Surah {ayah.surahNumber} : Ayah {ayah.numberInSurah}
-                      </span>
-
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => togglePinAyah(ayah.number)}
-                          className={cn(
-                            "p-1.5 rounded-lg transition cursor-pointer",
-                            ayah.pinned
-                              ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
-                              : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                          )}
-                          title={ayah.pinned ? "Unpin Ayah" : "Pin Ayah"}
-                        >
-                          <Pin className={cn("size-3.5", ayah.pinned && "rotate-45")} />
-                        </button>
-
-                        <button
-                          onClick={() => handleRemoveAyah(ayah.number)}
-                          className="p-1.5 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-muted transition cursor-pointer"
-                          title="Remove Ayah"
-                        >
-                          <X className="size-3.5" />
-                        </button>
-                      </div>
+                    {/* Left Icon */}
+                    <div className="pt-0.5 shrink-0">
+                      <BookOpen className={cn("size-4 transition", ayah.pinned ? "text-accent" : "text-muted-foreground group-hover:text-accent/70")} />
                     </div>
 
-                    <Link
-                      href={`/surah/${ayah.surahNumber}?ayah=${ayah.numberInSurah}`}
-                      className="block space-y-2 hover:opacity-90 transition"
-                    >
-                      <p className="font-mushaf-indopak-16 text-lg sm:text-2xl text-right leading-loose text-amber-100" dir="rtl">
-                        {ayah.text}
-                      </p>
-                      <p className="text-xs sm:text-sm text-reading leading-relaxed">{ayah.translation}</p>
-                    </Link>
+                    {/* Middle Content */}
+                    <div className="flex-1 min-w-0">
+                      <Link href={`/surah/${ayah.surahNumber}?ayah=${ayah.numberInSurah}`} className="block">
+                        <div className="text-sm font-medium text-foreground truncate" dir="rtl">
+                          {ayah.text}
+                        </div>
+                        <div className="text-xs text-muted-foreground flex items-center gap-1.5 mt-1">
+                          <span>Surah {ayah.surahNumber} : Ayah {ayah.numberInSurah}</span>
+                        </div>
+                        <div className="text-xs text-reading line-clamp-1 mt-1 opacity-70 group-hover:opacity-100 transition">
+                          {ayah.translation}
+                        </div>
+                      </Link>
+                    </div>
+
+                    {/* Right Actions */}
+                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition shrink-0 gap-1">
+                      <button
+                        onClick={() => copyToClipboard(ayah.translation, "Translation copied to clipboard!")}
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground transition cursor-pointer"
+                        title="Copy Translation"
+                      >
+                        <Copy className="size-3.5" />
+                      </button>
+                      <button
+                        onClick={() => togglePinAyah(ayah.number)}
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground transition cursor-pointer"
+                        title={ayah.pinned ? "Unpin Ayah" : "Pin Ayah"}
+                      >
+                        <Pin className="size-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleRemoveAyah(ayah.number)}
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-red-400 transition cursor-pointer"
+                        title="Remove Ayah"
+                      >
+                        <X className="size-3.5" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -617,88 +537,62 @@ export default function SavedPage() {
         {activeTab === "scholar" && (
           <div className="space-y-4">
             {filteredScholar.length > 0 ? (
-              <div className="space-y-4">
+              <div className="flex flex-col">
                 {filteredScholar.map((item) => (
                   <div
                     key={item.id}
-                    className="relative rounded-2xl border border-border bg-card/70 p-5 sm:p-6 transition hover:border-accent/40 space-y-4"
+                    className="group flex gap-4 py-4 border-b border-border/30 hover:bg-card/20 transition px-2 rounded-xl last:border-0"
                   >
-                    <div className="flex items-center justify-between border-b border-border pb-3 gap-2">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-accent/10 border border-accent/30 text-xs font-bold text-accent">
-                          <Bot className="size-3.5" />
-                          {item.modeName || "Academic AI Scholar"}
-                        </span>
+                    {/* Left Icon */}
+                    <div className="pt-0.5 shrink-0">
+                      <Bot className={cn("size-4 transition", item.pinned ? "text-accent" : "text-muted-foreground group-hover:text-accent/70")} />
+                    </div>
+
+                    {/* Middle Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-foreground">
+                        {item.question}
+                      </div>
+                      <div className="text-xs text-muted-foreground flex items-center gap-1.5 mt-1">
+                        <span>{item.modeName || "Academic AI Scholar"}</span>
                         {item.surahNumber && item.ayahNumber && (
-                          <span className="text-xs text-muted-foreground font-semibold bg-muted px-2 py-0.5 rounded-md border border-border">
-                            Surah {item.surahNumber}:{item.ayahNumber}
-                          </span>
+                          <span>• Surah {item.surahNumber}:{item.ayahNumber}</span>
                         )}
                         {item.rootWord && (
-                          <span className="text-xs text-muted-foreground font-semibold bg-muted px-2 py-0.5 rounded-md border border-border">
-                            Root: {item.rootWord}
-                          </span>
+                          <span>• Root: {item.rootWord}</span>
                         )}
                       </div>
-
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => handleTogglePinScholar(item.id)}
-                          className={cn(
-                            "p-1.5 rounded-lg transition cursor-pointer",
-                            item.pinned
-                              ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
-                              : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                          )}
-                          title={item.pinned ? "Unpin Note" : "Pin Note to Top"}
-                        >
-                          <Pin className={cn("size-3.5", item.pinned && "rotate-45")} />
-                        </button>
-
-                        <button
-                          onClick={() => copyToClipboard(`**Question:** ${item.question}\n\n**Answer:**\n${item.answer}`, "Scholar Q&A copied!")}
-                          className="p-1.5 rounded-lg text-muted-foreground hover:text-accent hover:bg-muted transition cursor-pointer"
-                          title="Copy Answer"
-                        >
-                          <Copy className="size-3.5" />
-                        </button>
-
-                        <button
-                          onClick={() => handleRemoveScholar(item.id)}
-                          className="p-1.5 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-muted transition cursor-pointer"
-                          title="Remove Note"
-                        >
-                          <X className="size-3.5" />
-                        </button>
+                      <div className="text-xs text-reading line-clamp-2 mt-1.5 opacity-70 group-hover:opacity-100 transition prose dark:prose-invert">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {item.answer}
+                        </ReactMarkdown>
                       </div>
                     </div>
 
-                    {/* Question Header */}
-                    <div className="bg-card/80 p-3.5 rounded-xl border border-border">
-                      <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider block mb-1">Inquiry</span>
-                      <p className="text-xs sm:text-sm font-semibold text-foreground">{item.question}</p>
+                    {/* Right Actions */}
+                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition shrink-0 gap-1 self-start">
+                      <button
+                        onClick={() => copyToClipboard(`**Question:** ${item.question}\n\n**Answer:**\n${item.answer}`, "Scholar Q&A copied!")}
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground transition cursor-pointer"
+                        title="Copy Answer"
+                      >
+                        <Copy className="size-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleTogglePinScholar(item.id)}
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground transition cursor-pointer"
+                        title={item.pinned ? "Unpin Note" : "Pin Note"}
+                      >
+                        <Pin className="size-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleRemoveScholar(item.id)}
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-red-400 transition cursor-pointer"
+                        title="Remove Note"
+                      >
+                        <X className="size-3.5" />
+                      </button>
                     </div>
-
-                    {/* Synthesized Response */}
-                    <div className="prose dark:prose-invert max-w-none text-xs sm:text-sm leading-relaxed text-reading">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {item.answer}
-                      </ReactMarkdown>
-                    </div>
-
-                    {/* Sources snippet if any */}
-                    {item.sources && item.sources.length > 0 && (
-                      <div className="pt-3 border-t border-border/50 flex flex-col gap-1.5">
-                        <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Citations & References</span>
-                        <div className="flex flex-wrap gap-1.5">
-                          {item.sources.map((src, i) => (
-                            <span key={i} className="text-[11px] px-2 py-0.5 rounded bg-card border border-border text-muted-foreground">
-                              {src.book} {src.authorName && `(${src.authorName})`}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
@@ -733,32 +627,37 @@ export default function SavedPage() {
                 </button>
               )}
             </div>
-
             {readingHistory.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="flex flex-col">
                 {readingHistory.map((item, idx) => (
                   <div
                     key={idx}
-                    className="p-4 rounded-2xl bg-card/70 border border-border flex items-center justify-between gap-3 hover:border-accent/40 transition"
+                    className="group flex items-center justify-between gap-4 py-3 border-b border-border/30 hover:bg-card/20 transition px-2 rounded-xl last:border-0"
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="size-9 rounded-xl bg-accent/10 border border-accent/30 flex items-center justify-center text-accent font-bold text-xs shrink-0">
-                        {item.surahId}:{item.ayahNumber}
+                    <div className="flex items-center gap-4 min-w-0 flex-1">
+                      {/* Left Icon */}
+                      <div className="shrink-0">
+                        <Clock className="size-4 text-muted-foreground group-hover:text-accent/70 transition" />
                       </div>
-                      <div className="flex flex-col min-w-0">
-                        <span className="text-sm font-semibold text-foreground truncate">{item.surahName}</span>
-                        <span className="text-xs text-muted-foreground truncate">
-                          {item.authorName.replace(/\s*\([^)]*\)\s*$/, '').trim()}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
-                          <Clock className="size-2.5" /> {timeAgo(item.timestamp)}
-                        </span>
+
+                      {/* Middle Content */}
+                      <div className="flex-1 min-w-0">
+                        <Link href={`/tafsir?surah=${item.surahId}&ayah=${item.ayahNumber}`} className="block">
+                          <div className="text-sm font-medium text-foreground truncate">
+                            {item.surahName} : Ayah {item.ayahNumber}
+                          </div>
+                          <div className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                            <span>{item.authorName.replace(/\s*\([^)]*\)\s*$/, '').trim()}</span>
+                            <span>• {timeAgo(item.timestamp)}</span>
+                          </div>
+                        </Link>
                       </div>
                     </div>
 
+                    {/* Right Action */}
                     <Link
                       href={`/tafsir?surah=${item.surahId}&ayah=${item.ayahNumber}`}
-                      className="p-2 rounded-xl bg-muted hover:bg-accent hover:text-accent-foreground text-reading transition shrink-0"
+                      className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-muted-foreground hover:text-foreground transition shrink-0"
                       title="Jump to reading"
                     >
                       <ArrowRight className="size-4" />
@@ -785,15 +684,30 @@ export default function SavedPage() {
                 <BookOpenText className="size-4" /> Personal Notes
               </h3>
               {savedNotes.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex flex-col">
                   {savedNotes.map((note) => (
-                    <div key={note.id} className="p-5 rounded-2xl bg-card border border-border hover:border-accent/40 transition flex flex-col gap-3 group shadow-sm">
-                      <div className="flex items-center justify-between">
-                        <Link href={`/surah/${note.surahId}?ayah=${note.ayahNumber}`} className="inline-flex items-center gap-2 hover:opacity-80 transition">
-                          <span className="h-6 px-2.5 rounded bg-accent/10 border border-accent/30 text-accent font-bold text-xs flex items-center">
+                    <div key={note.id} className="group flex gap-4 py-4 border-b border-border/30 hover:bg-card/20 transition px-2 rounded-xl last:border-0">
+                      {/* Left Icon */}
+                      <div className="pt-0.5 shrink-0">
+                        <BookOpenText className="size-4 text-muted-foreground group-hover:text-accent/70 transition" />
+                      </div>
+
+                      {/* Middle Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm text-reading whitespace-pre-wrap">
+                          {note.text}
+                        </div>
+                        <div className="text-xs text-muted-foreground flex items-center gap-1.5 mt-1.5">
+                          <Link href={`/surah/${note.surahId}?ayah=${note.ayahNumber}`} className="hover:text-foreground transition">
                             Surah {note.surahId} : {note.ayahNumber}
-                          </span>
-                        </Link>
+                          </Link>
+                          <span>•</span>
+                          <span>{new Date(note.createdAt).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+
+                      {/* Right Action */}
+                      <div className="flex items-center opacity-0 group-hover:opacity-100 transition shrink-0 gap-1 self-start">
                         <button
                           onClick={async () => {
                             if (await deleteUserNote(note.id)) {
@@ -801,13 +715,12 @@ export default function SavedPage() {
                               toast.info("Note deleted");
                             }
                           }}
-                          className="p-1.5 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-muted transition"
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-red-400 transition cursor-pointer"
+                          title="Delete Note"
                         >
                           <Trash2 className="size-3.5" />
                         </button>
                       </div>
-                      <p className="text-sm text-reading whitespace-pre-wrap">{note.text}</p>
-                      <span className="text-[10px] text-muted-foreground self-end mt-auto pt-2">{new Date(note.createdAt).toLocaleDateString()}</span>
                     </div>
                   ))}
                 </div>
@@ -824,18 +737,35 @@ export default function SavedPage() {
                 <Sparkles className="size-4" /> Text Highlights
               </h3>
               {savedHighlights.length > 0 ? (
-                <div className="grid grid-cols-1 gap-4">
+                <div className="flex flex-col">
                   {savedHighlights.map((hl) => (
-                    <div key={hl.id} className="p-5 rounded-2xl bg-card border border-border hover:border-accent/40 transition flex flex-col gap-3 group shadow-sm">
-                      <div className="flex items-center justify-between">
-                        <Link href={`/surah/${hl.surahId}?ayah=${hl.ayahNumber}`} className="inline-flex items-center gap-2 hover:opacity-80 transition">
-                          <span className="h-6 px-2.5 rounded bg-accent/10 border border-accent/30 text-accent font-bold text-xs flex items-center">
+                    <div key={hl.id} className="group flex gap-4 py-4 border-b border-border/30 hover:bg-card/20 transition px-2 rounded-xl last:border-0">
+                      {/* Left Icon */}
+                      <div className="pt-0.5 shrink-0">
+                        <Sparkles className="size-4 text-muted-foreground group-hover:text-accent/70 transition" />
+                      </div>
+
+                      {/* Middle Content */}
+                      <div className="flex-1 min-w-0">
+                        <blockquote className={cn(
+                          "pl-4 border-l-2 border-accent/50 text-sm py-1 bg-accent/5 rounded-r-lg pr-4",
+                          hl.type === "arabic" ? "font-mushaf-indopak-16 text-right text-lg text-amber-100/90 leading-loose border-r-2 border-l-0 pl-4 border-accent/50" : "text-reading italic"
+                        )} dir={hl.type === "arabic" ? "rtl" : "ltr"}>
+                          {hl.text}
+                        </blockquote>
+                        <div className="text-xs text-muted-foreground flex items-center gap-1.5 mt-2">
+                          <Link href={`/surah/${hl.surahId}?ayah=${hl.ayahNumber}`} className="hover:text-foreground transition">
                             Surah {hl.surahId} : {hl.ayahNumber}
-                          </span>
-                          <span className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider bg-muted px-2 py-0.5 rounded">
-                            {hl.type}
-                          </span>
-                        </Link>
+                          </Link>
+                          <span>•</span>
+                          <span className="uppercase">{hl.type}</span>
+                          <span>•</span>
+                          <span>{new Date(hl.createdAt).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+
+                      {/* Right Action */}
+                      <div className="flex items-center opacity-0 group-hover:opacity-100 transition shrink-0 gap-1 self-start">
                         <button
                           onClick={async () => {
                             if (await deleteUserHighlight(hl.id)) {
@@ -843,18 +773,12 @@ export default function SavedPage() {
                               toast.info("Highlight deleted");
                             }
                           }}
-                          className="p-1.5 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-muted transition"
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-red-400 transition cursor-pointer"
+                          title="Delete Highlight"
                         >
                           <Trash2 className="size-3.5" />
                         </button>
                       </div>
-                      <blockquote className={cn(
-                        "pl-4 border-l-2 border-accent/50 text-sm py-1 bg-accent/5 rounded-r-lg pr-4",
-                        hl.type === "arabic" ? "font-mushaf-indopak-16 text-right text-lg text-amber-100/90 leading-loose border-r-2 border-l-0 pl-4 border-accent/50" : "text-reading italic"
-                      )} dir={hl.type === "arabic" ? "rtl" : "ltr"}>
-                        {hl.text}
-                      </blockquote>
-                      <span className="text-[10px] text-muted-foreground self-end">{new Date(hl.createdAt).toLocaleDateString()}</span>
                     </div>
                   ))}
                 </div>
