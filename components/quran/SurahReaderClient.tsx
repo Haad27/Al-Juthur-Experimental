@@ -24,6 +24,7 @@ import {
   Save,
   ScrollText,
   Library,
+  Bookmark,
   MessageSquareText,
   Bot,
   Loader2,
@@ -242,11 +243,19 @@ const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRAN
       <div className="flex items-center gap-5">
         <nav className="hidden lg:flex items-center gap-6 text-muted-foreground text-sm">
           <Link href="/home" className="hover:text-foreground transition">Home</Link>
-          <Link href="/saved" className="hover:text-foreground transition">Library</Link>
+          <Link href="/tafsir" className="hover:text-foreground transition">Library</Link>
           <Link href="/lexicon" className="hover:text-foreground transition">Lexicon</Link>
           <Link href="/rag" className="hover:text-foreground transition">AI Scholar</Link>
           <Link href="/quran" className="hover:text-foreground transition">Quran</Link>
         </nav>
+        <Link
+          href="/saved"
+          className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          title="Saved Verses & Notes"
+          aria-label="Saved Verses & Notes"
+        >
+          <Bookmark className="size-4" />
+        </Link>
         <ThemeToggleButton />
       </div>
     </div>

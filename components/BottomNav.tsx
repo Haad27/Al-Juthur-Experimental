@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import {
   Home,
   Library,
+  Languages,
   Bookmark,
   Sparkles,
   BookOpen,
@@ -55,14 +56,14 @@ const BottomNav = () => {
     },
     {
       label: "Library",
-      href: "/saved",
-      icon: <Bookmark className="w-5 h-5" />,
-      isActive: pathname?.startsWith("/saved"),
+      href: "/tafsir",
+      icon: <Library className="w-5 h-5" />,
+      isActive: pathname?.startsWith("/tafsir"),
     },
     {
       label: "Lexicon",
       href: "/lexicon",
-      icon: <Library className="w-5 h-5" />,
+      icon: <Languages className="w-5 h-5" />,
       isActive: pathname?.startsWith("/lexicon"),
     },
     {
