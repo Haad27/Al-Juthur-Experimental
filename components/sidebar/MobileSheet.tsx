@@ -92,7 +92,7 @@ const MobileSheet = ({
               <div className="flex items-center justify-between w-full min-w-0 pr-1">
                 <div className="flex items-center gap-2 min-w-0 flex-1 mr-2">
                   <Link
-                    href="/quran"
+                    href="/home#start_reading"
                     className="p-1.5 -ml-1 rounded-lg bg-card/90 border border-border text-muted-foreground hover:text-accent hover:border-accent/50 transition-all flex items-center justify-center shrink-0 cursor-pointer shadow-sm"
                     title="Back to All Surahs"
                   >

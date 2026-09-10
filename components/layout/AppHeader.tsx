@@ -8,11 +8,12 @@ import LogoIcon from "@/components/svg/icons/LogoIcon";
 import ThemeToggleButton from "@/components/ThemeToggleButton";
 
 const NAV = [
-  { href: "/home", label: "Home", match: (p: string) => p === "/home" || p === "/" },
-  { href: "/tafsir", label: "Library", match: (p: string) => p.startsWith("/tafsir") },
+  { href: "/home", label: "Home", match: (p: string) => p === "/home" || p.startsWith("/surah") },
+  { href: "/tafsir", label: "Tafsir", match: (p: string) => p.startsWith("/tafsir") },
   { href: "/lexicon", label: "Lexicon", match: (p: string) => p.startsWith("/lexicon") },
+  { href: "/ai", label: "Translator", match: (p: string) => p.startsWith("/ai") },
   { href: "/rag", label: "AI Scholar", match: (p: string) => p.startsWith("/rag") },
-  { href: "/quran", label: "Quran", match: (p: string) => p.startsWith("/quran") || p.startsWith("/surah") },
+  { href: "/saved", label: "Library", match: (p: string) => p.startsWith("/saved") },
 ];
 
 export default function AppHeader({
@@ -61,17 +62,6 @@ export default function AppHeader({
 
         <div className="flex shrink-0 items-center gap-2">
           {rightSlot}
-          <Link
-            href="/saved"
-            className={cn(
-              "rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-              pathname.startsWith("/saved") && "bg-accent/10 text-accent font-medium"
-            )}
-            title="Saved Verses & Notes"
-            aria-label="Saved Verses & Notes"
-          >
-            <Bookmark className="size-4" />
-          </Link>
           <ThemeToggleButton />
         </div>
       </div>
