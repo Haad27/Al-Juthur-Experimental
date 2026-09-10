@@ -34,7 +34,7 @@ const APP_IMAGES = [
 const APP_CAPTIONS = [
   "Modern Interface",
   "Word-by-Word Mushaf",
-  "120+ Tafsirs",
+  "188 Tafsirs",
   "13 Classical Lexicons",
   "AI Arabic Translation",
   "6 RAG Modes",
@@ -139,7 +139,7 @@ export default function LandingPage() {
             </h1>
           </div>
           <p className="text-sm md:text-lg text-zinc-300 font-light leading-relaxed">
-            The most comprehensive platform featuring 120+ Tafsirs in 33 languages, 127 Translations, 13 Lexicons, RAG technology, and AI Translation with a Clean Modern UI.
+            The most comprehensive platform featuring 188 Tafsirs in 33 languages, 127 Translations, 13 Lexicons, RAG technology, and AI Translation with a Clean Modern UI.
           </p>
         </div>
 

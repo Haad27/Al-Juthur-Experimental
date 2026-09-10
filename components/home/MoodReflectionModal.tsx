@@ -131,7 +131,7 @@ export default function MoodReflectionModal({ mood, onClose }: MoodReflectionMod
             }}
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-accent hover:underline cursor-pointer"
           >
-            <span>Open in 120+ Tafsir Explorer</span>
+            <span>Open in 188 Tafsir Explorer</span>
             <ArrowRight className="size-3.5" />
           </button>
 

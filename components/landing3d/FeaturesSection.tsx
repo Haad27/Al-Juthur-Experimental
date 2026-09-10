@@ -13,8 +13,8 @@ const features = [
     color: "gold"
   },
   {
-    title: "120+ Classical & Modern Tafsirs",
-    description: "Dive into centuries of Islamic scholarship. Access a vast library of over 120 exegeses across 33 languages ranging from early classical works to contemporary interpretations, all beautifully formatted.",
+    title: "188 Classical & Modern Tafsirs",
+    description: "Dive into centuries of Islamic scholarship. Access a vast library of 188 exegeses across 33 languages ranging from early classical works to contemporary interpretations, all beautifully formatted.",
     image: "/images/features/tafsir.png",
     icon: <Library className="w-8 h-8 text-[#C4A574]" />,
     color: "gold"

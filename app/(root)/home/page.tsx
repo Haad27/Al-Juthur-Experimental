@@ -160,7 +160,7 @@ export default function DiscoveryHomePage() {
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-accent/15 hover:bg-accent/25 text-accent border border-accent/30 text-xs sm:text-sm font-semibold transition"
               >
                 <Compass className="size-4" />
-                <span>Browse 120+ Tafsirs</span>
+                <span>Browse 188 Tafsirs</span>
               </Link>
               <Link
                 href="/quran"
@@ -777,7 +777,7 @@ export default function DiscoveryHomePage() {
         </section>
 
         {/* =========================================================================
-            8. AL-JUTHUR SPOTLIGHT BANNER (120+ Tafsirs Engine)
+            8. AL-JUTHUR SPOTLIGHT BANNER (188 Tafsirs Engine)
            ========================================================================= */}
         <section className="relative overflow-hidden rounded-2xl border border-accent/30 bg-gradient-to-r from-card via-card to-muted p-6 sm:p-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
@@ -786,7 +786,7 @@ export default function DiscoveryHomePage() {
                 AL-JUTHUR SPOTLIGHT
               </span>
               <h3 className="text-xl sm:text-2xl font-bold text-foreground">
-                120+ Tafsirs in 33 Languages, 13 Classical Lexicons
+                188 Tafsirs in 33 Languages, 13 Classical Lexicons
               </h3>
               <p className="text-xs sm:text-sm text-reading leading-relaxed">
                 Compare classical and modern commentaries side-by-side, analyze triliteral Arabic roots across historical lexicons (Lisan al-Arab, Taj al-Arus, Lane's Lexicon), and synthesize insights with our scholarly AI.

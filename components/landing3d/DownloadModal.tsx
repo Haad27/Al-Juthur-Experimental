@@ -56,7 +56,7 @@ export default function DownloadModal({ open, onOpenChange }: DownloadModalProps
             Download Al-Juthur
           </DialogTitle>
           <DialogDescription className="text-sm text-zinc-400 leading-relaxed">
-            Distraction-free Quranic study platform on your local machine with 120+ Tafsirs, 13 Classical Lexicons, and local database capability.
+            Distraction-free Quranic study platform on your local machine with 188 Tafsirs, 13 Classical Lexicons, and local database capability.
           </DialogDescription>
         </DialogHeader>
 

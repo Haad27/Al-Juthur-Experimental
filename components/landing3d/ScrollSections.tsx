@@ -38,7 +38,7 @@ const SECTIONS: SectionData[] = [
   {
     id: "tafsirs",
     icon: <Library className="w-6 h-6" />,
-    title: "120+ Tafsirs",
+    title: "188 Tafsirs",
     subtitle: "Classical & Contemporary",
     description:
       "Access over 120 tafsir sources organized by era and methodology. From the classical works of Ibn Kathir to modern scholarly interpretations.",
@@ -196,7 +196,7 @@ function FinalCTA({ onOpenDownload }: { onOpenDownload?: () => void }) {
           Start Your Journey
         </h2>
         <p className="text-base md:text-lg text-zinc-400 max-w-lg mx-auto font-light leading-relaxed">
-          The most comprehensive Qur'anic study platform. 120+ Tafsirs in 33 languages, 13 Lexicons, 127 Translations, and AI-powered insights.
+          The most comprehensive Qur'anic study platform. 188 Tafsirs in 33 languages, 13 Lexicons, 127 Translations, and AI-powered insights.
         </p>
       </div>
 

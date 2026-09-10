@@ -20,11 +20,11 @@ import NextTopLoader from "nextjs-toploader";
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://aljuthur.com"),
   title: {
-    default: "Al-Juthur | 120+ Tafsirs, Classical Roots & Scholarly AI",
+    default: "Al-Juthur | 188 Tafsirs, Classical Roots & Scholarly AI",
     template: "%s | Al-Juthur",
   },
   description:
-    "Explore the depths of classical Arabic with 120+ Tafsirs, 13 historical lexicons, word-by-word root analysis, and custom scholarly AI. Traditional knowledge in a modern interface.",
+    "Explore the depths of classical Arabic with 188 Tafsirs, 13 historical lexicons, word-by-word root analysis, and custom scholarly AI. Traditional knowledge in a modern interface.",
   applicationName: "Al-Juthur",
   keywords: [
     "Quran",
@@ -56,24 +56,24 @@ export const metadata = {
     locale: "en_US",
     url: "https://aljuthur.com",
     siteName: "Al-Juthur",
-    title: "Al-Juthur | 120+ Tafsirs, Classical Roots & Scholarly AI",
+    title: "Al-Juthur | 188 Tafsirs, Classical Roots & Scholarly AI",
     description:
-      "Explore the depths of classical Arabic with 120+ Tafsirs, 13 historical lexicons, word-by-word root analysis, and custom scholarly AI. Traditional knowledge in a modern interface.",
+      "Explore the depths of classical Arabic with 188 Tafsirs, 13 historical lexicons, word-by-word root analysis, and custom scholarly AI. Traditional knowledge in a modern interface.",
     images: [
       {
         url: "/og-image.png",
         width: 1024,
         height: 1024,
-        alt: "Al-Juthur - 120+ Tafsirs, Classical Roots & Scholarly AI",
+        alt: "Al-Juthur - 188 Tafsirs, Classical Roots & Scholarly AI",
         type: "image/png",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Al-Juthur | 120+ Tafsirs, Classical Roots & Scholarly AI",
+    title: "Al-Juthur | 188 Tafsirs, Classical Roots & Scholarly AI",
     description:
-      "Explore the depths of classical Arabic with 120+ Tafsirs, 13 historical lexicons, word-by-word root analysis, and custom scholarly AI. Traditional knowledge in a modern interface.",
+      "Explore the depths of classical Arabic with 188 Tafsirs, 13 historical lexicons, word-by-word root analysis, and custom scholarly AI. Traditional knowledge in a modern interface.",
     images: ["/og-image.png"],
   },
 };
