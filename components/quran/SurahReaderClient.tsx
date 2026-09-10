@@ -242,10 +242,10 @@ const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRAN
       <div className="flex items-center gap-5">
         <nav className="hidden lg:flex items-center gap-6 text-muted-foreground text-sm">
           <Link href="/home" className="hover:text-foreground transition">Home</Link>
-          <Link href="/tafsir" className="hover:text-foreground transition">Tafsir</Link>
+          <Link href="/saved" className="hover:text-foreground transition">Library</Link>
           <Link href="/lexicon" className="hover:text-foreground transition">Lexicon</Link>
-          <Link href="/ai" className="hover:text-foreground transition">Translator</Link>
           <Link href="/rag" className="hover:text-foreground transition">AI Scholar</Link>
+          <Link href="/quran" className="hover:text-foreground transition">Quran</Link>
         </nav>
         <ThemeToggleButton />
       </div>

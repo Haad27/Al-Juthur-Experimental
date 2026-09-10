@@ -8,12 +8,11 @@ import LogoIcon from "@/components/svg/icons/LogoIcon";
 import ThemeToggleButton from "@/components/ThemeToggleButton";
 
 const NAV = [
-  { href: "/home", label: "Home", match: (p: string) => p === "/home" || p.startsWith("/surah") },
-  { href: "/tafsir", label: "Tafsir", match: (p: string) => p.startsWith("/tafsir") },
-  { href: "/lexicon", label: "Lexicon", match: (p: string) => p.startsWith("/lexicon") },
-  { href: "/ai", label: "Translator", match: (p: string) => p.startsWith("/ai") },
-  { href: "/rag", label: "AI Scholar", match: (p: string) => p.startsWith("/rag") },
+  { href: "/home", label: "Home", match: (p: string) => p === "/home" || p === "/" },
   { href: "/saved", label: "Library", match: (p: string) => p.startsWith("/saved") },
+  { href: "/lexicon", label: "Lexicon", match: (p: string) => p.startsWith("/lexicon") },
+  { href: "/rag", label: "AI Scholar", match: (p: string) => p.startsWith("/rag") },
+  { href: "/quran", label: "Quran", match: (p: string) => p.startsWith("/quran") || p.startsWith("/surah") },
 ];
 
 export default function AppHeader({

@@ -39,6 +39,8 @@
     "node_modules",
     "database",
     "scripts",
-    "tmp"
+    "tmp",
+    "dist",
+    "dist/**"
   ]
 }

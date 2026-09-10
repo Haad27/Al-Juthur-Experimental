@@ -215,7 +215,7 @@ function FinalCTA({ onOpenDownload }: { onOpenDownload?: () => void }) {
             hover:shadow-[0_0_40px_rgba(196,165,116,0.25)]
           "
         >
-          Start Web App
+          Get Started
           <ArrowRight className="w-5 h-5 md:w-6 md:h-6 group-hover:translate-x-1 transition-transform" />
         </Link>
       </div>
