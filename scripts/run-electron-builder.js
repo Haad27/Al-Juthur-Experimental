@@ -29,10 +29,6 @@ function run() {
   console.log('Stripping dependencies from package.json...');
   const tempPkg = { ...pkg };
   tempPkg.dependencies = {};
-  
-  // Also add npmRebuild: false just to be completely safe during the actual build
-  if (!tempPkg.build) tempPkg.build = {};
-  tempPkg.build.npmRebuild = false;
 
   fs.writeFileSync(pkgPath, JSON.stringify(tempPkg, null, 2));
 

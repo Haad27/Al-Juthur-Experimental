@@ -143,14 +143,6 @@ export default function LandingPage() {
           </button>
 
           <button
-            onClick={() => setIsDownloadModalOpen(true)}
-            className="group relative inline-flex items-center gap-2 px-4 py-3 md:px-7 md:py-4 bg-[#C4A574]/15 hover:bg-[#C4A574]/25 backdrop-blur-md text-[#F5E8C7] rounded-full font-semibold text-xs md:text-lg transition-all duration-300 border border-[#C4A574]/40 hover:border-[#C4A574] hover:shadow-[0_0_25px_rgba(196,165,116,0.35)]"
-          >
-            <Download className="w-4 h-4 md:w-5 md:h-5 text-[#C4A574]" />
-            Download App
-          </button>
-
-          <button
             onClick={handleDiscoverMore}
             className="group relative inline-flex items-center gap-2 px-4 py-3 md:px-7 md:py-4 bg-white/5 hover:bg-white/10 backdrop-blur-md text-gray-300 hover:text-white rounded-full font-semibold text-xs md:text-lg transition-all duration-300 border border-white/20 hover:border-white/40"
           >

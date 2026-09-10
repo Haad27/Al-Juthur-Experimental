@@ -218,25 +218,6 @@ function FinalCTA({ onOpenDownload }: { onOpenDownload?: () => void }) {
           Start Web App
           <ArrowRight className="w-5 h-5 md:w-6 md:h-6 group-hover:translate-x-1 transition-transform" />
         </Link>
-
-        {onOpenDownload && (
-          <button
-            onClick={onOpenDownload}
-            className="
-              group relative inline-flex items-center gap-3
-              px-8 py-4 md:px-10 md:py-5
-              bg-white/5 hover:bg-white/10
-              backdrop-blur-xl
-              text-zinc-200 hover:text-white
-              rounded-full font-semibold text-base md:text-xl
-              transition-all duration-500
-              border border-white/20 hover:border-white/40
-            "
-          >
-            <Download className="w-5 h-5 md:w-6 md:h-6 text-[#C4A574]" />
-            Download App
-          </button>
-        )}
       </div>
     </div>
   );
