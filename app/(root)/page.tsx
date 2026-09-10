@@ -4,7 +4,7 @@ import { useRef, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ChevronDown, Download } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import LoadingScreen from "@/components/landing3d/LoadingScreen";
@@ -119,17 +119,6 @@ export default function LandingPage() {
         ref={heroContentRef}
         className="fixed inset-0 z-20 pointer-events-none flex flex-col justify-between p-4 md:p-12 lg:p-24 pb-20 md:pb-12"
       >
-        {/* Top Right Download Button */}
-        <div className="absolute top-4 right-4 md:top-8 md:right-8 lg:top-12 lg:right-12 pointer-events-auto animate-fade-in-down">
-          <button
-            onClick={() => setIsDownloadModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 md:px-4 md:py-2 bg-[#C4A574]/10 hover:bg-[#C4A574]/20 backdrop-blur-md text-[#C4A574] rounded-full text-xs md:text-sm font-medium transition-all duration-300 border border-[#C4A574]/25 hover:border-[#C4A574]/50"
-          >
-            <Download className="w-3.5 h-3.5 md:w-4 md:h-4" />
-            Download App
-          </button>
-        </div>
-
         {/* Header / Hook */}
         <div className="max-w-md pointer-events-auto animate-fade-in-left">
           <div className="mb-4 flex items-center gap-3.5">
@@ -144,20 +133,20 @@ export default function LandingPage() {
         </div>
 
         {/* Call to Action Buttons */}
-        <div className="mt-8 flex flex-wrap gap-3 justify-center md:justify-start pointer-events-auto mb-6 md:mb-0 animate-fade-in-up">
+        <div className="mt-8 flex flex-wrap gap-3.5 justify-center md:justify-start pointer-events-auto mb-6 md:mb-0 animate-fade-in-up">
           <button
             onClick={handleStartUsingIt}
-            className="group relative inline-flex items-center gap-2 px-4 py-3 md:px-7 md:py-4 bg-accent/20 hover:bg-accent/30 backdrop-blur-md text-[#F5E8C7] rounded-full font-semibold text-xs md:text-lg transition-all duration-300 border border-accent/50 hover:border-accent hover:shadow-[0_0_25px_rgba(196,165,116,0.35)]"
+            className="group relative inline-flex items-center justify-center gap-2.5 w-44 sm:w-52 md:w-56 h-12 md:h-14 bg-accent/20 hover:bg-accent/30 backdrop-blur-md text-[#F5E8C7] rounded-full font-semibold text-sm md:text-base transition-all duration-300 border border-accent/50 hover:border-accent hover:shadow-[0_0_25px_rgba(196,165,116,0.35)]"
           >
-            Get Started
+            <span>Get Started</span>
             <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform text-[#F5E8C7]" />
           </button>
 
           <button
             onClick={handleDiscoverMore}
-            className="group relative inline-flex items-center gap-2 px-4 py-3 md:px-7 md:py-4 bg-white/5 hover:bg-white/10 backdrop-blur-md text-gray-300 hover:text-white rounded-full font-semibold text-xs md:text-lg transition-all duration-300 border border-white/20 hover:border-white/40"
+            className="group relative inline-flex items-center justify-center gap-2.5 w-44 sm:w-52 md:w-56 h-12 md:h-14 bg-white/5 hover:bg-white/10 backdrop-blur-md text-gray-300 hover:text-white rounded-full font-semibold text-sm md:text-base transition-all duration-300 border border-white/20 hover:border-white/40"
           >
-            Discover More
+            <span>Discover More</span>
             <ChevronDown className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-y-0.5 transition-transform" />
           </button>
         </div>
