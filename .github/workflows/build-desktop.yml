@@ -1,0 +1,55 @@
+name: Build and Release Desktop App
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      release_draft:
+        description: 'Publish as draft release'
+        required: false
+        default: 'false'
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Build Next.js standalone application
+        run: npm run build
+        env:
+          NODE_ENV: production
+          NEXT_TELEMETRY_DISABLED: 1
+
+      - name: Prepare standalone assets for Electron
+        run: node scripts/copy-standalone.js
+
+      - name: Build and Publish Electron Package
+        run: npx electron-builder --publish always
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

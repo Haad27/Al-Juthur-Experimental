@@ -8,6 +8,27 @@ const isDev = !app.isPackaged;
 let mainWindow;
 let nextProcess;
 
+const net = require('net');
+
+function getAvailablePort(desiredPort = 3000) {
+  return new Promise((resolve) => {
+    const tester = net.createServer()
+      .once('error', () => {
+        // Port taken, let OS assign a free port
+        const fallback = net.createServer()
+          .once('listening', () => {
+            const assigned = fallback.address().port;
+            fallback.close(() => resolve(assigned));
+          })
+          .listen(0, '127.0.0.1');
+      })
+      .once('listening', () => {
+        tester.close(() => resolve(desiredPort));
+      })
+      .listen(desiredPort, '127.0.0.1');
+  });
+}
+
 async function startNextServer() {
   if (isDev) {
     // In dev, next is started by concurrently. We just return the default dev port.
@@ -16,9 +37,7 @@ async function startNextServer() {
     // In prod, start the standalone Next.js server
     return new Promise(async (resolve, reject) => {
       try {
-        // dynamic import of get-port because it's esm
-        const getPort = await import('get-port');
-        const port = await getPort.default({ port: 3000 });
+        const port = await getAvailablePort(3000);
         
         // When packaged by electron-builder with 'asar: false' or extraResources,
         // the Next.js standalone app will be located relatively to process.resourcesPath.

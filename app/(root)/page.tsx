@@ -4,11 +4,12 @@ import { useRef, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowRight, ChevronDown, Download } from "lucide-react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import LoadingScreen from "@/components/landing3d/LoadingScreen";
 import LogoIcon from "@/components/svg/icons/LogoIcon";
+import DownloadModal from "@/components/landing3d/DownloadModal";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -45,6 +46,7 @@ export default function LandingPage() {
   const mainRef = useRef<HTMLDivElement>(null);
   const heroContentRef = useRef<HTMLDivElement>(null);
   const scrollProgress = useRef<number>(0);
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
 
   useEffect(() => {
     // Lock scroll briefly while 3D assets load
@@ -131,18 +133,26 @@ export default function LandingPage() {
         </div>
 
         {/* Call to Action Buttons */}
-        <div className="mt-8 flex flex-row gap-3 justify-center md:justify-start pointer-events-auto mb-6 md:mb-0 animate-fade-in-up">
+        <div className="mt-8 flex flex-wrap gap-3 justify-center md:justify-start pointer-events-auto mb-6 md:mb-0 animate-fade-in-up">
           <button
             onClick={handleStartUsingIt}
-            className="group relative inline-flex items-center gap-2 px-4 py-3 md:px-8 md:py-4 bg-accent/20 hover:bg-accent/30 backdrop-blur-md text-[#F5E8C7] rounded-full font-semibold text-xs md:text-lg transition-all duration-300 border border-accent/50 hover:border-accent hover:shadow-[0_0_25px_rgba(196,165,116,0.35)]"
+            className="group relative inline-flex items-center gap-2 px-4 py-3 md:px-7 md:py-4 bg-accent/20 hover:bg-accent/30 backdrop-blur-md text-[#F5E8C7] rounded-full font-semibold text-xs md:text-lg transition-all duration-300 border border-accent/50 hover:border-accent hover:shadow-[0_0_25px_rgba(196,165,116,0.35)]"
           >
-            Start Using It
+            Start Web App
             <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform text-[#F5E8C7]" />
           </button>
 
           <button
+            onClick={() => setIsDownloadModalOpen(true)}
+            className="group relative inline-flex items-center gap-2 px-4 py-3 md:px-7 md:py-4 bg-[#C4A574]/15 hover:bg-[#C4A574]/25 backdrop-blur-md text-[#F5E8C7] rounded-full font-semibold text-xs md:text-lg transition-all duration-300 border border-[#C4A574]/40 hover:border-[#C4A574] hover:shadow-[0_0_25px_rgba(196,165,116,0.35)]"
+          >
+            <Download className="w-4 h-4 md:w-5 md:h-5 text-[#C4A574]" />
+            Download App
+          </button>
+
+          <button
             onClick={handleDiscoverMore}
-            className="group relative inline-flex items-center gap-2 px-4 py-3 md:px-8 md:py-4 bg-white/5 hover:bg-white/10 backdrop-blur-md text-gray-300 hover:text-white rounded-full font-semibold text-xs md:text-lg transition-all duration-300 border border-white/20 hover:border-white/40"
+            className="group relative inline-flex items-center gap-2 px-4 py-3 md:px-7 md:py-4 bg-white/5 hover:bg-white/10 backdrop-blur-md text-gray-300 hover:text-white rounded-full font-semibold text-xs md:text-lg transition-all duration-300 border border-white/20 hover:border-white/40"
           >
             Discover More
             <ChevronDown className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-y-0.5 transition-transform" />
@@ -151,7 +161,13 @@ export default function LandingPage() {
       </div>
 
       {/* Scrollable HTML Content Layer — in normal document flow above canvas */}
-      <ScrollSections />
+      <ScrollSections onOpenDownload={() => setIsDownloadModalOpen(true)} />
+
+      {/* Download Desktop App Modal */}
+      <DownloadModal
+        open={isDownloadModalOpen}
+        onOpenChange={setIsDownloadModalOpen}
+      />
     </div>
   );
 }

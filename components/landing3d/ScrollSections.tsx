@@ -3,7 +3,7 @@
 import { useRef, useEffect } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowRight, BookOpen, Library, BookText, BrainCircuit, Languages } from "lucide-react";
+import { ArrowRight, BookOpen, Library, BookText, BrainCircuit, Languages, Download } from "lucide-react";
 import Link from "next/link";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -156,7 +156,7 @@ function FeatureCard({ section }: { section: SectionData }) {
   );
 }
 
-function FinalCTA() {
+function FinalCTA({ onOpenDownload }: { onOpenDownload?: () => void }) {
   const ctaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -200,23 +200,44 @@ function FinalCTA() {
         </p>
       </div>
 
-      <Link
-        href="/home"
-        className="
-          group relative inline-flex items-center gap-3
-          px-8 py-4 md:px-12 md:py-5
-          bg-[#C4A574]/15 hover:bg-[#C4A574]/25
-          backdrop-blur-xl
-          text-[#F5E8C7] hover:text-white
-          rounded-full font-semibold text-base md:text-xl
-          transition-all duration-500
-          border border-[#C4A574]/40 hover:border-[#C4A574]/60
-          hover:shadow-[0_0_40px_rgba(196,165,116,0.25)]
-        "
-      >
-        Start Using It
-        <ArrowRight className="w-5 h-5 md:w-6 md:h-6 group-hover:translate-x-1 transition-transform" />
-      </Link>
+      <div className="flex flex-col sm:flex-row items-center gap-4">
+        <Link
+          href="/home"
+          className="
+            group relative inline-flex items-center gap-3
+            px-8 py-4 md:px-10 md:py-5
+            bg-[#C4A574]/15 hover:bg-[#C4A574]/25
+            backdrop-blur-xl
+            text-[#F5E8C7] hover:text-white
+            rounded-full font-semibold text-base md:text-xl
+            transition-all duration-500
+            border border-[#C4A574]/40 hover:border-[#C4A574]/60
+            hover:shadow-[0_0_40px_rgba(196,165,116,0.25)]
+          "
+        >
+          Start Web App
+          <ArrowRight className="w-5 h-5 md:w-6 md:h-6 group-hover:translate-x-1 transition-transform" />
+        </Link>
+
+        {onOpenDownload && (
+          <button
+            onClick={onOpenDownload}
+            className="
+              group relative inline-flex items-center gap-3
+              px-8 py-4 md:px-10 md:py-5
+              bg-white/5 hover:bg-white/10
+              backdrop-blur-xl
+              text-zinc-200 hover:text-white
+              rounded-full font-semibold text-base md:text-xl
+              transition-all duration-500
+              border border-white/20 hover:border-white/40
+            "
+          >
+            <Download className="w-5 h-5 md:w-6 md:h-6 text-[#C4A574]" />
+            Download App
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -245,7 +266,7 @@ function ScrollIndicator() {
   );
 }
 
-export default function ScrollSections() {
+export default function ScrollSections({ onOpenDownload }: { onOpenDownload?: () => void } = {}) {
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -282,7 +303,7 @@ export default function ScrollSections() {
         className="relative flex items-center justify-center pointer-events-auto"
         style={{ minHeight: "100vh" }}
       >
-        <FinalCTA />
+        <FinalCTA onOpenDownload={onOpenDownload} />
       </section>
     </div>
   );
