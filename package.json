@@ -11,9 +11,9 @@
     "lint": "next lint",
     "postinstall": "prisma generate",
     "dev:electron": "concurrently -k \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
-    "build:electron": "npm run build && node scripts/copy-standalone.js && electron-builder build",
-    "build:electron:dir": "npm run build && node scripts/copy-standalone.js && electron-builder build --dir",
-    "package": "electron-builder build"
+    "build:electron": "npm run build && node scripts/copy-standalone.js && node scripts/run-electron-builder.js",
+    "build:electron:dir": "npm run build && node scripts/copy-standalone.js && node scripts/run-electron-builder.js --dir",
+    "package": "node scripts/run-electron-builder.js"
   },
   "build": {
     "appId": "com.aljuthur.app",

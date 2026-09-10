@@ -53,7 +53,7 @@ jobs:
         run: node scripts/copy-standalone.js
 
       - name: Build and Publish Electron Package
-        run: npx electron-builder --publish always
+        run: node scripts/run-electron-builder.js --publish always
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: "--max-old-space-size=8192"
