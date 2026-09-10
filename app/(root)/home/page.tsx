@@ -69,7 +69,7 @@ export default function DiscoveryHomePage() {
   const moodsRef = useRef<HTMLDivElement>(null);
 
   // Audio store state
-  const { currentSurah, isPlaying } = useAudioStore();
+  const { currentSurah, isPlaying, pause } = useAudioStore();
 
   useEffect(() => {
     const refreshStorage = () => {
@@ -747,20 +747,16 @@ export default function DiscoveryHomePage() {
                     </span>
                     <button
                       onClick={() => {
-                        if (isCurrent) {
-                          togglePlay();
+                        if (isCurrent && isPlaying) {
+                          pause();
                         } else {
-                          playSurah(surah.number);
+                          router.push(`/surah/${surah.number}`);
                         }
                       }}
                       className="size-9 rounded-full bg-foreground text-background flex items-center justify-center hover:opacity-90 transition cursor-pointer shadow-sm"
-                      title={isPlayingThis ? "Pause" : "Play Recitation"}
+                      title="Read & Listen"
                     >
-                      {isPlayingThis ? (
-                        <span className="size-3 bg-background rounded-xs" />
-                      ) : (
-                        <Play className="size-4 fill-current ml-0.5" />
-                      )}
+                      <Play className="size-4 fill-current ml-0.5" />
                     </button>
                   </div>
                 </div>
