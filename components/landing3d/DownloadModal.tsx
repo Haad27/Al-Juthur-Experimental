@@ -139,7 +139,7 @@ export default function DownloadModal({ open, onOpenChange }: DownloadModalProps
 
         {/* Footer / All releases link */}
         <div className="mt-2 flex items-center justify-between pt-3 border-t border-white/10 text-xs">
-          <span className="text-zinc-500">v0.1.0 • Desktop Release</span>
+          <span className="text-zinc-500">Latest Desktop Release</span>
           <a
             href={LATEST_RELEASE_URL}
             target="_blank"

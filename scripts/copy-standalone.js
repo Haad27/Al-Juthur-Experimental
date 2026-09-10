@@ -17,6 +17,18 @@ function copyStandaloneAssets() {
   if (fs.existsSync(sourcePublicPath)) {
     fs.cpSync(sourcePublicPath, standalonePublicPath, { recursive: true });
   }
+
+  const sourceDatabasePath = path.join(__dirname, '..', 'database');
+  const standaloneDatabasePath = path.join(standalonePath, 'database');
+  if (fs.existsSync(sourceDatabasePath)) {
+    fs.cpSync(sourceDatabasePath, standaloneDatabasePath, { recursive: true });
+  }
+
+  const sourcePrismaPath = path.join(__dirname, '..', 'prisma');
+  const standalonePrismaPath = path.join(standalonePath, 'prisma');
+  if (fs.existsSync(sourcePrismaPath)) {
+    fs.cpSync(sourcePrismaPath, standalonePrismaPath, { recursive: true });
+  }
   
   console.log('Assets copied successfully.');
 }

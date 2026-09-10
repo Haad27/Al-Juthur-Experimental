@@ -1,6 +1,8 @@
 {
   "name": "al-juthur",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "description": "Al-Juthur Quran Research Platform",
+  "author": "Haad27",
   "main": "electron/main.js",
   "scripts": {
     "dev": "next dev -H 0.0.0.0",
@@ -16,6 +18,7 @@
   "build": {
     "appId": "com.aljuthur.app",
     "productName": "Al-Juthur",
+    "asar": true,
     "publish": {
       "provider": "github",
       "owner": "Haad27",
@@ -26,11 +29,6 @@
     },
     "files": [
       "electron/**/*",
-      ".next/standalone/**/*",
-      "public/**/*",
-      "database/**/*",
-      "prisma/**/*",
-      "node_modules/**/*",
       "package.json"
     ],
     "extraResources": [
