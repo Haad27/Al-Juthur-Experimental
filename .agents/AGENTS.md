@@ -1,8 +1,10 @@
 # Rules
 
-## Git & Milestones
-- **Automatic GitHub Push**: Whenever any change, feature, bugfix, or milestone is completed and verified, automatically stage, commit, and push the changes directly to GitHub (`git add <files>`, `git commit -m "..."`, and `git push origin main`).
-- Provide the user with a concise summary of the changes made and confirm that they have been committed and pushed to the repository.
+## Git & Environments (Test Mode vs Production)
+- **Test Mode Repository (`experimental`)**: All active development, experiments, bugfixes, and feature changes must be committed and pushed ONLY to the test mode repository (`git push experimental main`). Local branch tracks `experimental/main`.
+- **Strict Production Protection (`origin`)**: NEVER push to production (`origin` / `git push origin main`) without explicit, direct user instruction and approval.
+- **Milestone Workflow**: Whenever any change, feature, bugfix, or milestone is completed and verified, stage, commit, and push to test mode (`git add <files>`, `git commit -m "..."`, and `git push experimental main`).
+- Provide the user with a concise summary of the changes made and confirm that they have been committed and pushed to the test repository.
 
 ## UI/UX Design System & Architectural Rules
 

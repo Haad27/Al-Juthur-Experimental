@@ -1,4 +1,5 @@
 "use client";
+// Production: Simple Qur'an Homepage (Surahs Catalog)
 import React, { useEffect, useState, useRef } from "react";
 import { fetchAllSurahs } from "@/api/api";
 import Link from "next/link";
