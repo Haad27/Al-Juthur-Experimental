@@ -22,7 +22,11 @@ export interface RagModeInfo {
   isPrimary?: boolean;
 }
 
-export const RAG_MODES: RagModeInfo[] = [
+/**
+ * All defined RAG modes preserved in codebase.
+ * To re-enable any mode, add its ID to ACTIVE_RAG_MODE_IDS below.
+ */
+export const ALL_RAG_MODES: RagModeInfo[] = [
   {
     id: "default",
     name: "1. AI Scholar · General Tafsir",
@@ -31,7 +35,7 @@ export const RAG_MODES: RagModeInfo[] = [
     badge: "Main Model · Balanced",
     badgeColor: "bg-accent/10 text-accent border-accent/25",
     isPrimary: true,
-    targetIntent: "Direct answers and general Quranic queries using the safest, most universally accepted classical commentaries.",
+    targetIntent: "Direct answers and general Quranic queries using authentic classical commentaries.",
     sources: [
       "Tafsir Ibn Kathir (English & Arabic)",
       "Tafsir al-Tabari (Jami' al-Bayan)",
@@ -66,7 +70,7 @@ export const RAG_MODES: RagModeInfo[] = [
     badge: "Main Model · Root Lexicon",
     badgeColor: "bg-accent/10 text-accent border-accent/25",
     isPrimary: true,
-    targetIntent: "Classical dictionary lookups, root concept structure, semantic nuances, and exhaustive classical Arabic usage.",
+    targetIntent: "Classical dictionary lookups, root concept structure, and classical Arabic usage.",
     sources: [
       "Mufradat Alfaz al-Quran (Al-Raghib al-Isfahani)",
       "Lisan al-Arab (Ibn Manzur)",
@@ -228,4 +232,15 @@ export const RAG_MODES: RagModeInfo[] = [
     description: "Engages with deep rational arguments, logical proofs, and philosophical reflections across classical scholarship."
   }
 ];
+
+/**
+ * Production Active Modes: Currently limited to General Tafsir & Classical Lexicon.
+ * All other modes remain preserved in ALL_RAG_MODES and query-router for future re-activation.
+ */
+export const ACTIVE_RAG_MODE_IDS: string[] = ["default", "lexicon"];
+
+export const RAG_MODES: RagModeInfo[] = ALL_RAG_MODES.filter((mode) =>
+  ACTIVE_RAG_MODE_IDS.includes(mode.id)
+);
+
 

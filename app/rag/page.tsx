@@ -544,21 +544,11 @@ function RagChatContent() {
           {messages.length === 0 && (
             <div className="min-h-[calc(100dvh-10rem)] flex flex-col items-center justify-center text-center px-2 sm:px-4 py-8 max-w-3xl mx-auto animate-in fade-in duration-300">
               
-              {/* Tafsir Name & Mode Pill */}
-              <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-card border border-border text-xs text-reading mb-6 shadow-sm max-w-full overflow-hidden">
-                <BookOpen className="size-3.5 text-accent shrink-0" />
-                <span className="font-semibold text-foreground shrink-0">{currentBot.shortName}</span>
-                <span className="text-muted-foreground shrink-0">•</span>
-                <span className="text-muted-foreground truncate max-w-[260px] sm:max-w-[420px]">
-                  {currentBot.sources.join(" • ")}
-                </span>
-              </div>
-
               {/* Main Headline */}
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground tracking-tight mb-3">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground tracking-tight mb-2.5">
                 Your Source for Tafsir and Classical Lexicon
               </h1>
-              <p className="text-xs sm:text-sm text-muted-foreground max-w-lg mb-6 leading-[1.7]">
+              <p className="text-xs sm:text-sm text-muted-foreground max-w-lg mb-5 leading-relaxed">
                 {currentBot.targetIntent}
               </p>
 
