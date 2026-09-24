@@ -39,3 +39,10 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ### 5. Codebase Discipline
 - When performing UI/UX styling passes, do NOT alter backend API logic, Prisma queries, RAG retrieval logic, or audio store state management.
+
+## Execution & Token Efficiency Rules
+- **Local Code Search First**: ALWAYS use `grep_search` or `find_by_name` for codebase symbol searches. NEVER use `search_web` for internal code, filenames, or React components.
+- **Batch Edits & Inspections**: Perform related file views and edits in batched steps rather than taking dozens of single-line turns to inspect small snippets.
+- **Build Verification Discipline**: Do NOT run full `npm run build` or status polling loops after minor text/UI tweaks. Reserve full production builds for final milestone verification.
+- **No Large File Ingestion in Context**: Do NOT download or stream multi-megabyte datasets (e.g., raw book files, multi-volume texts) into the LLM conversation context. Use local Node/Python scripts to process raw data directly to disk.
+- **Direct Task Completion**: Complete tasks in the minimum required steps and provide concise final output without unnecessary continuous status polling.

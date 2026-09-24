@@ -112,10 +112,10 @@ const Sidebar = () => {
   const pillW = `${pillPct}%`;
 
   return (
-    <div>
-      <div
+    <>
+      <aside
         className={cn(
-          "min-h-screen lg:block hidden sticky top-0 z-40 border-r border-border bg-sidebar text-sidebar-foreground transition-all duration-300",
+          "h-screen h-[100dvh] lg:flex flex-col hidden sticky top-0 z-40 border-r border-border bg-sidebar text-sidebar-foreground transition-all duration-300 shrink-0 self-start",
           isAudioActive 
             ? "w-0 opacity-0 overflow-hidden border-none pointer-events-none" 
             : isCollapsed ? "w-16" : "md:w-[350px]"
