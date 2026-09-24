@@ -248,6 +248,13 @@ const Settings = () => {
       </div> */}
 
       <SettingSection
+        icon={<Globe className="w-4 h-4 text-accent" />}
+        title="Translation"
+        control={<TranslationSelector />}
+        description="Search & select from 127 translations grouped by language."
+      />
+
+      <SettingSection
         icon={<BookMarked className="w-4 h-4 text-accent" />}
         title="Mushaf Script Style"
         control={
@@ -322,13 +329,6 @@ const Settings = () => {
           </div>
         }
         description="Choose from 9 authentic Mushaf editions: Uthmanic Hafs (Madani), Indo-Pak Nastaleeq, Digital Naskh, and Warsh script."
-      />
-
-      <SettingSection
-        icon={<Globe className="w-4 h-4 text-accent" />}
-        title="Translation"
-        control={<TranslationSelector />}
-        description="Search & select from 127 translations grouped by language."
       />
 
       <SettingSection

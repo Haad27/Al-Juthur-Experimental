@@ -154,6 +154,13 @@ body {
   color: var(--foreground);
 }
 
+/* Prevent layout shift and window scroll jumping when Radix UI dropdowns/selects are open */
+body[data-scroll-locked] {
+  overflow: visible !important;
+  margin-right: 0px !important;
+  padding-right: 0px !important;
+}
+
 /* Reading measure: ~65–75 characters per line */
 .reading-measure {
   max-width: 72ch;

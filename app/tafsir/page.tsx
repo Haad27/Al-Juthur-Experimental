@@ -1469,7 +1469,7 @@ function TafsirContent() {
 
         <FloatingAskScholarButton
           onClick={() => setAiChatContext({ surah: activeSurah, ayah: currentAyahIndex + 1 })}
-          label="Ask Tafsir Scholar"
+          label="Ask AI"
           isVisible={!aiChatContext}
           className="bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] right-4 sm:right-6 md:right-[calc(4rem+1.25rem)] lg:right-[calc(5rem+1.5rem)]"
         />

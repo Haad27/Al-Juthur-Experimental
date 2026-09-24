@@ -8,12 +8,12 @@ import LogoIcon from "@/components/svg/icons/LogoIcon";
 import ThemeToggleButton from "@/components/ThemeToggleButton";
 
 const NAV = [
-  { href: "/home", label: "Home", match: (p: string) => p === "/home" || p.startsWith("/surah") },
+  { href: "/home", label: "Home", match: (p: string) => p === "/home" },
   { href: "/tafsir", label: "Tafsir", match: (p: string) => p.startsWith("/tafsir") },
   { href: "/lexicon", label: "Lexicon", match: (p: string) => p.startsWith("/lexicon") },
-  { href: "/ai", label: "Translator", match: (p: string) => p.startsWith("/ai") },
-  { href: "/rag", label: "AI Scholar", match: (p: string) => p.startsWith("/rag") },
+  { href: "/rag", label: "Al-Juthur Chatbot", match: (p: string) => p.startsWith("/rag") },
   { href: "/saved", label: "Library", match: (p: string) => p.startsWith("/saved") },
+  { href: "/quran", label: "Qur'an", match: (p: string) => p.startsWith("/quran") || p.startsWith("/surah") },
 ];
 
 export default function AppHeader({
@@ -60,8 +60,20 @@ export default function AppHeader({
           </nav>
         )}
 
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2.5">
           {rightSlot}
+          <Link
+            href="/quran"
+            className={cn(
+              "inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all",
+              pathname.startsWith("/quran") || pathname.startsWith("/surah")
+                ? "bg-accent/15 text-accent border-accent/40"
+                : "bg-card hover:bg-muted text-foreground border-border hover:border-accent/40"
+            )}
+            title="Read Qur'an Surahs"
+          >
+            <span>Qur'an</span>
+          </Link>
           <ThemeToggleButton />
         </div>
       </div>

@@ -245,7 +245,7 @@ const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRAN
           <Link href="/tafsir" className="hover:text-foreground transition">Tafsir</Link>
           <Link href="/lexicon" className="hover:text-foreground transition">Lexicon</Link>
           <Link href="/ai" className="hover:text-foreground transition">Translator</Link>
-          <Link href="/rag" className="hover:text-foreground transition">AI Scholar</Link>
+          <Link href="/rag" className="hover:text-foreground transition">Al-Juthur Chatbot</Link>
         </nav>
         <ThemeToggleButton />
       </div>
@@ -721,9 +721,9 @@ const AyahRow = React.memo(({
                 }}
                 className="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card/70 hover:bg-accent/10 border border-accent/35 hover:border-accent/80 opacity-75 hover:opacity-100 transition-all cursor-pointer shadow-sm"
               >
-                <Bot size={14} className="text-accent group-hover:text-accent transition-colors animate-bounce" />
+                <Bot size={14} className="text-accent group-hover:text-accent transition-colors" />
                 <span className="text-[11px] font-semibold tracking-wide text-accent group-hover:text-foreground transition-colors">
-                  Ask Tafsir Scholar
+                  Ask AI
                 </span>
               </button>
 
