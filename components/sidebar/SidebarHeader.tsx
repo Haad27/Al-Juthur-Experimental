@@ -20,7 +20,7 @@ const SidebarHeader = ({ toggleSidebar, isCollapsed }: SidebarHeaderProps) => {
           <Link
             href={`/home`}
             className="group flex items-center gap-2 cursor-pointer min-w-0"
-            title="Al-Juthur"
+            title="Juthur AI"
           >
             <LogoIcon size={24} className="text-accent group-hover:scale-105 transition-transform shrink-0" />
             <span className="text-lg font-bold tracking-tight text-foreground truncate">

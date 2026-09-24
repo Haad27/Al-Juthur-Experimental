@@ -11,7 +11,7 @@ const NAV = [
   { href: "/home", label: "Home", match: (p: string) => p === "/home" },
   { href: "/tafsir", label: "Tafsir", match: (p: string) => p.startsWith("/tafsir") },
   { href: "/lexicon", label: "Lexicon", match: (p: string) => p.startsWith("/lexicon") },
-  { href: "/rag", label: "Al-Juthur Chatbot", match: (p: string) => p.startsWith("/rag") },
+  { href: "/rag", label: "Juthur AI", match: (p: string) => p.startsWith("/rag") },
   { href: "/saved", label: "Library", match: (p: string) => p.startsWith("/saved") },
   { href: "/quran", label: "Qur'an", match: (p: string) => p.startsWith("/quran") || p.startsWith("/surah") },
 ];
