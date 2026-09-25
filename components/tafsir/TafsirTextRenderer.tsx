@@ -178,32 +178,37 @@ export default function TafsirTextRenderer({
       html = applyArabicFont(html);
     }
 
-    // 5. Apply User Highlights
+    // 5. Apply User Highlights (Fill and Underline modes)
     if (highlights && highlights.length > 0) {
       highlights.forEach(h => {
         if (!h.text || h.text.trim() === '') return;
         try {
           const escaped = h.text.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
           const color = (h.color || 'gold').toLowerCase();
-          
-          let bg = 'rgba(245, 158, 11, 0.30)'; // amber/gold
-          let border = 'rgba(245, 158, 11, 0.75)';
-          if (color === 'pink') {
-            bg = 'rgba(236, 72, 153, 0.30)';
-            border = 'rgba(236, 72, 153, 0.80)';
-          } else if (color === 'green') {
-            bg = 'rgba(34, 197, 94, 0.28)';
-            border = 'rgba(34, 197, 94, 0.80)';
-          } else if (color === 'blue') {
-            bg = 'rgba(59, 130, 246, 0.28)';
-            border = 'rgba(59, 130, 246, 0.80)';
-          } else if (color === 'purple') {
-            bg = 'rgba(168, 85, 247, 0.28)';
-            border = 'rgba(168, 85, 247, 0.80)';
+          const isUnderline = color.endsWith('_underline');
+          const baseColor = color.replace('_underline', '');
+
+          let bg = 'rgba(250, 204, 21, 0.22)'; // amber/yellow-400
+          let border = '#eab308';
+          if (baseColor === 'pink') {
+            bg = 'rgba(248, 113, 113, 0.22)'; // coral/rose-400
+            border = '#ef4444';
+          } else if (baseColor === 'green') {
+            bg = 'rgba(74, 222, 128, 0.20)'; // sage green-400
+            border = '#22c55e';
+          } else if (baseColor === 'blue') {
+            bg = 'rgba(96, 165, 250, 0.20)'; // sky blue-400
+            border = '#3b82f6';
+          } else if (baseColor === 'purple') {
+            bg = 'rgba(167, 139, 250, 0.20)'; // violet-400
+            border = '#8b5cf6';
           }
 
-          const markStyle = `background-color: ${bg}; border-bottom: 2px solid ${border}; border-radius: 3px; padding: 1px 2px;`;
-          html = html.replace(new RegExp(escaped, "g"), `<mark style="${markStyle}" class="text-inherit cursor-pointer transition-opacity hover:opacity-90" data-id="${h.id || ''}" data-color="${color}">$&</mark>`);
+          const markStyle = isUnderline
+            ? `background-color: transparent; border-bottom: 2.5px solid ${border}; padding-bottom: 1px; text-decoration: none;`
+            : `background-color: ${bg}; border-bottom: 2px solid ${border}; border-radius: 3px; padding: 1px 2.5px; text-decoration: none;`;
+
+          html = html.replace(new RegExp(escaped, "g"), `<mark style="${markStyle}" class="text-inherit cursor-pointer transition-opacity hover:opacity-85" data-id="${h.id || ''}" data-color="${color}">$&</mark>`);
         } catch (e) {
           console.error("Failed to highlight", e);
         }
@@ -223,7 +228,7 @@ export default function TafsirTextRenderer({
             const regex = new RegExp(escaped, "g");
             if (regex.test(html)) {
               // Subtle sticky note icon placed right after the complete highlighted word/phrase
-              const iconHtml = ` <span role="button" tabindex="0" class="inline-flex items-center justify-center shrink-0 size-4 md:size-4.5 rounded bg-amber-400/25 hover:bg-amber-400/40 border border-amber-500/40 text-amber-600 dark:text-amber-400 text-[10px] mx-1 align-middle cursor-pointer transition-transform hover:scale-110 select-none shadow-xs" title="View Note" onclick="const btn = this.closest('.tafsir-card-container')?.querySelector('.note-badge-btn'); if(btn) btn.click(); event.stopPropagation();">📝</span>`;
+              const iconHtml = ` <span role="button" tabindex="0" data-note-id="${note.id}" class="note-indicator-icon inline-flex items-center justify-center shrink-0 size-4 md:size-4.5 rounded bg-amber-400/25 hover:bg-amber-400/45 border border-amber-500/40 text-amber-600 dark:text-amber-400 text-[11px] mx-1 align-middle cursor-pointer transition-transform hover:scale-115 select-none shadow-xs" title="Click to view note">📝</span>`;
               html = html.replace(regex, `$&${iconHtml}`);
             }
           } catch (e) {

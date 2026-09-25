@@ -40,6 +40,7 @@ import { getEnglishFont, getUrduFont } from "@/lib/fontsConfig";
 import { copyToClipboard, cn } from "@/lib/utils";
 import AyahNoteModal from "@/components/quran/AyahNoteModal";
 import HighlightToolbar, { HighlightColor, HighlightSelection } from "@/components/tafsir/HighlightToolbar";
+import NotePopover from "@/components/tafsir/NotePopover";
 import { getTafsirFameRank, getLanguagePriority, getTafsirDifficulty } from "@/lib/tafsirRanking";
 import { getTafsirWarning } from "@/lib/tafsirWarnings";
 import TopicSearchModal from "@/components/shared/TopicSearchModal";
@@ -242,6 +243,7 @@ function TafsirContent() {
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const [noteSelectedText, setNoteSelectedText] = useState<string>("");
   const [noteTargetAyah, setNoteTargetAyah] = useState<number | null>(null);
+  const [activeNotePopup, setActiveNotePopup] = useState<{ note: UserNote; x: number; y: number } | null>(null);
   
   const [isHighlightMode, setIsHighlightMode] = useState(false);
   const [isToolsMenuOpen, setIsToolsMenuOpen] = useState(false);
@@ -480,7 +482,7 @@ function TafsirContent() {
             ayahNumber: ayahNum,
             type: "translation",
             x: rect.left + rect.width / 2,
-            y: rect.top - 10,
+            y: rect.top,
             isExisting: true,
             color,
           });
@@ -488,9 +490,27 @@ function TafsirContent() {
       }
     };
 
+    const handleNoteClick = (e: MouseEvent | TouchEvent) => {
+      const target = (e.target as HTMLElement).closest('.note-indicator-icon, [data-note-id]');
+      if (target) {
+        e.preventDefault();
+        e.stopPropagation();
+        const noteId = target.getAttribute('data-note-id');
+        const found = notes.find(n => n.id === noteId);
+        if (found) {
+          const rect = target.getBoundingClientRect();
+          setActiveNotePopup({
+            note: found,
+            x: rect.left + rect.width / 2,
+            y: rect.top,
+          });
+        }
+      }
+    };
+
     const handleGlobalClick = (e: MouseEvent | TouchEvent) => {
       const target = e.target as HTMLElement;
-      if (!target.closest('.highlight-popover') && target.tagName.toLowerCase() !== 'mark' && window.getSelection()?.isCollapsed) {
+      if (!target.closest('.highlight-popover') && !target.closest('.note-indicator-icon') && target.tagName.toLowerCase() !== 'mark' && window.getSelection()?.isCollapsed) {
         setHighlightSelection(null);
       }
     };
@@ -498,6 +518,7 @@ function TafsirContent() {
     document.addEventListener("mouseup", handleSelection);
     document.addEventListener("touchend", handleSelection);
     document.addEventListener("click", handleMarkClick);
+    document.addEventListener("click", handleNoteClick);
     document.addEventListener("mousedown", handleGlobalClick);
     document.addEventListener("touchstart", handleGlobalClick);
 
@@ -505,10 +526,11 @@ function TafsirContent() {
       document.removeEventListener("mouseup", handleSelection);
       document.removeEventListener("touchend", handleSelection);
       document.removeEventListener("click", handleMarkClick);
+      document.removeEventListener("click", handleNoteClick);
       document.removeEventListener("mousedown", handleGlobalClick);
       document.removeEventListener("touchstart", handleGlobalClick);
     };
-  }, [activeSurah]);
+  }, [activeSurah, notes]);
   const [loadedTafsir, setLoadedTafsir] = useState<Record<number, TafsirEntry>>({});
   const [loadingEntries, setLoadingEntries] = useState<boolean>(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -1482,6 +1504,30 @@ function TafsirContent() {
           ayahNumber={noteTargetAyah || (currentAyahIndex + 1)}
           selectedText={noteSelectedText}
           onSave={(saved) => setNotes(prev => [...prev, saved])}
+        />
+
+        {/* Floating Interactive Note Popover when clicking inline note icon */}
+        <NotePopover
+          note={activeNotePopup?.note || null}
+          position={activeNotePopup ? { x: activeNotePopup.x, y: activeNotePopup.y } : null}
+          onClose={() => setActiveNotePopup(null)}
+          onDelete={async (id) => {
+            const ok = await deleteUserNote(id);
+            if (ok) {
+              toast.success("Note deleted.");
+              setNotes(prev => prev.filter(n => n.id !== id));
+              setActiveNotePopup(null);
+            } else {
+              toast.error("Failed to delete note.");
+            }
+          }}
+          onEdit={(note) => {
+            const anchorMatch = note.text.match(/^\[Re:\s*"([^"]+)"\]\n\n([\s\S]*)$/);
+            setNoteSelectedText(anchorMatch ? anchorMatch[1] : "");
+            setNoteTargetAyah(note.ayahNumber);
+            setIsNoteModalOpen(true);
+            setActiveNotePopup(null);
+          }}
         />
 
         {!aiChatContext && (
