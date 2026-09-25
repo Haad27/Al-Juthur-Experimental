@@ -6,9 +6,10 @@ import { getQuranComSurahTranslation } from '@/lib/translations';
 
 // Helper to build a cached NextResponse
 function cachedJson(data: unknown, maxAge: number, staleWhileRevalidate = Math.floor(maxAge / 4)) {
+  const isEmpty = Array.isArray((data as any)?.data) && (data as any).data.length === 0;
   return NextResponse.json(data, {
     headers: {
-      'Cache-Control': `public, s-maxage=${maxAge}, stale-while-revalidate=${staleWhileRevalidate}`,
+      'Cache-Control': isEmpty ? 'no-cache, no-store, must-revalidate' : `public, s-maxage=${maxAge}, stale-while-revalidate=${staleWhileRevalidate}`,
     },
   });
 }
@@ -211,7 +212,7 @@ const getTafsirLibrary = unstable_cache(
       authors: authorsByLang[l.id] || []
     }));
   },
-  ['tafsir-library-v12'],
+  ['tafsir-library-v13'],
   { revalidate: 2592000 } // 30 days
 );
 
@@ -275,7 +276,7 @@ const getLocalDownloadedTafsir = unstable_cache(
       return null;
     }
   },
-  ['local-downloaded-tafsir-v9'],
+  ['local-downloaded-tafsir-v10'],
   { revalidate: 2592000 }
 );
 
@@ -313,7 +314,7 @@ const getSurahDbTafsir = unstable_cache(
     tafsirs.sort((a, b) => (a.ayah?.numberInSurah || 0) - (b.ayah?.numberInSurah || 0));
     return tafsirs;
   },
-  ['surah-db-tafsir-v9'],
+  ['surah-db-tafsir-v10'],
   { revalidate: 2592000 } // 30 days
 );
 
