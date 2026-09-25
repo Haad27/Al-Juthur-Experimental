@@ -987,20 +987,43 @@ export default function SurahReaderClient({
     };
     const handleJump = (e: any) => {
       const index = e.detail?.index;
-      if (typeof index === 'number') {
-        setIsNavigatingAyah(true);
-        setTimeout(() => {
-          virtuosoRef.current?.scrollToIndex({ index, align: 'center', behavior: 'smooth' });
-          setTimeout(() => {
-            const element = document.getElementById(`ayah-${index + 1}`);
-            if (element) {
-              const c = ["dark:bg-[#1c1c1cff]", "bg-[var(--sephia-300)]"];
-              element.classList.add(...c);
-              setTimeout(() => element.classList.remove(...c), 2000);
-            }
+      if (typeof index !== 'number' || isNaN(index) || index < 0 || index >= totalAyahs) return;
+
+      const targetAyahNum = index + 1;
+      const targetPage = Math.floor(index / PAGE_SIZE);
+
+      setIsNavigatingAyah(true);
+
+      const performJump = () => {
+        // Scroll directly to target item
+        virtuosoRef.current?.scrollToIndex({ index, align: 'center', behavior: 'auto' });
+
+        let attempts = 0;
+        const checkAndHighlight = () => {
+          const element = document.getElementById(`ayah-${targetAyahNum}`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const c = ["ring-2", "ring-accent", "bg-accent/10", "transition-all"];
+            element.classList.add(...c);
+            setTimeout(() => element.classList.remove(...c), 2500);
             setIsNavigatingAyah(false);
-          }, 300);
-        }, 100);
+          } else if (attempts < 15) {
+            attempts++;
+            setTimeout(checkAndHighlight, 60);
+          } else {
+            setIsNavigatingAyah(false);
+          }
+        };
+
+        setTimeout(checkAndHighlight, 50);
+      };
+
+      if (loadedPagesRef.current.has(targetPage)) {
+        performJump();
+      } else {
+        fetchPage(targetPage, translationEdition)
+          .then(() => performJump())
+          .catch(() => performJump());
       }
     };
     const handleOpenTopics = () => setIsTopicModalOpen(true);
@@ -1012,7 +1035,7 @@ export default function SurahReaderClient({
       window.removeEventListener('jumpToAyah', handleJump);
       window.removeEventListener('open-topic-modal', handleOpenTopics);
     }
-  }, []);
+  }, [fetchPage, translationEdition, totalAyahs]);
 
   const [collapsed, setCollapsed] = useState(true);
   const [isNavigatingAyah, setIsNavigatingAyah] = useState(false);
@@ -1102,6 +1125,9 @@ export default function SurahReaderClient({
           visibleAyahRef.current = currentAyah;
           setVisibleAyahNumber(currentAyah);
           debouncedSaveRecent(currentAyah);
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new CustomEvent('visibleAyahChanged', { detail: { ayah: currentAyah } }));
+          }
         }
       });
     };
@@ -1349,6 +1375,9 @@ export default function SurahReaderClient({
                   visibleAyahRef.current = detected;
                   setVisibleAyahNumber(detected);
                   debouncedSaveRecent(detected);
+                  if (typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent('visibleAyahChanged', { detail: { ayah: detected } }));
+                  }
                 }
               }
 

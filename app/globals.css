@@ -155,8 +155,10 @@ body {
 }
 
 /* Prevent layout shift and window scroll jumping when Radix UI dropdowns/selects are open */
-body[data-scroll-locked] {
+body[data-scroll-locked],
+html[data-scroll-locked] {
   overflow: visible !important;
+  position: static !important;
   margin-right: 0px !important;
   padding-right: 0px !important;
 }

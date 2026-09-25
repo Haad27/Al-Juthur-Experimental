@@ -10,10 +10,8 @@ import JuzList from "../JuzList";
 import { Input } from "../ui/input";
 import { useParams } from "next/navigation";
 import Settings from "../Settings";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
 import { motion } from "framer-motion";
-import { BookOpen, SlidersHorizontal, Search, Compass, ChevronRight } from "lucide-react";
+import { BookOpen, SlidersHorizontal, Search, Compass, ChevronRight, ChevronDown } from "lucide-react";
 import { useAudioStore } from "@/lib/stores/audioStore";
 import { isSurahMatch, parseSurahVerseReference } from "@/lib/searchUtils";
 
@@ -38,6 +36,19 @@ const Sidebar = () => {
 
   const isPlayingAudio = useAudioStore((s) => s.isPlaying);
   const [isAudioActive, setIsAudioActive] = useState(false);
+  const [targetAyahInput, setTargetAyahInput] = useState("");
+  const [currentVisibleAyah, setCurrentVisibleAyah] = useState<number | null>(null);
+
+  useEffect(() => {
+    const handleVisibleAyah = (e: any) => {
+      const ayah = e.detail?.ayah;
+      if (typeof ayah === "number" && ayah > 0) {
+        setCurrentVisibleAyah(ayah);
+      }
+    };
+    window.addEventListener("visibleAyahChanged", handleVisibleAyah);
+    return () => window.removeEventListener("visibleAyahChanged", handleVisibleAyah);
+  }, []);
 
   useEffect(() => {
     const checkAudio = () => {
@@ -201,38 +212,58 @@ const Sidebar = () => {
               </button>
             )}
 
-            {surahNumber > 0 && surahs.length > 0 && (
-              <div className="flex items-center gap-2 bg-card/50 border border-border rounded-xl px-3 py-1.5 shadow-inner">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-accent shrink-0">Go to Ayah:</span>
-                <Select
-                  value=""
-                  onValueChange={(value) => {
-                    const val = Number(value);
-                    if (val > 0) {
-                      window.dispatchEvent(new CustomEvent('jumpToAyah', { detail: { index: val - 1 } }));
-                    }
-                  }}
-                >
-                  <SelectTrigger className="flex-1 h-7 bg-transparent border-0 shadow-none hover:bg-muted/70 rounded-lg dark:text-foreground text-foreground font-mono text-xs focus:ring-0">
-                    <SelectValue placeholder="Select..." />
-                  </SelectTrigger>
-                  <SelectContent
-                    position="popper"
-                    sideOffset={4}
-                    className="bg-card border-border max-h-[300px] z-[9999]"
-                  >
-                    {Array.from(
-                      { length: surahs.find(s => s.number === surahNumber)?.numberOfAyahs || 1 },
-                      (_, i) => i + 1
-                    ).map(num => (
-                      <SelectItem key={num} value={num.toString()} className="text-foreground focus:bg-accent focus:text-foreground cursor-pointer transition-colors">
-                        Ayah {num}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            {surahNumber > 0 && surahs.length > 0 && (() => {
+              const currentSurahObj = surahs.find((s) => s.number === surahNumber);
+              const maxAyahs = currentSurahObj?.numberOfAyahs || 1;
+              return (
+                <div className="flex items-center justify-between gap-2 bg-card/50 border border-border rounded-xl px-3 py-1.5 shadow-inner">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-accent shrink-0">Go to Ayah:</span>
+                  <div className="flex items-center gap-1.5 flex-1 justify-end min-w-0">
+                    <input
+                      type="number"
+                      min={1}
+                      max={maxAyahs}
+                      placeholder={currentVisibleAyah ? `${currentVisibleAyah}` : `1-${maxAyahs}`}
+                      value={targetAyahInput}
+                      onChange={(e) => setTargetAyahInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          const val = parseInt(targetAyahInput, 10);
+                          if (!isNaN(val) && val >= 1 && val <= maxAyahs) {
+                            window.dispatchEvent(new CustomEvent('jumpToAyah', { detail: { index: val - 1 } }));
+                            setTargetAyahInput("");
+                          }
+                        }
+                      }}
+                      className="w-14 h-7 bg-background/90 border border-border/80 focus:border-accent/60 rounded-lg text-center font-mono text-xs text-foreground placeholder:text-muted-foreground outline-none transition-all shadow-inner [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      title="Type Ayah number and press Enter"
+                    />
+                    <div className="relative">
+                      <select
+                        value=""
+                        onChange={(e) => {
+                          const val = Number(e.target.value);
+                          if (val > 0) {
+                            window.dispatchEvent(new CustomEvent('jumpToAyah', { detail: { index: val - 1 } }));
+                          }
+                          e.target.value = "";
+                        }}
+                        className="h-7 pl-2 pr-6 bg-muted/60 hover:bg-muted border border-border/80 rounded-lg text-foreground font-mono text-xs cursor-pointer outline-none appearance-none transition-colors"
+                        title="Select an Ayah from list"
+                      >
+                        <option value="" disabled className="bg-card text-muted-foreground">List...</option>
+                        {Array.from({ length: maxAyahs }, (_, i) => i + 1).map((num) => (
+                          <option key={num} value={num.toString()} className="bg-card text-foreground">
+                            Ayah {num}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="w-3.5 h-3.5 text-muted-foreground absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
 

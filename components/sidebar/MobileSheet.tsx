@@ -26,7 +26,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import useScrollDirection from "@/hooks/useScrollDirection";
 import { motion } from "framer-motion";
-import { Search, SlidersHorizontal, ChevronRight, ArrowLeft, Compass } from "lucide-react";
+import { Search, SlidersHorizontal, ChevronRight, ChevronDown, ArrowLeft, Compass } from "lucide-react";
 import { SURAHS_DATA } from "@/lib/surahsData";
 import { useAudioStore } from "@/lib/stores/audioStore";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
@@ -170,30 +170,29 @@ const MobileSheet = ({
             </div>
 
             <div className="relative w-28 shrink-0">
-              <Select
+              <select
                 value=""
-                onValueChange={(value) => {
-                  const val = Number(value);
+                onChange={(e) => {
+                  const val = Number(e.target.value);
                   if (val > 0) {
                     window.dispatchEvent(new CustomEvent('jumpToAyah', { detail: { index: val - 1 } }));
                   }
+                  e.target.value = "";
                 }}
+                className="w-full h-[38px] bg-card border border-border rounded-lg text-xs text-reading font-medium outline-none cursor-pointer appearance-none pl-3 pr-7 shadow-sm focus:border-accent/60"
+                title="Go to Ayah"
               >
-                <SelectTrigger className="w-full h-[38px] bg-card border-border rounded-lg text-xs text-reading font-medium focus:ring-0 shadow-sm pr-8">
-                  <SelectValue placeholder="Ayah..." />
-                </SelectTrigger>
-                <SelectContent
-                  position="popper"
-                  sideOffset={4}
-                  className="bg-card border-border max-h-[300px] z-[9999]"
-                >
-                  {Array.from({ length: SURAHS_DATA.find((s) => s.number === surahNumber)?.numberOfAyahs || 1 }, (_, i) => i + 1).map((num) => (
-                    <SelectItem key={num} value={num.toString()} className="text-foreground focus:bg-accent focus:text-foreground cursor-pointer transition-colors text-xs">
-                      Ayah {num}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <option value="" disabled className="bg-card text-muted-foreground">Ayah...</option>
+                {Array.from(
+                  { length: SURAHS_DATA.find((s) => s.number === surahNumber)?.numberOfAyahs || 1 },
+                  (_, i) => i + 1
+                ).map((num) => (
+                  <option key={num} value={num.toString()} className="bg-card text-foreground">
+                    Ayah {num}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-3.5 h-3.5 text-muted-foreground absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
           </div>
         </div>
