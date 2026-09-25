@@ -13,6 +13,8 @@ interface AyahNoteModalProps {
   ayahNumber: number;
   /** Optional: pre-selected text to anchor the note to */
   selectedText?: string;
+  /** Called after a note is successfully saved */
+  onSave?: (note: any) => void;
 }
 
 export default function AyahNoteModal({
@@ -21,6 +23,7 @@ export default function AyahNoteModal({
   surahNumber,
   ayahNumber,
   selectedText,
+  onSave,
 }: AyahNoteModalProps) {
   const [noteText, setNoteText] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -60,6 +63,7 @@ export default function AyahNoteModal({
       if (saved) {
         toast.success("Note saved to your library.");
         setNoteText("");
+        onSave?.(saved);
         onClose();
       } else {
         toast.error("Failed to save note. Please try again.");

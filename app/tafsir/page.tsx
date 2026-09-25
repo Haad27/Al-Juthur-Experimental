@@ -1477,6 +1477,7 @@ function TafsirContent() {
           surahNumber={activeSurah}
           ayahNumber={currentAyahIndex + 1}
           selectedText={noteSelectedText}
+          onSave={(saved) => setNotes(prev => [...prev, saved])}
         />
 
         {!aiChatContext && (
@@ -2449,6 +2450,7 @@ function TafsirCard({
             authorName={authorName}
             onNavigateToAyah={(num) => scrollToAyah(num)}
             onUpgradeClick={openPricingModal}
+            highlights={highlights}
           />
         </div>
 
@@ -2480,6 +2482,24 @@ function TafsirCard({
             currentAuthorId={authorId}
             languages={languages}
           />
+        )}
+
+        {/* Notes panel — shown when user clicks the note badge */}
+        {showNotesPanel && ayahNotes.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-amber-500/20 space-y-3 animate-in fade-in slide-in-from-top-2">
+            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-xs font-bold">
+              <StickyNote className="size-3.5" />
+              Your Notes ({ayahNotes.length})
+            </div>
+            {ayahNotes.map(note => (
+              <div key={note.id} className="p-3 rounded-xl bg-amber-500/8 border border-amber-500/20 text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+                {note.text}
+                <div className="text-[10px] text-muted-foreground mt-1.5">
+                  {new Date(note.createdAt).toLocaleDateString()}
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>
