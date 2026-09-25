@@ -38,6 +38,7 @@ import { copyToClipboard, cn } from "@/lib/utils";
 import AyahNoteModal from "@/components/quran/AyahNoteModal";
 import { getTafsirFameRank, getLanguagePriority, getTafsirDifficulty } from "@/lib/tafsirRanking";
 import { getTafsirWarning } from "@/lib/tafsirWarnings";
+import TopicSearchModal from "@/components/shared/TopicSearchModal";
 import InlineTranslation from "@/components/shared/InlineTranslation";
 import AlJuthurLoadingProgress from "@/components/shared/AlJuthurLoadingProgress";
 import { isTafsirMatch, filterTafsirs } from "@/lib/searchUtils";
@@ -1597,7 +1598,7 @@ function TafsirContent() {
           surahName={currentSurahMeta?.englishName || `Surah ${activeSurah}`}
           authorName={activeAuthor?.name}
           loadedTafsir={loadedTafsir}
-          onSelectAyah={(ayahNum) => handleSelectTopicAyahInTafsir(ayahNum)}
+          onSelectAyah={(ayahNum: number) => handleSelectTopicAyahInTafsir(ayahNum)}
         />
       </div>
     );
