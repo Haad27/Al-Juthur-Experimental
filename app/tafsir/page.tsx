@@ -1002,20 +1002,6 @@ function TafsirContent() {
                   <Compass className="size-3.5 text-accent" />
                   <span className="hidden xs:inline">Picker</span>
                 </button>
-                {/* Reader Mode (Horizontal) Toggle */}
-                <button
-                  onClick={() => setReadingMode(readingMode === "horizontal" ? "vertical" : "horizontal")}
-                  className={cn(
-                    "flex items-center gap-1 px-2 py-1.5 rounded-lg border text-xs font-medium transition-all shrink-0 cursor-pointer",
-                    readingMode === "horizontal"
-                      ? "border-accent bg-accent/15 text-accent font-semibold"
-                      : "border-border bg-card hover:bg-muted text-foreground"
-                  )}
-                  title={readingMode === "horizontal" ? "Switch to Vertical Scroll Mode" : "Switch to Horizontal Reader Mode"}
-                >
-                  <BookOpenText className="size-3.5 text-accent" />
-                  <span className="hidden xs:inline">{readingMode === "horizontal" ? "Vertical" : "Reader"}</span>
-                </button>
                 <ThemeToggleButton />
               </div>
             </div>
@@ -1111,20 +1097,6 @@ function TafsirContent() {
                   Surahs (1 - 114)
                 </h2>
                 <div className="flex items-center gap-1.5 shrink-0">
-                  {/* Reader Mode (Horizontal) Toggle */}
-                  <button
-                    onClick={() => setReadingMode(readingMode === "horizontal" ? "vertical" : "horizontal")}
-                    className={cn(
-                      "h-7 px-2 rounded-lg border text-xs font-medium transition-all inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer",
-                      readingMode === "horizontal"
-                        ? "border-accent bg-accent/15 text-accent font-semibold"
-                        : "border-border bg-card/60 hover:bg-muted text-foreground"
-                    )}
-                    title={readingMode === "horizontal" ? "Switch to Vertical Scroll Mode" : "Switch to Horizontal Reader Mode"}
-                  >
-                    <BookOpenText className="size-3.5 text-accent" />
-                    <span>{readingMode === "horizontal" ? "Vertical" : "Reader"}</span>
-                  </button>
                   {/* Topics Button */}
                   <button
                     onClick={() => setIsTopicModalOpen(true)}

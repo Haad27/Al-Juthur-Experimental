@@ -30,7 +30,7 @@ import { Search, SlidersHorizontal, ChevronRight, ChevronDown, ArrowLeft, Compas
 import { SURAHS_DATA } from "@/lib/surahsData";
 import { useAudioStore } from "@/lib/stores/audioStore";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
-import { isSurahMatch, parseSurahVerseReference } from "@/lib/searchUtils";
+import { filterSurahs, parseSurahVerseReference } from "@/lib/searchUtils";
 
 const MobileSheet = ({
   isOpen,
@@ -72,9 +72,7 @@ const MobileSheet = ({
   const parsedVerseRef = parseSurahVerseReference(searchQuery);
   const targetAyahFromSearch = parsedVerseRef?.ayahNumber;
 
-  const filteredSurahs = surahs?.filter((surah: Surah) =>
-    isSurahMatch(searchQuery, surah)
-  );
+  const filteredSurahs = filterSurahs(searchQuery, surahs || []);
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       {surahNumber ? (

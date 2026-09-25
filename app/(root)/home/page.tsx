@@ -89,9 +89,7 @@ const SurahsList = () => {
   const parsedHomeVerseRef = parseSurahVerseReference(homeSearchQuery);
   const targetAyahFromHomeSearch = parsedHomeVerseRef?.ayahNumber;
 
-  const filteredHomeSurahs = surahs.filter((surah) =>
-    isSurahMatch(homeSearchQuery, surah)
-  );
+  const filteredHomeSurahs = filterSurahs(homeSearchQuery, surahs);
 
   return (
     <>

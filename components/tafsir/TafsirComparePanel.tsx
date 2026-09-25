@@ -10,8 +10,7 @@ import {
 } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TafsirTextRenderer from "@/components/tafsir/TafsirTextRenderer";
-import { cn } from "@/lib/utils";
-import { isTafsirMatch } from "@/lib/searchUtils";
+import { filterTafsirs } from "@/lib/searchUtils";
 
 interface Author {
   id: number;
@@ -141,9 +140,7 @@ export default function TafsirComparePanel({
   const filteredCatalog = useMemo(() => {
     const q = query.trim();
     if (!q) return catalog.slice(0, 40);
-    return catalog
-      .filter((c) => isTafsirMatch(q, c.author, { name: c.languageName }))
-      .slice(0, 40);
+    return filterTafsirs(q, catalog).slice(0, 40);
   }, [catalog, query]);
 
   if (catalog.length === 0) return null;

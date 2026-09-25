@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { X, Search, Sparkles, BookOpen } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { isFuzzyMatch, isTafsirMatch } from "@/lib/searchUtils";
+import { filterTafsirs } from "@/lib/searchUtils";
 import { getTafsirFameRank, getLanguagePriority } from "@/lib/tafsirRanking";
 
 interface Author {
@@ -282,10 +281,7 @@ export default function TafsirWheelPickerModal({
 
   const filteredAuthors = useMemo(() => {
     if (!searchQuery.trim()) return allAuthors;
-    const query = searchQuery.trim();
-    return allAuthors.filter((a) =>
-      isTafsirMatch(query, a.author, { name: a.langName })
-    );
+    return filterTafsirs(searchQuery, allAuthors);
   }, [allAuthors, searchQuery]);
 
   // Lock body scrolling when modal is open
