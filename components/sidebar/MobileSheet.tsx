@@ -130,6 +130,19 @@ const MobileSheet = ({
                     <Compass className="size-3 text-accent" />
                     <span>Topics</span>
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof window !== "undefined") {
+                        window.dispatchEvent(new CustomEvent("open-global-topic-modal"));
+                      }
+                    }}
+                    className="flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-border/80 bg-card hover:bg-muted text-[11px] font-medium text-foreground transition-all shrink-0 cursor-pointer shadow-xs"
+                    title="Explore Topics in the Whole Quran"
+                  >
+                    <Search className="size-3 text-accent" />
+                    <span>Quran Topics</span>
+                  </button>
                   {currentSurahObj?.revelationType && (
                     <span className="px-2 py-0.5 rounded-full bg-accent/10 border border-accent/30 text-accent text-[10px] font-semibold tracking-wider uppercase">
                       {currentSurahObj.revelationType}
