@@ -178,12 +178,26 @@ export default function TafsirTextRenderer({
       html = applyArabicFont(html);
     }
 
+    // Helper to generate resilient regex pattern matching across whitespace, smart quotes, non-breaking spaces, and interleaved HTML tags
+    const buildResilientPattern = (rawStr: string) => {
+      const trimmed = rawStr.trim();
+      if (!trimmed) return null;
+
+      // Escape special characters except whitespace
+      const escaped = trimmed
+        .replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
+        .replace(/[''’‘]/g, "[''’‘]")
+        .replace(/[""“”]/g, '[""“”]')
+        .replace(/\\\s+|\s+/g, '(?:<[^>]+>|[\\s\\u00A0])+');
+
+      return escaped;
+    };
+
     // 5. Apply User Highlights (Fill and Underline modes)
     if (highlights && highlights.length > 0) {
       highlights.forEach(h => {
         if (!h.text || h.text.trim() === '') return;
         try {
-          const escaped = h.text.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
           const color = (h.color || 'gold').toLowerCase();
           const isUnderline = color.endsWith('_underline');
           const baseColor = color.replace('_underline', '');
@@ -208,7 +222,16 @@ export default function TafsirTextRenderer({
             ? `background-color: transparent; border-bottom: 2.5px solid ${border}; padding-bottom: 1px; text-decoration: none;`
             : `background-color: ${bg}; border-bottom: 2px solid ${border}; border-radius: 3px; padding: 1px 2.5px; text-decoration: none;`;
 
-          html = html.replace(new RegExp(escaped, "g"), `<mark style="${markStyle}" class="text-inherit cursor-pointer transition-opacity hover:opacity-85" data-id="${h.id || ''}" data-color="${color}">$&</mark>`);
+          // Handle multi-line selections across paragraphs
+          const segments = h.text.split(/\n+/).map(s => s.trim()).filter(s => s.length >= 2);
+          const targets = segments.length > 0 ? segments : [h.text.trim()];
+
+          targets.forEach(seg => {
+            const pattern = buildResilientPattern(seg);
+            if (!pattern) return;
+            const reg = new RegExp(pattern, 'gi');
+            html = html.replace(reg, `<mark style="${markStyle}" class="text-inherit cursor-pointer transition-opacity hover:opacity-85" data-id="${h.id || ''}" data-color="${color}">$&</mark>`);
+          });
         } catch (e) {
           console.error("Failed to highlight", e);
         }
@@ -222,17 +245,18 @@ export default function TafsirTextRenderer({
         if (anchorMatch) {
           let anchor = anchorMatch[1];
           if (anchor.endsWith('…')) anchor = anchor.slice(0, -1);
-          if (!anchor || anchor.trim() === '') return;
-          try {
-            const escaped = anchor.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-            const regex = new RegExp(escaped, "g");
-            if (regex.test(html)) {
-              // Subtle sticky note icon placed right after the complete highlighted word/phrase
-              const iconHtml = ` <span role="button" tabindex="0" data-note-id="${note.id}" class="note-indicator-icon inline-flex items-center justify-center shrink-0 size-4 md:size-4.5 rounded bg-amber-400/25 hover:bg-amber-400/45 border border-amber-500/40 text-amber-600 dark:text-amber-400 text-[11px] mx-1 align-middle cursor-pointer transition-transform hover:scale-115 select-none shadow-xs" title="Click to view note">📝</span>`;
-              html = html.replace(regex, `$&${iconHtml}`);
+          const pattern = buildResilientPattern(anchor);
+          if (pattern) {
+            try {
+              const regex = new RegExp(pattern, "gi");
+              if (regex.test(html)) {
+                // Subtle sticky note icon placed right after the complete highlighted word/phrase
+                const iconHtml = ` <span role="button" tabindex="0" data-note-id="${note.id}" class="note-indicator-icon inline-flex items-center justify-center shrink-0 size-4 md:size-4.5 rounded bg-amber-400/25 hover:bg-amber-400/45 border border-amber-500/40 text-amber-600 dark:text-amber-400 text-[11px] mx-1 align-middle cursor-pointer transition-transform hover:scale-115 select-none shadow-xs" title="Click to view note">📝</span>`;
+                html = html.replace(regex, `$&${iconHtml}`);
+              }
+            } catch (e) {
+              console.error("Failed to add note indicator", e);
             }
-          } catch (e) {
-            console.error("Failed to add note indicator", e);
           }
         }
       });

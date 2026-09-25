@@ -515,8 +515,13 @@ function TafsirContent() {
       }
     };
 
+    const handleTouchEnd = () => {
+      handleSelection();
+      setTimeout(handleSelection, 80);
+    };
+
     document.addEventListener("mouseup", handleSelection);
-    document.addEventListener("touchend", handleSelection);
+    document.addEventListener("touchend", handleTouchEnd);
     document.addEventListener("click", handleMarkClick);
     document.addEventListener("click", handleNoteClick);
     document.addEventListener("mousedown", handleGlobalClick);
@@ -524,7 +529,7 @@ function TafsirContent() {
 
     return () => {
       document.removeEventListener("mouseup", handleSelection);
-      document.removeEventListener("touchend", handleSelection);
+      document.removeEventListener("touchend", handleTouchEnd);
       document.removeEventListener("click", handleMarkClick);
       document.removeEventListener("click", handleNoteClick);
       document.removeEventListener("mousedown", handleGlobalClick);
@@ -2335,8 +2340,8 @@ function TafsirCard({
   const isArabicOrUrdu = isArabic || isUrduText;
   const cleanText = entry.text.replace(/<[^>]*>?/gm, '');
 
-  // Notes for this specific ayah
-  const ayahNotes = notes.filter(n => n.surahId === activeSurah && n.ayahNumber === ayahNumber);
+  // Notes for this specific ayah (type coerced for mobile SQLite consistency)
+  const ayahNotes = notes.filter(n => Number(n.surahId) === Number(activeSurah) && Number(n.ayahNumber) === Number(ayahNumber));
 
   const { tier, openPricingModal } = useSubscriptionStore();
   const authorId = entry.authorId || activeAuthor?.id || 0;
@@ -2344,12 +2349,12 @@ function TafsirCard({
 
   // Highlights for this specific ayah and author
   const ayahHighlights = highlights.filter(h => {
-    if (h.surahId !== activeSurah || h.ayahNumber !== ayahNumber) return false;
+    if (Number(h.surahId) !== Number(activeSurah) || Number(h.ayahNumber) !== Number(ayahNumber)) return false;
     if (h.type === 'arabic') return true;
     if (h.authorName && authorName) {
-      return h.authorName.toLowerCase() === authorName.toLowerCase() ||
-             h.authorName.toLowerCase().includes(authorName.toLowerCase()) ||
-             authorName.toLowerCase().includes(h.authorName.toLowerCase());
+      const hName = h.authorName.toLowerCase();
+      const aName = authorName.toLowerCase();
+      return hName === aName || hName.includes(aName) || aName.includes(hName);
     }
     return true;
   });
