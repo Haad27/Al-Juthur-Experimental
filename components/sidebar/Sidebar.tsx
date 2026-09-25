@@ -238,7 +238,7 @@ const Sidebar = () => {
 
         {/* Surah Panel */}
         {!isCollapsed && activeTab === "surah" && (
-          <div id="sidebar-surah-list" className="p-4 space-y-2 overflow-y-auto flex-1 min-h-0 custom-scrollbar">
+          <div id="sidebar-surah-list" className="p-4 pb-12 space-y-2 overflow-y-auto flex-1 min-h-0 custom-scrollbar">
             {filteredSurahs.map((surah) => {
               const isActive = surah.number === surahNumber;
               return (
@@ -304,7 +304,7 @@ const Sidebar = () => {
 
         {/* Page Panel */}
         {!isCollapsed && activeTab === "settings" && (
-          <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+          <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar flex flex-col">
             <Settings />
           </div>
         )}

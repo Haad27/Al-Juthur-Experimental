@@ -23,8 +23,8 @@ const AyahSkeleton = React.memo(({ estimatedHeight, isSidebarOpen }: AyahSkeleto
         "relative flex flex-col rounded-2xl shadow-sm w-full min-w-0 overflow-hidden box-border",
         "border border-accent/15 bg-card/40",
         isSidebarOpen
-          ? "my-1.5 sm:my-2 p-3 sm:p-4"
-          : "my-3 sm:my-5 p-3.5 sm:p-6 md:p-7"
+          ? "p-3 sm:p-4"
+          : "p-3.5 sm:p-6 md:p-7"
       )}
     >
       {/* Shimmer overlay */}

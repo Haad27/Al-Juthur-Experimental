@@ -213,7 +213,8 @@ const Settings = () => {
   const setPlaybackRate = useAudioStore((s) => s.setPlaybackRate);
 
   return (
-    <div className="p-2 sm:p-4 space-y-4 max-w-md w-full min-w-0 max-w-full overflow-y-auto overflow-x-hidden scrollable-container max-h-[calc(100vh-190px)] touch-pan-y">
+    <div className="p-3 sm:p-4 w-full min-w-0 max-w-full overflow-x-hidden min-h-full flex flex-col justify-between touch-pan-y">
+      <div className="space-y-4">
       {/* Subscription & AI Quota Banner (Temporarily commented out - Full Free mode) */}
       {/* <div className="p-3.5 rounded-2xl bg-gradient-to-br from-accent/10 via-card to-card border border-accent/25 space-y-2.5">
         <div className="flex items-center justify-between">
@@ -657,8 +658,10 @@ const Settings = () => {
         description="Adjust recitation playback speed (0.5x slow to 2.0x fast)."
       />
 
+      </div>
+ 
       {/* Subtle Legal & Policy Links Footer */}
-      <div className="pt-4 pb-2 border-t border-border mt-4 text-center">
+      <div className="pt-4 pb-4 border-t border-border mt-6 text-center">
         <div className="flex items-center justify-center gap-3 text-[11px] text-muted-foreground font-medium">
           <Link
             href="/legal?tab=terms"

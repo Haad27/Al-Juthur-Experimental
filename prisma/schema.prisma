@@ -192,6 +192,7 @@ model UserHighlight {
   text        String
   type        String   @default("arabic") // "arabic" or "translation"
   authorName  String?  // The name of the tafsir author if highlighted from a tafsir
+  color       String?  @default("gold")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

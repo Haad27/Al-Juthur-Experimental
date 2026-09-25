@@ -9,9 +9,7 @@ import useSurahNavigation from "@/hooks/useSurahNavigation";
 import { amiri, amiriquran, inter } from "@/app/fonts";
 import MobileSheet from "@/components/sidebar/MobileSheet";
 import AppHeader from "@/components/layout/AppHeader";
-import MenuIcon from "@/components/svg/icons/MenuIcon";
-import { toast } from "sonner";
-import { isSurahMatch, parseSurahVerseReference } from "@/lib/searchUtils";
+import { isSurahMatch, filterSurahs, parseSurahVerseReference } from "@/lib/searchUtils";
 import { getRecentQuranReading, RecentQuranReading } from "@/lib/readerStorage";
 
 const SurahsList = () => {

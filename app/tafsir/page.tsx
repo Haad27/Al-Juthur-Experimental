@@ -40,8 +40,7 @@ import { getTafsirFameRank, getLanguagePriority, getTafsirDifficulty } from "@/l
 import { getTafsirWarning } from "@/lib/tafsirWarnings";
 import InlineTranslation from "@/components/shared/InlineTranslation";
 import AlJuthurLoadingProgress from "@/components/shared/AlJuthurLoadingProgress";
-import TopicSearchModal from "@/components/shared/TopicSearchModal";
-import { isTafsirMatch } from "@/lib/searchUtils";
+import { isTafsirMatch, filterTafsirs } from "@/lib/searchUtils";
 
 interface Author {
   id: number;
@@ -241,6 +240,7 @@ function TafsirContent() {
   const [isToolsMenuOpen, setIsToolsMenuOpen] = useState(false);
   
   const [highlightSelection, setHighlightSelection] = useState<{
+    id?: string;
     text: string;
     surahNumber: number;
     ayahNumber: number;
@@ -248,6 +248,7 @@ function TafsirContent() {
     x: number;
     y: number;
     isExisting?: boolean;
+    color?: string;
   } | null>(null);
 
   const [highlights, setHighlights] = useState<UserHighlight[]>([]);
@@ -404,7 +405,7 @@ function TafsirContent() {
     const handleSelection = async () => {
       const selection = window.getSelection();
       if (!selection || selection.isCollapsed) {
-        setHighlightSelection(null);
+        // Only clear if not clicking inside the popover (handled by global click)
         return;
       }
       
@@ -412,7 +413,6 @@ function TafsirContent() {
       const rect = range.getBoundingClientRect();
       const text = selection.toString().trim();
       if (!text || text.length < 2) {
-        setHighlightSelection(null);
         return;
       }
 
@@ -437,21 +437,16 @@ function TafsirContent() {
         node = node.parentNode;
       }
 
-      if (type && targetAyahNum && isHighlightMode) {
-        // Auto-save highlight
-        const sNum = targetSurahNum || activeSurah;
-        const authorStr = type === 'translation' && activeAuthor?.authorName ? activeAuthor.authorName : undefined;
-        const res = await saveUserHighlight(sNum, targetAyahNum, text, type, authorStr);
-        if (res) {
-          toast.success("Highlight saved.");
-          setHighlights(prev => [...prev, res]);
-        } else {
-          toast.error("Failed to save highlight.");
-        }
-        selection.removeAllRanges();
-        setHighlightSelection(null);
-      } else {
-        setHighlightSelection(null);
+      if (type && targetAyahNum) {
+        setHighlightSelection({
+          text,
+          surahNumber: targetSurahNum || activeSurah,
+          ayahNumber: targetAyahNum,
+          type,
+          x: rect.left + rect.width / 2,
+          y: rect.top - 10,
+          isExisting: false
+        });
       }
     };
 
@@ -462,9 +457,11 @@ function TafsirContent() {
         const surahNum = parseInt(target.closest('[data-surah-num]')?.getAttribute('data-surah-num') || "0", 10);
         const ayahNum = parseInt(target.closest('[data-ayah-num]')?.getAttribute('data-ayah-num') || "0", 10);
         const rect = target.getBoundingClientRect();
+        const id = target.getAttribute('data-id') || undefined;
         
         if (text && (surahNum || activeSurah) && ayahNum) {
           setHighlightSelection({
+            id,
             text,
             surahNumber: surahNum || activeSurah,
             ayahNumber: ayahNum,
@@ -477,16 +474,27 @@ function TafsirContent() {
       }
     };
 
+    const handleGlobalClick = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.highlight-popover') && target.tagName.toLowerCase() !== 'mark' && window.getSelection()?.isCollapsed) {
+        setHighlightSelection(null);
+      }
+    };
+
     document.addEventListener("mouseup", handleSelection);
     document.addEventListener("touchend", handleSelection);
     document.addEventListener("click", handleMarkClick);
+    document.addEventListener("mousedown", handleGlobalClick);
+    document.addEventListener("touchstart", handleGlobalClick);
 
     return () => {
       document.removeEventListener("mouseup", handleSelection);
       document.removeEventListener("touchend", handleSelection);
       document.removeEventListener("click", handleMarkClick);
+      document.removeEventListener("mousedown", handleGlobalClick);
+      document.removeEventListener("touchstart", handleGlobalClick);
     };
-  }, [activeSurah, isHighlightMode]);
+  }, [activeSurah]);
   const [loadedTafsir, setLoadedTafsir] = useState<Record<number, TafsirEntry>>({});
   const [loadingEntries, setLoadingEntries] = useState<boolean>(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -660,7 +668,7 @@ function TafsirContent() {
 
   // Filter authors based on search query, language, era, and difficulty selection
   const filteredAuthors = useMemo(() => {
-    return allAuthorsWithLang.filter(({ author, language }) => {
+    const base = allAuthorsWithLang.filter(({ author, language }) => {
       const matchesLang =
         selectedLanguage === "All" ||
         language.name.toLowerCase() === selectedLanguage.toLowerCase();
@@ -670,9 +678,10 @@ function TafsirContent() {
       const matchesDifficulty =
         selectedDifficulty === "All Levels" ||
         author.difficulty === selectedDifficulty;
-      const matchesSearch = matchesSmartSearch(author, language, searchQuery);
-      return matchesLang && matchesEra && matchesDifficulty && matchesSearch;
+      return matchesLang && matchesEra && matchesDifficulty;
     });
+
+    return filterTafsirs(searchQuery, base);
   }, [allAuthorsWithLang, selectedLanguage, selectedEra, selectedDifficulty, searchQuery]);
 
   const currentSurahMeta = SURAHS_DATA.find((s) => s.number === activeSurah) || SURAHS_DATA[0];
@@ -1655,15 +1664,28 @@ function TafsirContent() {
             {/* Right side: Search and Refine */}
             <div className="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto shrink-0">
               <div ref={searchContainerRef} className="relative w-full md:w-80">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
                 <input
                   type="text"
                   placeholder="Search tafsirs..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setIsSearchFocused(true)}
-                  className="w-full bg-card border border-border rounded-xl pl-10 pr-4 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-all"
+                  className="w-full bg-card border border-border rounded-xl pl-10 pr-9 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-all"
                 />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setIsSearchFocused(false);
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                    aria-label="Clear search"
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                )}
                 
                 {/* Autocomplete Dropdown */}
                 {isSearchFocused && searchQuery.trim().length > 0 && (
@@ -1675,14 +1697,15 @@ function TafsirContent() {
                             key={`suggest-${language.id}-${author.id}`}
                             onClick={() => {
                               setSearchQuery(author.name);
+                              setSelectedLanguage(language.name);
                               setIsSearchFocused(false);
                             }}
-                            className="flex flex-col text-left px-3 py-2 hover:bg-accent/10 rounded-lg transition-colors w-full"
+                            className="flex flex-col text-left px-3 py-2 hover:bg-accent/10 rounded-lg transition-colors w-full cursor-pointer"
                           >
                             <span className="text-sm font-semibold text-foreground">{author.name}</span>
                             <span className="text-[10px] text-muted-foreground flex items-center gap-1">
                               {author.authorName && <span>{author.authorName} • </span>}
-                              <span className="text-accent">{language.name}</span>
+                              <span className="text-accent font-medium">{language.name}</span>
                             </span>
                           </button>
                         ))}
@@ -2123,47 +2146,68 @@ function TafsirContent() {
 
       {highlightSelection && (
         <div
-          className="fixed z-[999] flex items-center bg-[#2d2d2d] dark:bg-[#1a1a1a] border border-[#3a3a3a] rounded-lg shadow-2xl py-1 px-1.5 gap-0.5"
+          className="fixed z-[999] flex items-center bg-[#ffffff] dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#3a3a3a] rounded-full shadow-lg py-1.5 px-3 gap-3 highlight-popover text-sm font-medium"
           style={{
-            top: highlightSelection.y,
+            top: highlightSelection.y - 10,
             left: highlightSelection.x,
             transform: 'translate(-50%, -100%)',
           }}
         >
-          {highlightSelection.isExisting ? (
+          <button
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              copyToClipboard(highlightSelection.text, "Copied to clipboard!");
+              setHighlightSelection(null);
+              window.getSelection()?.removeAllRanges();
+            }}
+            className="text-gray-700 dark:text-[#d4d4d4] hover:text-black dark:hover:text-white transition"
+          >
+            Copy
+          </button>
+          
+          <div className="w-[1px] h-4 bg-gray-300 dark:bg-[#3a3a3a]" />
+          
+          <button
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (navigator.share) {
+                navigator.share({
+                  title: 'Al-Juthur Tafsir',
+                  text: highlightSelection.text,
+                }).catch(console.error);
+              } else {
+                copyToClipboard(highlightSelection.text, "Copied to clipboard!");
+              }
+              setHighlightSelection(null);
+              window.getSelection()?.removeAllRanges();
+            }}
+            className="text-gray-700 dark:text-[#d4d4d4] hover:text-black dark:hover:text-white transition"
+          >
+            Share
+          </button>
+
+          <div className="w-[1px] h-4 bg-gray-300 dark:bg-[#3a3a3a]" />
+
+          <div className="flex items-center gap-2">
             <button
               onMouseDown={(e) => e.preventDefault()}
               onClick={async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                const { text, surahNumber, ayahNumber } = highlightSelection;
-                const match = highlights.find(h => h.text === text && h.surahId === surahNumber && h.ayahNumber === ayahNumber);
-                if (match) {
-                  const success = await deleteUserHighlight(match.id);
-                  if (success) {
-                    toast.success("Highlight removed.");
+                const { text, surahNumber, ayahNumber, type, id } = highlightSelection;
+                if (id || highlightSelection.isExisting) {
+                  const match = highlights.find(h => h.id === id || (h.text === text && h.surahId === surahNumber && h.ayahNumber === ayahNumber));
+                  if (match) {
+                    await deleteUserHighlight(match.id);
                     setHighlights(prev => prev.filter(h => h.id !== match.id));
-                  } else {
-                    toast.error("Failed to remove highlight.");
                   }
                 }
-                setHighlightSelection(null);
-                window.getSelection()?.removeAllRanges();
-              }}
-              className="flex items-center justify-center p-2 rounded-md hover:bg-white/10 text-red-400 hover:text-red-300 transition group"
-              title="Remove Highlight"
-            >
-              <X className="size-4" />
-            </button>
-          ) : (
-            <button
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const { text, surahNumber, ayahNumber, type } = highlightSelection;
                 const authorStr = type === 'translation' && (activeAuthor as any)?.authorName ? (activeAuthor as any).authorName : undefined;
-                const res = await saveUserHighlight(surahNumber, ayahNumber, text, type, authorStr);
+                const res = await saveUserHighlight(surahNumber, ayahNumber, text, type, authorStr, 'gold');
                 if (res) {
                   toast.success("Highlight saved.");
                   setHighlights(prev => [...prev, res]);
@@ -2173,31 +2217,96 @@ function TafsirContent() {
                 setHighlightSelection(null);
                 window.getSelection()?.removeAllRanges();
               }}
-              className="flex items-center justify-center p-2 rounded-md hover:bg-white/10 text-[#d4d4d4] hover:text-white transition group"
-              title="Highlight"
-            >
-              <Highlighter className="size-4" />
-            </button>
-          )}
-          <div className="w-[1px] h-4 bg-white/10 mx-1" />
+              className="size-5 rounded-full bg-amber-600 hover:scale-110 transition shadow-sm border border-black/10"
+              title="Gold Highlight"
+            />
+            <button
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const { text, surahNumber, ayahNumber, type, id } = highlightSelection;
+                if (id || highlightSelection.isExisting) {
+                  const match = highlights.find(h => h.id === id || (h.text === text && h.surahId === surahNumber && h.ayahNumber === ayahNumber));
+                  if (match) {
+                    await deleteUserHighlight(match.id);
+                    setHighlights(prev => prev.filter(h => h.id !== match.id));
+                  }
+                }
+                const authorStr = type === 'translation' && (activeAuthor as any)?.authorName ? (activeAuthor as any).authorName : undefined;
+                const res = await saveUserHighlight(surahNumber, ayahNumber, text, type, authorStr, 'green');
+                if (res) {
+                  toast.success("Highlight saved.");
+                  setHighlights(prev => [...prev, res]);
+                } else {
+                  toast.error("Failed to save highlight.");
+                }
+                setHighlightSelection(null);
+                window.getSelection()?.removeAllRanges();
+              }}
+              className="size-5 rounded-full bg-emerald-600 hover:scale-110 transition shadow-sm border border-black/10"
+              title="Green Highlight"
+            />
+            <button
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const { text, surahNumber, ayahNumber, type, id } = highlightSelection;
+                if (id || highlightSelection.isExisting) {
+                  const match = highlights.find(h => h.id === id || (h.text === text && h.surahId === surahNumber && h.ayahNumber === ayahNumber));
+                  if (match) {
+                    await deleteUserHighlight(match.id);
+                    setHighlights(prev => prev.filter(h => h.id !== match.id));
+                  }
+                }
+                const authorStr = type === 'translation' && (activeAuthor as any)?.authorName ? (activeAuthor as any).authorName : undefined;
+                const res = await saveUserHighlight(surahNumber, ayahNumber, text, type, authorStr, 'blue');
+                if (res) {
+                  toast.success("Highlight saved.");
+                  setHighlights(prev => [...prev, res]);
+                } else {
+                  toast.error("Failed to save highlight.");
+                }
+                setHighlightSelection(null);
+                window.getSelection()?.removeAllRanges();
+              }}
+              className="size-5 rounded-full bg-blue-600 hover:scale-110 transition shadow-sm border border-black/10"
+              title="Blue Highlight"
+            />
+          </div>
 
-          <button
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              copyToClipboard(highlightSelection.text, "Copied selection to clipboard!");
-              setHighlightSelection(null);
-              window.getSelection()?.removeAllRanges();
-            }}
-            className="flex items-center justify-center p-2 rounded-md hover:bg-white/10 text-[#d4d4d4] hover:text-white transition"
-            title="Copy"
-          >
-            <Copy className="size-4" />
-          </button>
+          {highlightSelection.isExisting && (
+            <>
+              <div className="w-[1px] h-4 bg-gray-300 dark:bg-[#3a3a3a]" />
+              <button
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={async (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const { text, surahNumber, ayahNumber, id } = highlightSelection;
+                  const match = highlights.find(h => h.id === id || (h.text === text && h.surahId === surahNumber && h.ayahNumber === ayahNumber));
+                  if (match) {
+                    const success = await deleteUserHighlight(match.id);
+                    if (success) {
+                      toast.success("Highlight removed.");
+                      setHighlights(prev => prev.filter(h => h.id !== match.id));
+                    } else {
+                      toast.error("Failed to remove highlight.");
+                    }
+                  }
+                  setHighlightSelection(null);
+                  window.getSelection()?.removeAllRanges();
+                }}
+                className="text-red-500 hover:text-red-600 transition"
+                title="Remove Highlight"
+              >
+                <X className="size-4" />
+              </button>
+            </>
+          )}
         </div>
       )}
-
     </div>
   );
 }

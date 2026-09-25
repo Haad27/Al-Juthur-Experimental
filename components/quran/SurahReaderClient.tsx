@@ -478,8 +478,8 @@ const AyahRow = React.memo(({
       className={cn(
         "transition-all duration-300 relative flex flex-col rounded-2xl shadow-sm w-full min-w-0 overflow-hidden box-border",
         isSidebarOpen
-          ? "my-1.5 sm:my-2 md:my-2 p-3 sm:p-4 md:p-4 lg:p-4"
-          : "my-3 sm:my-5 p-3.5 sm:p-6 md:p-7",
+          ? "p-3 sm:p-4 md:p-4 lg:p-4"
+          : "p-3.5 sm:p-6 md:p-7",
         isCurrentlyPlaying
           ? "border border-accent/50 bg-card/70 dark:bg-card/70 backdrop-blur-md  scale-[1.005] z-50 max-h-[80vh] overflow-y-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-transparent"
           : "border border-accent/25 hover:border-accent/50 bg-card/50 dark:bg-card/50 ",
@@ -1362,6 +1362,22 @@ export default function SurahReaderClient({
                 fetchPage(p, translationEdition);
               }
             }}
+            components={{
+              Footer: () => (
+                <div className="w-full flex justify-center items-center pt-8 pb-36 md:pb-24">
+                  <div className="flex gap-4 w-full max-w-md px-2 justify-center">
+                    <NavigatorButton
+                      direction="Previous"
+                      surahNumber={surahNumber > 1 ? surahNumber - 1 : 1}
+                    />
+                    <NavigatorButton
+                      direction="Next"
+                      surahNumber={surahNumber < 114 ? surahNumber + 1 : 114}
+                    />
+                  </div>
+                </div>
+              ),
+            }}
             itemContent={(index) => {
               const ayah = loadedAyahs[index];
               if (!ayah) {
@@ -1373,46 +1389,37 @@ export default function SurahReaderClient({
                   !!aiChatContext
                 );
                 return (
-                  <AyahSkeleton
-                    estimatedHeight={estimatedHeight}
-                    isSidebarOpen={!!aiChatContext}
-                  />
+                  <div className="pb-3 sm:pb-5">
+                    <AyahSkeleton
+                      estimatedHeight={estimatedHeight}
+                      isSidebarOpen={!!aiChatContext}
+                    />
+                  </div>
                 );
               }
               return (
-                <AyahRow
-                  key={`${ayah.numberInSurah}-${translationEdition}`}
-                  ayah={ayah}
-                  surahNumber={surahNumber}
-                  surahWordsMap={surahWordsMap}
-                  fontSize={fontSize}
-                  showTranslation={showTranslation}
-                  showWbw={showWbw}
-                  surahWbwTranslation={surahWbwTranslation}
-                  handleCopyAyah={handleCopyAyah}
-                  handleSaveAyah={handleSaveAyah}
-                  onOpenAiChat={handleOpenAiChat}
-                  onOpenTafsirPicker={handleOpenTafsirPicker}
-                  isUrduTranslation={isUrduTranslation}
-                  translationEdition={translationEdition}
-                  isSidebarOpen={!!aiChatContext}
-                />
+                <div className="pb-3 sm:pb-5">
+                  <AyahRow
+                    key={`${ayah.numberInSurah}-${translationEdition}`}
+                    ayah={ayah}
+                    surahNumber={surahNumber}
+                    surahWordsMap={surahWordsMap}
+                    fontSize={fontSize}
+                    showTranslation={showTranslation}
+                    showWbw={showWbw}
+                    surahWbwTranslation={surahWbwTranslation}
+                    handleCopyAyah={handleCopyAyah}
+                    handleSaveAyah={handleSaveAyah}
+                    onOpenAiChat={handleOpenAiChat}
+                    onOpenTafsirPicker={handleOpenTafsirPicker}
+                    isUrduTranslation={isUrduTranslation}
+                    translationEdition={translationEdition}
+                    isSidebarOpen={!!aiChatContext}
+                  />
+                </div>
               );
             }}
           />
-
-          <div className="mb-32 md:mb-12 w-full flex justify-center items-center pb-12">
-            <div className="flex gap-4 w-full max-w-md px-2 justify-center mt-8 sm:mt-10 pt-2">
-              <NavigatorButton
-                direction="Previous"
-                surahNumber={surahNumber > 1 ? surahNumber - 1 : 1}
-              />
-              <NavigatorButton
-                direction="Next"
-                surahNumber={surahNumber < 114 ? surahNumber + 1 : 114}
-              />
-            </div>
-          </div>
         </div>
 
       </section>

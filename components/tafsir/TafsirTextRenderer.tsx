@@ -182,7 +182,10 @@ export default function TafsirTextRenderer({
         if (!h.text || h.text.trim() === '') return;
         try {
           const escaped = h.text.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-          html = html.replace(new RegExp(escaped, "g"), `<mark class="bg-amber-500/40 text-inherit rounded-sm px-0.5">$&</mark>`);
+          let colorClass = 'bg-amber-500/40';
+          if (h.color === 'green') colorClass = 'bg-emerald-600/30';
+          if (h.color === 'blue') colorClass = 'bg-blue-600/30';
+          html = html.replace(new RegExp(escaped, "g"), `<mark class="${colorClass} text-inherit rounded-sm px-0.5" data-id="${h.id || ''}">$&</mark>`);
         } catch (e) {
           console.error("Failed to highlight", e);
         }
