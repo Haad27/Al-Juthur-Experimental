@@ -439,7 +439,7 @@ export function searchTafsirTopics(
   // Sort results by relevance score descending
   return results.sort((a, b) => b.relevanceScore - a.relevanceScore);
 }
-export function searchGlobalTopics(rawQuery: string): TopicSearchResult[] {
+﻿export function searchGlobalTopics(rawQuery: string): TopicSearchResult[] {
   const query = normalizeQuery(rawQuery);
   if (!query) return [];
 
@@ -469,13 +469,13 @@ export function searchGlobalTopics(rawQuery: string): TopicSearchResult[] {
     if (topicScore > 0) {
       for (const v of topicItem.expandedVerses) {
         results.push({
-          id: \	ax-\-\-\\,
+          id: 'tax-' + v.surah + '-' + v.ayah + '-' + topicItem.topic,
           surahId: v.surah,
           ayahNumber: v.ayah,
           title: topicItem.topic,
-          category: \\ (Global)\,
-          snippet: \Topic found across Quran.\,
-          matchType: "concept",
+          category: topicItem.category + ' (Global)',
+          snippet: 'Topic found across Quran.',
+          matchType: 'concept',
           relevanceScore: topicScore,
         });
       }
@@ -502,19 +502,19 @@ export function searchGlobalTopics(rawQuery: string): TopicSearchResult[] {
 
       if (matches) {
         results.push({
-          id: \	heme-\-\-\\,
+          id: 'theme-' + sec.surahId + '-' + sec.fromAyah + '-' + sec.toAyah,
           surahId: sec.surahId,
           ayahNumber: sec.fromAyah,
           toAyah: sec.toAyah > sec.fromAyah ? sec.toAyah : undefined,
-          title: \Surah \ Thematic Section\,
-          category: "Surah Theme",
+          title: 'Surah ' + surah.surahName + ' Thematic Section',
+          category: 'Surah Theme',
           snippet: extractSnippetAroundKeyword(sec.description, query),
-          matchType: "theme",
+          matchType: 'theme',
           relevanceScore: score,
         });
       }
     }
   });
 
-  return results.sort((a, b) => b.relevanceScore - a.relevanceScore).slice(0, 150); // limit to top 150 to avoid massive lists
+  return results.sort((a, b) => b.relevanceScore - a.relevanceScore).slice(0, 150);
 }

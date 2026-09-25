@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
 import TopicSearchModal from "./TopicSearchModal";
@@ -23,7 +23,7 @@ export default function GlobalTopicSearchProvider() {
       mode="quran"
       onSelectAyah={(ayahNumber, toAyah, resultSurahId) => {
         if (resultSurahId) {
-          router.push(\/surah/\?ayah=\\);
+          router.push(`/surah/${resultSurahId}?ayah=${ayahNumber}`);
         }
       }}
     />
