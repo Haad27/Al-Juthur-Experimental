@@ -28,7 +28,7 @@ interface TopicSearchModalProps {
 export default function TopicSearchModal({
   isOpen,
   onClose,
-  mode,
+  mode: initialMode,
   surahId,
   surahName,
   authorName,
@@ -38,12 +38,20 @@ export default function TopicSearchModal({
 }: TopicSearchModalProps) {
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const [activeMode, setActiveMode] = useState<"tafsir" | "surah" | "quran">(initialMode);
+
+  // Sync initialMode when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setActiveMode(initialMode);
+    }
+  }, [isOpen, initialMode]);
 
   // Thematic sections for this Surah
   const thematicSections = useMemo<ThematicSection[]>(() => {
-    if (!surahId || mode === "quran") return [];
+    if (!surahId || activeMode === "quran") return [];
     return getSurahThematicOutline(surahId);
-  }, [surahId, mode]);
+  }, [surahId, activeMode]);
 
   // Focus input when modal opens
   useEffect(() => {
@@ -83,15 +91,15 @@ export default function TopicSearchModal({
     const trimmed = query.trim();
     if (!trimmed) return [];
 
-    if (mode === "quran") {
+    if (activeMode === "quran") {
       return searchGlobalTopics(trimmed);
-    } else if (mode === "tafsir" && surahId) {
+    } else if (activeMode === "tafsir" && surahId) {
       return searchTafsirTopics(surahId, null, trimmed, loadedTafsir);
     } else if (surahId) {
       return searchSurahTopics(surahId, trimmed, loadedAyahs);
     }
     return [];
-  }, [query, mode, surahId, loadedTafsir, loadedAyahs]);
+  }, [query, activeMode, surahId, loadedTafsir, loadedAyahs]);
 
   if (!isOpen) return null;
 
@@ -141,13 +149,35 @@ export default function TopicSearchModal({
             <div className="min-w-0">
               <h2 className="text-sm sm:text-base md:text-lg font-semibold tracking-tight text-foreground flex items-center gap-1.5 sm:gap-2">
                 <span className="truncate">Topic &amp; Subject Explorer</span>
-                <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded bg-accent/10 text-accent border border-accent/25 font-medium shrink-0">
-                  {mode === "tafsir" ? "Tafsir Mode" : mode === "quran" ? "Whole Quran Mode" : "Surah Mode"}
-                </span>
               </h2>
-              <p className="text-[11px] sm:text-xs text-muted-foreground truncate">
-                {mode === "quran" ? "Searching across all 114 Surahs" : `${surahName} (Surah ${surahId}) ${authorName ? `- ${authorName}` : ""}`}
-              </p>
+              {surahId ? (
+                <div className="flex bg-muted/60 p-0.5 rounded-lg border border-border mt-1">
+                  <button
+                    onClick={() => setActiveMode("quran")}
+                    className={`text-[10px] sm:text-xs px-2.5 py-1 rounded-md font-medium transition-all ${
+                      activeMode === "quran" 
+                        ? "bg-background text-foreground shadow-sm border border-border" 
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Whole Quran
+                  </button>
+                  <button
+                    onClick={() => setActiveMode(initialMode === "tafsir" ? "tafsir" : "surah")}
+                    className={`text-[10px] sm:text-xs px-2.5 py-1 rounded-md font-medium transition-all ${
+                      activeMode !== "quran" 
+                        ? "bg-background text-foreground shadow-sm border border-border" 
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    This {initialMode === "tafsir" ? "Tafsir" : "Surah"}
+                  </button>
+                </div>
+              ) : (
+                <p className="text-[11px] sm:text-xs text-muted-foreground truncate mt-0.5">
+                  Searching across all 114 Surahs
+                </p>
+              )}
             </div>
           </div>
 
@@ -170,9 +200,11 @@ export default function TopicSearchModal({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={
-                mode === "tafsir"
+                activeMode === "tafsir"
                   ? "Search a topic in this Tafsir (e.g., Fasting, Adam, Taqwa, Usury, Hypocrites)..."
-                  : "Search a topic or concept in this Surah (e.g., Prayer, Moses, Inheritance, Patience)..."
+                  : activeMode === "surah" 
+                  ? "Search a topic or concept in this Surah (e.g., Prayer, Moses, Inheritance, Patience)..."
+                  : "Search across whole Quran..."
               }
               className="w-full pl-9 pr-8 py-2.5 text-sm bg-card border border-border focus:border-accent/60 rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none transition-colors"
             />
@@ -222,7 +254,7 @@ export default function TopicSearchModal({
                 </div>
               ) : (
                 <p className="text-xs text-muted-foreground">
-                  Type a topic or concept in the search bar above to discover where it is discussed in this {mode === "tafsir" ? "Tafsir" : "Surah"}.
+                  Type a topic or concept in the search bar above to discover where it is discussed in this {activeMode === "tafsir" ? "Tafsir" : activeMode === "quran" ? "Quran" : "Surah"}.
                 </p>
               )}
 
@@ -263,7 +295,7 @@ export default function TopicSearchModal({
                       <div className="space-y-1.5 flex-1 pr-2">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-xs font-bold px-2 py-0.5 rounded bg-accent/10 text-accent border border-accent/25">
-                            {mode === "quran" ? `Surah ${res.surahId}, Ayah ${res.ayahNumber}` : `Ayah ${res.ayahNumber}`}{res.toAyah ? `-${res.toAyah}` : ""}
+                            {activeMode === "quran" ? `Surah ${res.surahId}, Ayah ${res.ayahNumber}` : `Ayah ${res.ayahNumber}`}{res.toAyah ? `-${res.toAyah}` : ""}
                           </span>
                           {res.category && (
                             <span className="text-[11px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border">
@@ -285,7 +317,7 @@ export default function TopicSearchModal({
                         onClick={() => handleSelectResult(res.ayahNumber, res.toAyah, res.surahId)}
                         className="self-stretch sm:self-center shrink-0 flex items-center justify-center gap-1.5 text-xs font-medium px-3.5 py-2 sm:py-1.5 rounded-lg bg-accent/15 text-accent hover:bg-accent hover:text-white dark:hover:text-black border border-accent/30 transition-colors cursor-pointer"
                       >
-                        <span>{mode === "tafsir" ? "Jump to Commentary" : "Jump to Ayah"}</span>
+                        <span>{activeMode === "tafsir" ? "Jump to Commentary" : "Jump to Ayah"}</span>
                         <ChevronRight className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -294,7 +326,7 @@ export default function TopicSearchModal({
               ) : (
                 <div className="p-8 text-center rounded-lg border border-dashed border-border text-muted-foreground space-y-2">
                   <BookOpenText className="w-8 h-8 mx-auto text-muted-foreground/60" />
-                  <p className="text-sm font-medium text-foreground">No specific matches in this {mode === "tafsir" ? "Tafsir" : "Surah"}</p>
+                  <p className="text-sm font-medium text-foreground">No specific matches in this {activeMode === "tafsir" ? "Tafsir" : activeMode === "quran" ? "Quran" : "Surah"}</p>
                   <p className="text-xs">
                     Try searching by a broader keyword (e.g. &ldquo;Fasting&rdquo;, &ldquo;Patience&rdquo;, &ldquo;Moses&rdquo;, &ldquo;Charity&rdquo;) or explore the curated thematic sections.
                   </p>

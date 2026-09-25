@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot } from "lucide-react";
 import { cn } from "@/lib/utils";
+import useScrollDirection from "@/hooks/useScrollDirection";
 
 interface FloatingAskScholarButtonProps {
   onClick: () => void;
@@ -19,6 +20,7 @@ export default function FloatingAskScholarButton({
   className,
 }: FloatingAskScholarButtonProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const showNav = useScrollDirection();
 
   return (
     <AnimatePresence>
@@ -29,7 +31,10 @@ export default function FloatingAskScholarButton({
           exit={{ opacity: 0, y: 30, scale: 0.85 }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
           className={cn(
-            "fixed right-4 md:right-6 bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:bottom-6 z-[90] flex items-center justify-center",
+            "fixed right-4 md:right-6 z-[90] flex items-center justify-center transition-all duration-300",
+            showNav 
+              ? "bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:bottom-6"
+              : "bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] md:bottom-6",
             className
           )}
         >

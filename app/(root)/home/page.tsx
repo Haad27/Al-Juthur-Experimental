@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { fetchAllSurahs } from "@/api/api";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArchiveIcon, XIcon, Search, Menu as MenuIcon } from "lucide-react";
+import { ArchiveIcon, XIcon, Search, Menu as MenuIcon, Compass } from "lucide-react";
 import { toast } from "sonner";
 import useSurahNavigation from "@/hooks/useSurahNavigation";
 import { amiri, amiriquran, inter } from "@/app/fonts";
@@ -167,48 +167,59 @@ const SurahsList = () => {
         })()}
 
         <section className="space-y-5 scroll-mt-24" id="start_reading">
-          <div className="flex flex-col justify-between gap-3 md:flex-row md:items-end">
+          <div className="flex flex-col md:flex-row items-stretch md:items-end justify-between gap-3">
             <h2 className="text-lg font-semibold text-foreground md:text-2xl">
               All surahs
             </h2>
-            <div ref={homeSearchContainerRef} className="relative z-20 w-full md:w-72">
-              <input
-                type="text"
-                placeholder="Search surah (e.g. Al-Nur, 24)..."
-                value={homeSearchQuery}
-                onChange={(e) => setHomeSearchQuery(e.target.value)}
-                onFocus={() => setIsHomeSearchFocused(true)}
-                className="w-full rounded-xl border border-border bg-card px-4 py-2.5 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-              />
-              <Search className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              <div ref={homeSearchContainerRef} className="relative z-20 flex-1 md:w-72">
+                <input
+                  type="text"
+                  placeholder="Search surah (e.g. Al-Nur, 24)..."
+                  value={homeSearchQuery}
+                  onChange={(e) => setHomeSearchQuery(e.target.value)}
+                  onFocus={() => setIsHomeSearchFocused(true)}
+                  className="w-full rounded-xl border border-border bg-card px-4 py-2.5 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                />
+                <Search className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
 
-              {isHomeSearchFocused && homeSearchQuery.trim().length > 0 && (
-                <div className="absolute top-full right-0 left-0 z-50 mt-2 max-h-60 overflow-y-auto rounded-xl border border-border bg-popover shadow-lg custom-scrollbar">
-                  {filteredHomeSurahs.length > 0 ? (
-                    <div className="flex flex-col gap-0.5 p-1.5">
-                      {filteredHomeSurahs.slice(0, 10).map((surah) => (
-                        <button
-                          key={`suggest-surah-${surah.number}`}
-                          onClick={() => {
-                            setHomeSearchQuery(surah.englishName);
-                            setIsHomeSearchFocused(false);
-                            const targetUrl = targetAyahFromHomeSearch && targetAyahFromHomeSearch <= (surah.numberOfAyahs || 999)
-                              ? `/surah/${surah.number}?ayah=${targetAyahFromHomeSearch}`
-                              : `/surah/${surah.number}`;
-                            router.push(targetUrl);
-                          }}
-                          className="w-full rounded-lg px-3 py-2 text-left transition-colors hover:bg-muted"
-                        >
-                          <span className="block text-sm font-medium text-foreground">{surah.englishName}</span>
-                          <span className="text-[10px] text-muted-foreground">{surah.englishNameTranslation}</span>
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="px-4 py-3 text-center text-xs text-muted-foreground">No matches found</div>
-                  )}
-                </div>
-              )}
+                {isHomeSearchFocused && homeSearchQuery.trim().length > 0 && (
+                  <div className="absolute top-full right-0 left-0 z-50 mt-2 max-h-60 overflow-y-auto rounded-xl border border-border bg-popover shadow-lg custom-scrollbar">
+                    {filteredHomeSurahs.length > 0 ? (
+                      <div className="flex flex-col gap-0.5 p-1.5">
+                        {filteredHomeSurahs.slice(0, 10).map((surah) => (
+                          <button
+                            key={`suggest-surah-${surah.number}`}
+                            onClick={() => {
+                              setHomeSearchQuery(surah.englishName);
+                              setIsHomeSearchFocused(false);
+                              const targetUrl = targetAyahFromHomeSearch && targetAyahFromHomeSearch <= (surah.numberOfAyahs || 999)
+                                ? `/surah/${surah.number}?ayah=${targetAyahFromHomeSearch}`
+                                : `/surah/${surah.number}`;
+                              router.push(targetUrl);
+                            }}
+                            className="w-full rounded-lg px-3 py-2 text-left transition-colors hover:bg-muted"
+                          >
+                            <span className="block text-sm font-medium text-foreground">{surah.englishName}</span>
+                            <span className="text-[10px] text-muted-foreground">{surah.englishNameTranslation}</span>
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="px-4 py-3 text-center text-xs text-muted-foreground">No matches found</div>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent("open-global-topic-modal"))}
+                className="shrink-0 flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent/10 hover:text-accent focus:outline-none focus:ring-1 focus:ring-ring"
+                title="Explore Quran Topics"
+              >
+                <Compass className="size-4" />
+                <span className="hidden sm:inline">Quran Topics</span>
+              </button>
             </div>
           </div>
 

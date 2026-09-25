@@ -32,9 +32,11 @@ import {
   Map as MapIcon,
   Compass,
   ChevronRight,
+  FileText,
 } from "lucide-react";
 import SurahPlayer from "@/components/SurahPlayer";
 import AyahChatSidebar from "@/components/ai/AyahChatSidebar";
+import AyahNoteModal from "@/components/quran/AyahNoteModal";
 import TafsirWheelPickerModal from "@/components/quran/TafsirWheelPickerModal";
 import TopicSearchModal from "@/components/shared/TopicSearchModal";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
@@ -112,6 +114,7 @@ interface AyahRowProps {
   handleSaveAyah: (ayah: AyahProps) => void;
   onOpenAiChat: (surahNumber: number, ayahNumber: number) => void;
   onOpenTafsirPicker: (surahNumber: number, ayahNumber: number) => void;
+  onOpenNoteModal: (surahNumber: number, ayahNumber: number, text?: string) => void;
   isUrduTranslation: boolean;
   translationEdition: string;
   isSidebarOpen?: boolean;
@@ -264,6 +267,7 @@ const AyahRow = React.memo(({
   handleSaveAyah,
   onOpenAiChat,
   onOpenTafsirPicker,
+  onOpenNoteModal,
   isUrduTranslation,
   translationEdition,
   isSidebarOpen,
@@ -557,6 +561,13 @@ const AyahRow = React.memo(({
           <Save className="text-muted-foreground" size={18} />
         </div>
         <div
+          onClick={() => onOpenNoteModal(surahNumber, ayah.numberInSurah, ayah.translation ? `[${surahNumber}:${ayah.numberInSurah}] ${ayah.translation}` : undefined)}
+          className="p-2 rounded-full dark:hover:bg-muted hover:bg-[var(--sephia-500)]/45 transition-colors cursor-pointer inline-flex items-center justify-center"
+          title="Add Note"
+        >
+          <FileText className="text-muted-foreground hover:text-accent" size={18} />
+        </div>
+        <div
           onClick={() => {
             if (isCurrentlyPlaying) {
               window.dispatchEvent(new CustomEvent('pausePlayerAudio'));
@@ -782,6 +793,7 @@ export default function SurahReaderClient({
   }, [targetAyahFromParam]);
   const [aiChatContext, setAiChatContext] = useState<{ surah: number; ayah: number } | null>(null);
   const [tafsirWheelContext, setTafsirWheelContext] = useState<{ surah: number; ayah: number } | null>(null);
+  const [noteModalContext, setNoteModalContext] = useState<{ surah: number; ayah: number; text?: string } | null>(null);
   const [isTopicModalOpen, setIsTopicModalOpen] = useState<boolean>(false);
 
   const currentTranslationOption = useMemo(() => {
@@ -960,6 +972,10 @@ export default function SurahReaderClient({
 
   const handleOpenTafsirPicker = useCallback((surah: number, ayah: number) => {
     setTafsirWheelContext({ surah, ayah });
+  }, []);
+
+  const handleOpenNoteModal = useCallback((surah: number, ayah: number, text?: string) => {
+    setNoteModalContext({ surah, ayah, text });
   }, []);
 
   const isPlayingAudio = useAudioStore(s => s.isPlaying);
@@ -1440,6 +1456,7 @@ export default function SurahReaderClient({
                     handleSaveAyah={handleSaveAyah}
                     onOpenAiChat={handleOpenAiChat}
                     onOpenTafsirPicker={handleOpenTafsirPicker}
+                    onOpenNoteModal={handleOpenNoteModal}
                     isUrduTranslation={isUrduTranslation}
                     translationEdition={translationEdition}
                     isSidebarOpen={!!aiChatContext}
@@ -1488,6 +1505,14 @@ export default function SurahReaderClient({
         surahName={surah?.englishName || `Surah ${surahNumber}`}
         loadedAyahs={Object.values(loadedAyahs)}
         onSelectAyah={(ayahNum) => handleSelectTopicAyah(ayahNum)}
+      />
+
+      <AyahNoteModal
+        isOpen={!!noteModalContext}
+        onClose={() => setNoteModalContext(null)}
+        surahNumber={noteModalContext?.surah || surahNumber}
+        ayahNumber={noteModalContext?.ayah || 1}
+        selectedText={noteModalContext?.text}
       />
 
     </div>
