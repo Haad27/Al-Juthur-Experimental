@@ -197,9 +197,8 @@ export default function TafsirTextRenderer({
       });
     }
 
-    // 6. Apply Inline Note Indicators
+    // 6. Apply Inline Note Indicators (only for anchored notes that match this specific text)
     if (notes && notes.length > 0) {
-      let injectedAny = false;
       notes.forEach(note => {
         const anchorMatch = note.text.match(/^\[Re:\s*"([^"]+)"\]/);
         if (anchorMatch) {
@@ -210,21 +209,15 @@ export default function TafsirTextRenderer({
             const escaped = anchor.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
             const regex = new RegExp(escaped, "g");
             if (regex.test(html)) {
-              // Subtler icon injected before the text
-              const iconHtml = `<button class="inline-flex items-center justify-center shrink-0 size-4 md:size-5 rounded-full bg-amber-400/20 text-amber-600 dark:text-amber-400 text-[10px] mx-1 align-baseline cursor-pointer transition-colors hover:bg-amber-400/40" title="View Note" onclick="const btn = this.closest('.tafsir-card-container')?.querySelector('.note-badge-btn'); if(btn) btn.click(); else alert('Note: ' + decodeURIComponent('${encodeURIComponent(note.text.replace(/"/g, '&quot;'))}')); event.stopPropagation();">📝</button>`;
-              html = html.replace(regex, `${iconHtml}$&`);
-              injectedAny = true;
+              // Subtle sticky note icon injected right at the end of the highlighted text
+              const iconHtml = `<span role="button" tabindex="0" class="inline-flex items-center justify-center shrink-0 size-4 md:size-4.5 rounded bg-amber-400/20 hover:bg-amber-400/35 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[10px] mx-1 align-middle cursor-pointer transition-colors select-none" title="View Note" onclick="const btn = this.closest('.tafsir-card-container')?.querySelector('.note-badge-btn'); if(btn) btn.click(); event.stopPropagation();">📝</span>`;
+              html = html.replace(regex, `$&${iconHtml}`);
             }
           } catch (e) {
             console.error("Failed to add note indicator", e);
           }
         }
       });
-      // Fallback: If notes exist but weren't injected inline (e.g. general notes), put an icon at the end
-      if (!injectedAny) {
-        const iconHtml = `<button class="inline-flex items-center justify-center shrink-0 size-4 md:size-5 rounded-full bg-amber-400/20 text-amber-600 dark:text-amber-400 text-[10px] mx-1 align-baseline cursor-pointer transition-colors hover:bg-amber-400/40" title="View Notes" onclick="const btn = this.closest('.tafsir-card-container')?.querySelector('.note-badge-btn'); if(btn) btn.click(); event.stopPropagation();">📝</button>`;
-        html += iconHtml;
-      }
     }
 
     return html;

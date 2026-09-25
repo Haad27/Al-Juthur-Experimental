@@ -240,6 +240,7 @@ function TafsirContent() {
   const [mounted, setMounted] = useState(false);
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const [noteSelectedText, setNoteSelectedText] = useState<string>("");
+  const [noteTargetAyah, setNoteTargetAyah] = useState<number | null>(null);
   
   const [isHighlightMode, setIsHighlightMode] = useState(false);
   const [isToolsMenuOpen, setIsToolsMenuOpen] = useState(false);
@@ -1473,9 +1474,9 @@ function TafsirContent() {
 
         <AyahNoteModal
           isOpen={isNoteModalOpen}
-          onClose={() => { setIsNoteModalOpen(false); setNoteSelectedText(""); }}
+          onClose={() => { setIsNoteModalOpen(false); setNoteSelectedText(""); setNoteTargetAyah(null); }}
           surahNumber={activeSurah}
-          ayahNumber={currentAyahIndex + 1}
+          ayahNumber={noteTargetAyah || (currentAyahIndex + 1)}
           selectedText={noteSelectedText}
           onSave={(saved) => setNotes(prev => [...prev, saved])}
         />
@@ -1605,6 +1606,7 @@ function TafsirContent() {
           onNote={() => {
             if (!highlightSelection) return;
             setNoteSelectedText(highlightSelection.text);
+            setNoteTargetAyah(highlightSelection.ayahNumber);
             setIsNoteModalOpen(true);
             setHighlightSelection(null);
             window.getSelection()?.removeAllRanges();
@@ -2213,6 +2215,7 @@ function TafsirContent() {
         onNote={() => {
           if (!highlightSelection) return;
           setNoteSelectedText(highlightSelection.text);
+          setNoteTargetAyah(highlightSelection.ayahNumber);
           setIsNoteModalOpen(true);
           setHighlightSelection(null);
           window.getSelection()?.removeAllRanges();
@@ -2287,6 +2290,18 @@ function TafsirCard({
   const { tier, openPricingModal } = useSubscriptionStore();
   const authorId = entry.authorId || activeAuthor?.id || 0;
   const authorName = entry.author?.name || activeAuthor?.name || `Tafsir #${authorId}`;
+
+  // Highlights for this specific ayah and author
+  const ayahHighlights = highlights.filter(h => {
+    if (h.surahId !== activeSurah || h.ayahNumber !== ayahNumber) return false;
+    if (h.type === 'arabic') return true;
+    if (h.authorName && authorName) {
+      return h.authorName.toLowerCase() === authorName.toLowerCase() ||
+             h.authorName.toLowerCase().includes(authorName.toLowerCase()) ||
+             authorName.toLowerCase().includes(h.authorName.toLowerCase());
+    }
+    return true;
+  });
   const isLocked = false;
   const isPreviewInSurahOne = false;
 
@@ -2446,7 +2461,7 @@ function TafsirCard({
             authorName={authorName}
             onNavigateToAyah={(num) => scrollToAyah(num)}
             onUpgradeClick={openPricingModal}
-            highlights={highlights}
+            highlights={ayahHighlights}
             notes={ayahNotes}
           />
         </div>
