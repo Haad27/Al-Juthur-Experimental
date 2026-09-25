@@ -276,7 +276,7 @@ const getLocalDownloadedTafsir = unstable_cache(
       return null;
     }
   },
-  ['local-downloaded-tafsir-v10'],
+  ['local-downloaded-tafsir-v11'],
   { revalidate: 2592000 }
 );
 
@@ -314,7 +314,7 @@ const getSurahDbTafsir = unstable_cache(
     tafsirs.sort((a, b) => (a.ayah?.numberInSurah || 0) - (b.ayah?.numberInSurah || 0));
     return tafsirs;
   },
-  ['surah-db-tafsir-v10'],
+  ['surah-db-tafsir-v11'],
   { revalidate: 2592000 } // 30 days
 );
 
