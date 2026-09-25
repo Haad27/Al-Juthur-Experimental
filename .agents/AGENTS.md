@@ -1,38 +1,13 @@
 # Rules
 
-## Git & Environments (Production Mode - Temporary)
-- **Production Repository (`origin`)**: All active development, bugfixes, experiments, and feature changes must be committed and pushed directly to the production repository (`git push origin main`). Local branch pushes to `origin/main`.
-- **Milestone Workflow**: Whenever any change, feature, bugfix, or milestone is completed and verified, stage, commit, and push to production (`git add <files>`, `git commit -m "..."`, and `git push origin main`).
-- Provide the user with a concise summary of the changes made and confirm that they have been committed and pushed to the production repository.
+## 1. Production Workflow
+- **Push Big Changes to Production**: When a major feature, bugfix, or milestone is completed, stage, commit, and push directly to the production repository (`git add .`, `git commit -m "..."`, and `git push origin main`).
 
-## UI/UX Design System & Architectural Rules
+## 2. UI/UX Design System
+- **Distraction-Free & Minimalist**: Reverent aesthetic for Qur'an research. Avoid heavy animations, bouncing effects, or radar pings. Use clean fades and subtle progress bars.
+- **Theme Semantic Tokens Only**: Always use Tailwind theme tokens (`bg-background`, `text-foreground`, `text-reading`, `text-arabic`, `bg-card`, `border-border`, `text-accent`, `bg-accent/10`). Never use rogue neon colors (like bright blue or emerald). Do NOT modify variables in `globals.css`.
+- **Codebase Discipline**: Do not alter backend API logic or database queries during UI passes.
 
-### 2. Distraction-Free & Minimalist Philosophy
-- **Scholarly & Reverent Aesthetic**: Al-Juthur is an enterprise-grade academic and spiritual Qur'an research platform. The visual tone must be tranquil, dignified, and distraction-free.
-- **No Heavy Animations**:
-  - Avoid aggressive bouncing, multi-ring radar pings, pulsing neon glow blobs, and spring physics.
-  - Keep page transitions and loading states quiet and minimalist: clean "Al-Juthur" title, subtle secondary status text, and a thin (2px) theme accent progress bar.
-  - Dialogs and overlays should use gentle fades or clean instant appearances without bouncy physics.
-
-### 3. Color Palette & Theme Tokens
-- **Zero Rogue / Out-of-Place Colors**:
-  - DO NOT use uncoordinated neon colors like random `blue-400/500`, `purple-400/500`, `cyan-400`, or bright neon `emerald-400/500`.
-  - Never use colored markdown typography classes like `prose-emerald` or `prose-blue`. Always use `prose dark:prose-invert`.
-- **Use Theme Semantic Tokens**:
-  - Always rely on CSS variables and semantic Tailwind tokens defined in `globals.css`:
-    - **Sepia / Paper Mode (Default)**: Background (`--background: #F4ECD8`), Reading text (`--foreground: #5B4636`), Quranic Arabic (`--arabic: #3D2B1F`), Card surface (`--card: #EFE6D0`), Accent Gold (`--accent: #8B6914`), Borders (`--border: #D4C4A8`).
-    - **Dark Mode (`.dark`)**: Background (`--background: #1A1A1A`), Reading text (`--foreground: #D4D4D4`), Quranic Arabic (`--arabic: #EDE8E0`), Card surface (`--card: #242424`), Accent Gold (`--accent: #C4A574`), Borders (`--border: #3A3A3A`).
-  - Use Tailwind utility classes: `bg-background`, `text-foreground`, `text-reading`, `text-arabic`, `bg-card`, `text-card-foreground`, `bg-muted`, `border-border`, `text-accent`, `bg-accent`.
-  - For badges, tags, pills, and active states across Tafsir, Lexicon, RAG, and Settings: standard style is `bg-accent/10 text-accent border border-accent/25`.
-  - For audio recitation and word-by-word active tracking: use `!text-accent` so words highlight in antique gold in sepia mode and illuminated gold in dark mode.
-- **Do Not Alter Theme Variables**: The user is fully satisfied with the sepia and dark mode variables in `globals.css`. Do NOT change `:root` or `.dark` theme color definitions.
-
-### 5. Codebase Discipline
-- When performing UI/UX styling passes, do NOT alter backend API logic, Prisma queries, RAG retrieval logic, or audio store state management.
-
-## Execution & Token Efficiency Rules
-- **Local Code Search First**: ALWAYS use `grep_search` or `find_by_name` for codebase symbol searches. NEVER use `search_web` for internal code, filenames, or React components.
-- **Batch Edits & Inspections**: Perform related file views and edits in batched steps rather than taking dozens of single-line turns to inspect small snippets.
-- **Build Verification Discipline**: Do NOT run full `npm run build` or status polling loops after minor text/UI tweaks. Reserve full production builds for final milestone verification.
-- **No Large File Ingestion in Context**: Do NOT download or stream multi-megabyte datasets (e.g., raw book files, multi-volume texts) into the LLM conversation context. Use local Node/Python scripts to process raw data directly to disk.
-- **Direct Task Completion**: Complete tasks in the minimum required steps and provide concise final output without unnecessary continuous status polling.
+## 3. Build & Efficiency Rules
+- **No Early Builds**: Do NOT run `npm run build` or continuous build polling until ALL code edits and file modifications for the task are completely finished.
+- **Local Code Search Only**: Use `grep_search` or `find_by_name` for internal files—never `search_web`.
