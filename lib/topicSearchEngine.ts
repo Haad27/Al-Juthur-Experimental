@@ -439,3 +439,82 @@ export function searchTafsirTopics(
   // Sort results by relevance score descending
   return results.sort((a, b) => b.relevanceScore - a.relevanceScore);
 }
+export function searchGlobalTopics(rawQuery: string): TopicSearchResult[] {
+  const query = normalizeQuery(rawQuery);
+  if (!query) return [];
+
+  const queryTerms = query.split(" ").filter(t => t.length > 1);
+  const results: TopicSearchResult[] = [];
+
+  // Check Ayah Topic Taxonomy for all Surahs
+  for (const topicItem of taxonomy.topics) {
+    const topicLower = topicItem.topic.toLowerCase();
+    const catLower = topicItem.category.toLowerCase();
+    const keywordsLower = topicItem.keywords.map(k => k.toLowerCase());
+
+    let topicScore = 0;
+    if (topicLower.includes(query)) {
+      topicScore += 80;
+    } else if (keywordsLower.some(k => k.includes(query) || query.includes(k))) {
+      topicScore += 65;
+    } else {
+      const matchCount = queryTerms.filter(t => 
+        topicLower.includes(t) || keywordsLower.some(k => k.includes(t)) || catLower.includes(t)
+      ).length;
+      if (matchCount > 0) {
+        topicScore += matchCount * 25;
+      }
+    }
+
+    if (topicScore > 0) {
+      for (const v of topicItem.expandedVerses) {
+        results.push({
+          id: \	ax-\-\-\\,
+          surahId: v.surah,
+          ayahNumber: v.ayah,
+          title: topicItem.topic,
+          category: \\ (Global)\,
+          snippet: \Topic found across Quran.\,
+          matchType: "concept",
+          relevanceScore: topicScore,
+        });
+      }
+    }
+  }
+
+  // Optional: could check thematic outlines of all surahs
+  Object.values(thematicOutline).forEach(surah => {
+    for (const sec of surah.thematicSections) {
+      const descLower = sec.description.toLowerCase();
+      let matches = false;
+      let score = 0;
+
+      if (descLower.includes(query)) {
+        matches = true;
+        score += 60;
+      } else {
+        const matchedTerms = queryTerms.filter(t => descLower.includes(t));
+        if (matchedTerms.length > 0) {
+          matches = true;
+          score += matchedTerms.length * 20;
+        }
+      }
+
+      if (matches) {
+        results.push({
+          id: \	heme-\-\-\\,
+          surahId: sec.surahId,
+          ayahNumber: sec.fromAyah,
+          toAyah: sec.toAyah > sec.fromAyah ? sec.toAyah : undefined,
+          title: \Surah \ Thematic Section\,
+          category: "Surah Theme",
+          snippet: extractSnippetAroundKeyword(sec.description, query),
+          matchType: "theme",
+          relevanceScore: score,
+        });
+      }
+    }
+  });
+
+  return results.sort((a, b) => b.relevanceScore - a.relevanceScore).slice(0, 150); // limit to top 150 to avoid massive lists
+}

@@ -145,7 +145,7 @@ const MobileSheet = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 w-full">
+                <div className="flex items-center justify-center gap-4 py-1 border-t border-border/40 mt-1">
                   <button
                     type="button"
                     onClick={() => {
@@ -153,12 +153,13 @@ const MobileSheet = ({
                         window.dispatchEvent(new CustomEvent("open-topic-modal"));
                       }
                     }}
-                    className="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl border border-border/80 bg-card/60 hover:bg-card text-[11px] font-medium text-foreground transition-all shrink-0 cursor-pointer shadow-sm"
+                    className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-muted-foreground hover:text-accent transition-colors cursor-pointer"
                     title="Explore Topics in this Surah"
                   >
-                    <Compass className="size-3.5 text-accent mb-0.5" />
+                    <Compass className="size-3.5" />
                     <span>Surah Topics</span>
                   </button>
+                  <div className="w-px h-3 bg-border/60" />
                   <button
                     type="button"
                     onClick={() => {
@@ -166,10 +167,10 @@ const MobileSheet = ({
                         window.dispatchEvent(new CustomEvent("open-global-topic-modal"));
                       }
                     }}
-                    className="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl border border-border/80 bg-card/60 hover:bg-card text-[11px] font-medium text-foreground transition-all shrink-0 cursor-pointer shadow-sm"
+                    className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-muted-foreground hover:text-accent transition-colors cursor-pointer"
                     title="Explore Topics in the Whole Quran"
                   >
-                    <Search className="size-3.5 text-accent mb-0.5" />
+                    <Search className="size-3.5" />
                     <span>Quran Topics</span>
                   </button>
                 </div>

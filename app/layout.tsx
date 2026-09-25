@@ -14,6 +14,7 @@ import {
 } from "./fonts";
 import BottomNav from "@/components/BottomNav";
 import AppThemeProvider from "@/components/theme/AppThemeProvider";
+import GlobalTopicSearchProvider from "@/components/shared/GlobalTopicSearchProvider";
 
 import NextTopLoader from "nextjs-toploader";
 
@@ -112,6 +113,7 @@ export default function RootLayout({
             />
             {children}
             <BottomNav />
+            <GlobalTopicSearchProvider />
             <GlobalModals />
             <Toaster />
           </GlobalStateProvider>

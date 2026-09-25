@@ -194,7 +194,7 @@ const Sidebar = () => {
             </div>
 
             {surahNumber > 0 && (
-              <div className="grid grid-cols-2 gap-2">
+              <div className="flex items-center justify-center gap-4 py-1">
                 <button
                   type="button"
                   onClick={() => {
@@ -202,12 +202,13 @@ const Sidebar = () => {
                       window.dispatchEvent(new CustomEvent("open-topic-modal"));
                     }
                   }}
-                  className="flex flex-col items-center justify-center py-2 px-1 bg-card/60 hover:bg-card border border-border hover:border-accent/40 rounded-xl text-foreground transition-all shadow-inner group cursor-pointer text-center"
+                  className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-muted-foreground hover:text-accent transition-colors cursor-pointer"
                   title="Explore Topics & Subjects in this Surah"
                 >
-                  <Compass className="w-4 h-4 text-accent mb-1 group-hover:rotate-45 transition-transform duration-300" />
-                  <span className="truncate text-[10px] sm:text-[11px] font-medium w-full">Surah Topics</span>
+                  <Compass className="w-3.5 h-3.5" />
+                  <span>Surah Topics</span>
                 </button>
+                <div className="w-px h-3 bg-border/60" />
                 <button
                   type="button"
                   onClick={() => {
@@ -215,11 +216,11 @@ const Sidebar = () => {
                       window.dispatchEvent(new CustomEvent("open-global-topic-modal"));
                     }
                   }}
-                  className="flex flex-col items-center justify-center py-2 px-1 bg-card/60 hover:bg-card border border-border hover:border-accent/40 rounded-xl text-foreground transition-all shadow-inner group cursor-pointer text-center"
+                  className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-muted-foreground hover:text-accent transition-colors cursor-pointer"
                   title="Explore Topics & Subjects in the Whole Quran"
                 >
-                  <Search className="w-4 h-4 text-accent mb-1 group-hover:rotate-45 transition-transform duration-300" />
-                  <span className="truncate text-[10px] sm:text-[11px] font-medium w-full">Quran Topics</span>
+                  <Search className="w-3.5 h-3.5" />
+                  <span>Quran Topics</span>
                 </button>
               </div>
             )}

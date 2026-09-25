@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo, useRef, useCallback, Suspense } fr
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
-import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, ChevronLeft, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check, Bookmark, BookmarkCheck, Lock, Columns2, AlertCircle, RotateCcw, Edit3, Highlighter, PenTool, Wrench } from "lucide-react";
+import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, ChevronLeft, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check, Bookmark, BookmarkCheck, Lock, Columns2, AlertCircle, RotateCcw, Edit3, Highlighter, PenTool, Wrench, StickyNote } from "lucide-react";
 import dynamic from "next/dynamic";
 import TafsirHorizontalReader from "@/components/tafsir/TafsirHorizontalReader";
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
@@ -27,7 +27,9 @@ import {
   saveUserHighlight,
   fetchUserHighlights,
   deleteUserHighlight,
-  UserHighlight
+  UserHighlight,
+  fetchUserNotes,
+  UserNote,
 } from "@/lib/readerStorage";
 
 import { useRouter, useSearchParams } from "next/navigation";
@@ -245,10 +247,12 @@ function TafsirContent() {
   const [highlightSelection, setHighlightSelection] = useState<HighlightSelection | null>(null);
 
   const [highlights, setHighlights] = useState<UserHighlight[]>([]);
+  const [notes, setNotes] = useState<UserNote[]>([]);
   const [showHighlightOnboarding, setShowHighlightOnboarding] = useState(false);
 
   useEffect(() => {
     fetchUserHighlights().then(setHighlights).catch(console.error);
+    fetchUserNotes().then(setNotes).catch(console.error);
   }, []);
 
   // When highlight mode is on, we inject a style to change the text selection color to amber/gold
@@ -398,7 +402,6 @@ function TafsirContent() {
     const handleSelection = async () => {
       const selection = window.getSelection();
       if (!selection || selection.isCollapsed) {
-        // Only clear if not clicking inside the popover (handled by global click)
         return;
       }
       
@@ -409,22 +412,36 @@ function TafsirContent() {
         return;
       }
 
-      let node = selection.anchorNode;
+      // Start from the element that contains the anchor node
+      const startEl = (range.startContainer.nodeType === Node.TEXT_NODE
+        ? range.startContainer.parentElement
+        : range.startContainer as HTMLElement);
+
+      if (!startEl) return;
+
+      // Determine type from the closest matching ancestor
       let type: "arabic" | "translation" | null = null;
+      if (startEl.closest(".tafsir-content")) {
+        type = "translation";
+      } else if (startEl.closest("[lang='ar']") || startEl.closest("[id^='atext-']")) {
+        type = "arabic";
+      } else {
+        // fallback: anything inside a TafsirCard counts as translation
+        const card = startEl.closest("[data-ayah-num]");
+        if (card) type = "translation";
+      }
+
+      // Walk up to find ayah/surah numbers
       let targetAyahNum: number | null = null;
       let targetSurahNum: number | null = null;
-
+      let node: Node | null = startEl;
       while (node && node !== document.body) {
         if (node.nodeType === Node.ELEMENT_NODE) {
           const el = node as HTMLElement;
           if (!targetAyahNum && el.getAttribute("data-ayah-num")) {
             targetAyahNum = parseInt(el.getAttribute("data-ayah-num") || "0", 10);
             targetSurahNum = parseInt(el.getAttribute("data-surah-num") || "0", 10);
-          }
-          if (el.lang === "ar" || el.id?.startsWith("atext-")) {
-            type = "arabic";
-          } else if (el.classList?.contains("tafsir-content") || el.closest(".tafsir-content")) {
-            type = "translation";
+            break;
           }
         }
         node = node.parentNode;
@@ -437,7 +454,7 @@ function TafsirContent() {
           ayahNumber: targetAyahNum,
           type,
           x: rect.left + rect.width / 2,
-          y: rect.top - 10,
+          y: rect.top,          // viewport-relative; toolbar is position:fixed
           isExisting: false
         });
       }
@@ -1345,7 +1362,9 @@ function TafsirContent() {
                       activeAuthor={activeAuthor} 
                       aiChatContext={aiChatContext} 
                       scrollToAyah={scrollToAyah}
-                      languages={languages} highlights={highlights}
+                      languages={languages}
+                      highlights={highlights}
+                      notes={notes}
                     />
                   ) : (
                     <div className="flex flex-col items-center justify-center p-12 text-muted-foreground text-sm">
@@ -1396,7 +1415,9 @@ function TafsirContent() {
                         activeAuthor={activeAuthor}
                         aiChatContext={aiChatContext}
                         scrollToAyah={scrollToAyah}
-                        languages={languages} highlights={highlights}
+                        languages={languages}
+                        highlights={highlights}
+                        notes={notes}
                       />
                     );
                   }}
@@ -1460,81 +1481,61 @@ function TafsirContent() {
 
         {!aiChatContext && (
           <div className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] left-4 sm:left-6 md:left-[calc(16rem+1.25rem)] lg:left-[calc(18rem+1.5rem)] z-40 flex flex-col items-start gap-3 transition-all duration-200">
-            {isToolsMenuOpen && (
-              <div className="flex flex-col gap-2 bg-card border border-border shadow-2xl rounded-2xl p-2 animate-in fade-in slide-in-from-bottom-4 zoom-in-95">
-                <button 
-                  onClick={() => {
-                    const newMode = !isHighlightMode;
-                    setIsHighlightMode(newMode);
-                    setIsToolsMenuOpen(false);
-                    if (newMode && typeof window !== 'undefined' && localStorage.getItem('hide_highlight_onboarding') !== 'true') {
-                      setShowHighlightOnboarding(true);
-                      setTimeout(() => {
-                        setShowHighlightOnboarding(false);
-                      }, 8000);
-                    }
-                  }}
-                  className={cn("flex items-center gap-3 px-3 py-2 rounded-xl transition font-medium", isHighlightMode ? "bg-amber-500/20 text-amber-600 dark:text-amber-400" : "hover:bg-muted text-foreground")}
-                >
-                  <div className={cn("p-1.5 rounded-lg", isHighlightMode ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground")}>
-                    <Highlighter className="size-4" />
-                  </div>
-                  <span className="text-sm pr-2">Highlight Mode {isHighlightMode ? "(ON)" : ""}</span>
-                </button>
-                <div className="h-[1px] w-full bg-border" />
-                <button 
-                  onClick={() => {
-                    setIsNoteModalOpen(true);
-                    setIsToolsMenuOpen(false);
-                  }}
-                  className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-muted text-foreground transition font-medium"
-                >
-                  <div className="p-1.5 rounded-lg bg-muted text-muted-foreground">
-                    <Edit3 className="size-4" />
-                  </div>
-                  <span className="text-sm pr-2">Add Note to Verse</span>
-                </button>
-              </div>
-            )}
 
-            {showHighlightOnboarding && !isToolsMenuOpen && (
-              <div className="absolute bottom-[4.5rem] left-0 w-64 p-3.5 bg-card border border-amber-500/30 shadow-2xl rounded-2xl animate-in fade-in slide-in-from-bottom-2">
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-bold text-sm">
-                    <Highlighter className="size-4" />
-                    Highlighter is ON
+            {/* Highlight Tips Tooltip */}
+            {isToolsMenuOpen && (
+              <div className="w-64 p-4 bg-card border border-border shadow-2xl rounded-2xl animate-in fade-in slide-in-from-bottom-4 zoom-in-95">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2 font-bold text-sm text-foreground">
+                    <Highlighter className="size-4 text-accent" />
+                    Highlights & Notes
                   </div>
-                  <button onClick={() => setShowHighlightOnboarding(false)} className="text-muted-foreground hover:text-foreground">
+                  <button onClick={() => setIsToolsMenuOpen(false)} className="text-muted-foreground hover:text-foreground">
                     <X className="size-4" />
                   </button>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed mb-3">
-                  Select any text with your cursor. It will be instantly highlighted and saved to your library!
-                </p>
-                <label className="flex items-center gap-2 cursor-pointer group">
-                  <input 
-                    type="checkbox" 
-                    className="size-3.5 rounded-sm border-muted-foreground text-amber-500 focus:ring-amber-500 cursor-pointer"
-                    onChange={(e) => {
-                      if (e.target.checked) localStorage.setItem('hide_highlight_onboarding', 'true');
-                      else localStorage.removeItem('hide_highlight_onboarding');
-                    }}
-                  />
-                  <span className="text-[10px] text-muted-foreground group-hover:text-foreground transition-colors">Don't show this again</span>
-                </label>
+
+                <div className="space-y-2.5 text-xs text-muted-foreground leading-relaxed">
+                  <div className="flex items-start gap-2.5">
+                    <div className="size-5 rounded-full bg-accent/15 border border-accent/30 flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="text-accent font-bold text-[10px]">1</span>
+                    </div>
+                    <p><strong className="text-foreground">Select any text</strong> in the tafsir with your cursor or finger to bring up the toolbar.</p>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <div className="size-5 rounded-full bg-accent/15 border border-accent/30 flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="text-accent font-bold text-[10px]">2</span>
+                    </div>
+                    <p>Pick a <strong className="text-foreground">highlight color</strong> — it's saved permanently to your library.</p>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <div className="size-5 rounded-full bg-accent/15 border border-accent/30 flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="text-accent font-bold text-[10px]">3</span>
+                    </div>
+                    <p>Tap the <strong className="text-foreground">Note</strong> button to write a reflection anchored to that text.</p>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <div className="size-5 rounded-full bg-accent/15 border border-accent/30 flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="text-accent font-bold text-[10px]">4</span>
+                    </div>
+                    <p><strong className="text-foreground">Tap any highlight</strong> to re-color or remove it.</p>
+                  </div>
+                </div>
               </div>
             )}
-            
+
+            {/* FAB Button */}
             <button
               onClick={() => setIsToolsMenuOpen(!isToolsMenuOpen)}
               className={cn(
                 "flex items-center justify-center size-12 rounded-full border border-border backdrop-blur-xl shadow-md transition-all duration-200 cursor-pointer",
-                isToolsMenuOpen ? "border-accent text-accent ring-2 ring-accent/20 bg-card/90" : 
-                isHighlightMode ? "bg-amber-500 text-amber-50 border-amber-600 hover:bg-amber-600" : "bg-card/90 text-foreground hover:border-accent/40 hover:text-accent hover:bg-muted"
+                isToolsMenuOpen
+                  ? "border-accent text-accent ring-2 ring-accent/20 bg-card/90"
+                  : "bg-card/90 text-foreground hover:border-accent/40 hover:text-accent hover:bg-muted"
               )}
-              title="Reading Tools"
+              title="Highlight & Note Tips"
             >
-              {isToolsMenuOpen ? <X className="size-5" /> : (isHighlightMode ? <Highlighter className="size-5" /> : <PenTool className="size-5" />)}
+              {isToolsMenuOpen ? <X className="size-5" /> : <PenTool className="size-5" />}
             </button>
           </div>
         )}
@@ -1721,7 +1722,7 @@ function TafsirContent() {
                             key={`suggest-${language.id}-${author.id}`}
                             onClick={() => {
                               setSearchQuery(author.name);
-                              setSelectedLanguage(language.name);
+                              setSelectedLanguage("All");
                               setIsSearchFocused(false);
                             }}
                             className="flex flex-col text-left px-3 py-2 hover:bg-accent/10 rounded-lg transition-colors w-full cursor-pointer"
@@ -2259,6 +2260,7 @@ function TafsirCard({
   scrollToAyah,
   languages = [],
   highlights = [],
+  notes = [],
 }: {
   entry: any;
   idx: number;
@@ -2269,6 +2271,7 @@ function TafsirCard({
   scrollToAyah: (num: number) => void;
   languages?: Language[];
   highlights?: UserHighlight[];
+  notes?: UserNote[];
 }) {
   const ayahNumber = entry.ayah?.numberInSurah || idx + 1;
   const arabicText = entry.ayah?.text && entry.ayah.text !== "Arabic Text" ? entry.ayah.text : null;
@@ -2277,20 +2280,21 @@ function TafsirCard({
   const isArabicOrUrdu = isArabic || isUrduText;
   const cleanText = entry.text.replace(/<[^>]*>?/gm, '');
 
+  // Notes for this specific ayah
+  const ayahNotes = notes.filter(n => n.surahId === activeSurah && n.ayahNumber === ayahNumber);
+
   const { tier, openPricingModal } = useSubscriptionStore();
   const authorId = entry.authorId || activeAuthor?.id || 0;
   const authorName = entry.author?.name || activeAuthor?.name || `Tafsir #${authorId}`;
-  // const isFreeAuthor = isFreeTafsirAuthor(authorName, authorRealName);
-  // const isLocked = tier === "FREE" && activeSurah > 1 && !isFreeAuthor;
-  // const isPreviewInSurahOne = tier === "FREE" && activeSurah === 1 && !isFreeAuthor;
-  const isLocked = false; // Full free mode for now
-  const isPreviewInSurahOne = false; // Full free mode for now
+  const isLocked = false;
+  const isPreviewInSurahOne = false;
 
   const surahMeta = SURAHS_DATA.find((s) => s.number === activeSurah);
 
   const savedKey = `tafsir_${authorId}_${activeSurah}_${ayahNumber}`;
   const [isSaved, setIsSaved] = useState<boolean>(() => isTafsirSaved(savedKey));
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
+  const [showNotesPanel, setShowNotesPanel] = useState(false);
 
   const handleToggleSave = () => {
     const snippet = cleanText.slice(0, 280);
@@ -2362,6 +2366,17 @@ function TafsirCard({
                 {authorName}
               </span>
             </div>
+            {/* Note indicator badge */}
+            {ayahNotes.length > 0 && (
+              <button
+                onClick={() => setShowNotesPanel(p => !p)}
+                className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[10px] font-semibold hover:bg-amber-500/25 transition shrink-0"
+                title="View your notes"
+              >
+                <StickyNote className="size-3" />
+                {ayahNotes.length}
+              </button>
+            )}
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2">

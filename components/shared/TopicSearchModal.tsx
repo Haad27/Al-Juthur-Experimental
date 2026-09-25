@@ -5,22 +5,24 @@ import { Search, X, Compass, BookOpen, Layers, ChevronRight, ArrowRight, BookOpe
 import { 
   getSurahThematicOutline, 
   searchSurahTopics, 
-  searchTafsirTopics, 
+  searchTafsirTopics,
+  searchGlobalTopics,
   TopicSearchResult,
   ThematicSection 
 } from "@/lib/topicSearchEngine";
 import { cn } from "@/lib/utils";
+import { SURAHS_DATA } from "@/lib/surahsData";
 
 interface TopicSearchModalProps {
   isOpen: boolean;
   onClose: () => void;
-  mode: "tafsir" | "surah";
-  surahId: number;
-  surahName: string;
+  mode: "tafsir" | "surah" | "quran";
+  surahId?: number;
+  surahName?: string;
   authorName?: string;
   loadedTafsir?: Record<number, any>;
   loadedAyahs?: { numberInSurah: number; translation?: string; text?: string }[];
-  onSelectAyah: (ayahNumber: number, toAyah?: number) => void;
+  onSelectAyah: (ayahNumber: number, toAyah?: number, surahNumber?: number) => void;
 }
 
 export default function TopicSearchModal({
@@ -39,9 +41,9 @@ export default function TopicSearchModal({
 
   // Thematic sections for this Surah
   const thematicSections = useMemo<ThematicSection[]>(() => {
-    if (!surahId) return [];
+    if (!surahId || mode === "quran") return [];
     return getSurahThematicOutline(surahId);
-  }, [surahId]);
+  }, [surahId, mode]);
 
   // Focus input when modal opens
   useEffect(() => {
@@ -81,11 +83,14 @@ export default function TopicSearchModal({
     const trimmed = query.trim();
     if (!trimmed) return [];
 
-    if (mode === "tafsir") {
+    if (mode === "quran") {
+      return searchGlobalTopics(trimmed);
+    } else if (mode === "tafsir" && surahId) {
       return searchTafsirTopics(surahId, null, trimmed, loadedTafsir);
-    } else {
+    } else if (surahId) {
       return searchSurahTopics(surahId, trimmed, loadedAyahs);
     }
+    return [];
   }, [query, mode, surahId, loadedTafsir, loadedAyahs]);
 
   if (!isOpen) return null;
@@ -113,8 +118,8 @@ export default function TopicSearchModal({
     });
   };
 
-  const handleSelectResult = (ayahNumber: number, toAyah?: number) => {
-    onSelectAyah(ayahNumber, toAyah);
+  const handleSelectResult = (ayahNumber: number, toAyah?: number, resultSurahId?: number) => {
+    onSelectAyah(ayahNumber, toAyah, resultSurahId);
     onClose();
   };
 
@@ -137,11 +142,11 @@ export default function TopicSearchModal({
               <h2 className="text-sm sm:text-base md:text-lg font-semibold tracking-tight text-foreground flex items-center gap-1.5 sm:gap-2">
                 <span className="truncate">Topic &amp; Subject Explorer</span>
                 <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded bg-accent/10 text-accent border border-accent/25 font-medium shrink-0">
-                  {mode === "tafsir" ? "Tafsir Mode" : "Surah Mode"}
+                  {mode === "tafsir" ? "Tafsir Mode" : mode === "quran" ? "Whole Quran Mode" : "Surah Mode"}
                 </span>
               </h2>
               <p className="text-[11px] sm:text-xs text-muted-foreground truncate">
-                {surahName} (Surah {surahId}) {authorName ? `· ${authorName}` : ""}
+                {mode === "quran" ? "Searching across all 114 Surahs" : `${surahName} (Surah ${surahId}) ${authorName ? `- ${authorName}` : ""}`}
               </p>
             </div>
           </div>
@@ -258,7 +263,7 @@ export default function TopicSearchModal({
                       <div className="space-y-1.5 flex-1 pr-2">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-xs font-bold px-2 py-0.5 rounded bg-accent/10 text-accent border border-accent/25">
-                            Ayah {res.ayahNumber}{res.toAyah ? `–${res.toAyah}` : ""}
+                            {mode === "quran" ? `Surah ${res.surahId}, Ayah ${res.ayahNumber}` : `Ayah ${res.ayahNumber}`}{res.toAyah ? `-${res.toAyah}` : ""}
                           </span>
                           {res.category && (
                             <span className="text-[11px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border">
@@ -277,7 +282,7 @@ export default function TopicSearchModal({
                       </div>
 
                       <button
-                        onClick={() => handleSelectResult(res.ayahNumber, res.toAyah)}
+                        onClick={() => handleSelectResult(res.ayahNumber, res.toAyah, res.surahId)}
                         className="self-stretch sm:self-center shrink-0 flex items-center justify-center gap-1.5 text-xs font-medium px-3.5 py-2 sm:py-1.5 rounded-lg bg-accent/15 text-accent hover:bg-accent hover:text-white dark:hover:text-black border border-accent/30 transition-colors cursor-pointer"
                       >
                         <span>{mode === "tafsir" ? "Jump to Commentary" : "Jump to Ayah"}</span>
