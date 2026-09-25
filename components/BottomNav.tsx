@@ -150,7 +150,7 @@ const BottomNav = () => {
                   )}
                 >
                   <Bot className="mb-0.5 w-5 h-5" />
-                  <span className="text-[9px] tracking-tight">AI Scholar</span>
+                  <span className="text-[9px] tracking-tight">Juthur AI</span>
                 </Link>
               </div>
             </motion.div>

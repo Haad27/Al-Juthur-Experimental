@@ -13,7 +13,6 @@ const NAV = [
   { href: "/lexicon", label: "Lexicon", match: (p: string) => p.startsWith("/lexicon") },
   { href: "/rag", label: "Juthur AI", match: (p: string) => p.startsWith("/rag") },
   { href: "/saved", label: "Library", match: (p: string) => p.startsWith("/saved") },
-  { href: "/quran", label: "Qur'an", match: (p: string) => p.startsWith("/quran") || p.startsWith("/surah") },
 ];
 
 export default function AppHeader({
@@ -62,18 +61,6 @@ export default function AppHeader({
 
         <div className="flex shrink-0 items-center gap-2.5">
           {rightSlot}
-          <Link
-            href="/quran"
-            className={cn(
-              "inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all",
-              pathname.startsWith("/quran") || pathname.startsWith("/surah")
-                ? "bg-accent/15 text-accent border-accent/40"
-                : "bg-card hover:bg-muted text-foreground border-border hover:border-accent/40"
-            )}
-            title="Read Qur'an Surahs"
-          >
-            <span>Qur'an</span>
-          </Link>
           <ThemeToggleButton />
         </div>
       </div>

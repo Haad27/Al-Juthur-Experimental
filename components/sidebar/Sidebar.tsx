@@ -129,7 +129,7 @@ const Sidebar = () => {
 
         {/* Creative Animated Tab Switcher */}
         {!isCollapsed && (
-          <div className="relative mt-4 mx-4">
+          <div className="relative mt-4 mx-4 shrink-0">
             <div className="relative flex items-center p-1 bg-muted border border-border rounded-2xl overflow-hidden">
               {tabs.map((tab) => {
                 const isActive = activeTab === tab.key;
@@ -170,7 +170,7 @@ const Sidebar = () => {
 
         {/* Search Input and Verse Selector (Only shown on Surah tab) */}
         {!isCollapsed && activeTab === "surah" && (
-          <div className="mt-4 mx-4 flex flex-col gap-2">
+          <div className="mt-4 mx-4 flex flex-col gap-2 shrink-0">
             <div className="relative">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <Input
@@ -216,7 +216,11 @@ const Sidebar = () => {
                   <SelectTrigger className="flex-1 h-7 bg-transparent border-0 shadow-none hover:bg-muted/70 rounded-lg dark:text-foreground text-foreground font-mono text-xs focus:ring-0">
                     <SelectValue placeholder="Select..." />
                   </SelectTrigger>
-                  <SelectContent className="bg-card border-border max-h-[300px]">
+                  <SelectContent
+                    position="popper"
+                    sideOffset={4}
+                    className="bg-card border-border max-h-[300px] z-[9999]"
+                  >
                     {Array.from(
                       { length: surahs.find(s => s.number === surahNumber)?.numberOfAyahs || 1 },
                       (_, i) => i + 1
@@ -234,7 +238,7 @@ const Sidebar = () => {
 
         {/* Surah Panel */}
         {!isCollapsed && activeTab === "surah" && (
-          <div className="p-4 space-y-2 overflow-y-auto scrollable-container max-h-[calc(100vh-210px)]">
+          <div id="sidebar-surah-list" className="p-4 space-y-2 overflow-y-auto flex-1 min-h-0 custom-scrollbar">
             {filteredSurahs.map((surah) => {
               const isActive = surah.number === surahNumber;
               return (
@@ -298,22 +302,13 @@ const Sidebar = () => {
           </div>
         )}
 
-
-
         {/* Page Panel */}
-        {!isCollapsed && activeTab === "settings" && <Settings />}
-        {/* 
         {!isCollapsed && activeTab === "settings" && (
-          <div className="px-5 py-4">
-            <Link
-              href="/support"
-              className="block w-full text-center bg-accent hover:bg-accent/90 text-foreground py-2 rounded-xl transition"
-            >
-              Support Us ♥
-            </Link>
+          <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+            <Settings />
           </div>
-        )} */}
-      </div>
+        )}
+      </aside>
 
       {/* Mobile version */}
       <MobileSheet
@@ -324,7 +319,7 @@ const Sidebar = () => {
         surahs={surahs}
         surahNumber={surahNumber}
       />
-    </div>
+    </>
   );
 };
 

@@ -173,22 +173,20 @@ const MobileSheet = ({
               <Select
                 value=""
                 onValueChange={(value) => {
-                  const ayahNumber = value;
-                  const element = document.getElementById(`ayah-${ayahNumber}`);
-                  if (element) {
-                    element.scrollIntoView({ behavior: "auto", block: "center" });
-                    const c = ["dark:bg-[#1c1c1cff]", "bg-[var(--sephia-300)]"];
-                    element.classList.add(...c);
-                    setTimeout(() => element.classList.remove(...c), 2000);
-                  } else {
-                    router.replace(`/surah/${surahNumber}?ayah=${ayahNumber}`);
+                  const val = Number(value);
+                  if (val > 0) {
+                    window.dispatchEvent(new CustomEvent('jumpToAyah', { detail: { index: val - 1 } }));
                   }
                 }}
               >
                 <SelectTrigger className="w-full h-[38px] bg-card border-border rounded-lg text-xs text-reading font-medium focus:ring-0 shadow-sm pr-8">
                   <SelectValue placeholder="Ayah..." />
                 </SelectTrigger>
-                <SelectContent className="bg-card border-border max-h-[300px]">
+                <SelectContent
+                  position="popper"
+                  sideOffset={4}
+                  className="bg-card border-border max-h-[300px] z-[9999]"
+                >
                   {Array.from({ length: SURAHS_DATA.find((s) => s.number === surahNumber)?.numberOfAyahs || 1 }, (_, i) => i + 1).map((num) => (
                     <SelectItem key={num} value={num.toString()} className="text-foreground focus:bg-accent focus:text-foreground cursor-pointer transition-colors text-xs">
                       Ayah {num}

@@ -156,7 +156,7 @@ export function isFuzzyMatch(rawQuery: string, rawTarget: string): boolean {
   // Spaceless clean match (e.g. "ibnkasir" matches "ibn kathir")
   const qSpaceless = qClean.replace(/\s+/g, "");
   const tSpaceless = tClean.replace(/\s+/g, "");
-  if (tSpaceless.includes(qSpaceless) || qSpaceless.includes(tSpaceless)) return true;
+  if (tSpaceless.includes(qSpaceless)) return true;
 
   // Phonetic matching
   const qPhone = phoneticReduce(rawQuery);
@@ -166,7 +166,7 @@ export function isFuzzyMatch(rawQuery: string, rawTarget: string): boolean {
     if (tPhone.includes(qPhone)) return true;
     const qPhoneNoSpace = qPhone.replace(/\s+/g, "");
     const tPhoneNoSpace = tPhone.replace(/\s+/g, "");
-    if (tPhoneNoSpace.includes(qPhoneNoSpace) || qPhoneNoSpace.includes(tPhoneNoSpace)) return true;
+    if (tPhoneNoSpace.includes(qPhoneNoSpace)) return true;
 
     // Word-by-word token matching
     const qTokens = qPhone.split(" ").filter((t) => t.length >= 2);
@@ -175,9 +175,10 @@ export function isFuzzyMatch(rawQuery: string, rawTarget: string): boolean {
     if (qTokens.length > 0) {
       const allTokensMatch = qTokens.every((qTok) =>
         tTokens.some((tTok) => {
-          if (tTok.includes(qTok) || qTok.includes(tTok)) return true;
-          if (qTok.length >= 3 && tTok.length >= 3) {
-            const maxDist = Math.min(qTok.length, tTok.length) <= 4 ? 1 : 2;
+          if (tTok.startsWith(qTok)) return true;
+          if (qTok.length >= 3 && tTok.includes(qTok)) return true;
+          if (qTok.length >= 4 && tTok.length >= 4) {
+            const maxDist = Math.min(qTok.length, tTok.length) <= 6 ? 1 : 2;
             return levenshteinDistance(qTok, tTok) <= maxDist;
           }
           return false;
@@ -187,10 +188,12 @@ export function isFuzzyMatch(rawQuery: string, rawTarget: string): boolean {
     }
   }
 
-  // Levenshtein on whole spaceless string if query is 3+ chars
-  if (qSpaceless.length >= 3 && tSpaceless.length >= 3) {
-    const maxDist = qSpaceless.length <= 5 ? 1 : 2;
-    if (levenshteinDistance(qSpaceless, tSpaceless) <= maxDist) return true;
+  // Levenshtein on whole spaceless string if query is 4+ chars and lengths are similar
+  if (qSpaceless.length >= 4 && tSpaceless.length >= 4) {
+    if (Math.abs(qSpaceless.length - tSpaceless.length) <= 2) {
+      const maxDist = qSpaceless.length <= 6 ? 1 : 2;
+      if (levenshteinDistance(qSpaceless, tSpaceless) <= maxDist) return true;
+    }
   }
 
   return false;
@@ -246,6 +249,36 @@ export function parseSurahVerseReference(query: string): { surahNumber?: number;
 }
 
 /**
+ * Checks if a search query is an exact match for a Surah.
+ */
+export function isExactSurahMatch(
+  query: string,
+  surah: { number: number; name?: string; englishName: string; englishNameTranslation?: string }
+): boolean {
+  if (!query || !query.trim()) return false;
+  const q = query.trim();
+
+  // 1. Direct number equality
+  const converted = convertEasternToWesternDigits(q);
+  if (surah.number.toString() === converted) return true;
+
+  const ref = parseSurahVerseReference(q);
+  if (ref && ref.surahNumber === surah.number) return true;
+
+  const qClean = cleanPunctuation(q);
+  if (!qClean) return false;
+
+  if (cleanPunctuation(surah.englishName) === qClean) return true;
+  if (surah.name && cleanPunctuation(surah.name) === qClean) return true;
+  if (surah.englishNameTranslation && cleanPunctuation(surah.englishNameTranslation) === qClean) return true;
+
+  const qPhone = phoneticReduce(q);
+  if (qPhone && phoneticReduce(surah.englishName) === qPhone) return true;
+
+  return false;
+}
+
+/**
  * Checks if a search query matches a Surah by number, verse reference (2:255),
  * English name, translation, Arabic name, or phonetic variation ("al nuur", "noor", "kahaf", "baqara").
  */
@@ -279,6 +312,21 @@ export function isSurahMatch(
 }
 
 /**
+ * Filters an array of Surahs. If any exact matches exist, returns ONLY exact matches.
+ * Otherwise returns all fuzzy/prefix matches.
+ */
+export function filterSurahs<
+  T extends { number: number; name?: string; englishName: string; englishNameTranslation?: string }
+>(query: string, surahs: T[]): T[] {
+  if (!query || !query.trim()) return surahs;
+
+  const exact = surahs.filter((s) => isExactSurahMatch(query, s));
+  if (exact.length > 0) return exact;
+
+  return surahs.filter((s) => isSurahMatch(query, s));
+}
+
+/**
  * Finds the index of a Surah by number (Western or Eastern Arabic digits) or fuzzy name match.
  */
 export function findSurahMatchIndex(
@@ -295,7 +343,38 @@ export function findSurahMatchIndex(
     if (idx !== -1) return idx;
   }
 
+  // Check exact match first
+  const exactIdx = surahs.findIndex((s) => isExactSurahMatch(trimmed, s));
+  if (exactIdx !== -1) return exactIdx;
+
   return surahs.findIndex((s) => isSurahMatch(trimmed, s));
+}
+
+/**
+ * Checks if a search query is an exact match for a Tafsir title or author.
+ */
+export function isExactTafsirMatch(
+  query: string,
+  author: { name: string; authorName?: string },
+  language?: { name: string } | null
+): boolean {
+  if (!query || !query.trim()) return false;
+  const qClean = cleanPunctuation(query);
+  if (!qClean) return false;
+
+  // Direct clean title match
+  if (cleanPunctuation(author.name) === qClean) return true;
+
+  // Direct clean authorName match
+  if (author.authorName && cleanPunctuation(author.authorName) === qClean) return true;
+
+  // Combined title + language, e.g. "Tafsir Al Jalalayn English"
+  if (language?.name) {
+    const titleAndLang = cleanPunctuation(`${author.name} ${language.name}`);
+    if (titleAndLang === qClean) return true;
+  }
+
+  return false;
 }
 
 /**
@@ -305,28 +384,69 @@ export function findSurahMatchIndex(
 export function isTafsirMatch(
   rawQuery: string,
   author: { name: string; authorName?: string; era?: string; difficulty?: string; tags?: { name: string }[] },
-  language?: { name: string }
+  language?: { name: string } | null
 ): boolean {
   if (!rawQuery || !rawQuery.trim()) return true;
   const q = rawQuery.trim();
 
-  // Target candidate fields
-  const targets = [
-    author.name,
-    author.authorName,
-    author.era,
-    language?.name,
-    ...(author.tags ? author.tags.map((t) => t.name) : []),
-  ].filter(Boolean) as string[];
+  // Primary targets: book title and author's name
+  if (isFuzzyMatch(q, author.name)) return true;
+  if (author.authorName && isFuzzyMatch(q, author.authorName)) return true;
 
-  // 1. Direct match on any field
-  for (const t of targets) {
-    if (isFuzzyMatch(q, t)) return true;
-  }
+  // Target language directly if query matches it
+  if (language?.name && isFuzzyMatch(q, language.name)) return true;
 
-  // 2. Multi-word composite match (e.g. "english ibn kathir", "classical kathir")
-  const combined = targets.join(" ");
+  // Era or tags if query matches them
+  if (author.era && isFuzzyMatch(q, author.era)) return true;
+  if (author.tags && author.tags.some((t) => isFuzzyMatch(q, t.name))) return true;
+
+  // Composite match (e.g. "English Jalalayn" or "Ibn Kathir English")
+  const combined = [author.name, author.authorName, language?.name].filter(Boolean).join(" ");
   if (isFuzzyMatch(q, combined)) return true;
 
   return false;
+}
+
+/**
+ * Filters a list of Tafsir items. If an exact match is found for the query, returns ONLY exact matches.
+ * Otherwise returns all matching items via fuzzy search.
+ */
+export function filterTafsirs<
+  T extends {
+    author: { name: string; authorName?: string; era?: string; difficulty?: string; tags?: { name: string }[] };
+    language?: { name: string } | null;
+    languageName?: string;
+    langName?: string;
+  }
+>(query: string, items: T[]): T[] {
+  if (!query || !query.trim()) return items;
+
+  const getLangObj = (item: T) => {
+    if (item.language) return item.language;
+    if (item.languageName) return { name: item.languageName };
+    if (item.langName) return { name: item.langName };
+    return null;
+  };
+
+  // 1. Check for exact title or author matches
+  const exact = items.filter((item) => isExactTafsirMatch(query, item.author, getLangObj(item)));
+  if (exact.length > 0) return exact;
+
+  // 2. Check for exact phonetic match (e.g. user typed "Jalalain" for "Jalalayn")
+  const qPhone = phoneticReduce(query);
+  if (qPhone) {
+    const phoneticExact = items.filter((item) => {
+      const aNamePhone = phoneticReduce(item.author.name);
+      if (aNamePhone && aNamePhone === qPhone) return true;
+      if (item.author.authorName) {
+        const authPhone = phoneticReduce(item.author.authorName);
+        if (authPhone && authPhone === qPhone) return true;
+      }
+      return false;
+    });
+    if (phoneticExact.length > 0) return phoneticExact;
+  }
+
+  // 3. Fall back to smart fuzzy match
+  return items.filter((item) => isTafsirMatch(query, item.author, getLangObj(item)));
 }
