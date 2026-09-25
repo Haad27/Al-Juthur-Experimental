@@ -121,9 +121,9 @@ export default function HighlightToolbar({
               {savingColor === c.value && (
                 <Check className="size-3 text-white" strokeWidth={3} />
               )}
-              {/* Show checkmark if this color matches existing highlight */}
+              {/* Show ring if this color matches existing highlight */}
               {!savingColor && selection.isExisting && selection.color === c.value && (
-                <div className="absolute inset-0 rounded-full ring-2 ring-white ring-offset-1" style={{ ringOffsetColor: c.bg }} />
+                <div className="absolute inset-0 rounded-full ring-2 ring-white ring-offset-1" style={{ outlineOffset: '1px' }} />
               )}
             </button>
           ))}

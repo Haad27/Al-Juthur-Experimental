@@ -37,6 +37,7 @@ import { getEnglishFont, getUrduFont } from "@/lib/fontsConfig";
 import { copyToClipboard, cn } from "@/lib/utils";
 import AyahNoteModal from "@/components/quran/AyahNoteModal";
 import HighlightToolbar, { HighlightColor, HighlightSelection } from "@/components/tafsir/HighlightToolbar";
+import { getTafsirFameRank, getLanguagePriority, getTafsirDifficulty } from "@/lib/tafsirRanking";
 import { getTafsirWarning } from "@/lib/tafsirWarnings";
 import TopicSearchModal from "@/components/shared/TopicSearchModal";
 import InlineTranslation from "@/components/shared/InlineTranslation";
@@ -236,21 +237,12 @@ function TafsirContent() {
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
+  const [noteSelectedText, setNoteSelectedText] = useState<string>("");
   
   const [isHighlightMode, setIsHighlightMode] = useState(false);
   const [isToolsMenuOpen, setIsToolsMenuOpen] = useState(false);
   
-  const [highlightSelection, setHighlightSelection] = useState<{
-    id?: string;
-    text: string;
-    surahNumber: number;
-    ayahNumber: number;
-    type: "arabic" | "translation";
-    x: number;
-    y: number;
-    isExisting?: boolean;
-    color?: string;
-  } | null>(null);
+  const [highlightSelection, setHighlightSelection] = useState<HighlightSelection | null>(null);
 
   const [highlights, setHighlights] = useState<UserHighlight[]>([]);
   const [showHighlightOnboarding, setShowHighlightOnboarding] = useState(false);
@@ -459,6 +451,7 @@ function TafsirContent() {
         const ayahNum = parseInt(target.closest('[data-ayah-num]')?.getAttribute('data-ayah-num') || "0", 10);
         const rect = target.getBoundingClientRect();
         const id = target.getAttribute('data-id') || undefined;
+        const color = (target.getAttribute('data-color') || 'gold') as import('@/components/tafsir/HighlightToolbar').HighlightColor;
         
         if (text && (surahNum || activeSurah) && ayahNum) {
           setHighlightSelection({
@@ -469,7 +462,8 @@ function TafsirContent() {
             type: "translation",
             x: rect.left + rect.width / 2,
             y: rect.top - 10,
-            isExisting: true
+            isExisting: true,
+            color,
           });
         }
       }
@@ -1458,9 +1452,10 @@ function TafsirContent() {
 
         <AyahNoteModal
           isOpen={isNoteModalOpen}
-          onClose={() => setIsNoteModalOpen(false)}
+          onClose={() => { setIsNoteModalOpen(false); setNoteSelectedText(""); }}
           surahNumber={activeSurah}
           ayahNumber={currentAyahIndex + 1}
+          selectedText={noteSelectedText}
         />
 
         {!aiChatContext && (
@@ -1571,6 +1566,62 @@ function TafsirContent() {
           authorName={activeAuthor?.name}
           loadedTafsir={loadedTafsir}
           onSelectAyah={(ayahNum: number) => handleSelectTopicAyahInTafsir(ayahNum)}
+        />
+
+        {/* Highlight toolbar - renders via portal above selected text */}
+        <HighlightToolbar
+          selection={highlightSelection}
+          onHighlight={async (color: HighlightColor) => {
+            if (!highlightSelection) return;
+            const { text, surahNumber, ayahNumber, type, id } = highlightSelection;
+            if (id || highlightSelection.isExisting) {
+              const match = highlights.find(h => h.id === id || (h.text === text && h.surahId === surahNumber && h.ayahNumber === ayahNumber));
+              if (match) {
+                await deleteUserHighlight(match.id);
+                setHighlights(prev => prev.filter(h => h.id !== match.id));
+              }
+            }
+            const authorStr = type === 'translation' && (activeAuthor as any)?.authorName ? (activeAuthor as any).authorName : undefined;
+            const res = await saveUserHighlight(surahNumber, ayahNumber, text, type, authorStr, color);
+            if (res) { toast.success("Highlight saved."); setHighlights(prev => [...prev, res]); }
+            else toast.error("Failed to save highlight.");
+            setHighlightSelection(null);
+            window.getSelection()?.removeAllRanges();
+          }}
+          onDelete={async () => {
+            if (!highlightSelection) return;
+            const { text, surahNumber, ayahNumber, id } = highlightSelection;
+            const match = highlights.find(h => h.id === id || (h.text === text && h.surahId === surahNumber && h.ayahNumber === ayahNumber));
+            if (match) {
+              const success = await deleteUserHighlight(match.id);
+              if (success) { toast.success("Highlight removed."); setHighlights(prev => prev.filter(h => h.id !== match.id)); }
+              else toast.error("Failed to remove highlight.");
+            }
+            setHighlightSelection(null);
+            window.getSelection()?.removeAllRanges();
+          }}
+          onNote={() => {
+            if (!highlightSelection) return;
+            setNoteSelectedText(highlightSelection.text);
+            setIsNoteModalOpen(true);
+            setHighlightSelection(null);
+            window.getSelection()?.removeAllRanges();
+          }}
+          onCopy={() => {
+            if (!highlightSelection) return;
+            copyToClipboard(highlightSelection.text, "Copied to clipboard!");
+            setHighlightSelection(null);
+            window.getSelection()?.removeAllRanges();
+          }}
+          onShare={() => {
+            if (!highlightSelection) return;
+            if (navigator.share) {
+              navigator.share({ title: 'Al-Juthur Tafsir', text: highlightSelection.text }).catch(console.error);
+            } else copyToClipboard(highlightSelection.text, "Copied to clipboard!");
+            setHighlightSelection(null);
+            window.getSelection()?.removeAllRanges();
+          }}
+          onClose={() => { setHighlightSelection(null); window.getSelection()?.removeAllRanges(); }}
         />
       </div>
     );
@@ -2117,172 +2168,78 @@ function TafsirContent() {
         }}
       />
 
-      {highlightSelection && (
-        <div
-          className="fixed z-[999] flex items-center bg-[#ffffff] dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#3a3a3a] rounded-full shadow-lg py-1.5 px-3 gap-3 highlight-popover text-sm font-medium"
-          style={{
-            top: highlightSelection.y - 10,
-            left: highlightSelection.x,
-            transform: 'translate(-50%, -100%)',
-          }}
-        >
-          <button
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              copyToClipboard(highlightSelection.text, "Copied to clipboard!");
-              setHighlightSelection(null);
-              window.getSelection()?.removeAllRanges();
-            }}
-            className="text-gray-700 dark:text-[#d4d4d4] hover:text-black dark:hover:text-white transition"
-          >
-            Copy
-          </button>
-          
-          <div className="w-[1px] h-4 bg-gray-300 dark:bg-[#3a3a3a]" />
-          
-          <button
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              if (navigator.share) {
-                navigator.share({
-                  title: 'Al-Juthur Tafsir',
-                  text: highlightSelection.text,
-                }).catch(console.error);
-              } else {
-                copyToClipboard(highlightSelection.text, "Copied to clipboard!");
-              }
-              setHighlightSelection(null);
-              window.getSelection()?.removeAllRanges();
-            }}
-            className="text-gray-700 dark:text-[#d4d4d4] hover:text-black dark:hover:text-white transition"
-          >
-            Share
-          </button>
-
-          <div className="w-[1px] h-4 bg-gray-300 dark:bg-[#3a3a3a]" />
-
-          <div className="flex items-center gap-2">
-            <button
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const { text, surahNumber, ayahNumber, type, id } = highlightSelection;
-                if (id || highlightSelection.isExisting) {
-                  const match = highlights.find(h => h.id === id || (h.text === text && h.surahId === surahNumber && h.ayahNumber === ayahNumber));
-                  if (match) {
-                    await deleteUserHighlight(match.id);
-                    setHighlights(prev => prev.filter(h => h.id !== match.id));
-                  }
-                }
-                const authorStr = type === 'translation' && (activeAuthor as any)?.authorName ? (activeAuthor as any).authorName : undefined;
-                const res = await saveUserHighlight(surahNumber, ayahNumber, text, type, authorStr, 'gold');
-                if (res) {
-                  toast.success("Highlight saved.");
-                  setHighlights(prev => [...prev, res]);
-                } else {
-                  toast.error("Failed to save highlight.");
-                }
-                setHighlightSelection(null);
-                window.getSelection()?.removeAllRanges();
-              }}
-              className="size-5 rounded-full bg-amber-600 hover:scale-110 transition shadow-sm border border-black/10"
-              title="Gold Highlight"
-            />
-            <button
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const { text, surahNumber, ayahNumber, type, id } = highlightSelection;
-                if (id || highlightSelection.isExisting) {
-                  const match = highlights.find(h => h.id === id || (h.text === text && h.surahId === surahNumber && h.ayahNumber === ayahNumber));
-                  if (match) {
-                    await deleteUserHighlight(match.id);
-                    setHighlights(prev => prev.filter(h => h.id !== match.id));
-                  }
-                }
-                const authorStr = type === 'translation' && (activeAuthor as any)?.authorName ? (activeAuthor as any).authorName : undefined;
-                const res = await saveUserHighlight(surahNumber, ayahNumber, text, type, authorStr, 'green');
-                if (res) {
-                  toast.success("Highlight saved.");
-                  setHighlights(prev => [...prev, res]);
-                } else {
-                  toast.error("Failed to save highlight.");
-                }
-                setHighlightSelection(null);
-                window.getSelection()?.removeAllRanges();
-              }}
-              className="size-5 rounded-full bg-emerald-600 hover:scale-110 transition shadow-sm border border-black/10"
-              title="Green Highlight"
-            />
-            <button
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const { text, surahNumber, ayahNumber, type, id } = highlightSelection;
-                if (id || highlightSelection.isExisting) {
-                  const match = highlights.find(h => h.id === id || (h.text === text && h.surahId === surahNumber && h.ayahNumber === ayahNumber));
-                  if (match) {
-                    await deleteUserHighlight(match.id);
-                    setHighlights(prev => prev.filter(h => h.id !== match.id));
-                  }
-                }
-                const authorStr = type === 'translation' && (activeAuthor as any)?.authorName ? (activeAuthor as any).authorName : undefined;
-                const res = await saveUserHighlight(surahNumber, ayahNumber, text, type, authorStr, 'blue');
-                if (res) {
-                  toast.success("Highlight saved.");
-                  setHighlights(prev => [...prev, res]);
-                } else {
-                  toast.error("Failed to save highlight.");
-                }
-                setHighlightSelection(null);
-                window.getSelection()?.removeAllRanges();
-              }}
-              className="size-5 rounded-full bg-blue-600 hover:scale-110 transition shadow-sm border border-black/10"
-              title="Blue Highlight"
-            />
-          </div>
-
-          {highlightSelection.isExisting && (
-            <>
-              <div className="w-[1px] h-4 bg-gray-300 dark:bg-[#3a3a3a]" />
-              <button
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={async (e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  const { text, surahNumber, ayahNumber, id } = highlightSelection;
-                  const match = highlights.find(h => h.id === id || (h.text === text && h.surahId === surahNumber && h.ayahNumber === ayahNumber));
-                  if (match) {
-                    const success = await deleteUserHighlight(match.id);
-                    if (success) {
-                      toast.success("Highlight removed.");
-                      setHighlights(prev => prev.filter(h => h.id !== match.id));
-                    } else {
-                      toast.error("Failed to remove highlight.");
-                    }
-                  }
-                  setHighlightSelection(null);
-                  window.getSelection()?.removeAllRanges();
-                }}
-                className="text-red-500 hover:text-red-600 transition"
-                title="Remove Highlight"
-              >
-                <X className="size-4" />
-              </button>
-            </>
-          )}
-        </div>
-      )}
+      <HighlightToolbar
+        selection={highlightSelection}
+        onHighlight={async (color: HighlightColor) => {
+          if (!highlightSelection) return;
+          const { text, surahNumber, ayahNumber, type, id } = highlightSelection;
+          // If re-highlighting an existing one, remove it first
+          if (id || highlightSelection.isExisting) {
+            const match = highlights.find(h => h.id === id || (h.text === text && h.surahId === surahNumber && h.ayahNumber === ayahNumber));
+            if (match) {
+              await deleteUserHighlight(match.id);
+              setHighlights(prev => prev.filter(h => h.id !== match.id));
+            }
+          }
+          const authorStr = type === 'translation' && (activeAuthor as any)?.authorName ? (activeAuthor as any).authorName : undefined;
+          const res = await saveUserHighlight(surahNumber, ayahNumber, text, type, authorStr, color);
+          if (res) {
+            toast.success("Highlight saved.");
+            setHighlights(prev => [...prev, res]);
+          } else {
+            toast.error("Failed to save highlight.");
+          }
+          setHighlightSelection(null);
+          window.getSelection()?.removeAllRanges();
+        }}
+        onDelete={async () => {
+          if (!highlightSelection) return;
+          const { text, surahNumber, ayahNumber, id } = highlightSelection;
+          const match = highlights.find(h => h.id === id || (h.text === text && h.surahId === surahNumber && h.ayahNumber === ayahNumber));
+          if (match) {
+            const success = await deleteUserHighlight(match.id);
+            if (success) {
+              toast.success("Highlight removed.");
+              setHighlights(prev => prev.filter(h => h.id !== match.id));
+            } else {
+              toast.error("Failed to remove highlight.");
+            }
+          }
+          setHighlightSelection(null);
+          window.getSelection()?.removeAllRanges();
+        }}
+        onNote={() => {
+          if (!highlightSelection) return;
+          setNoteSelectedText(highlightSelection.text);
+          setIsNoteModalOpen(true);
+          setHighlightSelection(null);
+          window.getSelection()?.removeAllRanges();
+        }}
+        onCopy={() => {
+          if (!highlightSelection) return;
+          copyToClipboard(highlightSelection.text, "Copied to clipboard!");
+          setHighlightSelection(null);
+          window.getSelection()?.removeAllRanges();
+        }}
+        onShare={() => {
+          if (!highlightSelection) return;
+          if (navigator.share) {
+            navigator.share({ title: 'Al-Juthur Tafsir', text: highlightSelection.text }).catch(console.error);
+          } else {
+            copyToClipboard(highlightSelection.text, "Copied to clipboard!");
+          }
+          setHighlightSelection(null);
+          window.getSelection()?.removeAllRanges();
+        }}
+        onClose={() => {
+          setHighlightSelection(null);
+          window.getSelection()?.removeAllRanges();
+        }}
+      />
     </div>
   );
 }
+
 
 export default function TafsirPage() {
   return (
