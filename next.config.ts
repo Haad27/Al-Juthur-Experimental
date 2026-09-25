@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
     '/**/*': ['./database/surah-meta/**/*', './database/word-by-word-translation/**/*', './database/translations/**/*'],
   },
   outputFileTracingExcludes: {
-    '*': ['./database/**/*.sqlite', './database/**/*.db', './database/rag/**/*', './database/lexicon/**/*', './database/downloaded_tafsirs/**/*'],
+    '*': ['./database/**/*', './database/rag/**/*', './database/**/*.sqlite', './database/**/*.db', './database/lexicon/**/*', './database/downloaded_tafsirs/**/*'],
   },
 };
 
