@@ -37,7 +37,6 @@ import SurahPlayer from "@/components/SurahPlayer";
 import AyahChatSidebar from "@/components/ai/AyahChatSidebar";
 import TafsirWheelPickerModal from "@/components/quran/TafsirWheelPickerModal";
 import TopicSearchModal from "@/components/shared/TopicSearchModal";
-import FloatingAskScholarButton from "@/components/ai/FloatingAskScholarButton";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 import { amiri } from "@/app/fonts";
 import useScrollDirection from "@/hooks/useScrollDirection";

@@ -36,6 +36,7 @@ import { formatTime, normalizeArabic, unlockAudio, cn } from "@/lib/utils";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 import { fetchAyahAudio } from "@/api/api";
 import { useAudioStore } from "@/lib/stores/audioStore";
+import useScrollDirection from "@/hooks/useScrollDirection";
 
 interface SurahPlayerProps {
   surahNumber: number;
@@ -107,6 +108,7 @@ export default function SurahPlayer({
 
   const [collapsed, setCollapsed] = useState(false);
   const [mobileFabOpen, setMobileFabOpen] = useState(false);
+  const showNav = useScrollDirection();
 
   useEffect(() => {
     if (recording || playing || audioStore.isPlaying) {
@@ -417,7 +419,10 @@ export default function SurahPlayer({
         onClick={() => setMobileFabOpen((prev) => !prev)}
         whileTap={{ scale: 0.92 }}
         className={cn(
-          "fixed bottom-[calc(6.75rem+env(safe-area-inset-bottom,0px))] md:bottom-8 z-[9999] size-11 md:size-12 rounded-full backdrop-blur-md flex items-center justify-center transition-all duration-200 cursor-pointer select-none border shadow-md",
+          "fixed z-[9999] size-11 md:size-12 rounded-full backdrop-blur-md flex items-center justify-center transition-all duration-300 ease-in-out cursor-pointer select-none border shadow-md",
+          showNav
+            ? "bottom-[calc(6.75rem+env(safe-area-inset-bottom,0px))] md:bottom-8"
+            : "bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] md:bottom-8",
           mobileFabOpen
             ? "bg-card border-accent text-accent ring-2 ring-accent/25"
             : playing
@@ -469,7 +474,10 @@ export default function SurahPlayer({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 15, scale: 0.95 }}
           className={cn(
-            "fixed bottom-[calc(10.25rem+env(safe-area-inset-bottom,0px))] md:bottom-[5.5rem] z-[9999] w-64 md:w-72 bg-card border border-accent/40 rounded-2xl p-4  backdrop-blur-2xl space-y-4 text-foreground transition-all duration-300 max-h-[85vh] overflow-y-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
+            "fixed z-[9999] w-64 md:w-72 bg-card border border-accent/40 rounded-2xl p-4 backdrop-blur-2xl space-y-4 text-foreground transition-all duration-300 ease-in-out max-h-[85vh] overflow-y-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
+            showNav
+              ? "bottom-[calc(10.25rem+env(safe-area-inset-bottom,0px))] md:bottom-[5.5rem]"
+              : "bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] md:bottom-[5.5rem]",
             aiChatContext ? "max-lg:hidden right-4 lg:right-[440px] xl:right-[470px]" : "right-4 md:right-8"
           )}
         >
