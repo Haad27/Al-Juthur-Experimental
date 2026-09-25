@@ -257,25 +257,27 @@ function LexiconPageContent() {
         }
       />
 
-          {/* MOBILE ONLY: Pinned Dropdowns for Dictionaries & PDF Lexicons */}
-          {result?.entries && result.entries.length > 0 && (
-            <div className="md:hidden flex gap-2 w-full px-4 pt-3">
-              {/* Dictionary Dropdown (Prominent Green Border) */}
-              <div className="relative flex-1 min-w-0">
-                <select
-                  value={selectedDictId}
-                  onChange={(e) => setSelectedDictId(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-                  className="w-full appearance-none bg-card border border-border rounded-lg px-3 py-1.5 text-xs text-foreground font-medium focus:outline-none focus:ring-1 focus:ring-ring pr-7 truncate"
-                >
-                  <option value="all" className="bg-card text-foreground">All Dictionaries ({result.entries.length})</option>
-                  {result.entries.map((entry) => (
-                    <option key={entry.dictId} value={entry.dictId} className="bg-card text-foreground">
-                      {entry.dictName}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
-              </div>
+          {/* MOBILE ONLY: Pinned Dropdowns for Dictionaries & PDF Lexicons (Sticky with Top Nav) */}
+          {((result?.entries && result.entries.length > 0) || pdfDictionaries.length > 0) && (
+            <div className="md:hidden sticky top-14 z-40 bg-background/95 backdrop-blur-md border-b border-border py-2.5 px-4 flex gap-2 w-full shadow-sm">
+              {/* Dictionary Dropdown */}
+              {result?.entries && result.entries.length > 0 && (
+                <div className="relative flex-1 min-w-0">
+                  <select
+                    value={selectedDictId}
+                    onChange={(e) => setSelectedDictId(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+                    className="w-full appearance-none bg-card border border-border rounded-lg px-3 py-1.5 text-xs text-foreground font-medium focus:outline-none focus:ring-1 focus:ring-ring pr-7 truncate"
+                  >
+                    <option value="all" className="bg-card text-foreground">All Dictionaries ({result.entries.length})</option>
+                    {result.entries.map((entry) => (
+                      <option key={entry.dictId} value={entry.dictId} className="bg-card text-foreground">
+                        {entry.dictName}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+                </div>
+              )}
 
               {/* PDF Lexicons Dropdown */}
               {pdfDictionaries.length > 0 && (

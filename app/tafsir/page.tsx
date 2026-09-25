@@ -1587,7 +1587,7 @@ function TafsirContent() {
                 setHighlights(prev => prev.filter(h => h.id !== match.id));
               }
             }
-            const authorStr = type === 'translation' ? (activeAuthor?.name || activeAuthor?.authorName || undefined) : undefined;
+            const authorStr = type === 'translation' ? ((activeAuthor as any)?.name || (activeAuthor as any)?.authorName || undefined) : undefined;
             const res = await saveUserHighlight(surahNumber, ayahNumber, text, type, authorStr, color);
             if (res) { toast.success("Highlight saved."); setHighlights(prev => [...prev, res]); }
             else toast.error("Failed to save highlight.");
@@ -1644,8 +1644,8 @@ function TafsirContent() {
 
       {/* Hero Header removed for cleaner UI consistency */}
 
-      {/* Sticky Filters & Search (Action Bar) */}
-      <div className={`sticky z-30 bg-background/90 backdrop-blur-md border-y border-border mb-4 transition-all duration-300 top-0 mt-0`}>
+      {/* Sticky Filters & Search (Action Bar - positioned cleanly below AppHeader) */}
+      <div className={`sticky top-14 z-30 bg-background/90 backdrop-blur-md border-y border-border mb-4 transition-all duration-300`}>
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-3">
           
           {/* Action Row: Search, Refine, Active Chips */}
@@ -2188,7 +2188,7 @@ function TafsirContent() {
               setHighlights(prev => prev.filter(h => h.id !== match.id));
             }
           }
-          const authorStr = type === 'translation' ? (activeAuthor?.name || activeAuthor?.authorName || undefined) : undefined;
+          const authorStr = type === 'translation' ? ((activeAuthor as any)?.name || (activeAuthor as any)?.authorName || undefined) : undefined;
           const res = await saveUserHighlight(surahNumber, ayahNumber, text, type, authorStr, color);
           if (res) {
             toast.success("Highlight saved.");

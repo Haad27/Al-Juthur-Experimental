@@ -1317,7 +1317,7 @@ export default function SurahReaderClient({
           onOpenTopics={() => setIsTopicModalOpen(true)}
         />
 
-        <div className="flex items-center text-center w-full flex-col pt-16 md:pt-16 mb-1 md:mb-2 relative z-20">
+        <div className="flex items-center text-center w-full flex-col pt-40 sm:pt-44 md:pt-16 mb-1 md:mb-2 relative z-20">
           <BismillahIcon className="text-arabic lg:max-w-56 md:max-w-48 max-w-36 sm:max-w-44" />
           
           <div className="mt-2.5 mb-1 flex items-center justify-center gap-2 flex-wrap max-w-3xl">
