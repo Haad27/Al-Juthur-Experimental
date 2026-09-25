@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TafsirTextRenderer from "@/components/tafsir/TafsirTextRenderer";
+import { cn } from "@/lib/utils";
 import { filterTafsirs } from "@/lib/searchUtils";
 
 interface Author {
