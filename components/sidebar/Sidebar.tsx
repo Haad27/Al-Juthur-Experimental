@@ -194,7 +194,7 @@ const Sidebar = () => {
             </div>
 
             {surahNumber > 0 && (
-              <div className="flex flex-col gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => {
@@ -202,14 +202,11 @@ const Sidebar = () => {
                       window.dispatchEvent(new CustomEvent("open-topic-modal"));
                     }
                   }}
-                  className="flex items-center justify-between px-3 py-2 bg-card/60 hover:bg-card border border-border hover:border-accent/40 rounded-xl text-xs font-medium text-foreground transition-all shadow-inner group cursor-pointer"
+                  className="flex flex-col items-center justify-center py-2 px-1 bg-card/60 hover:bg-card border border-border hover:border-accent/40 rounded-xl text-foreground transition-all shadow-inner group cursor-pointer text-center"
                   title="Explore Topics & Subjects in this Surah"
                 >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Compass className="w-4 h-4 text-accent shrink-0 group-hover:rotate-45 transition-transform duration-300" />
-                    <span className="truncate">Explore Topics in Surah</span>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-accent group-hover:translate-x-0.5 transition-all shrink-0" />
+                  <Compass className="w-4 h-4 text-accent mb-1 group-hover:rotate-45 transition-transform duration-300" />
+                  <span className="truncate text-[10px] sm:text-[11px] font-medium w-full">Surah Topics</span>
                 </button>
                 <button
                   type="button"
@@ -218,14 +215,11 @@ const Sidebar = () => {
                       window.dispatchEvent(new CustomEvent("open-global-topic-modal"));
                     }
                   }}
-                  className="flex items-center justify-between px-3 py-2 bg-card/60 hover:bg-card border border-border hover:border-accent/40 rounded-xl text-xs font-medium text-foreground transition-all shadow-inner group cursor-pointer"
+                  className="flex flex-col items-center justify-center py-2 px-1 bg-card/60 hover:bg-card border border-border hover:border-accent/40 rounded-xl text-foreground transition-all shadow-inner group cursor-pointer text-center"
                   title="Explore Topics & Subjects in the Whole Quran"
                 >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Search className="w-4 h-4 text-accent shrink-0 group-hover:rotate-45 transition-transform duration-300" />
-                    <span className="truncate">Explore Topics in Quran</span>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-accent group-hover:translate-x-0.5 transition-all shrink-0" />
+                  <Search className="w-4 h-4 text-accent mb-1 group-hover:rotate-45 transition-transform duration-300" />
+                  <span className="truncate text-[10px] sm:text-[11px] font-medium w-full">Quran Topics</span>
                 </button>
               </div>
             )}
@@ -238,13 +232,12 @@ const Sidebar = () => {
                   <span className="text-[10px] font-bold uppercase tracking-wider text-accent shrink-0">Go to Ayah:</span>
                   <div className="flex-1 min-w-0 relative">
                     <select
-                      value=""
+                      value={currentVisibleAyah ? currentVisibleAyah.toString() : ""}
                       onChange={(e) => {
                         const val = Number(e.target.value);
                         if (val > 0) {
                           window.dispatchEvent(new CustomEvent('jumpToAyah', { detail: { index: val - 1 } }));
                         }
-                        e.target.value = "";
                       }}
                       className="w-full h-7 pl-2 pr-6 bg-muted/60 hover:bg-muted border border-border/80 rounded-lg text-foreground font-mono text-xs cursor-pointer outline-none appearance-none transition-colors"
                       title="Select an Ayah from list"

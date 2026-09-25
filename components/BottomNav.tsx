@@ -17,6 +17,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 import { useAudioStore } from "@/lib/stores/audioStore";
 import { cn } from "@/lib/utils";
+import useScrollDirection from "@/hooks/useScrollDirection";
 
 const BottomNav = () => {
   const pathname = usePathname();
@@ -25,6 +26,7 @@ const BottomNav = () => {
   const [isAudioActive, setIsAudioActive] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
   const [isAiSheetOpen, setIsAiSheetOpen] = useState(false);
+  const show = useScrollDirection();
 
   React.useEffect(() => {
     setMounted(true);
@@ -160,7 +162,10 @@ const BottomNav = () => {
 
       <div
         suppressHydrationWarning
-        className="pointer-events-none fixed inset-x-0 bottom-0 z-[99999] flex w-full justify-center pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] md:hidden"
+        className={cn(
+          "pointer-events-none fixed inset-x-0 bottom-0 z-[99999] flex w-full justify-center pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] md:hidden transition-transform duration-300 ease-in-out",
+          show ? "translate-y-0" : "translate-y-[150%]"
+        )}
         style={{
           position: "fixed",
           bottom: 0,

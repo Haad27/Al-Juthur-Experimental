@@ -36,7 +36,7 @@ import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 import { getEnglishFont, getUrduFont } from "@/lib/fontsConfig";
 import { copyToClipboard, cn } from "@/lib/utils";
 import AyahNoteModal from "@/components/quran/AyahNoteModal";
-import { getTafsirFameRank, getLanguagePriority, getTafsirDifficulty } from "@/lib/tafsirRanking";
+import HighlightToolbar, { HighlightColor, HighlightSelection } from "@/components/tafsir/HighlightToolbar";
 import { getTafsirWarning } from "@/lib/tafsirWarnings";
 import TopicSearchModal from "@/components/shared/TopicSearchModal";
 import InlineTranslation from "@/components/shared/InlineTranslation";

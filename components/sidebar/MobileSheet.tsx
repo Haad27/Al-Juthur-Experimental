@@ -46,6 +46,18 @@ const MobileSheet = ({
   const isPlayingAudio = useAudioStore((s) => s.isPlaying);
   const [isAudioActive, setIsAudioActive] = useState(false);
   const { isWordDialogVisible } = useGlobalState();
+  const [currentVisibleAyah, setCurrentVisibleAyah] = useState<number | null>(null);
+
+  useEffect(() => {
+    const handleVisibleAyah = (e: any) => {
+      const ayah = e.detail?.ayah;
+      if (typeof ayah === "number" && ayah > 0) {
+        setCurrentVisibleAyah(ayah);
+      }
+    };
+    window.addEventListener("visibleAyahChanged", handleVisibleAyah);
+    return () => window.removeEventListener("visibleAyahChanged", handleVisibleAyah);
+  }, []);
 
   useEffect(() => {
     const checkAudio = () => {
@@ -87,36 +99,53 @@ const MobileSheet = ({
           {(() => {
             const currentSurahObj = SURAHS_DATA.find((s) => s.number === surahNumber);
             return (
-              <div className="flex items-center justify-between w-full min-w-0 pr-1">
-                <div className="flex items-center gap-2 min-w-0 flex-1 mr-2">
-                  <Link
-                    href="/home#start_reading"
-                    className="p-1.5 -ml-1 rounded-lg bg-card/90 border border-border text-muted-foreground hover:text-accent hover:border-accent/50 transition-all flex items-center justify-center shrink-0 cursor-pointer shadow-sm"
-                    title="Back to All Surahs"
-                  >
-                    <ArrowLeft className="size-4" />
-                  </Link>
+              <div className="flex flex-col w-full gap-2">
+                <div className="flex items-center justify-between w-full min-w-0 pr-1">
+                  <div className="flex items-center gap-2 min-w-0 flex-1 mr-2">
+                    <Link
+                      href="/home#start_reading"
+                      className="p-1.5 -ml-1 rounded-lg bg-card/90 border border-border text-muted-foreground hover:text-accent hover:border-accent/50 transition-all flex items-center justify-center shrink-0 cursor-pointer shadow-sm"
+                      title="Back to All Surahs"
+                    >
+                      <ArrowLeft className="size-4" />
+                    </Link>
 
-                  <div className="flex flex-col min-w-0 justify-center">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <span className="text-accent font-extrabold text-base sm:text-lg tracking-tight truncate ">
-                        {currentSurahObj?.englishName}
-                      </span>
+                    <div className="flex flex-col min-w-0 justify-center">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="text-accent font-extrabold text-base sm:text-lg tracking-tight truncate ">
+                          {currentSurahObj?.englishName}
+                        </span>
+                        {currentSurahObj?.englishNameTranslation && (
+                          <span className="text-muted-foreground text-[11px] font-medium truncate max-w-[140px] hidden sm:inline">
+                            ({currentSurahObj.englishNameTranslation})
+                          </span>
+                        )}
+                      </div>
                       {currentSurahObj?.englishNameTranslation && (
-                        <span className="text-muted-foreground text-[11px] font-medium truncate max-w-[140px] hidden sm:inline">
-                          ({currentSurahObj.englishNameTranslation})
+                        <span className="text-muted-foreground text-[10px] font-medium truncate sm:hidden">
+                          {currentSurahObj.englishNameTranslation}
                         </span>
                       )}
                     </div>
-                    {currentSurahObj?.englishNameTranslation && (
-                      <span className="text-muted-foreground text-[10px] font-medium truncate sm:hidden">
-                        {currentSurahObj.englishNameTranslation}
+                  </div>
+
+                  <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                    {currentSurahObj?.revelationType && (
+                      <span className="px-2 py-0.5 rounded-full bg-accent/10 border border-accent/30 text-accent text-[10px] font-semibold tracking-wider uppercase">
+                        {currentSurahObj.revelationType}
                       </span>
                     )}
+                    <ThemeToggleButton />
+                    <button 
+                      onClick={() => { setActiveTab("settings"); setIsOpen(true); }} 
+                      className="p-1.5 rounded-lg bg-card border border-accent/50  text-accent hover:text-accent  transition-all duration-300"
+                    >
+                      <SlidersHorizontal className="size-4" />
+                    </button>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <div className="grid grid-cols-2 gap-2 w-full">
                   <button
                     type="button"
                     onClick={() => {
@@ -124,11 +153,11 @@ const MobileSheet = ({
                         window.dispatchEvent(new CustomEvent("open-topic-modal"));
                       }
                     }}
-                    className="flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-border/80 bg-card hover:bg-muted text-[11px] font-medium text-foreground transition-all shrink-0 cursor-pointer shadow-xs"
+                    className="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl border border-border/80 bg-card/60 hover:bg-card text-[11px] font-medium text-foreground transition-all shrink-0 cursor-pointer shadow-sm"
                     title="Explore Topics in this Surah"
                   >
-                    <Compass className="size-3 text-accent" />
-                    <span>Topics</span>
+                    <Compass className="size-3.5 text-accent mb-0.5" />
+                    <span>Surah Topics</span>
                   </button>
                   <button
                     type="button"
@@ -137,23 +166,11 @@ const MobileSheet = ({
                         window.dispatchEvent(new CustomEvent("open-global-topic-modal"));
                       }
                     }}
-                    className="flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-border/80 bg-card hover:bg-muted text-[11px] font-medium text-foreground transition-all shrink-0 cursor-pointer shadow-xs"
+                    className="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl border border-border/80 bg-card/60 hover:bg-card text-[11px] font-medium text-foreground transition-all shrink-0 cursor-pointer shadow-sm"
                     title="Explore Topics in the Whole Quran"
                   >
-                    <Search className="size-3 text-accent" />
+                    <Search className="size-3.5 text-accent mb-0.5" />
                     <span>Quran Topics</span>
-                  </button>
-                  {currentSurahObj?.revelationType && (
-                    <span className="px-2 py-0.5 rounded-full bg-accent/10 border border-accent/30 text-accent text-[10px] font-semibold tracking-wider uppercase">
-                      {currentSurahObj.revelationType}
-                    </span>
-                  )}
-                  <ThemeToggleButton />
-                  <button 
-                    onClick={() => { setActiveTab("settings"); setIsOpen(true); }} 
-                    className="p-1.5 rounded-lg bg-card border border-accent/50  text-accent hover:text-accent  transition-all duration-300"
-                  >
-                    <SlidersHorizontal className="size-4" />
                   </button>
                 </div>
               </div>
@@ -182,13 +199,12 @@ const MobileSheet = ({
 
             <div className="relative w-28 shrink-0">
               <select
-                value=""
+                value={currentVisibleAyah ? currentVisibleAyah.toString() : ""}
                 onChange={(e) => {
                   const val = Number(e.target.value);
                   if (val > 0) {
                     window.dispatchEvent(new CustomEvent('jumpToAyah', { detail: { index: val - 1 } }));
                   }
-                  e.target.value = "";
                 }}
                 className="w-full h-[38px] bg-card border border-border rounded-lg text-xs text-reading font-medium outline-none cursor-pointer appearance-none pl-3 pr-7 shadow-sm focus:border-accent/60"
                 title="Go to Ayah"
