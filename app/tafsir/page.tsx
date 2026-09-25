@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo, useRef, useCallback, Suspense } fr
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
-import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, ChevronLeft, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check, Bookmark, BookmarkCheck, Lock, Columns2, AlertCircle, RotateCcw, Edit3, Highlighter, PenTool, Wrench, StickyNote } from "lucide-react";
+import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, ChevronLeft, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check, Bookmark, BookmarkCheck, Lock, Columns2, AlertCircle, RotateCcw, Edit3, Highlighter, PenTool, Wrench, StickyNote, Trash2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import TafsirHorizontalReader from "@/components/tafsir/TafsirHorizontalReader";
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
@@ -29,6 +29,7 @@ import {
   deleteUserHighlight,
   UserHighlight,
   fetchUserNotes,
+  deleteUserNote,
   UserNote,
 } from "@/lib/readerStorage";
 
@@ -1366,6 +1367,7 @@ function TafsirContent() {
                       languages={languages}
                       highlights={highlights}
                       notes={notes}
+                      onDeleteNote={(noteId) => setNotes(prev => prev.filter(n => n.id !== noteId))}
                     />
                   ) : (
                     <div className="flex flex-col items-center justify-center p-12 text-muted-foreground text-sm">
@@ -1419,6 +1421,7 @@ function TafsirContent() {
                         languages={languages}
                         highlights={highlights}
                         notes={notes}
+                        onDeleteNote={(noteId) => setNotes(prev => prev.filter(n => n.id !== noteId))}
                       />
                     );
                   }}
@@ -1584,7 +1587,7 @@ function TafsirContent() {
                 setHighlights(prev => prev.filter(h => h.id !== match.id));
               }
             }
-            const authorStr = type === 'translation' && (activeAuthor as any)?.authorName ? (activeAuthor as any).authorName : undefined;
+            const authorStr = type === 'translation' ? (activeAuthor?.name || activeAuthor?.authorName || undefined) : undefined;
             const res = await saveUserHighlight(surahNumber, ayahNumber, text, type, authorStr, color);
             if (res) { toast.success("Highlight saved."); setHighlights(prev => [...prev, res]); }
             else toast.error("Failed to save highlight.");
@@ -2185,7 +2188,7 @@ function TafsirContent() {
               setHighlights(prev => prev.filter(h => h.id !== match.id));
             }
           }
-          const authorStr = type === 'translation' && (activeAuthor as any)?.authorName ? (activeAuthor as any).authorName : undefined;
+          const authorStr = type === 'translation' ? (activeAuthor?.name || activeAuthor?.authorName || undefined) : undefined;
           const res = await saveUserHighlight(surahNumber, ayahNumber, text, type, authorStr, color);
           if (res) {
             toast.success("Highlight saved.");
@@ -2265,6 +2268,7 @@ function TafsirCard({
   languages = [],
   highlights = [],
   notes = [],
+  onDeleteNote,
 }: {
   entry: any;
   idx: number;
@@ -2276,6 +2280,7 @@ function TafsirCard({
   languages?: Language[];
   highlights?: UserHighlight[];
   notes?: UserNote[];
+  onDeleteNote?: (id: string) => void;
 }) {
   const ayahNumber = entry.ayah?.numberInSurah || idx + 1;
   const arabicText = entry.ayah?.text && entry.ayah.text !== "Arabic Text" ? entry.ayah.text : null;
@@ -2496,21 +2501,58 @@ function TafsirCard({
           />
         )}
 
-        {/* Notes panel — shown when user clicks the note badge */}
+        {/* Notes panel — shown when user clicks the note badge or inline note icon */}
         {showNotesPanel && ayahNotes.length > 0 && (
           <div className="mt-4 pt-4 border-t border-amber-500/20 space-y-3 animate-in fade-in slide-in-from-top-2">
-            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-xs font-bold">
-              <StickyNote className="size-3.5" />
-              Your Notes ({ayahNotes.length})
-            </div>
-            {ayahNotes.map(note => (
-              <div key={note.id} className="p-3 rounded-xl bg-amber-500/8 border border-amber-500/20 text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-                {note.text}
-                <div className="text-[10px] text-muted-foreground mt-1.5">
-                  {new Date(note.createdAt).toLocaleDateString()}
-                </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-xs font-bold">
+                <StickyNote className="size-3.5" />
+                <span>Your Notes ({ayahNotes.length})</span>
               </div>
-            ))}
+              <button
+                onClick={() => setShowNotesPanel(false)}
+                className="text-[11px] text-muted-foreground hover:text-foreground transition-colors p-1"
+              >
+                <X className="size-3.5" />
+              </button>
+            </div>
+            {ayahNotes.map(note => {
+              const anchorMatch = note.text.match(/^\[Re:\s*"([^"]+)"\]\n\n([\s\S]*)$/);
+              const anchorText = anchorMatch ? anchorMatch[1] : null;
+              const noteBody = anchorMatch ? anchorMatch[2] : note.text;
+
+              return (
+                <div key={note.id} className="p-3.5 rounded-2xl bg-amber-500/8 border border-amber-500/20 text-sm text-foreground space-y-2">
+                  {anchorText && (
+                    <div className="text-xs text-muted-foreground italic border-l-2 border-amber-500/50 pl-2.5 py-0.5 bg-amber-500/5 rounded-r">
+                      "{anchorText}"
+                    </div>
+                  )}
+                  <div className="text-sm text-foreground leading-relaxed whitespace-pre-wrap font-medium">
+                    {noteBody}
+                  </div>
+                  <div className="flex items-center justify-between pt-1 border-t border-amber-500/10 text-[11px] text-muted-foreground">
+                    <span>{new Date(note.createdAt).toLocaleDateString()}</span>
+                    <button
+                      onClick={async () => {
+                        const ok = await deleteUserNote(note.id);
+                        if (ok) {
+                          toast.success("Note deleted.");
+                          onDeleteNote?.(note.id);
+                        } else {
+                          toast.error("Failed to delete note.");
+                        }
+                      }}
+                      className="inline-flex items-center gap-1 text-muted-foreground hover:text-red-400 p-1 rounded transition-colors cursor-pointer"
+                      title="Delete Note"
+                    >
+                      <Trash2 className="size-3.5" />
+                      <span className="text-[10px]">Delete</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

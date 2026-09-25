@@ -184,13 +184,26 @@ export default function TafsirTextRenderer({
         if (!h.text || h.text.trim() === '') return;
         try {
           const escaped = h.text.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-          let colorClass = 'bg-amber-500/40';
-          if (h.color === 'gold')   colorClass = 'bg-amber-500/40';
-          if (h.color === 'green')  colorClass = 'bg-emerald-600/30';
-          if (h.color === 'blue')   colorClass = 'bg-blue-600/30';
-          if (h.color === 'pink')   colorClass = 'bg-pink-600/35';
-          if (h.color === 'purple') colorClass = 'bg-purple-600/30';
-          html = html.replace(new RegExp(escaped, "g"), `<mark class="${colorClass} text-inherit rounded-sm px-0.5 cursor-pointer" data-id="${h.id || ''}" data-color="${h.color || 'gold'}">$&</mark>`);
+          const color = (h.color || 'gold').toLowerCase();
+          
+          let bg = 'rgba(245, 158, 11, 0.30)'; // amber/gold
+          let border = 'rgba(245, 158, 11, 0.75)';
+          if (color === 'pink') {
+            bg = 'rgba(236, 72, 153, 0.30)';
+            border = 'rgba(236, 72, 153, 0.80)';
+          } else if (color === 'green') {
+            bg = 'rgba(34, 197, 94, 0.28)';
+            border = 'rgba(34, 197, 94, 0.80)';
+          } else if (color === 'blue') {
+            bg = 'rgba(59, 130, 246, 0.28)';
+            border = 'rgba(59, 130, 246, 0.80)';
+          } else if (color === 'purple') {
+            bg = 'rgba(168, 85, 247, 0.28)';
+            border = 'rgba(168, 85, 247, 0.80)';
+          }
+
+          const markStyle = `background-color: ${bg}; border-bottom: 2px solid ${border}; border-radius: 3px; padding: 1px 2px;`;
+          html = html.replace(new RegExp(escaped, "g"), `<mark style="${markStyle}" class="text-inherit cursor-pointer transition-opacity hover:opacity-90" data-id="${h.id || ''}" data-color="${color}">$&</mark>`);
         } catch (e) {
           console.error("Failed to highlight", e);
         }
@@ -209,8 +222,8 @@ export default function TafsirTextRenderer({
             const escaped = anchor.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
             const regex = new RegExp(escaped, "g");
             if (regex.test(html)) {
-              // Subtle sticky note icon injected right at the end of the highlighted text
-              const iconHtml = `<span role="button" tabindex="0" class="inline-flex items-center justify-center shrink-0 size-4 md:size-4.5 rounded bg-amber-400/20 hover:bg-amber-400/35 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[10px] mx-1 align-middle cursor-pointer transition-colors select-none" title="View Note" onclick="const btn = this.closest('.tafsir-card-container')?.querySelector('.note-badge-btn'); if(btn) btn.click(); event.stopPropagation();">📝</span>`;
+              // Subtle sticky note icon placed right after the complete highlighted word/phrase
+              const iconHtml = ` <span role="button" tabindex="0" class="inline-flex items-center justify-center shrink-0 size-4 md:size-4.5 rounded bg-amber-400/25 hover:bg-amber-400/40 border border-amber-500/40 text-amber-600 dark:text-amber-400 text-[10px] mx-1 align-middle cursor-pointer transition-transform hover:scale-110 select-none shadow-xs" title="View Note" onclick="const btn = this.closest('.tafsir-card-container')?.querySelector('.note-badge-btn'); if(btn) btn.click(); event.stopPropagation();">📝</span>`;
               html = html.replace(regex, `$&${iconHtml}`);
             }
           } catch (e) {

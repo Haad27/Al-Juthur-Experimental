@@ -54,9 +54,13 @@ export default function AyahNoteModal({
     }
     setIsSaving(true);
     try {
-      // Prefix note with anchor text if provided
-      const fullNote = selectedText
-        ? `[Re: "${selectedText.slice(0, 120)}${selectedText.length > 120 ? "…" : ""}"]\n\n${noteText}`
+      // Prefix note with anchor text if provided (clean word boundary)
+      let anchor = selectedText?.trim();
+      if (anchor && anchor.length > 250) {
+        anchor = anchor.slice(0, 240).replace(/\s+\S*$/, '') + '…';
+      }
+      const fullNote = anchor
+        ? `[Re: "${anchor}"]\n\n${noteText}`
         : noteText;
 
       const saved = await saveUserNote(surahNumber, ayahNumber, fullNote);
