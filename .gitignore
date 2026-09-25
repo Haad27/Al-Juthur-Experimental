@@ -57,4 +57,5 @@ database/*
 !database/word-by-word-translation
 !database/pdf
 !database/topics
+!database/downloaded_tafsirs/
 localtunnel_output.txt

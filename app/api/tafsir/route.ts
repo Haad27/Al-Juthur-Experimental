@@ -21,6 +21,7 @@ const LOCAL_TAFSIR_MAP: Record<number, { folder: string; isUrdu?: boolean; isPas
   62: { folder: "en-tafsir-maarif-ul-quran", authorName: "Mufti Muhammad Shafi", name: "Ma'arif-ul-Quran" },
   63: { folder: "en-al-jalalayn", authorName: "Jalal al-Din al-Mahalli & Jalal al-Din al-Suyuti", name: "Tafsir al-Jalalayn" },
   64: { folder: "en-tazkirul-quran", authorName: "Maulana Wahiduddin Khan", name: "Tazkirul Quran" },
+  265: { folder: "en-tafsir-as-saadi", authorName: "Shaykh Abdur-Rahman ibn Nasir as-Sa'di", name: "Tafsir as-Sa'di" },
   102: { folder: "ur-tafseer-ibn-e-kaseer", isUrdu: true, authorName: "Hafiz Ibn Kathir", name: "Tafsir Ibn Kathir" },
   103: { folder: "ur-tafsir-as-saadi-urdu", isUrdu: true, authorName: "Shaykh Abdur-Rahman ibn Nasir as-Sa'di", name: "Tafsir as-Sa'di" },
   104: { folder: "ur-tafsir-bayan-ul-quran", isUrdu: true, authorName: "Dr. Israr Ahmad", name: "Bayan-ul-Quran (بیان القرآن)" },
@@ -162,6 +163,7 @@ const getTafsirLibrary = unstable_cache(
     // Virtual Authors & Dedicated Local Tafsirs
     const virtualAuthors: any[] = [
       // English (languageId: 3)
+      { id: 265, name: "Tafsir as-Sa'di (تيسير الكريم الرحمن)", authorName: "Shaykh Abdur-Rahman ibn Nasir as-Sa'di", languageId: 3, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
       { id: 100095, name: "Tafheem-ul-Quran (Commentary)", authorName: "Sayyid Abul Ala Maududi", languageId: 3, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
       { id: 100084, name: "The Noble Quran (with Explanatory Notes)", authorName: "Mufti Taqi Usmani", languageId: 3, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
       { id: 100022, name: "Quran Translation & Commentary", authorName: "Abdullah Yusuf Ali", languageId: 3, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
@@ -210,7 +212,7 @@ const getTafsirLibrary = unstable_cache(
       authors: authorsByLang[l.id] || []
     }));
   },
-  ['tafsir-library-v14'],
+  ['tafsir-library-v15'],
   { revalidate: 2592000 } // 30 days
 );
 
@@ -274,7 +276,7 @@ const getLocalDownloadedTafsir = unstable_cache(
       return null;
     }
   },
-  ['local-downloaded-tafsir-v12'],
+  ['local-downloaded-tafsir-v13'],
   { revalidate: 2592000 }
 );
 

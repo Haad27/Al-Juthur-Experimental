@@ -1,0 +1,557 @@
+[
+  {
+    "surah": 12,
+    "ayah": 1,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 2,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 3,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 4,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 5,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 6,
+    "text": "<span class=\"book-ayah text-primary\">﴿تَأْوِيلِ ٱلأَحَادِيثِ﴾</span>: تفسير الرؤيا."
+  },
+  {
+    "surah": 12,
+    "ayah": 7,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 8,
+    "text": "<span class=\"book-ayah text-primary\">﴿عُصْبَةٌ﴾</span> أي جماعة، من العشرة إلى الأربعين."
+  },
+  {
+    "surah": 12,
+    "ayah": 9,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 10,
+    "text": "<span class=\"book-ayah text-primary\">﴿غَيَٰبَتِ ٱلْجُبِّ﴾</span>: كل شيء غيب عنك شيئا فهو غيابة (جب): اسم ركية لم تطو، فإذا طويت فهي بئر. <span class=\"book-ayah text-primary\">﴿يَلْتَقِطْهُ بَعْضُ السَّيَّارَةِ﴾</span> أي يأخذه على غير طلب له ولا قصد، ومنه قولهم: لقيته التقاطا ووردت الماء التقاطا، إذا لم ترده فهجمت عليه، قال الراجز: ومنهل ودرته التقاطا"
+  },
+  {
+    "surah": 12,
+    "ayah": 11,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 12,
+    "text": "(نرتع ونلعب) أي ننعم ونلهو، ومنه القيد والرتعة، يضرب مثلا في الخصب والجدب. ويقال: نرتع: نأكل، ومنه قول الشاعر: ويحييني إذا لاقيته   وإذا يخلو له لحمى رتعأي أكله. ونرتع: أي نرتع إبلنا، وترتع أي ترتع إبلنا، وترتع بكسر العين: نفتعل من الرعي."
+  },
+  {
+    "surah": 12,
+    "ayah": 13,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 14,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 15,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 16,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 17,
+    "text": "<span class=\"book-ayah text-primary\">﴿نَسْتَبِقُ﴾</span> نفتعل من السباق: أي يسابق بعضنا بعضا في الرمي."
+  },
+  {
+    "surah": 12,
+    "ayah": 18,
+    "text": "<span class=\"book-ayah text-primary\">﴿سَوَّلَتْ لَكُمْ﴾</span>: زينت."
+  },
+  {
+    "surah": 12,
+    "ayah": 19,
+    "text": "<span class=\"book-ayah text-primary\">﴿سَيَّارَةٌ﴾</span>: يعني مسافرين. <span class=\"book-ayah text-primary\">﴿وَارِدَهُمْ﴾</span>: الذي يتقدمهم في الماء فيستقي لهم <span class=\"book-ayah text-primary\">﴿أَدْلَىٰ دَلْوَهُ﴾</span> أرسلها ليملأها. ودلاها أخرجها. <span class=\"book-ayah text-primary\">﴿بِضَاعَةً﴾</span> أي قطعة من المال يتجر فيها."
+  },
+  {
+    "surah": 12,
+    "ayah": 20,
+    "text": "<span class=\"book-ayah text-primary\">﴿شَرَوْهُ بِثَمَنٍ بَخْسٍ﴾</span> أي باعوه انظر ١٠٢ من البقرة <span class=\"book-ayah text-primary\">﴿بَخْسٍ﴾</span>: نقصان، يقال: بخسه حقه إذا نقصه."
+  },
+  {
+    "surah": 12,
+    "ayah": 21,
+    "text": "<span class=\"book-ayah text-primary\">﴿مَثْوَاهُ﴾</span> أي مقامه <span class=\"book-ayah text-primary\">﴿نَتَّخِذَهُ وَلَداً﴾</span> أي نتبناه."
+  },
+  {
+    "surah": 12,
+    "ayah": 22,
+    "text": "<span class=\"book-ayah text-primary\">﴿أَشُدَّهُ﴾</span> منتهى شبابه وقوته، واحدها شد، مثل فلس وأفلس، وشد، كقولهم فلان ود والقوم أود. وشدة وأشد مثل نعمه وأنعم. ويقال الأشد اسم واحد لا جمع له بمنزلة الآنك وهو الرصاص، والأسرب وهو القزدير. وذكر عن مجاهد في قوله تعالى <span class=\"book-ayah text-primary\">﴿وَلَمَّا بَلَغَ أَشُدَّهُ﴾</span> قال: ثلاثا وثلاثين سنة.<span class=\"book-ayah text-primary\">﴿ وَٱسْتَوَىٰ ﴾</span><span class=\"surah-ref\">[القصص: ١٤]</span> قال: أربعين سنة. وأشد اليتيم: قالوا ثماني عشرة سنة."
+  },
+  {
+    "surah": 12,
+    "ayah": 23,
+    "text": "<span class=\"book-ayah text-primary\">﴿هَيْتَ لَكَ﴾</span> أي هلم: أي أقبل إلى ما أدعوك إليه، وقوله عز وجل <span class=\"book-ayah text-primary\">﴿هَيْتَ لَكَ﴾</span> أي إرادتي بهذا لك. وقرئت هئت لك، ومعناه: تهيأت لك <span class=\"book-ayah text-primary\">﴿مَعَاذَ ٱللَّهِ﴾</span> ومعاذة الله وعوذ الله وعياذ الله: بمعنى واحد، أي أستجير بالله."
+  },
+  {
+    "surah": 12,
+    "ayah": 24,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 25,
+    "text": "<span class=\"book-ayah text-primary\">﴿سَيِّدَهَا لَدَى الْبَابِ﴾</span> يعني زوجها والسيد الرئيس أيضا. والسيد: الذي يفوق في الخير قومه. والسيد: المالك <span class=\"book-ayah text-primary\">﴿لَدَى﴾</span> ولدن بمعنى عند."
+  },
+  {
+    "surah": 12,
+    "ayah": 26,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 27,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 28,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 29,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 30,
+    "text": "<span class=\"book-ayah text-primary\">﴿شَغَفَهَا حُبّاً﴾</span> أي أصاب حبها شغاف قلبه، كما تقول: كبده إذا أصاب كبده، ورأسه إذا أصاب رأسه. والشغاف: غلاف القلب. ويقال هو حبة القلب، وهي علقة سوداء في صميمه. وشغفها حبا: أي ارتفع حبه إلى أعلى موضع من قلبها، مشتق من شغاف الجبال: أي رءوس الجبال. وقولهم فلان مشغوف بفلانة، أي ذهب به الحب أقصى المذاهب."
+  },
+  {
+    "surah": 12,
+    "ayah": 31,
+    "text": "<span class=\"book-ayah text-primary\">﴿مُتَّكَئاً﴾</span> أي نمرقا يتكأ عليها. وقيل: متكأ مجلسا يتكأ فيه. وقيل طعاما. وقرئت متكا، قيل هو الأترج. وقيل هو الزما ورد <span class=\"book-ayah text-primary\">﴿أَكْبَرْنَهُ﴾</span> أعظمنه وهالهن أمره."
+  },
+  {
+    "surah": 12,
+    "ayah": 32,
+    "text": "<span class=\"book-ayah text-primary\">﴿ٱسَتَعْصَمَ﴾</span>: أي امتنع."
+  },
+  {
+    "surah": 12,
+    "ayah": 33,
+    "text": "<span class=\"book-ayah text-primary\">﴿أَصْبُ إِلَيْهِنَّ﴾</span> أمل إليهن، يقال: أصباني فصبوت؛ أي حملني على الجهل وعلى ما يفعل الصبي ففعلت."
+  },
+  {
+    "surah": 12,
+    "ayah": 34,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 35,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 36,
+    "text": "<span class=\"book-ayah text-primary\">﴿فَتَيَانِ﴾</span> أي مملوكان، والعرب تسمي المملوك شابا كان أو شيخا فتى. ومنه قوله تعالى<span class=\"book-ayah text-primary\">﴿ تُرَاوِدُ فَتَاهَا عَن نَّفْسِهِ ﴾</span><span class=\"surah-ref\">[يوسف: ٣٠]</span> أي عبدها <span class=\"book-ayah text-primary\">﴿أَعْصِرُ خَمْراً﴾</span> أي أستخرج الخمر، لأنه إذا عصر العنب فإنما يستخرج الخمر. ويقال: الخمر العنب بعينه، حكى الأصمعي عن معتمر بن سليمان قال لقيت أعرابيا ومعه عنب فقلت له: ما معك؟ فقال: خمر."
+  },
+  {
+    "surah": 12,
+    "ayah": 37,
+    "text": "<span class=\"book-ayah text-primary\">﴿تَرَكْتُ مِلَّةَ قَوْمٍ لَا يُؤْمِنُونَ بِاللَّهِ﴾</span>: أي رغبت عنها، والترك على ضربين: أحدهما مفارقة ما يكون الإنسان عليه؛ والآخر ترك الشيء رغبة عنه من غير دخول كان فيه."
+  },
+  {
+    "surah": 12,
+    "ayah": 38,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 39,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 40,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 41,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 42,
+    "text": "<span class=\"book-ayah text-primary\">﴿بِضْعَ سِنِينَ﴾</span> البضع: ما بين الثلاث إلى التسع."
+  },
+  {
+    "surah": 12,
+    "ayah": 43,
+    "text": "<span class=\"book-ayah text-primary\">﴿عِجَافٌ﴾</span> هي التي قد بلغت في الهزال النهاية.<span class=\"book-ayah text-primary\">﴿تَعْبُرُونَ﴾</span>: أي تفسرون الرؤيا."
+  },
+  {
+    "surah": 12,
+    "ayah": 44,
+    "text": "<span class=\"book-ayah text-primary\">﴿أَضْغَاثُ أَحْلاَمٍ﴾</span> أخلاط أحلام. مثل أضغاث الحشيش يجمعها الإنسان فيكون فيها ضروب مختلفة، واحدها ضغث، وهو ملء كف منه."
+  },
+  {
+    "surah": 12,
+    "ayah": 45,
+    "text": "<span class=\"book-ayah text-primary\">﴿وَٱدَّكَرَ بَعْدَ أُمَّةٍ﴾</span> أي بعد حين. انظر ١٣٤ من البقرة."
+  },
+  {
+    "surah": 12,
+    "ayah": 46,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 47,
+    "text": "<span class=\"book-ayah text-primary\">﴿دَأَباً﴾</span>: جدا في الزراعة ومتابعة: أي تدأبون دأبا. والدأب: الملازمة للشيء، والعادة."
+  },
+  {
+    "surah": 12,
+    "ayah": 48,
+    "text": "<span class=\"book-ayah text-primary\">﴿تُحْصِنُونَ﴾</span> أي تحرزون."
+  },
+  {
+    "surah": 12,
+    "ayah": 49,
+    "text": "<span class=\"book-ayah text-primary\">﴿يُغَاثُ ٱلنَّاسُ﴾</span>: يمطرون <span class=\"book-ayah text-primary\">﴿يَعْصِرُونَ﴾</span> أي ينجون، وقيل يعني العنب والزيت."
+  },
+  {
+    "surah": 12,
+    "ayah": 50,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 51,
+    "text": "(حاشا لله) وحاش لله، قال المفسرون: معناه معاذ الله. وقال اللغويون: لحاشالله معنيان: التنزيه، والاستثناء. واشتقاقه من قولك: كنت في حشى فلان، أي في ناحية فلان؛ ولا أدري أي الحشى آخذ أي أي الناحية آخذ، قال الشاعر: يقول الذي أمسى إلى الحزن أهله   بأي الحشى أمس الخليط المباينوقولهم حاشا فلانا: أي أعزل فلانا من وصف القوم بالحشى فلا أدخله في جملتهم. ويقال حاشا لفلان وحاشا فلانا وحاشا فلان، فمن نصب فلانا أضمر في حاشا مرفوعا، والتقدير: حاشا فعلهم فلانا، ومن خفض فباضمار اللام لطول صحبتها حاشا. وجواب آخر: لما خلت حاشا من الصاحب أشبهت الإسم فأضيفت إلى ما بعدها <span class=\"book-ayah text-primary\">﴿خَطْبُكُنَّ﴾</span> أي أمركن، والخطب: الأمر العظيم <span class=\"book-ayah text-primary\">﴿حَصْحَصَ ٱلْحَقُّ﴾</span>: وضح وتبين."
+  },
+  {
+    "surah": 12,
+    "ayah": 52,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 53,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 54,
+    "text": "<span class=\"book-ayah text-primary\">﴿مَكِينٌ﴾</span> أي خاص المنزلة."
+  },
+  {
+    "surah": 12,
+    "ayah": 55,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 56,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 57,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 58,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 59,
+    "text": "<span class=\"book-ayah text-primary\">﴿جَهَّزَهُم بِجَهَازِهِمْ﴾</span>: كال لكل واحد ما يصيبه. والجهاز: ما أصلح حال الإنسان."
+  },
+  {
+    "surah": 12,
+    "ayah": 60,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 61,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 62,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 63,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 64,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 65,
+    "text": "<span class=\"book-ayah text-primary\">﴿وَنَمِيرُ أَهْلَنَا﴾</span> يقال: فلان مار أهله إذا حمل إليهم أقواتهم من غير بلده.<span class=\"book-ayah text-primary\">﴿كَيْلَ بَعِيرٍ﴾</span> أي حمل جمل."
+  },
+  {
+    "surah": 12,
+    "ayah": 66,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 67,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 68,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 69,
+    "text": "<span class=\"book-ayah text-primary\">﴿آوَىۤ إِلَيْهِ أَخَاهُ﴾</span>: ضمه إليه، وآوى إليه: انضم إليه.<span class=\"book-ayah text-primary\">﴿تَبْتَئِسْ﴾</span> أي تفتعل من البؤس، وهو الفقر والشدة: أي لا يلحقك بؤس بالذي فعلوا."
+  },
+  {
+    "surah": 12,
+    "ayah": 70,
+    "text": "<span class=\"book-ayah text-primary\">﴿ٱلسِّقَايَةَ﴾</span> هي مكيال يكال به ويشرب فيه.<span class=\"book-ayah text-primary\">﴿ٱلْعِيرُ﴾</span> الإبل تحمل الميرة."
+  },
+  {
+    "surah": 12,
+    "ayah": 71,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 72,
+    "text": "<span class=\"book-ayah text-primary\">﴿صُوَاعَ ٱلْمَلِكِ﴾</span> وصاع الملك واحد. ويقال: الصواع: جام كهيئة المكوك من فضة. وقرأ يحيى بن يعمر صوغ الملك بغين معجمة، يذهب إلى أنه كان مصوغا فسماه بالمصدر <span class=\"book-ayah text-primary\">﴿زَعِيمٌ﴾</span> وضمين وحميل وقبيل وكفيل: بمعنى واحد."
+  },
+  {
+    "surah": 12,
+    "ayah": 73,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 74,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 75,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 76,
+    "text": "<span class=\"book-ayah text-primary\">﴿كِدْنَا لِيُوسُفَ﴾</span> أي كدنا له إخوته حتى ضممنا أخاه إليه. والكيد من المخلوقين احتيال، ومن الله: مشيئته بالذي يقع به الكيد."
+  },
+  {
+    "surah": 12,
+    "ayah": 77,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 78,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 79,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 80,
+    "text": "<span class=\"book-ayah text-primary\">﴿ٱسْتَيْأَسُواْ﴾</span>: استفعلوا، من يئست.<span class=\"book-ayah text-primary\">﴿خَلَصُواْ﴾</span> نجيا: أي تفردوا من الناس يتناجون، أي يسر بعضهم إلى بعض.<span class=\"book-ayah text-primary\">﴿فَرَّطتُمْ فِي يُوسُفَ﴾</span> أي قصرتم في أمره. ومعنى التفريط في اللغة: تقدمه العجز."
+  },
+  {
+    "surah": 12,
+    "ayah": 81,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 82,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 83,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 84,
+    "text": "<span class=\"book-ayah text-primary\">﴿يَٰأَسَفَىٰ عَلَى يُوسُفَ﴾</span> الأسف: الحزن على ما فات."
+  },
+  {
+    "surah": 12,
+    "ayah": 85,
+    "text": "<span class=\"book-ayah text-primary\">﴿تَاللهِ﴾</span>: بمعنى والله، قلبت الواو تاء مع اسم الله دون سائر أسمائه <span class=\"book-ayah text-primary\">﴿تَفْتَؤُاْ تَذْكُرُ يُوسُفَ﴾</span>: أي لا تزال تذكر يوسف. وجواب القسم لا المضمرة التي تأويلها: تالله لا تفتأ <span class=\"book-ayah text-primary\">﴿حَرَضاً﴾</span> الحرض: الذي قد أذابه الحزن والعشق، قال الشاعر: إني امرؤ لج بي حزن فأحرضني   حتى بليت وحتى شفني السقم"
+  },
+  {
+    "surah": 12,
+    "ayah": 86,
+    "text": "<span class=\"book-ayah text-primary\">﴿بَثِّي وَحُزْنِي﴾</span>: البث: أشد الحزن الذي لا يصبر عليه صاحبه حتى يبثه أي يشكوه، والحزن: أشد الهم."
+  },
+  {
+    "surah": 12,
+    "ayah": 87,
+    "text": "<span class=\"book-ayah text-primary\">﴿تَحَسَّسُواْ﴾</span> وتجسسوا بمعنى واحد: أي تبحثوا وتخبروا."
+  },
+  {
+    "surah": 12,
+    "ayah": 88,
+    "text": "<span class=\"book-ayah text-primary\">﴿مُّزْجَاةٍ﴾</span> أي يسيرة قليلة، من قولك: فلان يزجي العيش، أي يدفع بالقليل يكفى به. المعنى: جئنا ببضاعة إنما ندافع بها ونتقوت ليست مما يتسع به."
+  },
+  {
+    "surah": 12,
+    "ayah": 89,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 90,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 91,
+    "text": "<span class=\"book-ayah text-primary\">﴿آثَرَكَ اللَّهُ عَلَيْنَا﴾</span> فضلك الله علينا. ويقال: له علينا أثره، أي فضل <span class=\"book-ayah text-primary\">﴿خَاطِئِينَ﴾</span> قال أبو عبيدة: خطئ وأخطأ بمعنى واحد. وقال غيره: خطئ في الدين، وأخطأ في كل شيء، إذا سلك سبيل خطأ عامدا أو غير عامد."
+  },
+  {
+    "surah": 12,
+    "ayah": 92,
+    "text": "<span class=\"book-ayah text-primary\">﴿تَثْرِيبَ﴾</span>: أي تعيير وتوبيخ."
+  },
+  {
+    "surah": 12,
+    "ayah": 93,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 94,
+    "text": "<span class=\"book-ayah text-primary\">﴿تُفَنِّدُونِ﴾</span> أي تجهلون، ويقال: تعجزون في الرأي، وأصل الفند: الخرف، يقال: أفند الرجل إذا خرف وتغير عقله ولم يحصل كلامه، ثم قيل: فند الرجل إذا جهل، والأصل ذاك."
+  },
+  {
+    "surah": 12,
+    "ayah": 95,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 96,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 97,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 98,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 99,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 100,
+    "text": "<span class=\"book-ayah text-primary\">﴿وَرَفَعَ أَبَوَيْهِ عَلَى الْعَرْشِ﴾</span> يعني أباه وخالته، فكانت أمه ماتت. انظر ٣٣ من البقرة.(عرش) أي سرير الملك، ومنه <span class=\"book-ayah text-primary\">﴿وَرَفَعَ أَبَوَيْهِ عَلَى ٱلْعَرْشِ﴾</span> وقوله<span class=\"book-ayah text-primary\">﴿ أَهَكَذَا عَرْشُكِ ﴾</span><span class=\"surah-ref\">[النمل: ٤٢]</span>.<br><span class=\"book-ayah text-primary\">﴿خَرُّواْ لَهُ سُجَّدَاً﴾</span>: أي كذلك كانت تحيتهم في ذلك الوقت، وإنما سجد هؤلاء لله عز وجل <span class=\"book-ayah text-primary\">﴿نَزَغَ الشَّيْطَانُ بَيْنِي وَبَيْنَ إِخْوَتِي﴾</span> أي أفسد بيننا وحمل بعضنا على بعض."
+  },
+  {
+    "surah": 12,
+    "ayah": 101,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 102,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 103,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 104,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 105,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 106,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 107,
+    "text": "<span class=\"book-ayah text-primary\">﴿غَاشِيَةٌ مِنْ عَذَابِ اللَّهِ﴾</span> أي مجللة من عذاب الله. وقوله عز وجل<span class=\"book-ayah text-primary\">﴿ لَهُمْ مِّن جَهَنَّمَ مِهَادٌ ﴾</span><span class=\"surah-ref\">[الأعراف: ٤١]</span> أي فرش<span class=\"book-ayah text-primary\">﴿ وَمِن فَوْقِهِمْ غَوَاشٍ ﴾</span><span class=\"surah-ref\">[الأعراف: ٤١]</span> أي ما يغشاهم فيغطيهم من أنواع العذاب. وقوله تعالى:<span class=\"book-ayah text-primary\">﴿ هَلْ أَتَاكَ حَدِيثُ ٱلْغَاشِيَةِ ﴾</span><span class=\"surah-ref\">[الغاشية: ١]</span> يعني القيامة، لأنها تغشاهم."
+  },
+  {
+    "surah": 12,
+    "ayah": 108,
+    "text": "<span class=\"book-ayah text-primary\">﴿بَصِيرَةٍ﴾</span> أي يقين، كقوله: <span class=\"book-ayah text-primary\">﴿أَدْعُو إِلَىٰ ٱللَّهِ عَلَىٰ بَصِيرَةٍ﴾</span> أي على يقين، وقوله:<span class=\"book-ayah text-primary\">﴿ بَلِ ٱلإِنسَانُ عَلَىٰ نَفْسِهِ بَصِيرَةٌ ﴾</span><span class=\"surah-ref\">[القيامة: ١٤]</span> أي من الإنسان على نفسه عين بصيرة، أي جوارحه يشهدن عليه بعمله؛ ويقال: الإنسان بصير على نفسه، والهاء دخلت للمبالغة كما دخلت في علامة ونسابة ونحو ذلك."
+  },
+  {
+    "surah": 12,
+    "ayah": 109,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 110,
+    "text": ""
+  },
+  {
+    "surah": 12,
+    "ayah": 111,
+    "text": "<span class=\"book-ayah text-primary\">﴿عِبْرَةٌ لِأُولِي الْأَلْبَابِ﴾</span> أي اعتبار وموعظة لذوي العقول."
+  }
+]
