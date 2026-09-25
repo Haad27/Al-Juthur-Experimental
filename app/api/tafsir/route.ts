@@ -241,11 +241,16 @@ const getLocalDownloadedTafsir = unstable_cache(
       const fs = await import('fs');
       const path = await import('path');
       
+      const parts1 = ['data' + 'base', 'downloaded' + '_tafsirs', folder, `${surahId}.json`];
+      const parts2 = ['resources', 'standalone', 'data' + 'base', 'downloaded' + '_tafsirs', folder, `${surahId}.json`];
+      const parts3 = ['.next', 'standalone', 'data' + 'base', 'downloaded' + '_tafsirs', folder, `${surahId}.json`];
+      const parts4 = ['..', 'data' + 'base', 'downloaded' + '_tafsirs', folder, `${surahId}.json`];
+
       const candidatePaths = [
-        path.join(process.cwd(), 'database', 'downloaded_tafsirs', folder, `${surahId}.json`),
-        path.join(process.cwd(), 'resources', 'standalone', 'database', 'downloaded_tafsirs', folder, `${surahId}.json`),
-        path.join(process.cwd(), '.next', 'standalone', 'database', 'downloaded_tafsirs', folder, `${surahId}.json`),
-        path.join(process.cwd(), '..', 'database', 'downloaded_tafsirs', folder, `${surahId}.json`),
+        path.join(/*turbopackIgnore: true*/ process.cwd(), ...parts1),
+        path.join(/*turbopackIgnore: true*/ process.cwd(), ...parts2),
+        path.join(/*turbopackIgnore: true*/ process.cwd(), ...parts3),
+        path.join(/*turbopackIgnore: true*/ process.cwd(), ...parts4),
       ];
       const tafsirFile = candidatePaths.find(p => fs.existsSync(p));
       if (!tafsirFile) return null;
