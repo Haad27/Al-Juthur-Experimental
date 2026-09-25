@@ -297,10 +297,24 @@ const getLocalDownloadedTafsir = unstable_cache(
   { revalidate: 2592000 }
 );
 
+const AUTHOR_DB_FALLBACK_MAP: Record<number, number[]> = {
+  131: [131, 112],
+  112: [112, 131],
+  128: [128, 108],
+  108: [108, 128],
+  129: [129, 111],
+  111: [111, 129],
+  63: [63, 113],
+  113: [113, 63],
+  95: [95, 98],
+  98: [98, 95],
+};
+
 // 3. Cached DB Surah Tafsir Loader (Fallback for authors not pre-downloaded)
 const getSurahDbTafsir = unstable_cache(
   async (authorId: number, surahId: number) => {
     try {
+      const targetAuthorIds = AUTHOR_DB_FALLBACK_MAP[authorId] || [authorId];
       const [ayahs, author, rawTafsirs] = await Promise.all([
         getAyahsForSurah(surahId).catch(() => []),
         prisma.author.findUnique({
@@ -308,7 +322,10 @@ const getSurahDbTafsir = unstable_cache(
           select: { id: true, name: true, authorName: true, languageId: true, era: true }
         }).catch(() => null),
         prisma.tafsirEntry.findMany({
-          where: { authorId, surahId },
+          where: {
+            authorId: { in: targetAuthorIds },
+            surahId
+          },
           select: { id: true, authorId: true, surahId: true, ayahId: true, text: true }
         }).catch(() => [])
       ]);
@@ -324,6 +341,7 @@ const getSurahDbTafsir = unstable_cache(
         };
         return {
           ...t,
+          authorId: authorId, // Normalized to requested authorId
           ayah: arabicAyah,
           author: author
         };
@@ -336,7 +354,7 @@ const getSurahDbTafsir = unstable_cache(
       return [];
     }
   },
-  ['surah-db-tafsir-v13'],
+  ['surah-db-tafsir-v15'],
   { revalidate: 2592000 } // 30 days
 );
 
@@ -541,10 +559,11 @@ export async function GET(request: Request) {
         }
       }
 
+      const targetAuthorIds = AUTHOR_DB_FALLBACK_MAP[parsedAuthorId] || [parsedAuthorId];
       const [rawTafsirs, author, ayah] = await Promise.all([
         prisma.tafsirEntry.findMany({
           where: {
-            authorId: parsedAuthorId,
+            authorId: { in: targetAuthorIds },
             surahId: parsedSurahId,
             ayah: { numberInSurah: parsedAyahNum },
           },
@@ -562,6 +581,7 @@ export async function GET(request: Request) {
 
       const tafsirs = rawTafsirs.map((t) => ({
         ...t,
+        authorId: parsedAuthorId,
         ayah: ayah,
         author: author,
       }));
