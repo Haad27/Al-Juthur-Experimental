@@ -2321,7 +2321,7 @@ function TafsirCard({
   };
 
   return (
-    <div className="pb-10">
+    <div className="pb-10 tafsir-card-container">
       <AyahNoteModal
         isOpen={isNoteModalOpen}
         onClose={() => setIsNoteModalOpen(false)}
@@ -2371,7 +2371,7 @@ function TafsirCard({
             {ayahNotes.length > 0 && (
               <button
                 onClick={() => setShowNotesPanel(p => !p)}
-                className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[10px] font-semibold hover:bg-amber-500/25 transition shrink-0"
+                className="note-badge-btn flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[10px] font-semibold hover:bg-amber-500/25 transition shrink-0"
                 title="View your notes"
               >
                 <StickyNote className="size-3" />

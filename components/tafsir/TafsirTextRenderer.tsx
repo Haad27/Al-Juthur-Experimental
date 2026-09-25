@@ -14,6 +14,7 @@ interface TafsirTextRendererProps {
   onNavigateToAyah?: (ayahNum: number) => void;
   onUpgradeClick?: () => void;
   highlights?: UserHighlight[];
+  notes?: any[]; // using any for UserNote to avoid circular import if needed
 }
 
 export default function TafsirTextRenderer({ 
@@ -26,6 +27,7 @@ export default function TafsirTextRenderer({
   onNavigateToAyah,
   onUpgradeClick,
   highlights = [],
+  notes = [],
 }: TafsirTextRendererProps) {
   const { openPricingModal } = useSubscriptionStore();
   const { englishFont, urduFont } = useGlobalState();
@@ -191,6 +193,26 @@ export default function TafsirTextRenderer({
           html = html.replace(new RegExp(escaped, "g"), `<mark class="${colorClass} text-inherit rounded-sm px-0.5 cursor-pointer" data-id="${h.id || ''}" data-color="${h.color || 'gold'}">$&</mark>`);
         } catch (e) {
           console.error("Failed to highlight", e);
+        }
+      });
+    }
+
+    // 6. Apply Inline Note Indicators
+    if (notes && notes.length > 0) {
+      notes.forEach(note => {
+        const anchorMatch = note.text.match(/^\[Re:\s*"([^"]+)"\]/);
+        if (anchorMatch) {
+          let anchor = anchorMatch[1];
+          if (anchor.endsWith('…')) anchor = anchor.slice(0, -1);
+          if (!anchor || anchor.trim() === '') return;
+          try {
+            const escaped = anchor.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+            // Inject the icon *before* the matched text
+            const iconHtml = `<button class="inline-flex items-center justify-center shrink-0 size-4 md:size-5 rounded bg-amber-500/20 border border-amber-500/30 text-[10px] mx-1 md:mx-1.5 align-middle cursor-pointer transition-colors hover:bg-amber-500/30 text-amber-600 dark:text-amber-400" title="View Note" onclick="this.closest('.tafsir-card-container').querySelector('.note-badge-btn').click()">🗒️</button>`;
+            html = html.replace(new RegExp(escaped, "g"), `${iconHtml}$&`);
+          } catch (e) {
+            console.error("Failed to add note indicator", e);
+          }
         }
       });
     }

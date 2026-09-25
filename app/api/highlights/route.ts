@@ -26,6 +26,7 @@ export async function POST(request: Request) {
     const { identifier, surahId, ayahNumber, text, type, authorName, color } = body;
 
     if (!identifier || !surahId || !ayahNumber || !text) {
+      console.error("Missing required fields for highlight:", { identifier, surahId, ayahNumber, text_length: text?.length });
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -43,6 +44,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(highlight);
   } catch (error) {
+    console.error("Error creating highlight:", error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

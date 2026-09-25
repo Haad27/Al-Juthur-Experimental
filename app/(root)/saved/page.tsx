@@ -288,7 +288,27 @@ export default function SavedPage() {
           )}
         </div>
 
-        {/* Navigation Tabs */}
+        {/* Global Empty State */}
+        {(savedAyahs.length === 0 && savedTafsirs.length === 0 && savedScholarAnswers.length === 0 && savedNotes.length === 0 && savedHighlights.length === 0) ? (
+          <div className="flex flex-col items-center justify-center py-32 px-4 bg-card/20 border border-border/50 rounded-3xl mt-8">
+            <div className="size-20 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center mb-6">
+              <BookOpenText className="size-8 text-accent opacity-80" />
+            </div>
+            <h2 className="text-xl font-bold text-foreground mb-3 text-center">Your library is currently empty</h2>
+            <p className="text-sm text-muted-foreground max-w-md text-center mb-8 leading-relaxed">
+              When you highlight text, save passages, or add personal notes in the Tafsir reader, they will securely appear here for your future studies.
+            </p>
+            <Link
+              href="/tafsir"
+              className="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-accent-foreground font-bold px-6 py-3 rounded-2xl text-sm transition-all shadow-sm hover:shadow-md cursor-pointer"
+            >
+              <BookOpenText className="size-4" />
+              <span>Go to Tafsir Reader</span>
+            </Link>
+          </div>
+        ) : (
+          <>
+            {/* Navigation Tabs */}
         <div className="flex flex-col gap-4 mb-6">
           <div className="w-full bg-card/40 rounded-full p-1 flex items-center justify-between border border-border/30">
             <button
@@ -796,6 +816,8 @@ export default function SavedPage() {
             </div>
 
           </div>
+        )}
+        </>
         )}
 
       </div>
