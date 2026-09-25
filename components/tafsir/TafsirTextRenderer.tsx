@@ -199,6 +199,7 @@ export default function TafsirTextRenderer({
 
     // 6. Apply Inline Note Indicators
     if (notes && notes.length > 0) {
+      let injectedAny = false;
       notes.forEach(note => {
         const anchorMatch = note.text.match(/^\[Re:\s*"([^"]+)"\]/);
         if (anchorMatch) {
@@ -207,14 +208,23 @@ export default function TafsirTextRenderer({
           if (!anchor || anchor.trim() === '') return;
           try {
             const escaped = anchor.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-            // Inject the icon *before* the matched text
-            const iconHtml = `<button class="inline-flex items-center justify-center shrink-0 size-4 md:size-5 rounded bg-amber-500/20 border border-amber-500/30 text-[10px] mx-1 md:mx-1.5 align-middle cursor-pointer transition-colors hover:bg-amber-500/30 text-amber-600 dark:text-amber-400" title="View Note" onclick="this.closest('.tafsir-card-container').querySelector('.note-badge-btn').click()">🗒️</button>`;
-            html = html.replace(new RegExp(escaped, "g"), `${iconHtml}$&`);
+            const regex = new RegExp(escaped, "g");
+            if (regex.test(html)) {
+              // Subtler icon injected before the text
+              const iconHtml = `<button class="inline-flex items-center justify-center shrink-0 size-4 md:size-5 rounded-full bg-amber-400/20 text-amber-600 dark:text-amber-400 text-[10px] mx-1 align-baseline cursor-pointer transition-colors hover:bg-amber-400/40" title="View Note" onclick="const btn = this.closest('.tafsir-card-container')?.querySelector('.note-badge-btn'); if(btn) btn.click(); else alert('Note: ' + decodeURIComponent('${encodeURIComponent(note.text.replace(/"/g, '&quot;'))}')); event.stopPropagation();">📝</button>`;
+              html = html.replace(regex, `${iconHtml}$&`);
+              injectedAny = true;
+            }
           } catch (e) {
             console.error("Failed to add note indicator", e);
           }
         }
       });
+      // Fallback: If notes exist but weren't injected inline (e.g. general notes), put an icon at the end
+      if (!injectedAny) {
+        const iconHtml = `<button class="inline-flex items-center justify-center shrink-0 size-4 md:size-5 rounded-full bg-amber-400/20 text-amber-600 dark:text-amber-400 text-[10px] mx-1 align-baseline cursor-pointer transition-colors hover:bg-amber-400/40" title="View Notes" onclick="const btn = this.closest('.tafsir-card-container')?.querySelector('.note-badge-btn'); if(btn) btn.click(); event.stopPropagation();">📝</button>`;
+        html += iconHtml;
+      }
     }
 
     return html;

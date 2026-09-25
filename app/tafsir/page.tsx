@@ -2367,17 +2367,6 @@ function TafsirCard({
                 {authorName}
               </span>
             </div>
-            {/* Note indicator badge */}
-            {ayahNotes.length > 0 && (
-              <button
-                onClick={() => setShowNotesPanel(p => !p)}
-                className="note-badge-btn flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[10px] font-semibold hover:bg-amber-500/25 transition shrink-0"
-                title="View your notes"
-              >
-                <StickyNote className="size-3" />
-                {ayahNotes.length}
-              </button>
-            )}
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
@@ -2413,6 +2402,13 @@ function TafsirCard({
               <Edit3 className={cn("shrink-0 size-3.5", aiChatContext && "lg:size-3")} />
               <span className={cn("hidden sm:inline", aiChatContext && "lg:hidden")}>Note</span>
             </button>
+
+            {/* Hidden button to allow inline raw HTML icons to trigger the notes panel */}
+            <button 
+              className="note-badge-btn hidden" 
+              onClick={() => setShowNotesPanel(p => !p)} 
+              aria-hidden="true" 
+            />
 
             <button
               onClick={() => {
@@ -2451,6 +2447,7 @@ function TafsirCard({
             onNavigateToAyah={(num) => scrollToAyah(num)}
             onUpgradeClick={openPricingModal}
             highlights={highlights}
+            notes={ayahNotes}
           />
         </div>
 
