@@ -212,20 +212,25 @@ const getTafsirLibrary = unstable_cache(
       authors: authorsByLang[l.id] || []
     }));
   },
-  ['tafsir-library-v15'],
+  ['tafsir-library-v16'],
   { revalidate: 2592000 } // 30 days
 );
 
 // Cached Surah Ayahs (Quran text never changes; 30-day memory cache)
 const getAyahsForSurah = unstable_cache(
   async (surahId: number) => {
-    return await prisma.ayah.findMany({
-      where: { surahId },
-      orderBy: { numberInSurah: 'asc' },
-      select: { id: true, surahId: true, numberInSurah: true, text: true }
-    });
+    try {
+      return await prisma.ayah.findMany({
+        where: { surahId },
+        orderBy: { numberInSurah: 'asc' },
+        select: { id: true, surahId: true, numberInSurah: true, text: true }
+      });
+    } catch (e) {
+      console.warn(`[Tafsir] getAyahsForSurah failed for surah ${surahId}:`, e);
+      return [];
+    }
   },
-  ['tafsir-surah-ayahs-v1'],
+  ['tafsir-surah-ayahs-v2'],
   { revalidate: 2592000 } // 30 days
 );
 
@@ -235,21 +240,33 @@ const getLocalDownloadedTafsir = unstable_cache(
     try {
       const fs = await import('fs');
       const path = await import('path');
-      const parts = ['data' + 'base', 'downloaded' + '_tafsirs', folder, `${surahId}.json`];
-      const tafsirFile = path.join(/*turbopackIgnore: true*/ process.cwd(), ...parts);
-      if (!fs.existsSync(tafsirFile)) return null;
+      
+      const candidatePaths = [
+        path.join(process.cwd(), 'database', 'downloaded_tafsirs', folder, `${surahId}.json`),
+        path.join(process.cwd(), 'resources', 'standalone', 'database', 'downloaded_tafsirs', folder, `${surahId}.json`),
+        path.join(process.cwd(), '.next', 'standalone', 'database', 'downloaded_tafsirs', folder, `${surahId}.json`),
+        path.join(process.cwd(), '..', 'database', 'downloaded_tafsirs', folder, `${surahId}.json`),
+      ];
+      const tafsirFile = candidatePaths.find(p => fs.existsSync(p));
+      if (!tafsirFile) return null;
 
       const raw = fs.readFileSync(tafsirFile, 'utf8');
       const parsed = JSON.parse(raw);
       const rawAyahs = Array.isArray(parsed) ? parsed : (parsed.ayahs || []);
-      const ayahs = await getAyahsForSurah(surahId);
-      const ayahByNumber = new Map(ayahs.map(a => [a.numberInSurah, a]));
+      
+      let ayahs: any[] = [];
+      try {
+        ayahs = await getAyahsForSurah(surahId);
+      } catch (err) {
+        console.warn(`[Tafsir] Could not fetch arabic ayahs for surah ${surahId}:`, err);
+      }
+      const ayahByNumber = new Map(ayahs.map((a: any) => [a.numberInSurah, a]));
 
       return rawAyahs.map((a: any, idx: number) => {
         const vNum = a.ayah || a.numberInSurah || (idx + 1);
         const arabicAyah = ayahByNumber.get(vNum);
         
-        let textFormatted = a.text;
+        let textFormatted = a.text || "";
         if (isUrdu) {
           textFormatted = `<div class='text-zinc-100 leading-[2.8] text-right font-urdu' style="font-family: 'Noto Nastaliq Urdu', 'Gulzar', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', 'Noto Sans Arabic', serif; line-height: 2.8; font-size: 1.18rem; color: #f4f4f5;" dir="rtl">${a.text}</div>`;
         } else if (isPashto) {
@@ -276,45 +293,50 @@ const getLocalDownloadedTafsir = unstable_cache(
       return null;
     }
   },
-  ['local-downloaded-tafsir-v13'],
+  ['local-downloaded-tafsir-v14'],
   { revalidate: 2592000 }
 );
 
 // 3. Cached DB Surah Tafsir Loader (Fallback for authors not pre-downloaded)
 const getSurahDbTafsir = unstable_cache(
   async (authorId: number, surahId: number) => {
-    const [ayahs, author, rawTafsirs] = await Promise.all([
-      getAyahsForSurah(surahId),
-      prisma.author.findUnique({
-        where: { id: authorId },
-        select: { id: true, name: true, authorName: true, languageId: true, era: true }
-      }),
-      prisma.tafsirEntry.findMany({
-        where: { authorId, surahId },
-        select: { id: true, authorId: true, surahId: true, ayahId: true, text: true }
-      })
-    ]);
+    try {
+      const [ayahs, author, rawTafsirs] = await Promise.all([
+        getAyahsForSurah(surahId).catch(() => []),
+        prisma.author.findUnique({
+          where: { id: authorId },
+          select: { id: true, name: true, authorName: true, languageId: true, era: true }
+        }).catch(() => null),
+        prisma.tafsirEntry.findMany({
+          where: { authorId, surahId },
+          select: { id: true, authorId: true, surahId: true, ayahId: true, text: true }
+        }).catch(() => [])
+      ]);
 
-    const ayahById = new Map(ayahs.map(a => [a.id, a]));
-    const ayahByNumber = new Map(ayahs.map(a => [a.numberInSurah, a]));
-    const tafsirs = rawTafsirs.map(t => {
-      const arabicAyah = ayahById.get(t.ayahId) || ayahByNumber.get(t.ayahId) || {
-        id: t.ayahId,
-        surahId: surahId,
-        numberInSurah: t.ayahId,
-        text: "Arabic Text",
-      };
-      return {
-        ...t,
-        ayah: arabicAyah,
-        author: author
-      };
-    });
+      const ayahById = new Map((ayahs || []).map((a: any) => [a.id, a]));
+      const ayahByNumber = new Map((ayahs || []).map((a: any) => [a.numberInSurah, a]));
+      const tafsirs = (rawTafsirs || []).map((t: any) => {
+        const arabicAyah = ayahById.get(t.ayahId) || ayahByNumber.get(t.ayahId) || {
+          id: t.ayahId,
+          surahId: surahId,
+          numberInSurah: t.ayahId,
+          text: "Arabic Text",
+        };
+        return {
+          ...t,
+          ayah: arabicAyah,
+          author: author
+        };
+      });
 
-    tafsirs.sort((a, b) => (a.ayah?.numberInSurah || 0) - (b.ayah?.numberInSurah || 0));
-    return tafsirs;
+      tafsirs.sort((a: any, b: any) => (a.ayah?.numberInSurah || 0) - (b.ayah?.numberInSurah || 0));
+      return tafsirs;
+    } catch (e) {
+      console.error(`Error loading DB tafsir author ${authorId} for surah ${surahId}:`, e);
+      return [];
+    }
   },
-  ['surah-db-tafsir-v12'],
+  ['surah-db-tafsir-v13'],
   { revalidate: 2592000 } // 30 days
 );
 
