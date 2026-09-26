@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import PricingModal from "./PricingModal";
+import AuthModal from "@/components/auth/AuthModal";
 
 export default function GlobalModals() {
   const [mounted, setMounted] = useState(false);
@@ -14,6 +15,7 @@ export default function GlobalModals() {
 
   return (
     <>
+      <AuthModal />
       {/* <PricingModal /> */}
     </>
   );

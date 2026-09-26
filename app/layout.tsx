@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { GlobalStateProvider } from "@/lib/providers/GlobalStatesProvider";
+import { AuthProvider } from "@/lib/providers/AuthContext";
 import {
   inter,
   notoNastaliqUrdu,
@@ -104,19 +105,21 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} ${notoNastaliqUrdu.variable} ${gulzar.variable} ${notoSansArabic.variable} ${lora.variable} ${playfair.variable} ${cinzel.variable} ${plusJakartaSans.variable} ${robotoSlab.variable} bg-background text-foreground`} suppressHydrationWarning>
         <AppThemeProvider>
-          <GlobalStateProvider>
-            <NextTopLoader
-              color="#8B6914"
-              showSpinner={false}
-              height={2}
-              shadow="none"
-            />
-            {children}
-            <BottomNav />
-            <GlobalTopicSearchProvider />
-            <GlobalModals />
-            <Toaster />
-          </GlobalStateProvider>
+          <AuthProvider>
+            <GlobalStateProvider>
+              <NextTopLoader
+                color="#8B6914"
+                showSpinner={false}
+                height={2}
+                shadow="none"
+              />
+              {children}
+              <BottomNav />
+              <GlobalTopicSearchProvider />
+              <GlobalModals />
+              <Toaster />
+            </GlobalStateProvider>
+          </AuthProvider>
         </AppThemeProvider>
       </body>
     </html>

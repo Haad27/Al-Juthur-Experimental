@@ -6,6 +6,7 @@ import { Bookmark } from "lucide-react";
 import { cn } from "@/lib/utils";
 import LogoIcon from "@/components/svg/icons/LogoIcon";
 import ThemeToggleButton from "@/components/ThemeToggleButton";
+import UserNav from "@/components/auth/UserNav";
 
 const NAV = [
   { href: "/home", label: "Home", match: (p: string) => p === "/home" },
@@ -61,6 +62,7 @@ export default function AppHeader({
 
         <div className="flex shrink-0 items-center gap-2.5">
           {rightSlot}
+          <UserNav />
           <ThemeToggleButton />
         </div>
       </div>

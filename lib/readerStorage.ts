@@ -294,6 +294,22 @@ export function getDeviceId(): string {
   return deviceId;
 }
 
+export function getUserIdentifier(): string {
+  if (typeof window === "undefined") return "server";
+  const authUserId = localStorage.getItem("aljuthur-auth-user-id");
+  if (authUserId) return authUserId;
+  return getDeviceId();
+}
+
+export function setAuthUserIdentifier(userId: string | null): void {
+  if (typeof window === "undefined") return;
+  if (userId) {
+    localStorage.setItem("aljuthur-auth-user-id", userId);
+  } else {
+    localStorage.removeItem("aljuthur-auth-user-id");
+  }
+}
+
 export interface UserNote {
   id: string;
   surahId: number;
@@ -314,14 +330,14 @@ export interface UserHighlight {
 }
 
 export async function fetchUserNotes(): Promise<UserNote[]> {
-  const id = getDeviceId();
+  const id = getUserIdentifier();
   const res = await fetch(`/api/notes?identifier=${id}`);
   if (!res.ok) return [];
   return res.json();
 }
 
 export async function saveUserNote(surahId: number, ayahNumber: number, text: string): Promise<UserNote | null> {
-  const id = getDeviceId();
+  const id = getUserIdentifier();
   const res = await fetch('/api/notes', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -332,20 +348,20 @@ export async function saveUserNote(surahId: number, ayahNumber: number, text: st
 }
 
 export async function deleteUserNote(noteId: string): Promise<boolean> {
-  const id = getDeviceId();
+  const id = getUserIdentifier();
   const res = await fetch(`/api/notes?identifier=${id}&id=${noteId}`, { method: 'DELETE' });
   return res.ok;
 }
 
 export async function fetchUserHighlights(): Promise<UserHighlight[]> {
-  const id = getDeviceId();
+  const id = getUserIdentifier();
   const res = await fetch(`/api/highlights?identifier=${id}`);
   if (!res.ok) return [];
   return res.json();
 }
 
 export async function saveUserHighlight(surahId: number, ayahNumber: number, text: string, type: 'arabic'|'translation', authorName?: string, color?: string): Promise<UserHighlight | null> {
-  const id = getDeviceId();
+  const id = getUserIdentifier();
   const res = await fetch('/api/highlights', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -356,7 +372,8 @@ export async function saveUserHighlight(surahId: number, ayahNumber: number, tex
 }
 
 export async function deleteUserHighlight(highlightId: string): Promise<boolean> {
-  const id = getDeviceId();
+  const id = getUserIdentifier();
   const res = await fetch(`/api/highlights?identifier=${id}&id=${highlightId}`, { method: 'DELETE' });
   return res.ok;
 }
+

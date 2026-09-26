@@ -18,10 +18,12 @@ import {
   Trash2,
   PenLine,
   LayoutGrid,
-  List
+  List,
+  Cloud
 } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/providers/AuthContext";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { isFuzzyMatch, parseSurahVerseReference } from "@/lib/searchUtils";
@@ -96,6 +98,7 @@ export default function SavedPage() {
   const [sortBy, setSortBy] = useState<SortOption>("pinned");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [highlightFilter, setHighlightFilter] = useState<HighlightFilter>("all");
+  const { user, openAuthModal } = useAuth();
 
   // State
   const [lastRead, setLastRead] = useState<LastReadTafsir | null>(null);
@@ -133,6 +136,14 @@ export default function SavedPage() {
 
     fetchUserNotes().then(setSavedNotes);
     fetchUserHighlights().then(setSavedHighlights);
+
+    const onAuthChange = () => {
+      fetchUserNotes().then(setSavedNotes);
+      fetchUserHighlights().then(setSavedHighlights);
+    };
+
+    window.addEventListener("aljuthur-auth-changed", onAuthChange);
+    return () => window.removeEventListener("aljuthur-auth-changed", onAuthChange);
   }, []);
 
   const handleViewModeChange = (mode: ViewMode) => {
@@ -284,6 +295,23 @@ export default function SavedPage() {
         
         {/* Header & Hero Section */}
         <div className="flex flex-col gap-6">
+          {!user && (
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-border bg-card/60">
+              <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
+                <Cloud className="w-4 h-4 text-accent shrink-0" />
+                <span>
+                  Notes and highlights are currently stored only on this device. Sign in with Google to sync them anywhere.
+                </span>
+              </div>
+              <button
+                onClick={openAuthModal}
+                className="shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg bg-accent text-accent-foreground hover:opacity-90 transition-opacity"
+              >
+                Sign in to sync
+              </button>
+            </div>
+          )}
+
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-serif font-bold text-foreground tracking-tight">Saved</h1>

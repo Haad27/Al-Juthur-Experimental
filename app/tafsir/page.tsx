@@ -255,8 +255,14 @@ function TafsirContent() {
   const [showHighlightOnboarding, setShowHighlightOnboarding] = useState(false);
 
   useEffect(() => {
-    fetchUserHighlights().then(setHighlights).catch(console.error);
-    fetchUserNotes().then(setNotes).catch(console.error);
+    const loadUserData = () => {
+      fetchUserHighlights().then(setHighlights).catch(console.error);
+      fetchUserNotes().then(setNotes).catch(console.error);
+    };
+
+    loadUserData();
+    window.addEventListener("aljuthur-auth-changed", loadUserData);
+    return () => window.removeEventListener("aljuthur-auth-changed", loadUserData);
   }, []);
 
   // When highlight mode is on, we inject a style to change the text selection color to amber/gold
