@@ -76,7 +76,7 @@ export default function NotePopover({
         <div className="flex items-center justify-between border-b border-border/50 pb-2">
           <div className="flex items-center gap-1.5 text-xs font-bold text-amber-500">
             <StickyNote className="size-3.5" />
-            <span>Note · Verse {note.ayahNumber}</span>
+            <span>{note.surahId === 0 ? "Note · Lexicon" : `Note · Verse ${note.ayahNumber}`}</span>
           </div>
           <button
             onClick={onClose}

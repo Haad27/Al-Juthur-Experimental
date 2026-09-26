@@ -32,6 +32,18 @@ import AppHeader from '@/components/layout/AppHeader';
 import AyahChatSidebar from '@/components/ai/AyahChatSidebar';
 import FloatingAskScholarButton from '@/components/ai/FloatingAskScholarButton';
 import { useSubscriptionStore } from '@/lib/stores/subscriptionStore';
+import HighlightToolbar, { HighlightColor, HighlightSelection } from '@/components/tafsir/HighlightToolbar';
+import NotePopover from '@/components/tafsir/NotePopover';
+import AyahNoteModal from '@/components/quran/AyahNoteModal';
+import { 
+  fetchUserHighlights, 
+  saveUserHighlight, 
+  deleteUserHighlight, 
+  UserHighlight, 
+  fetchUserNotes, 
+  deleteUserNote, 
+  UserNote 
+} from '@/lib/readerStorage';
 
 interface DictionaryInfo {
   id: number;
@@ -126,6 +138,137 @@ function LexiconPageContent() {
   const [pdfDictionaries, setPdfDictionaries] = useState<PdfDictionaryInfo[]>([]);
   const [selectedDictId, setSelectedDictId] = useState<number | 'all'>('all');
   const [isAiSummaryExpanded, setIsAiSummaryExpanded] = useState(false);
+
+  const [highlights, setHighlights] = useState<UserHighlight[]>([]);
+  const [notes, setNotes] = useState<UserNote[]>([]);
+  const [highlightSelection, setHighlightSelection] = useState<HighlightSelection | null>(null);
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
+  const [noteSelectedText, setNoteSelectedText] = useState<string>('');
+  const [noteTargetDictId, setNoteTargetDictId] = useState<number | null>(null);
+  const [activeNotePopup, setActiveNotePopup] = useState<{ note: UserNote; x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    const loadUserData = () => {
+      fetchUserHighlights().then(setHighlights).catch(console.error);
+      fetchUserNotes().then(setNotes).catch(console.error);
+    };
+
+    loadUserData();
+    window.addEventListener('aljuthur-auth-changed', loadUserData);
+    return () => window.removeEventListener('aljuthur-auth-changed', loadUserData);
+  }, []);
+
+  useEffect(() => {
+    const handleSelection = async () => {
+      const selection = window.getSelection();
+      if (!selection || selection.isCollapsed) {
+        return;
+      }
+      
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+      const text = selection.toString().trim();
+      if (!text || text.length < 2) {
+        return;
+      }
+
+      const startEl = (range.startContainer.nodeType === Node.TEXT_NODE
+        ? range.startContainer.parentElement
+        : range.startContainer as HTMLElement);
+
+      if (!startEl) return;
+
+      const card = startEl.closest('[data-dict-id]') as HTMLElement | null;
+      const isAiSummary = !!startEl.closest('[data-ai-summary]');
+      const isLexiconArea = !!startEl.closest('.lexicon-content') || !!card || isAiSummary;
+      if (!isLexiconArea) return;
+
+      const dictId = card ? parseInt(card.getAttribute('data-dict-id') || '0', 10) : (isAiSummary ? 999999 : 0);
+
+      setHighlightSelection({
+        text,
+        surahNumber: 0,
+        ayahNumber: dictId,
+        type: 'translation',
+        x: rect.left + rect.width / 2,
+        y: rect.top,
+        isExisting: false,
+      });
+    };
+
+    const handleMarkClick = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName.toLowerCase() === 'mark') {
+        const text = target.textContent || '';
+        const card = target.closest('[data-dict-id]') as HTMLElement | null;
+        const isAiSummary = !!target.closest('[data-ai-summary]');
+        const dictId = card ? parseInt(card.getAttribute('data-dict-id') || '0', 10) : (isAiSummary ? 999999 : 0);
+        const rect = target.getBoundingClientRect();
+        const id = target.getAttribute('data-id') || undefined;
+        const color = (target.getAttribute('data-color') || 'gold') as HighlightColor;
+
+        if (text) {
+          setHighlightSelection({
+            id,
+            text,
+            surahNumber: 0,
+            ayahNumber: dictId,
+            type: 'translation',
+            x: rect.left + rect.width / 2,
+            y: rect.top,
+            isExisting: true,
+            color,
+          });
+        }
+      }
+    };
+
+    const handleNoteClick = (e: MouseEvent | TouchEvent) => {
+      const target = (e.target as HTMLElement).closest('.note-indicator-icon, [data-note-id]');
+      if (target) {
+        e.preventDefault();
+        e.stopPropagation();
+        const noteId = target.getAttribute('data-note-id');
+        const found = notes.find((n) => n.id === noteId);
+        if (found) {
+          const rect = target.getBoundingClientRect();
+          setActiveNotePopup({
+            note: found,
+            x: rect.left + rect.width / 2,
+            y: rect.top,
+          });
+        }
+      }
+    };
+
+    const handleGlobalClick = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.highlight-popover') && !target.closest('.note-indicator-icon') && target.tagName.toLowerCase() !== 'mark' && window.getSelection()?.isCollapsed) {
+        setHighlightSelection(null);
+      }
+    };
+
+    const handleTouchEnd = () => {
+      handleSelection();
+      setTimeout(handleSelection, 80);
+    };
+
+    document.addEventListener('mouseup', handleSelection);
+    document.addEventListener('touchend', handleTouchEnd);
+    document.addEventListener('click', handleMarkClick);
+    document.addEventListener('click', handleNoteClick);
+    document.addEventListener('mousedown', handleGlobalClick);
+    document.addEventListener('touchstart', handleGlobalClick);
+
+    return () => {
+      document.removeEventListener('mouseup', handleSelection);
+      document.removeEventListener('touchend', handleTouchEnd);
+      document.removeEventListener('click', handleMarkClick);
+      document.removeEventListener('click', handleNoteClick);
+      document.removeEventListener('mousedown', handleGlobalClick);
+      document.removeEventListener('touchstart', handleGlobalClick);
+    };
+  }, [activeRoot, notes]);
 
   // Scroll navigation state
   const [readingProgress, setReadingProgress] = useState(0);
@@ -518,7 +661,12 @@ function LexiconPageContent() {
 
               {/* AI Comprehensive Root Summary (Always Open & Styled like Root Word Analysis) */}
               {result.ai_summary && (
-                <div className="bg-gradient-to-br from-card via-card to-background/90 border border-accent/30 rounded-2xl p-4 sm:p-6 shadow-xl space-y-4">
+                <div 
+                  data-ai-summary="true" 
+                  data-dict-id="999999" 
+                  data-dict-name="AI Root Summary"
+                  className="bg-gradient-to-br from-card via-card to-background/90 border border-accent/30 rounded-2xl p-4 sm:p-6 shadow-xl space-y-4 lexicon-content"
+                >
                   <div className="flex items-center gap-2.5 border-b border-border pb-3">
                     <div className="p-1.5 bg-accent/15 rounded-md border border-accent/30 text-accent">
                       <Sparkles className="size-4" />
@@ -554,6 +702,8 @@ function LexiconPageContent() {
                   return (
                     <div
                       key={entry.dictId}
+                      data-dict-id={entry.dictId}
+                      data-dict-name={entry.dictName}
                       className="bg-gradient-to-br from-card via-card to-background/80 border border-accent/20 rounded-2xl p-4 md:p-6 shadow-lg space-y-4 hover:border-accent/40 transition-all"
                     >
                       <div className="flex items-center justify-between border-b border-border pb-3">
@@ -608,6 +758,8 @@ function LexiconPageContent() {
                               isLocked={isLocked}
                               dictName={entry.dictName}
                               onUpgradeClick={openPricingModal}
+                              highlights={highlights.filter(h => h.ayahNumber === entry.dictId || (h.surahId === 0 && h.authorName?.includes(entry.dictName)))}
+                              notes={notes.filter(n => n.ayahNumber === entry.dictId && n.surahId === 0)}
                             />
                           </div>
                         ))}
@@ -722,6 +874,110 @@ function LexiconPageContent() {
           onClick={() => setAiChatContext({ root: activeRoot })}
           label="Ask Lexicon Scholar"
           isVisible={!aiChatContext && !!result}
+        />
+
+        <AyahNoteModal
+          isOpen={isNoteModalOpen}
+          onClose={() => { setIsNoteModalOpen(false); setNoteSelectedText(''); setNoteTargetDictId(null); }}
+          surahNumber={0}
+          ayahNumber={noteTargetDictId || 0}
+          selectedText={noteSelectedText}
+          onSave={(saved) => setNotes(prev => [...prev, saved])}
+        />
+
+        {/* Floating Interactive Note Popover when clicking inline note icon */}
+        <NotePopover
+          note={activeNotePopup?.note || null}
+          position={activeNotePopup ? { x: activeNotePopup.x, y: activeNotePopup.y } : null}
+          onClose={() => setActiveNotePopup(null)}
+          onDelete={async (id) => {
+            const ok = await deleteUserNote(id);
+            if (ok) {
+              toast.success("Note deleted.");
+              setNotes(prev => prev.filter(n => n.id !== id));
+              setActiveNotePopup(null);
+            } else {
+              toast.error("Failed to delete note.");
+            }
+          }}
+          onEdit={(note) => {
+            const anchorMatch = note.text.match(/^\[Re:\s*"([^"]+)"\]\n\n([\s\S]*)$/);
+            setNoteSelectedText(anchorMatch ? anchorMatch[1] : "");
+            setNoteTargetDictId(note.ayahNumber);
+            setIsNoteModalOpen(true);
+            setActiveNotePopup(null);
+          }}
+        />
+
+        {/* Highlight toolbar - renders via portal above selected text */}
+        <HighlightToolbar
+          selection={highlightSelection}
+          onHighlight={async (color: HighlightColor) => {
+            if (!highlightSelection) return;
+            const { text, surahNumber, ayahNumber, type, id } = highlightSelection;
+            if (id || highlightSelection.isExisting) {
+              const match = highlights.find(h => h.id === id || (h.text === text && h.surahId === surahNumber && h.ayahNumber === ayahNumber));
+              if (match) {
+                await deleteUserHighlight(match.id);
+                setHighlights(prev => prev.filter(h => h.id !== match.id));
+              }
+            }
+            const matchedEntry = result?.entries?.find(e => e.dictId === ayahNumber);
+            const authorStr = matchedEntry ? matchedEntry.dictName : `Lexicon - ${activeRoot}`;
+            const res = await saveUserHighlight(surahNumber, ayahNumber, text, type, authorStr, color);
+            if (res) {
+              toast.success("Highlight saved.");
+              setHighlights(prev => [...prev, res]);
+            } else {
+              toast.error("Failed to save highlight.");
+            }
+            setHighlightSelection(null);
+            window.getSelection()?.removeAllRanges();
+          }}
+          onDelete={async () => {
+            if (!highlightSelection) return;
+            const { text, surahNumber, ayahNumber, id } = highlightSelection;
+            const match = highlights.find(h => h.id === id || (h.text === text && h.surahId === surahNumber && h.ayahNumber === ayahNumber));
+            if (match) {
+              const success = await deleteUserHighlight(match.id);
+              if (success) {
+                toast.success("Highlight removed.");
+                setHighlights(prev => prev.filter(h => h.id !== match.id));
+              } else {
+                toast.error("Failed to remove highlight.");
+              }
+            }
+            setHighlightSelection(null);
+            window.getSelection()?.removeAllRanges();
+          }}
+          onNote={() => {
+            if (!highlightSelection) return;
+            setNoteSelectedText(highlightSelection.text);
+            setNoteTargetDictId(highlightSelection.ayahNumber);
+            setIsNoteModalOpen(true);
+            setHighlightSelection(null);
+            window.getSelection()?.removeAllRanges();
+          }}
+          onCopy={() => {
+            if (!highlightSelection) return;
+            copyToClipboard(highlightSelection.text, "Copied to clipboard!");
+            setHighlightSelection(null);
+            window.getSelection()?.removeAllRanges();
+          }}
+          onShare={() => {
+            if (!highlightSelection) return;
+            if (navigator.share) {
+              navigator.share({ title: `Al-Juthur Lexicon (${activeRoot})`, text: highlightSelection.text }).catch(console.error);
+            } else {
+              copyToClipboard(highlightSelection.text, "Copied to clipboard!");
+            }
+            setHighlightSelection(null);
+            window.getSelection()?.removeAllRanges();
+          }}
+          onClose={() => {
+            setHighlightSelection(null);
+            window.getSelection()?.removeAllRanges();
+          }}
         />
       </div>
     </div>

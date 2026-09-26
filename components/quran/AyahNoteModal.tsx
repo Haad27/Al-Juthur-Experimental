@@ -106,7 +106,7 @@ export default function AyahNoteModal({
             <div>
               <h3 className="font-bold text-foreground text-base leading-tight">Add Note</h3>
               <p className="text-[11px] text-muted-foreground">
-                Surah {surahNumber} · Verse {ayahNumber}
+                {surahNumber === 0 ? "Classical Lexicon Reflection" : `Surah ${surahNumber} · Verse ${ayahNumber}`}
               </p>
             </div>
           </div>
