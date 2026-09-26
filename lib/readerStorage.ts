@@ -331,49 +331,139 @@ export interface UserHighlight {
 
 export async function fetchUserNotes(): Promise<UserNote[]> {
   const id = getUserIdentifier();
-  const res = await fetch(`/api/notes?identifier=${id}`);
-  if (!res.ok) return [];
-  return res.json();
+  const deviceId = getDeviceId();
+  
+  // Fast offline/local fallback
+  let cached: UserNote[] = [];
+  if (typeof window !== "undefined") {
+    try {
+      const raw = localStorage.getItem("aljuthur-cached-notes");
+      if (raw) cached = JSON.parse(raw);
+    } catch {}
+  }
+
+  try {
+    const res = await fetch(`/api/notes?identifier=${encodeURIComponent(id)}&deviceId=${encodeURIComponent(deviceId)}`);
+    if (!res.ok) return cached;
+    const serverNotes: UserNote[] = await res.json();
+    if (typeof window !== "undefined") {
+      localStorage.setItem("aljuthur-cached-notes", JSON.stringify(serverNotes));
+    }
+    return serverNotes;
+  } catch {
+    return cached;
+  }
 }
 
 export async function saveUserNote(surahId: number, ayahNumber: number, text: string): Promise<UserNote | null> {
   const id = getUserIdentifier();
-  const res = await fetch('/api/notes', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ identifier: id, surahId, ayahNumber, text })
-  });
-  if (!res.ok) return null;
-  return res.json();
+  try {
+    const res = await fetch('/api/notes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identifier: id, surahId, ayahNumber, text })
+    });
+    if (!res.ok) return null;
+    const note: UserNote = await res.json();
+    if (typeof window !== "undefined") {
+      try {
+        const raw = localStorage.getItem("aljuthur-cached-notes");
+        const existing: UserNote[] = raw ? JSON.parse(raw) : [];
+        localStorage.setItem("aljuthur-cached-notes", JSON.stringify([note, ...existing]));
+      } catch {}
+    }
+    return note;
+  } catch {
+    return null;
+  }
 }
 
 export async function deleteUserNote(noteId: string): Promise<boolean> {
   const id = getUserIdentifier();
-  const res = await fetch(`/api/notes?identifier=${id}&id=${noteId}`, { method: 'DELETE' });
-  return res.ok;
+  const deviceId = getDeviceId();
+  try {
+    const res = await fetch(`/api/notes?identifier=${encodeURIComponent(id)}&deviceId=${encodeURIComponent(deviceId)}&id=${encodeURIComponent(noteId)}`, { method: 'DELETE' });
+    if (res.ok && typeof window !== "undefined") {
+      try {
+        const raw = localStorage.getItem("aljuthur-cached-notes");
+        if (raw) {
+          const filtered = JSON.parse(raw).filter((n: UserNote) => n.id !== noteId);
+          localStorage.setItem("aljuthur-cached-notes", JSON.stringify(filtered));
+        }
+      } catch {}
+    }
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
 export async function fetchUserHighlights(): Promise<UserHighlight[]> {
   const id = getUserIdentifier();
-  const res = await fetch(`/api/highlights?identifier=${id}`);
-  if (!res.ok) return [];
-  return res.json();
+  const deviceId = getDeviceId();
+
+  // Fast offline/local fallback
+  let cached: UserHighlight[] = [];
+  if (typeof window !== "undefined") {
+    try {
+      const raw = localStorage.getItem("aljuthur-cached-highlights");
+      if (raw) cached = JSON.parse(raw);
+    } catch {}
+  }
+
+  try {
+    const res = await fetch(`/api/highlights?identifier=${encodeURIComponent(id)}&deviceId=${encodeURIComponent(deviceId)}`);
+    if (!res.ok) return cached;
+    const serverHighlights: UserHighlight[] = await res.json();
+    if (typeof window !== "undefined") {
+      localStorage.setItem("aljuthur-cached-highlights", JSON.stringify(serverHighlights));
+    }
+    return serverHighlights;
+  } catch {
+    return cached;
+  }
 }
 
 export async function saveUserHighlight(surahId: number, ayahNumber: number, text: string, type: 'arabic'|'translation', authorName?: string, color?: string): Promise<UserHighlight | null> {
   const id = getUserIdentifier();
-  const res = await fetch('/api/highlights', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ identifier: id, surahId, ayahNumber, text, type, authorName, color })
-  });
-  if (!res.ok) return null;
-  return res.json();
+  try {
+    const res = await fetch('/api/highlights', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identifier: id, surahId, ayahNumber, text, type, authorName, color })
+    });
+    if (!res.ok) return null;
+    const highlight: UserHighlight = await res.json();
+    if (typeof window !== "undefined") {
+      try {
+        const raw = localStorage.getItem("aljuthur-cached-highlights");
+        const existing: UserHighlight[] = raw ? JSON.parse(raw) : [];
+        localStorage.setItem("aljuthur-cached-highlights", JSON.stringify([highlight, ...existing]));
+      } catch {}
+    }
+    return highlight;
+  } catch {
+    return null;
+  }
 }
 
 export async function deleteUserHighlight(highlightId: string): Promise<boolean> {
   const id = getUserIdentifier();
-  const res = await fetch(`/api/highlights?identifier=${id}&id=${highlightId}`, { method: 'DELETE' });
-  return res.ok;
+  const deviceId = getDeviceId();
+  try {
+    const res = await fetch(`/api/highlights?identifier=${encodeURIComponent(id)}&deviceId=${encodeURIComponent(deviceId)}&id=${encodeURIComponent(highlightId)}`, { method: 'DELETE' });
+    if (res.ok && typeof window !== "undefined") {
+      try {
+        const raw = localStorage.getItem("aljuthur-cached-highlights");
+        if (raw) {
+          const filtered = JSON.parse(raw).filter((h: UserHighlight) => h.id !== highlightId);
+          localStorage.setItem("aljuthur-cached-highlights", JSON.stringify(filtered));
+        }
+      } catch {}
+    }
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 

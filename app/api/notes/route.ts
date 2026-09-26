@@ -4,16 +4,30 @@ import prisma from '@/lib/prisma';
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const identifier = searchParams.get('identifier');
+  const deviceId = searchParams.get('deviceId');
   
-  if (!identifier) {
+  if (!identifier && !deviceId) {
     return NextResponse.json({ error: 'Missing identifier' }, { status: 400 });
   }
 
+  const ids = Array.from(new Set([identifier, deviceId].filter(Boolean))) as string[];
+
   try {
     const notes = await prisma.userNote.findMany({
-      where: { identifier },
+      where: {
+        identifier: { in: ids }
+      },
       orderBy: { createdAt: 'desc' }
     });
+
+    // Auto-migrate in background if logged in user has deviceId notes
+    if (identifier && deviceId && identifier !== deviceId && notes.some(n => n.identifier === deviceId)) {
+      prisma.userNote.updateMany({
+        where: { identifier: deviceId },
+        data: { identifier }
+      }).catch(err => console.error("Error auto-migrating notes:", err));
+    }
+
     return NextResponse.json(notes);
   } catch (error) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
@@ -48,16 +62,19 @@ export async function DELETE(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
   const identifier = searchParams.get('identifier');
+  const deviceId = searchParams.get('deviceId');
   
-  if (!id || !identifier) {
+  if (!id || (!identifier && !deviceId)) {
     return NextResponse.json({ error: 'Missing id or identifier' }, { status: 400 });
   }
+
+  const ids = Array.from(new Set([identifier, deviceId].filter(Boolean))) as string[];
 
   try {
     await prisma.userNote.deleteMany({
       where: {
         id,
-        identifier // ensure user owns it
+        identifier: { in: ids }
       }
     });
     return NextResponse.json({ success: true });
