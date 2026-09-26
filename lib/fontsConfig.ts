@@ -37,7 +37,7 @@ export const ENGLISH_FONTS: TranslationFontOption[] = [
     category: "Serif",
     description: "High-contrast, distinguished serif with classical scripture appeal.",
     sample: "In the name of Allah, the Entirely Merciful, the Especially Merciful.",
-    fontFamily: "var(--font-playfair), 'Times New Roman', Georgia, serif",
+    fontFamily: "var(--font-playfair), 'Playfair Display', 'Times New Roman', Georgia, serif",
     lineHeight: "1.75",
   },
   {

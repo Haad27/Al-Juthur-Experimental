@@ -4,7 +4,6 @@ import {
   Noto_Sans_Arabic,
   Inter,
   Lora,
-  Playfair_Display,
   Cinzel,
   Plus_Jakarta_Sans,
   Roboto_Slab,
@@ -44,12 +43,10 @@ export const lora = Lora({
   display: "swap",
 });
 
-export const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+export const playfair = {
+  className: "font-serif",
   variable: "--font-playfair",
-  display: "swap",
-});
+};
 
 export const cinzel = Cinzel({
   subsets: ["latin"],
