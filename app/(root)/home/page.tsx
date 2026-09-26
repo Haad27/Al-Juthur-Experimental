@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { fetchAllSurahs } from "@/api/api";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArchiveIcon, XIcon, Search, Menu as MenuIcon, Compass } from "lucide-react";
+import { ArchiveIcon, XIcon, Search, MoreVertical, Compass } from "lucide-react";
 import { toast } from "sonner";
 import useSurahNavigation from "@/hooks/useSurahNavigation";
 import { amiri, amiriquran, inter } from "@/app/fonts";
@@ -106,9 +106,10 @@ const SurahsList = () => {
           <button
             onClick={() => setIsOpen((prev) => !prev)}
             className="rounded-full border border-border p-2 text-muted-foreground transition-colors hover:text-foreground lg:hidden"
-            aria-label="Open menu"
+            aria-label="Settings"
+            title="Settings"
           >
-            <MenuIcon className="size-5" />
+            <MoreVertical className="size-5" />
           </button>
         }
       />

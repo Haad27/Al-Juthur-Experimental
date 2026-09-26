@@ -137,8 +137,8 @@ const MobileSheet = ({
                     )}
                     <ThemeToggleButton />
                     <button 
-                      onClick={() => { setActiveTab("settings"); setIsOpen(true); }} 
-                      className="p-1.5 rounded-lg bg-card border border-accent/50  text-accent hover:text-accent  transition-all duration-300"
+                      onClick={() => setIsOpen(true)} 
+                      className="p-1.5 rounded-lg bg-card border border-accent/50 text-accent hover:text-accent transition-all duration-300"
                     >
                       <SlidersHorizontal className="size-4" />
                     </button>
@@ -234,138 +234,16 @@ const MobileSheet = ({
           <SheetHeader>Menu</SheetHeader>
         </VisuallyHidden>
 
-        <div className="pt-2 pb-2 px-1 border-b border-border/60">
+        <div className="pt-2 pb-3 px-1 border-b border-border/60 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <LogoIcon size={26} className="text-accent shrink-0" />
-            <span className="font-bold tracking-tight text-foreground text-base">Al-Juthur</span>
+            <SlidersHorizontal className="size-5 text-accent shrink-0" />
+            <span className="font-bold tracking-tight text-foreground text-base">Settings</span>
           </div>
         </div>
 
-        <div className="relative mt-3 mx-1">
-          <div className="relative flex items-center p-1 bg-background/90 dark:bg-background/90 border border-border rounded-2xl shadow-xl backdrop-blur-2xl overflow-hidden">
-            {[
-              { key: "search", label: "Search", icon: <Search className="w-4 h-4" /> },
-              { key: "settings", label: "Settings", icon: <SlidersHorizontal className="w-4 h-4" /> },
-            ].map((tab) => {
-              const isActive = activeTab === tab.key;
-              return (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => setActiveTab(tab.key)}
-                  className={cn(
-                    "relative z-10 flex-1 flex items-center justify-center gap-2 py-2.5 px-3 text-xs font-bold transition-all duration-200 cursor-pointer select-none group",
-                    isActive
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="mobile-creative-tab-bg"
-                      className="absolute inset-0 bg-gradient-to-r from-accent via-accent to-accent rounded-xl border-t border-accent/40  z-0"
-                      transition={{ type: "spring", stiffness: 450, damping: 30 }}
-                    />
-                  )}
-                  <span className="relative z-10 flex items-center gap-2 tracking-wide">
-                    <span className={cn("transition-transform duration-200 group-hover:scale-110", isActive && "text-accent-foreground drop-shadow-[0_0_6px_rgba(255,255,255,0.7)]")}>
-                      {tab.icon}
-                    </span>
-                    <span>{tab.label}</span>
-                    {isActive && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse shadow-sm ml-0.5" />
-                    )}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {activeTab === "search" && (
-          <>
-            <div className="flex flex-col gap-3">
-              <div>
-                <Input
-                  value={searchQuery}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setSearchQuery(e.target.value);
-                  }} // Update search query on input change
-                  placeholder="Search Surah (e.g. Al-Nur, 24)..."
-                  className="bg-muted text-foreground border-0"
-                />
-              </div>
-            </div>
-
-            <div className="overflow-y-auto scrollable-container max-h-[calc(100vh-220px)] space-y-2 pb-6">
-              {filteredSurahs?.map((surah) => {
-                const isActive = surah.number === surahNumber;
-                return (
-                  <Link
-                    key={surah.number}
-                    id={`mobile-surah-${surah.number}`}
-                    href={
-                      targetAyahFromSearch && targetAyahFromSearch <= (surah.numberOfAyahs || 999)
-                        ? `/surah/${surah.number}?ayah=${targetAyahFromSearch}`
-                        : `/surah/${surah.number}`
-                    }
-                    title={`${surah.englishName} — ${surah.englishNameTranslation}`}
-                    onClick={() => setIsOpen(false)}
-                    className={cn(
-                      "p-3 rounded-2xl border transition-all duration-200 flex items-center justify-between group cursor-pointer w-full",
-                      isActive
-                        ? "bg-gradient-to-r from-accent/10 to-card border-accent/40 shadow-lg "
-                        : "bg-card/50 hover:bg-muted/80 border-border hover:border-accent/30"
-                    )}
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div
-                        className={cn(
-                          "w-9 h-9 rounded-xl flex items-center justify-center font-mono font-bold text-xs shrink-0 transition-all duration-200 border",
-                          isActive
-                            ? "bg-accent text-foreground border-accent shadow-md shadow-sm"
-                            : "bg-muted text-muted-foreground group-hover:text-accent group-hover:bg-accent/10 border-border"
-                        )}
-                      >
-                        {surah.number}
-                      </div>
-                      <div className="flex flex-col min-w-0">
-                        <span
-                          className={cn(
-                            "text-xs font-semibold truncate transition-colors",
-                            isActive
-                              ? "text-accent font-bold"
-                              : "text-foreground group-hover:text-accent"
-                          )}
-                        >
-                          {surah.englishName}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground truncate">
-                          {surah.englishNameTranslation}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col items-end shrink-0 ml-2">
-                      <span className="font-sans font-medium text-base text-accent group-hover:text-accent transition-colors">
-                        {surah.name}
-                      </span>
-                      {surah.numberOfAyahs && (
-                        <span className="text-[9px] text-muted-foreground font-mono">
-                          {surah.numberOfAyahs} ayahs
-                        </span>
-                      )}
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </>
-        )}
-
-        {activeTab === "settings" && ( // maybe rename into info
+        <div className="mt-2 flex-1 overflow-y-auto custom-scrollbar pb-10">
           <Settings />
-        )}
+        </div>
       </SheetContent>
     </Sheet>
   );
