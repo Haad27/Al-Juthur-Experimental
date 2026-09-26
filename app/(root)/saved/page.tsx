@@ -94,7 +94,7 @@ export default function SavedPage() {
   const [activeTab, setActiveTab] = useState<TabType>("highlights");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("pinned");
-  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [highlightFilter, setHighlightFilter] = useState<HighlightFilter>("all");
 
   // State
@@ -108,6 +108,15 @@ export default function SavedPage() {
 
   // Load all local data on mount
   useEffect(() => {
+    try {
+      const savedMode = localStorage.getItem("aljuthur-library-view-mode") as ViewMode;
+      if (savedMode === "list" || savedMode === "grid") {
+        setViewMode(savedMode);
+      }
+    } catch {
+      // fallback to grid
+    }
+
     setLastRead(getLastReadTafsir());
     setSavedTafsirs(getSavedTafsirs());
     setSavedScholarAnswers(getSavedScholarAnswers());
@@ -125,6 +134,13 @@ export default function SavedPage() {
     fetchUserNotes().then(setSavedNotes);
     fetchUserHighlights().then(setSavedHighlights);
   }, []);
+
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    try {
+      localStorage.setItem("aljuthur-library-view-mode", mode);
+    } catch {}
+  };
 
   // Handlers for Ayahs
   const updateAyahStorage = (updated: Ayah[]) => {
@@ -275,16 +291,28 @@ export default function SavedPage() {
             </div>
             
             {/* View Toggle */}
-            <div className="hidden sm:flex items-center gap-1 bg-card/60 border border-border rounded-xl p-1">
+            <div className="flex items-center gap-1 bg-card/80 border border-border/80 rounded-2xl p-1 shadow-sm">
               <button 
-                onClick={() => setViewMode("list")}
-                className={cn("p-1.5 rounded-lg transition", viewMode === "list" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground")}
+                onClick={() => handleViewModeChange("list")}
+                title="List View"
+                className={cn(
+                  "p-2 rounded-xl transition cursor-pointer flex items-center justify-center",
+                  viewMode === "list"
+                    ? "bg-background shadow-sm text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
               >
                 <List className="size-4" />
               </button>
               <button 
-                onClick={() => setViewMode("grid")}
-                className={cn("p-1.5 rounded-lg transition", viewMode === "grid" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground")}
+                onClick={() => handleViewModeChange("grid")}
+                title="Grid View"
+                className={cn(
+                  "p-2 rounded-xl transition cursor-pointer flex items-center justify-center",
+                  viewMode === "grid"
+                    ? "bg-background shadow-sm text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
               >
                 <LayoutGrid className="size-4" />
               </button>
@@ -485,7 +513,7 @@ export default function SavedPage() {
           {/* Tafsirs Tab */}
           {activeTab === "tafsirs" && (
             filteredTafsirs.length > 0 ? (
-              <div className="flex flex-col gap-3">
+              <div className={cn("grid gap-4", viewMode === "grid" ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1")}>
                 {filteredTafsirs.map((t) => (
                   <div key={t.id} className="group flex flex-col sm:flex-row gap-4 bg-card border border-border/50 rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all">
                     <div className="flex-1 min-w-0">
@@ -530,7 +558,7 @@ export default function SavedPage() {
           {/* Ayahs Tab */}
           {activeTab === "ayahs" && (
             filteredAyahs.length > 0 ? (
-              <div className="flex flex-col gap-3">
+              <div className={cn("grid gap-4", viewMode === "grid" ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1")}>
                 {filteredAyahs.map((ayah) => (
                   <div key={ayah.number} className="group bg-card border border-border/50 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
                     <div className="flex items-center justify-between mb-4">
@@ -563,7 +591,7 @@ export default function SavedPage() {
           {/* AI Scholar Tab */}
           {activeTab === "scholar" && (
             filteredScholar.length > 0 ? (
-              <div className="flex flex-col gap-4">
+              <div className={cn("grid gap-4", viewMode === "grid" ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1")}>
                 {filteredScholar.map((item) => (
                   <div key={item.id} className="bg-card border border-border/50 rounded-2xl p-5 shadow-sm flex flex-col">
                     <div className="flex items-center justify-between mb-3 pb-3 border-b border-border/50">
