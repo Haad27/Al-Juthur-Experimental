@@ -26,7 +26,7 @@ import InlineTranslation from '@/components/shared/InlineTranslation';
 import { toast } from 'sonner';
 import { useGlobalState } from '@/lib/providers/GlobalStatesProvider';
 import { copyToClipboard } from '@/lib/utils';
-import LexiconTextRenderer from '@/components/lexicon/LexiconTextRenderer';
+import LexiconTextRenderer, { applyHighlightsAndNotesToHtml } from '@/components/lexicon/LexiconTextRenderer';
 import { amiriquran, inter } from '@/app/fonts';
 import AppHeader from '@/components/layout/AppHeader';
 import AyahChatSidebar from '@/components/ai/AyahChatSidebar';
@@ -661,37 +661,63 @@ function LexiconPageContent() {
               )}
 
               {/* AI Comprehensive Root Summary (Always Open & Styled like Root Word Analysis) */}
-              {result.ai_summary && (
-                <div 
-                  data-ai-summary="true" 
-                  data-dict-id="999999" 
-                  data-dict-name="AI Root Summary"
-                  className="bg-gradient-to-br from-card via-card to-background/90 border border-accent/30 rounded-2xl p-4 sm:p-6 shadow-xl space-y-4 lexicon-content"
-                >
-                  <div className="flex items-center gap-2.5 border-b border-border pb-3">
-                    <div className="p-1.5 bg-accent/15 rounded-md border border-accent/30 text-accent">
-                      <Sparkles className="size-4" />
-                    </div>
-                    <h3 className="text-sm sm:text-base font-bold text-accent tracking-tight">Comprehensive Root Summary</h3>
-                  </div>
+              {result.ai_summary && (() => {
+                const aiSummaryHighlights = highlights.filter(h => 
+                  Number(h.surahId) === 0 && (Number(h.ayahNumber) === 999999 || h.authorName?.toLowerCase().includes("summary"))
+                );
+                const aiSummaryNotes = notes.filter(n => 
+                  Number(n.surahId) === 0 && Number(n.ayahNumber) === 999999
+                );
 
-                  <div className="space-y-4">
-                    <div>
-                      <strong className="text-accent font-semibold block mb-1 text-xs sm:text-sm">
-                        Root Meaning:
-                      </strong>
-                      <div className="prose prose-sm dark:prose-invert max-w-none text-reading prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-foreground prose-em:text-muted-foreground text-xs sm:text-sm" dangerouslySetInnerHTML={{ __html: formatArabicWithIndoPak(result.ai_summary.root_meaning_html) }} />
+                const rootMeaningHtml = applyHighlightsAndNotesToHtml(
+                  formatArabicWithIndoPak(result.ai_summary.root_meaning_html),
+                  aiSummaryHighlights,
+                  aiSummaryNotes
+                );
+                const quranicUsageHtml = applyHighlightsAndNotesToHtml(
+                  formatArabicWithIndoPak(result.ai_summary.quranic_usage_html),
+                  aiSummaryHighlights,
+                  aiSummaryNotes
+                );
+
+                return (
+                  <div 
+                    data-ai-summary="true" 
+                    data-dict-id="999999" 
+                    data-dict-name="AI Root Summary"
+                    className="bg-gradient-to-br from-card via-card to-background/90 border border-accent/30 rounded-2xl p-4 sm:p-6 shadow-xl space-y-4 lexicon-content"
+                  >
+                    <div className="flex items-center gap-2.5 border-b border-border pb-3">
+                      <div className="p-1.5 bg-accent/15 rounded-md border border-accent/30 text-accent">
+                        <Sparkles className="size-4" />
+                      </div>
+                      <h3 className="text-sm sm:text-base font-bold text-accent tracking-tight">Comprehensive Root Summary</h3>
                     </div>
-                    
-                    <div className="border-t border-border pt-3">
-                      <strong className="text-accent font-semibold block mb-1 text-xs sm:text-sm">
-                        Quranic Usage:
-                      </strong>
-                      <div className="prose prose-sm dark:prose-invert max-w-none text-reading prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-foreground prose-em:text-muted-foreground text-xs sm:text-sm" dangerouslySetInnerHTML={{ __html: formatArabicWithIndoPak(result.ai_summary.quranic_usage_html) }} />
+
+                    <div className="space-y-4">
+                      <div>
+                        <strong className="text-accent font-semibold block mb-1 text-xs sm:text-sm">
+                          Root Meaning:
+                        </strong>
+                        <div 
+                          className="prose prose-sm dark:prose-invert max-w-none text-reading prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-foreground prose-em:text-muted-foreground text-xs sm:text-sm" 
+                          dangerouslySetInnerHTML={{ __html: rootMeaningHtml }} 
+                        />
+                      </div>
+                      
+                      <div className="border-t border-border pt-3">
+                        <strong className="text-accent font-semibold block mb-1 text-xs sm:text-sm">
+                          Quranic Usage:
+                        </strong>
+                        <div 
+                          className="prose prose-sm dark:prose-invert max-w-none text-reading prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-foreground prose-em:text-muted-foreground text-xs sm:text-sm" 
+                          dangerouslySetInnerHTML={{ __html: quranicUsageHtml }} 
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* Lexicon Definitions Display (Starts immediately below header) */}
               <div className="space-y-4 md:space-y-6">
@@ -699,6 +725,17 @@ function LexiconPageContent() {
                   // const isFreeDict = (entry.dictIdent || "").toLowerCase().includes("mufradat") || (entry.dictName || "").toLowerCase().includes("mufradat");
                   // const isLocked = tier === "FREE" && !isFreeDict;
                   const isLocked = false; // Full free mode for now
+
+                  const entryHighlights = highlights.filter(h => 
+                    (Number(h.surahId) === 0 && Number(h.ayahNumber) === Number(entry.dictId)) ||
+                    (Number(h.surahId) === 0 && h.authorName && entry.dictName && (
+                      h.authorName.toLowerCase().includes(entry.dictName.toLowerCase()) ||
+                      entry.dictName.toLowerCase().includes(h.authorName.toLowerCase())
+                    ))
+                  );
+                  const entryNotes = notes.filter(n => 
+                    Number(n.surahId) === 0 && Number(n.ayahNumber) === Number(entry.dictId)
+                  );
 
                   return (
                     <div
@@ -758,9 +795,10 @@ function LexiconPageContent() {
                               text={def} 
                               isLocked={isLocked}
                               dictName={entry.dictName}
+                              isEnglish={entry.isEnglish}
                               onUpgradeClick={openPricingModal}
-                              highlights={highlights.filter(h => h.ayahNumber === entry.dictId || (h.surahId === 0 && h.authorName?.includes(entry.dictName)))}
-                              notes={notes.filter(n => n.ayahNumber === entry.dictId && n.surahId === 0)}
+                              highlights={entryHighlights}
+                              notes={entryNotes}
                             />
                           </div>
                         ))}
@@ -919,14 +957,14 @@ function LexiconPageContent() {
             if (!highlightSelection) return;
             const { text, surahNumber, ayahNumber, type, id } = highlightSelection;
             if (id || highlightSelection.isExisting) {
-              const match = highlights.find(h => (id && h.id === id) || (h.text === text && h.surahId === surahNumber));
+              const match = highlights.find(h => (id && h.id === id) || (h.text === text && Number(h.surahId) === Number(surahNumber) && Number(h.ayahNumber) === Number(ayahNumber)));
               if (match) {
                 await deleteUserHighlight(match.id);
                 setHighlights(prev => prev.filter(h => h.id !== match.id));
               }
             }
-            const matchedEntry = result?.entries?.find(e => e.dictId === ayahNumber);
-            const authorStr = matchedEntry ? matchedEntry.dictName : `Lexicon - ${activeRoot}`;
+            const matchedEntry = result?.entries?.find(e => Number(e.dictId) === Number(ayahNumber));
+            const authorStr = matchedEntry ? matchedEntry.dictName : (Number(ayahNumber) === 999999 ? "AI Root Summary" : `Lexicon - ${activeRoot}`);
             const res = await saveUserHighlight(surahNumber, ayahNumber, text, type, authorStr, color);
             if (res) {
               toast.success("Highlight saved.");
@@ -940,7 +978,7 @@ function LexiconPageContent() {
           onDelete={async () => {
             if (!highlightSelection) return;
             const { text, surahNumber, ayahNumber, id } = highlightSelection;
-            const match = highlights.find(h => (id && h.id === id) || (h.text === text && h.surahId === surahNumber));
+            const match = highlights.find(h => (id && h.id === id) || (h.text === text && Number(h.surahId) === Number(surahNumber) && Number(h.ayahNumber) === Number(ayahNumber)));
             if (match) {
               const success = await deleteUserHighlight(match.id);
               if (success) {
