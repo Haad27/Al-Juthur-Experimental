@@ -39,7 +39,16 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { identifier, surahId, ayahNumber, text } = body;
 
-    if (!identifier || !surahId || !ayahNumber || !text) {
+    if (
+      !identifier ||
+      surahId === undefined ||
+      surahId === null ||
+      isNaN(Number(surahId)) ||
+      ayahNumber === undefined ||
+      ayahNumber === null ||
+      isNaN(Number(ayahNumber)) ||
+      !text
+    ) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 

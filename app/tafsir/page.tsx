@@ -242,6 +242,7 @@ function TafsirContent() {
   const [mounted, setMounted] = useState(false);
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const [noteSelectedText, setNoteSelectedText] = useState<string>("");
+  const [noteInitialText, setNoteInitialText] = useState<string>("");
   const [noteTargetAyah, setNoteTargetAyah] = useState<number | null>(null);
   const [activeNotePopup, setActiveNotePopup] = useState<{ note: UserNote; x: number; y: number } | null>(null);
   
@@ -1510,10 +1511,11 @@ function TafsirContent() {
 
         <AyahNoteModal
           isOpen={isNoteModalOpen}
-          onClose={() => { setIsNoteModalOpen(false); setNoteSelectedText(""); setNoteTargetAyah(null); }}
+          onClose={() => { setIsNoteModalOpen(false); setNoteSelectedText(""); setNoteInitialText(""); setNoteTargetAyah(null); }}
           surahNumber={activeSurah}
           ayahNumber={noteTargetAyah || (currentAyahIndex + 1)}
           selectedText={noteSelectedText}
+          initialNoteText={noteInitialText}
           onSave={(saved) => setNotes(prev => [...prev, saved])}
         />
 
@@ -1535,6 +1537,7 @@ function TafsirContent() {
           onEdit={(note) => {
             const anchorMatch = note.text.match(/^\[Re:\s*"([^"]+)"\]\n\n([\s\S]*)$/);
             setNoteSelectedText(anchorMatch ? anchorMatch[1] : "");
+            setNoteInitialText(anchorMatch ? anchorMatch[2] : note.text);
             setNoteTargetAyah(note.ayahNumber);
             setIsNoteModalOpen(true);
             setActiveNotePopup(null);
@@ -1666,6 +1669,7 @@ function TafsirContent() {
           onNote={() => {
             if (!highlightSelection) return;
             setNoteSelectedText(highlightSelection.text);
+            setNoteInitialText("");
             setNoteTargetAyah(highlightSelection.ayahNumber);
             setIsNoteModalOpen(true);
             setHighlightSelection(null);

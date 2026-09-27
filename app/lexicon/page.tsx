@@ -144,6 +144,7 @@ function LexiconPageContent() {
   const [highlightSelection, setHighlightSelection] = useState<HighlightSelection | null>(null);
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const [noteSelectedText, setNoteSelectedText] = useState<string>('');
+  const [noteInitialText, setNoteInitialText] = useState<string>('');
   const [noteTargetDictId, setNoteTargetDictId] = useState<number | null>(null);
   const [activeNotePopup, setActiveNotePopup] = useState<{ note: UserNote; x: number; y: number } | null>(null);
 
@@ -878,10 +879,11 @@ function LexiconPageContent() {
 
         <AyahNoteModal
           isOpen={isNoteModalOpen}
-          onClose={() => { setIsNoteModalOpen(false); setNoteSelectedText(''); setNoteTargetDictId(null); }}
+          onClose={() => { setIsNoteModalOpen(false); setNoteSelectedText(''); setNoteInitialText(''); setNoteTargetDictId(null); }}
           surahNumber={0}
           ayahNumber={noteTargetDictId || 0}
           selectedText={noteSelectedText}
+          initialNoteText={noteInitialText}
           onSave={(saved) => setNotes(prev => [...prev, saved])}
         />
 
@@ -903,6 +905,7 @@ function LexiconPageContent() {
           onEdit={(note) => {
             const anchorMatch = note.text.match(/^\[Re:\s*"([^"]+)"\]\n\n([\s\S]*)$/);
             setNoteSelectedText(anchorMatch ? anchorMatch[1] : "");
+            setNoteInitialText(anchorMatch ? anchorMatch[2] : note.text);
             setNoteTargetDictId(note.ayahNumber);
             setIsNoteModalOpen(true);
             setActiveNotePopup(null);
@@ -916,7 +919,7 @@ function LexiconPageContent() {
             if (!highlightSelection) return;
             const { text, surahNumber, ayahNumber, type, id } = highlightSelection;
             if (id || highlightSelection.isExisting) {
-              const match = highlights.find(h => h.id === id || (h.text === text && h.surahId === surahNumber && h.ayahNumber === ayahNumber));
+              const match = highlights.find(h => (id && h.id === id) || (h.text === text && h.surahId === surahNumber));
               if (match) {
                 await deleteUserHighlight(match.id);
                 setHighlights(prev => prev.filter(h => h.id !== match.id));
@@ -937,7 +940,7 @@ function LexiconPageContent() {
           onDelete={async () => {
             if (!highlightSelection) return;
             const { text, surahNumber, ayahNumber, id } = highlightSelection;
-            const match = highlights.find(h => h.id === id || (h.text === text && h.surahId === surahNumber && h.ayahNumber === ayahNumber));
+            const match = highlights.find(h => (id && h.id === id) || (h.text === text && h.surahId === surahNumber));
             if (match) {
               const success = await deleteUserHighlight(match.id);
               if (success) {
@@ -953,6 +956,7 @@ function LexiconPageContent() {
           onNote={() => {
             if (!highlightSelection) return;
             setNoteSelectedText(highlightSelection.text);
+            setNoteInitialText('');
             setNoteTargetDictId(highlightSelection.ayahNumber);
             setIsNoteModalOpen(true);
             setHighlightSelection(null);

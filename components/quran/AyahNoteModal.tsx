@@ -13,6 +13,8 @@ interface AyahNoteModalProps {
   ayahNumber: number;
   /** Optional: pre-selected text to anchor the note to */
   selectedText?: string;
+  /** Optional: initial note body text when editing an existing note */
+  initialNoteText?: string;
   /** Called after a note is successfully saved */
   onSave?: (note: any) => void;
 }
@@ -23,9 +25,10 @@ export default function AyahNoteModal({
   surahNumber,
   ayahNumber,
   selectedText,
+  initialNoteText,
   onSave,
 }: AyahNoteModalProps) {
-  const [noteText, setNoteText] = useState("");
+  const [noteText, setNoteText] = useState(initialNoteText || "");
   const [isSaving, setIsSaving] = useState(false);
   const [mounted, setMounted] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -33,17 +36,17 @@ export default function AyahNoteModal({
   useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
-    if (isOpen && textareaRef.current) {
-      // Slight delay so the modal animation completes first
-      const t = setTimeout(() => textareaRef.current?.focus(), 120);
-      return () => clearTimeout(t);
+    if (isOpen) {
+      setNoteText(initialNoteText || "");
+      if (textareaRef.current) {
+        // Slight delay so the modal animation completes first
+        const t = setTimeout(() => textareaRef.current?.focus(), 120);
+        return () => clearTimeout(t);
+      }
+    } else {
+      setNoteText("");
     }
-  }, [isOpen]);
-
-  // Reset note text when closing
-  useEffect(() => {
-    if (!isOpen) setNoteText("");
-  }, [isOpen]);
+  }, [isOpen, initialNoteText]);
 
   if (!isOpen || !mounted) return null;
 
