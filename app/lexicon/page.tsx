@@ -25,7 +25,7 @@ import {
 import InlineTranslation from '@/components/shared/InlineTranslation';
 import { toast } from 'sonner';
 import { useGlobalState } from '@/lib/providers/GlobalStatesProvider';
-import { copyToClipboard } from '@/lib/utils';
+import { copyToClipboard, cn } from '@/lib/utils';
 import LexiconTextRenderer, { applyHighlightsAndNotesToHtml } from '@/components/lexicon/LexiconTextRenderer';
 import { amiriquran, inter } from '@/app/fonts';
 import AppHeader from '@/components/layout/AppHeader';
@@ -313,7 +313,37 @@ function LexiconPageContent() {
     }
   }, [activeRoot]);
 
-  // Scroll listener for reading progress
+  const scrollToLexicon = (dictId: number | 'all') => {
+    setTimeout(() => {
+      let targetEl: HTMLElement | null = null;
+      if (dictId !== 'all') {
+        targetEl = document.getElementById(`dict-entry-${dictId}`);
+      }
+      if (!targetEl) {
+        targetEl = document.getElementById('lexicon-entries-container');
+      }
+
+      if (targetEl) {
+        const isMobile = window.innerWidth < 768;
+        const offset = isMobile ? 24 : 76;
+        const rect = targetEl.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const targetY = rect.top + scrollTop - offset;
+
+        window.scrollTo({
+          top: Math.max(0, targetY),
+          behavior: 'smooth'
+        });
+      }
+    }, 80);
+  };
+
+  const handleSelectDictionary = (dictId: number | 'all') => {
+    setSelectedDictId(dictId);
+    scrollToLexicon(dictId);
+  };
+
+  // Scroll listener for reading progress & mobile top nav hide/show
   useEffect(() => {
     const onScroll = () => {
       const scrollTop = window.scrollY;
@@ -322,10 +352,15 @@ function LexiconPageContent() {
       setReadingProgress(pct);
 
       // Hide top nav when scrolling down, show when scrolling up
-      if (scrollTop > lastScrollYRef.current && scrollTop > 50) {
-        setTopNavVisible(false);
-      } else if (scrollTop < lastScrollYRef.current) {
+      if (scrollTop <= 30) {
         setTopNavVisible(true);
+      } else {
+        const delta = scrollTop - lastScrollYRef.current;
+        if (delta > 8) {
+          setTopNavVisible(false);
+        } else if (delta < -8) {
+          setTopNavVisible(true);
+        }
       }
       lastScrollYRef.current = scrollTop;
     };
@@ -390,62 +425,74 @@ function LexiconPageContent() {
   // ==========================================
   return (
     <div className={`min-h-screen bg-background text-foreground pb-36 md:pb-24 ${inter.className} transition-all duration-300 ${!!aiChatContext ? 'lg:pr-[420px] xl:pr-[450px]' : ''}`}>
-      <AppHeader
-        subtitle={
-          (activeRoot || result?.normalizedRoot) ? (
-            <span className="hidden md:inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1 text-xs">
-              <span className="uppercase tracking-wider text-muted-foreground">Root</span>
-              <span className="font-arabic font-semibold text-arabic">{result?.normalizedRoot || activeRoot}</span>
-            </span>
-          ) : undefined
-        }
-      />
+      {/* Top Navigation Bar: Hides on scroll down in mobile, comes back on scroll up */}
+      <div
+        className={cn(
+          "sticky top-0 z-50 w-full transition-transform duration-300 ease-in-out",
+          topNavVisible ? "translate-y-0" : "-translate-y-full md:translate-y-0"
+        )}
+      >
+        <AppHeader
+          className="static"
+          subtitle={
+            (activeRoot || result?.normalizedRoot) ? (
+              <span className="hidden md:inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1 text-xs">
+                <span className="uppercase tracking-wider text-muted-foreground">Root</span>
+                <span className="font-arabic font-semibold text-arabic">{result?.normalizedRoot || activeRoot}</span>
+              </span>
+            ) : undefined
+          }
+        />
 
-          {/* MOBILE ONLY: Pinned Dropdowns for Dictionaries & PDF Lexicons (Sticky with Top Nav) */}
-          {((result?.entries && result.entries.length > 0) || pdfDictionaries.length > 0) && (
-            <div className="md:hidden sticky top-14 z-40 bg-background/95 backdrop-blur-md border-b border-border py-2.5 px-4 flex gap-2 w-full shadow-sm">
-              {/* Dictionary Dropdown */}
-              {result?.entries && result.entries.length > 0 && (
-                <div className="relative flex-1 min-w-0">
-                  <select
-                    value={selectedDictId}
-                    onChange={(e) => setSelectedDictId(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-                    className="w-full appearance-none bg-card border border-border rounded-lg px-3 py-1.5 text-xs text-foreground font-medium focus:outline-none focus:ring-1 focus:ring-ring pr-7 truncate"
-                  >
-                    <option value="all" className="bg-card text-foreground">All Dictionaries ({result.entries.length})</option>
-                    {result.entries.map((entry) => (
-                      <option key={entry.dictId} value={entry.dictId} className="bg-card text-foreground">
-                        {entry.dictName}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
-                </div>
-              )}
+        {/* MOBILE ONLY: Pinned Dropdowns for Dictionaries & PDF Lexicons (Part of Top Nav Bar) */}
+        {((result?.entries && result.entries.length > 0) || pdfDictionaries.length > 0) && (
+          <div className="md:hidden bg-background/95 backdrop-blur-md border-b border-border py-2.5 px-4 flex gap-2 w-full shadow-sm">
+            {/* Dictionary Dropdown */}
+            {result?.entries && result.entries.length > 0 && (
+              <div className="relative flex-1 min-w-0">
+                <select
+                  value={selectedDictId}
+                  onChange={(e) => {
+                    const val = e.target.value === 'all' ? 'all' : Number(e.target.value);
+                    handleSelectDictionary(val);
+                  }}
+                  className="w-full appearance-none bg-card border border-border rounded-lg px-3 py-1.5 text-xs text-foreground font-medium focus:outline-none focus:ring-1 focus:ring-ring pr-7 truncate cursor-pointer"
+                >
+                  <option value="all" className="bg-card text-foreground">All Dictionaries ({result.entries.length})</option>
+                  {result.entries.map((entry) => (
+                    <option key={entry.dictId} value={entry.dictId} className="bg-card text-foreground">
+                      {entry.dictName}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+              </div>
+            )}
 
-              {/* PDF Lexicons Dropdown */}
-              {pdfDictionaries.length > 0 && (
-                <div className="relative flex-1 min-w-0">
-                  <select
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        window.location.href = `/api/lexicon/pdf?file=${encodeURIComponent(e.target.value)}`;
-                      }
-                    }}
-                    className="w-full appearance-none bg-card border border-border rounded-lg px-3 py-1.5 text-xs text-foreground font-medium focus:outline-none focus:border-accent/50 pr-7 shadow-sm truncate"
-                  >
-                    <option value="" className="bg-card text-foreground">PDF Lexicons ({pdfDictionaries.length})</option>
-                    {pdfDictionaries.map((pdf) => (
-                      <option key={pdf.id} value={pdf.filePath} className="bg-card text-foreground">
-                        {pdf.name} ({pdf.language})
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
-                </div>
-              )}
-            </div>
-          )}
+            {/* PDF Lexicons Dropdown */}
+            {pdfDictionaries.length > 0 && (
+              <div className="relative flex-1 min-w-0">
+                <select
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      window.location.href = `/api/lexicon/pdf?file=${encodeURIComponent(e.target.value)}`;
+                    }
+                  }}
+                  className="w-full appearance-none bg-card border border-border rounded-lg px-3 py-1.5 text-xs text-foreground font-medium focus:outline-none focus:border-accent/50 pr-7 shadow-sm truncate cursor-pointer"
+                >
+                  <option value="" className="bg-card text-foreground">PDF Lexicons ({pdfDictionaries.length})</option>
+                  {pdfDictionaries.map((pdf) => (
+                    <option key={pdf.id} value={pdf.filePath} className="bg-card text-foreground">
+                      {pdf.name} ({pdf.language})
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Search Bar & Container */}
       <div className="max-w-[1700px] mx-auto px-4 md:px-8 pt-4 md:pt-6">
@@ -563,7 +610,7 @@ function LexiconPageContent() {
 
                 <div className="space-y-2 max-h-[calc(100vh-160px)] overflow-y-auto pr-1 custom-scrollbar">
                   <button
-                    onClick={() => setSelectedDictId('all')}
+                    onClick={() => handleSelectDictionary('all')}
                     className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
                       selectedDictId === 'all'
                         ? 'bg-accent/15 border-accent text-foreground shadow-md'
@@ -582,7 +629,7 @@ function LexiconPageContent() {
                   {result.entries.map((entry) => (
                     <button
                       key={entry.dictId}
-                      onClick={() => setSelectedDictId(entry.dictId)}
+                      onClick={() => handleSelectDictionary(entry.dictId)}
                       className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
                         selectedDictId === entry.dictId
                           ? 'bg-accent/15 border-accent text-foreground shadow-md'
@@ -720,7 +767,7 @@ function LexiconPageContent() {
               })()}
 
               {/* Lexicon Definitions Display (Starts immediately below header) */}
-              <div className="space-y-4 md:space-y-6">
+              <div id="lexicon-entries-container" className="space-y-4 md:space-y-6">
                 {filteredEntries.map((entry) => {
                   // const isFreeDict = (entry.dictIdent || "").toLowerCase().includes("mufradat") || (entry.dictName || "").toLowerCase().includes("mufradat");
                   // const isLocked = tier === "FREE" && !isFreeDict;
@@ -740,9 +787,10 @@ function LexiconPageContent() {
                   return (
                     <div
                       key={entry.dictId}
+                      id={`dict-entry-${entry.dictId}`}
                       data-dict-id={entry.dictId}
                       data-dict-name={entry.dictName}
-                      className="bg-gradient-to-br from-card via-card to-background/80 border border-accent/20 rounded-2xl p-4 md:p-6 shadow-lg space-y-4 hover:border-accent/40 transition-all"
+                      className="bg-gradient-to-br from-card via-card to-background/80 border border-accent/20 rounded-2xl p-4 md:p-6 shadow-lg space-y-4 hover:border-accent/40 transition-all scroll-mt-28"
                     >
                       <div className="flex items-center justify-between border-b border-border pb-3">
                         <div className="flex items-center gap-2 flex-wrap">
