@@ -472,31 +472,16 @@ function RagChatContent() {
       <AppHeader
         className="shrink-0"
         leftSlot={
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowDisclaimers(true)}
-              className="h-8 inline-flex items-center gap-1.5 px-2.5 sm:px-3 rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted text-xs font-medium transition-all cursor-pointer shrink-0"
-              title="View Notes & Disclaimers"
-            >
-              <Info className="size-3.5" />
-              <span className="hidden lg:inline">Notes & Disclaimers</span>
-              <span className="hidden sm:inline lg:hidden">Notes</span>
-              {currentBot.warning && (
-                <span className="size-1.5 rounded-full bg-accent" title="Guardrail active" />
-              )}
-            </button>
-
-            <div className="h-8 inline-flex items-center gap-1.5 px-2.5 sm:px-3 rounded-xl border border-border bg-card text-xs font-medium text-muted-foreground shrink-0">
-              <Sparkles className="size-3.5 text-accent shrink-0" />
-              {remainingTokens !== null ? (
-                <span>
-                  <strong className="text-foreground font-semibold">{(tokenLimit - remainingTokens).toLocaleString()}</strong>
-                  <span className="text-muted-foreground">/{tokenLimit.toLocaleString()}</span>
-                </span>
-              ) : (
-                <span>Active</span>
-              )}
-            </div>
+          <div className="h-8 inline-flex items-center gap-1.5 px-2.5 sm:px-3 rounded-xl border border-border bg-card text-xs font-medium text-muted-foreground shrink-0">
+            <Sparkles className="size-3.5 text-accent shrink-0" />
+            {remainingTokens !== null ? (
+              <span>
+                <strong className="text-foreground font-semibold">{(tokenLimit - remainingTokens).toLocaleString()}</strong>
+                <span className="text-muted-foreground">/{tokenLimit.toLocaleString()}</span>
+              </span>
+            ) : (
+              <span>Active</span>
+            )}
           </div>
         }
         rightSlot={
