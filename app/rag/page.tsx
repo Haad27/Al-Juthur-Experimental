@@ -472,24 +472,26 @@ function RagChatContent() {
       <AppHeader
         className="shrink-0"
         subtitle={
-          <span className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-0.5 text-xs text-muted-foreground">
+          <span className="hidden xl:inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-0.5 text-xs text-muted-foreground">
             AI Scholar
           </span>
         }
+        leftSlot={
+          <button
+            onClick={() => setShowDisclaimers(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted text-xs font-medium transition-all cursor-pointer shrink-0"
+            title="View Notes & Disclaimers"
+          >
+            <Info className="size-3.5" />
+            <span className="hidden lg:inline">Notes & Disclaimers</span>
+            <span className="hidden sm:inline lg:hidden">Notes</span>
+            {currentBot.warning && (
+              <span className="size-1.5 rounded-full bg-accent" title="Guardrail active" />
+            )}
+          </button>
+        }
         rightSlot={
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <button
-              onClick={() => setShowDisclaimers(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted text-xs font-medium transition-all cursor-pointer"
-              title="View Notes & Disclaimers"
-            >
-              <Info className="size-3.5" />
-              <span className="hidden md:inline">Notes & Disclaimers</span>
-              {currentBot.warning && (
-                <span className="size-1.5 rounded-full bg-accent" title="Guardrail active" />
-              )}
-            </button>
-
             {messages.length > 0 && (
               <button
                 onClick={handleClearChat}

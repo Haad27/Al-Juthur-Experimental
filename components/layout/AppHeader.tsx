@@ -17,11 +17,13 @@ const NAV = [
 ];
 
 export default function AppHeader({
+  leftSlot,
   rightSlot,
   subtitle,
   hideNav = false,
   className,
 }: {
+  leftSlot?: React.ReactNode;
   rightSlot?: React.ReactNode;
   subtitle?: React.ReactNode;
   hideNav?: boolean;
@@ -32,15 +34,18 @@ export default function AppHeader({
   return (
     <header className={cn("sticky top-0 z-50 w-full border-b border-border bg-background/90 backdrop-blur-md", className)}>
       <div className="relative mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-3 sm:px-6">
-        <Link
-          href="/home"
-          className="group flex min-w-0 items-center gap-2 text-foreground"
-          title="Al-Juthur"
-        >
-          <LogoIcon size={28} className="text-accent group-hover:scale-105 transition-transform shrink-0" />
-          <span className="truncate font-bold tracking-tight text-base sm:text-lg">Al-Juthur</span>
-          {subtitle}
-        </Link>
+        <div className="flex shrink-0 items-center gap-2 sm:gap-2.5 min-w-0">
+          <Link
+            href="/home"
+            className="group flex min-w-0 items-center gap-2 text-foreground shrink-0"
+            title="Al-Juthur"
+          >
+            <LogoIcon size={28} className="text-accent group-hover:scale-105 transition-transform shrink-0" />
+            <span className="truncate font-bold tracking-tight text-base sm:text-lg">Al-Juthur</span>
+            {subtitle}
+          </Link>
+          {leftSlot}
+        </div>
 
         {!hideNav && (
           <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-3.5 lg:gap-5 text-sm text-muted-foreground md:flex">
