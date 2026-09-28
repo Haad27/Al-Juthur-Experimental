@@ -173,11 +173,6 @@ export default function TafsirTextRenderer({
     }
     html = html.replace(/<span[^>]*class=["']gray["'][^>]*>/gi, "");
 
-    // Only apply Arabic snippet font wrapper if this is an LTR translation (e.g. English, French)
-    if (!isRightToLeft) {
-      html = applyArabicFont(html);
-    }
-
     // Helper to generate resilient regex pattern matching across whitespace, smart quotes, non-breaking spaces, and interleaved HTML tags
     const buildResilientPattern = (rawStr: string) => {
       const trimmed = rawStr.trim();
@@ -186,14 +181,15 @@ export default function TafsirTextRenderer({
       // Escape special characters except whitespace
       const escaped = trimmed
         .replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
-        .replace(/[''’‘]/g, "[''’‘]")
-        .replace(/[""“”]/g, '[""“”]')
+        .replace(/[''’‘]/g, "(?:'|&#39;|&apos;|’|‘)")
+        .replace(/[""“”]/g, '(?:"|&quot;|&#34;|“|”)')
+        .replace(/&/g, '(?:&|&amp;)')
         .replace(/\\\s+|\s+/g, '(?:<[^>]+>|[\\s\\u00A0])+');
 
       return escaped;
     };
 
-    // 5. Apply User Highlights (Fill and Underline modes)
+    // 5. Apply User Highlights (Fill and Underline modes) - Vibrant readable palette
     if (highlights && highlights.length > 0) {
       highlights.forEach(h => {
         if (!h.text || h.text.trim() === '') return;
@@ -202,25 +198,25 @@ export default function TafsirTextRenderer({
           const isUnderline = color.endsWith('_underline');
           const baseColor = color.replace('_underline', '');
 
-          let bg = 'rgba(250, 204, 21, 0.22)'; // amber/yellow-400
-          let border = '#eab308';
+          let bg = 'rgba(250, 204, 21, 0.45)'; // amber/yellow-400 (vibrant on sepia & dark)
+          let border = '#d97706';
           if (baseColor === 'pink') {
-            bg = 'rgba(248, 113, 113, 0.22)'; // coral/rose-400
-            border = '#ef4444';
+            bg = 'rgba(244, 63, 94, 0.40)'; // rose/pink-500
+            border = '#e11d48';
           } else if (baseColor === 'green') {
-            bg = 'rgba(74, 222, 128, 0.20)'; // sage green-400
-            border = '#22c55e';
+            bg = 'rgba(34, 197, 94, 0.40)'; // emerald/green-500
+            border = '#16a34a';
           } else if (baseColor === 'blue') {
-            bg = 'rgba(96, 165, 250, 0.20)'; // sky blue-400
-            border = '#3b82f6';
+            bg = 'rgba(59, 130, 246, 0.40)'; // sky/blue-500
+            border = '#2563eb';
           } else if (baseColor === 'purple') {
-            bg = 'rgba(167, 139, 250, 0.20)'; // violet-400
-            border = '#8b5cf6';
+            bg = 'rgba(168, 85, 247, 0.40)'; // purple/violet-500
+            border = '#9333ea';
           }
 
           const markStyle = isUnderline
-            ? `background-color: transparent; border-bottom: 2.5px solid ${border}; padding-bottom: 1px; text-decoration: none;`
-            : `background-color: ${bg}; border-bottom: 2px solid ${border}; border-radius: 3px; padding: 1px 2.5px; text-decoration: none;`;
+            ? `background-color: transparent; border-bottom: 2.5px solid ${border}; padding-bottom: 1.5px; text-decoration: none; display: inline;`
+            : `background-color: ${bg}; border-bottom: 2px solid ${border}; border-radius: 3px; padding: 2px 4px; text-decoration: none; display: inline;`;
 
           // Handle multi-line selections across paragraphs
           const segments = h.text.split(/\n+/).map(s => s.trim()).filter(s => s.length >= 2);
@@ -241,25 +237,28 @@ export default function TafsirTextRenderer({
     // 6. Apply Inline Note Indicators (only for anchored notes that match this specific text)
     if (notes && notes.length > 0) {
       notes.forEach(note => {
-        const anchorMatch = note.text.match(/^\[Re:\s*"([^"]+)"\]/);
+        const anchorMatch = note.text.match(/^\[Re:\s*["']?([\s\S]+?)["']?\](?:\r?\n\r?\n|$)/);
         if (anchorMatch) {
-          let anchor = anchorMatch[1];
-          if (anchor.endsWith('…')) anchor = anchor.slice(0, -1);
+          let anchor = anchorMatch[1].trim();
+          if (anchor.endsWith('…')) anchor = anchor.slice(0, -1).trim();
           const pattern = buildResilientPattern(anchor);
           if (pattern) {
             try {
-              const regex = new RegExp(pattern, "gi");
-              if (regex.test(html)) {
-                // Subtle sticky note icon placed right after the complete highlighted word/phrase
-                const iconHtml = ` <span role="button" tabindex="0" data-note-id="${note.id}" class="note-indicator-icon inline-flex items-center justify-center shrink-0 size-4 md:size-4.5 rounded bg-amber-400/25 hover:bg-amber-400/45 border border-amber-500/40 text-amber-600 dark:text-amber-400 text-[11px] mx-1 align-middle cursor-pointer transition-transform hover:scale-115 select-none shadow-xs" title="Click to view note">📝</span>`;
-                html = html.replace(regex, `$&${iconHtml}`);
-              }
+              const regex = new RegExp(`(${pattern})(</mark>)?`, "gi");
+              // Subtle sticky note icon placed right after the complete highlighted word/phrase (outside of mark)
+              const iconHtml = ` <span role="button" tabindex="0" data-note-id="${note.id}" class="note-indicator-icon inline-flex items-center justify-center shrink-0 size-5 rounded-md bg-amber-400/30 hover:bg-amber-400/50 border border-amber-500/50 text-amber-700 dark:text-amber-300 text-xs mx-1 align-baseline cursor-pointer transition-transform hover:scale-110 select-none shadow-sm" title="Click to view note">📝</span>`;
+              html = html.replace(regex, `$1$2${iconHtml}`);
             } catch (e) {
               console.error("Failed to add note indicator", e);
             }
           }
         }
       });
+    }
+
+    // 7. Only apply Arabic snippet font wrapper if this is an LTR translation (e.g. English, French)
+    if (!isRightToLeft) {
+      html = applyArabicFont(html);
     }
 
     return html;

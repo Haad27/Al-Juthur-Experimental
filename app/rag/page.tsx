@@ -45,6 +45,7 @@ import SourceChunkViewer, { SourceItem } from "@/components/ai/SourceChunkViewer
 import GeminiInputComposer from "@/components/ai/GeminiInputComposer";
 import RagModeChips from "@/components/ai/RagModeChips";
 import ThemeToggleButton from "@/components/ThemeToggleButton";
+import AppHeader from "@/components/layout/AppHeader";
 
 function getChipIcon(iconName: string) {
   switch (iconName) {
@@ -468,26 +469,15 @@ function RagChatContent() {
 
   return (
     <div className={`flex h-dvh max-h-dvh w-full flex-col overflow-hidden bg-background text-foreground ${inter.className}`}>
-      <header className="shrink-0 z-40 bg-background/90 backdrop-blur-md border-b border-border px-3 sm:px-6 py-3">
-        <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-3">
-          
-          <div className="flex items-center gap-2.5 shrink-0">
-            <Link
-              href="/home"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-card border border-border hover:bg-muted text-xs font-medium transition-all text-muted-foreground hover:text-foreground"
-            >
-              <ArrowLeft className="size-3.5 sm:size-4" />
-              <span className="hidden sm:inline">Home</span>
-            </Link>
-
-            <div className="h-5 w-px bg-border hidden sm:block" />
-
-            <div className="flex items-center gap-2.5">
-              <span className="font-semibold text-sm sm:text-base text-foreground tracking-tight">AI Scholar</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
+      <AppHeader
+        className="shrink-0"
+        subtitle={
+          <span className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-0.5 text-xs text-muted-foreground">
+            AI Scholar
+          </span>
+        }
+        rightSlot={
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <button
               onClick={() => setShowDisclaimers(true)}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted text-xs font-medium transition-all cursor-pointer"
@@ -522,11 +512,9 @@ function RagChatContent() {
                 <span>Active</span>
               )}
             </div>
-
-            <ThemeToggleButton />
           </div>
-        </div>
-      </header>
+        }
+      />
 
       {/* Main Content Area (Split View on Desktop when activeSource is open) */}
       <div className="flex-1 flex min-h-0 relative overflow-hidden">

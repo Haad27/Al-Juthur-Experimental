@@ -47,6 +47,7 @@ export function applyHighlightsAndNotesToHtml(
   let html = rawHtml;
 
   // 1. Apply User Highlights (Fill and Underline modes)
+  // 1. Apply User Highlights (Fill and Underline modes) - Vibrant readable palette
   if (highlights && highlights.length > 0) {
     highlights.forEach((h) => {
       if (!h.text || h.text.trim() === '') return;
@@ -55,25 +56,25 @@ export function applyHighlightsAndNotesToHtml(
         const isUnderline = color.endsWith('_underline');
         const baseColor = color.replace('_underline', '');
 
-        let bg = 'rgba(250, 204, 21, 0.22)'; // amber/yellow-400
-        let border = '#eab308';
+        let bg = 'rgba(250, 204, 21, 0.45)'; // amber/yellow-400
+        let border = '#d97706';
         if (baseColor === 'pink') {
-          bg = 'rgba(248, 113, 113, 0.22)'; // coral/rose-400
-          border = '#ef4444';
+          bg = 'rgba(244, 63, 94, 0.40)'; // rose/pink-500
+          border = '#e11d48';
         } else if (baseColor === 'green') {
-          bg = 'rgba(74, 222, 128, 0.20)'; // sage green-400
-          border = '#22c55e';
+          bg = 'rgba(34, 197, 94, 0.40)'; // sage green-500
+          border = '#16a34a';
         } else if (baseColor === 'blue') {
-          bg = 'rgba(96, 165, 250, 0.20)'; // sky blue-400
-          border = '#3b82f6';
+          bg = 'rgba(59, 130, 246, 0.40)'; // sky blue-500
+          border = '#2563eb';
         } else if (baseColor === 'purple') {
-          bg = 'rgba(167, 139, 250, 0.20)'; // violet-400
+          bg = 'rgba(168, 85, 247, 0.40)'; // violet-500
           border = '#8b5cf6';
         }
 
         const markStyle = isUnderline
-          ? `background-color: transparent; border-bottom: 2.5px solid ${border}; padding-bottom: 1px; text-decoration: none;`
-          : `background-color: ${bg}; border-bottom: 2px solid ${border}; border-radius: 3px; padding: 1px 2.5px; text-decoration: none;`;
+          ? `background-color: transparent; border-bottom: 2.5px solid ${border}; padding-bottom: 1.5px; text-decoration: none; display: inline;`
+          : `background-color: ${bg}; border-bottom: 2px solid ${border}; border-radius: 3px; padding: 2px 4px; text-decoration: none; display: inline;`;
 
         // Handle multi-line selections across paragraphs
         const segments = h.text.split(/\n+/).map((s) => s.trim()).filter((s) => s.length >= 2);
@@ -94,19 +95,17 @@ export function applyHighlightsAndNotesToHtml(
   // 2. Apply Inline Note Indicators (only for anchored notes that match this specific text)
   if (notes && notes.length > 0) {
     notes.forEach((note) => {
-      const anchorMatch = note.text.match(/^\[Re:\s*"([^"]+)"\]/);
+      const anchorMatch = note.text.match(/^\[Re:\s*["']?([\s\S]+?)["']?\](?:\r?\n\r?\n|$)/);
       if (anchorMatch) {
-        let anchor = anchorMatch[1];
-        if (anchor.endsWith('…')) anchor = anchor.slice(0, -1);
+        let anchor = anchorMatch[1].trim();
+        if (anchor.endsWith('…')) anchor = anchor.slice(0, -1).trim();
         const pattern = buildResilientPattern(anchor);
         if (pattern) {
           try {
-            const regex = new RegExp(pattern, "gi");
-            if (regex.test(html)) {
-              // Subtle sticky note icon placed right after the complete highlighted word/phrase
-              const iconHtml = ` <span role="button" tabindex="0" data-note-id="${note.id}" class="note-indicator-icon inline-flex items-center justify-center shrink-0 size-4 md:size-4.5 rounded bg-amber-400/25 hover:bg-amber-400/45 border border-amber-500/40 text-amber-600 dark:text-amber-400 text-[11px] mx-1 align-middle cursor-pointer transition-transform hover:scale-115 select-none shadow-xs" title="Click to view note">📝</span>`;
-              html = html.replace(regex, `$&${iconHtml}`);
-            }
+            const regex = new RegExp(`(${pattern})(</mark>)?`, "gi");
+            // Subtle sticky note icon placed right after the complete highlighted word/phrase (outside mark)
+            const iconHtml = ` <span role="button" tabindex="0" data-note-id="${note.id}" class="note-indicator-icon inline-flex items-center justify-center shrink-0 size-5 rounded-md bg-amber-400/30 hover:bg-amber-400/50 border border-amber-500/50 text-amber-700 dark:text-amber-300 text-xs mx-1 align-baseline cursor-pointer transition-transform hover:scale-110 select-none shadow-sm" title="Click to view note">📝</span>`;
+            html = html.replace(regex, `$1$2${iconHtml}`);
           } catch (e) {
             console.error("Failed to add note indicator", e);
           }
@@ -178,16 +177,21 @@ export default function LexiconTextRenderer({
             );
           }
 
-          // For lines that are mostly English but contain Arabic words, style the Arabic words
-          let styledLine = line.replace(
-            /([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+(?:\s+[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+)*)/g,
-            (match) => {
-              const cleaned = match.replace(/\u064E\u0670/g, '\u0670').replace(/\u0670\u064E/g, '\u0670');
-              return `<span class="font-arabic text-arabic/90 leading-normal inline-block mx-1 ${compact ? 'text-lg md:text-xl' : 'text-xl md:text-2xl'}" dir="rtl">${cleaned}</span>`;
+          // Apply highlights and notes first on clean line text
+          let styledLine = applyHighlightsAndNotesToHtml(line, highlights, notes);
+
+          // For lines that are mostly English but contain Arabic words, style the Arabic words without corrupting mark/html tags
+          styledLine = styledLine.replace(
+            /(<mark[^>]*>[\s\S]*?<\/mark>)|(<[^>]+>)|([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+(?:\s+[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+)*)/g,
+            (match, markTag, htmlTag, arabicText) => {
+              if (markTag || htmlTag) return match;
+              if (arabicText) {
+                const cleaned = arabicText.replace(/\u064E\u0670/g, '\u0670').replace(/\u0670\u064E/g, '\u0670');
+                return `<span class="font-arabic text-arabic/90 leading-normal inline-block mx-1 ${compact ? 'text-lg md:text-xl' : 'text-xl md:text-2xl'}" dir="rtl">${cleaned}</span>`;
+              }
+              return match;
             }
           );
-
-          styledLine = applyHighlightsAndNotesToHtml(styledLine, highlights, notes);
 
           const Tag = line.includes('<li') || line.includes('<ul') ? 'div' : 'p';
 

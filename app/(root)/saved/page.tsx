@@ -92,7 +92,19 @@ const getHighlightDot = (color?: string) => {
 };
 
 function getHighlightBadgeInfo(hl: UserHighlight) {
-  if (Number(hl.surahId) === 0) {
+  const isLex = Number(hl.surahId) === 0 || 
+                Number(hl.ayahNumber) === 999999 || 
+                (hl.authorName && (
+                  hl.authorName.toLowerCase().includes("lexicon") || 
+                  hl.authorName.toLowerCase().includes("summary") || 
+                  hl.authorName.toLowerCase().includes("lane") || 
+                  hl.authorName.toLowerCase().includes("lisan") ||
+                  hl.authorName.toLowerCase().includes("mufradat") ||
+                  hl.authorName.toLowerCase().includes("sihah") ||
+                  hl.authorName.toLowerCase().includes("qamus")
+                ));
+
+  if (isLex) {
     // Lexicon highlight
     let word = "";
     const parenMatch = hl.authorName?.match(/\(([^)]+)\)/);
@@ -103,10 +115,21 @@ function getHighlightBadgeInfo(hl: UserHighlight) {
       if (bulletMatch) {
         word = bulletMatch[1].trim();
       } else {
-        // Fallback: extract the first Arabic word from hl.text if available
-        const arabicMatch = hl.text?.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+/);
-        if (arabicMatch) {
-          word = arabicMatch[0].trim();
+        const arabicInAuthor = hl.authorName?.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+/);
+        if (arabicInAuthor) {
+          word = arabicInAuthor[0].trim();
+        } else {
+          // Check for bracketed root in highlighted text e.g. [ ر ح م ] or (رحم)
+          const bracketMatch = hl.text?.match(/[\[\(]\s*([\u0600-\u06FF\s]+)\s*[\]\)]/);
+          if (bracketMatch) {
+            word = bracketMatch[1].replace(/\s+/g, '').trim();
+          } else {
+            // Fallback: extract the first Arabic word from hl.text if available
+            const arabicMatch = hl.text?.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+/);
+            if (arabicMatch) {
+              word = arabicMatch[0].trim();
+            }
+          }
         }
       }
     }
@@ -565,12 +588,27 @@ export default function SavedPage() {
                     </div>
                     
                     <div className="mt-auto flex items-center justify-between border-t border-border/50 pt-3">
-                      {Number(note.surahId) === 0 ? (
-                        <Link href="/lexicon" className="flex items-center gap-2 text-xs font-medium text-accent hover:underline">
-                          <BookOpen className="size-3.5" />
-                          Lexicon Note
-                        </Link>
-                      ) : (
+                      {Number(note.surahId) === 0 || Number(note.ayahNumber) === 999999 ? (() => {
+                        let noteWord = "";
+                        const anchorMatch = note.text.match(/^\[Re:\s*"([^"]+)"\]/);
+                        const sourceText = anchorMatch ? anchorMatch[1] : note.text;
+                        const bracketMatch = sourceText.match(/[\[\(]\s*([\u0600-\u06FF\s]+)\s*[\]\)]/);
+                        if (bracketMatch) {
+                          noteWord = bracketMatch[1].replace(/\s+/g, '').trim();
+                        } else {
+                          const arabicMatch = sourceText.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+/);
+                          if (arabicMatch) noteWord = arabicMatch[0].trim();
+                        }
+                        return (
+                          <Link 
+                            href={noteWord ? `/lexicon?root=${encodeURIComponent(noteWord)}` : "/lexicon"} 
+                            className="flex items-center gap-2 text-xs font-medium text-accent hover:underline"
+                          >
+                            <BookOpen className="size-3.5" />
+                            {noteWord ? `Lexicon • ${noteWord}` : "Lexicon Note"}
+                          </Link>
+                        );
+                      })() : (
                         <Link href={`/surah/${note.surahId}?ayah=${note.ayahNumber}`} className="flex items-center gap-2 text-xs font-medium text-accent hover:underline">
                           <Bookmark className="size-3.5" />
                           Surah {note.surahId} : {note.ayahNumber}

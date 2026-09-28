@@ -43,7 +43,7 @@ export default function AppHeader({
         </Link>
 
         {!hideNav && (
-          <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-5 text-sm text-muted-foreground lg:flex">
+          <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-3.5 lg:gap-5 text-sm text-muted-foreground md:flex">
             {NAV.map((item) => {
               const active = item.match(pathname);
               return (

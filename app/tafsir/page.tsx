@@ -1402,6 +1402,7 @@ function TafsirContent() {
                       highlights={highlights}
                       notes={notes}
                       onDeleteNote={(noteId) => setNotes(prev => prev.filter(n => n.id !== noteId))}
+                      onSaveNote={(saved) => setNotes(prev => [...prev, saved])}
                     />
                   ) : (
                     <div className="flex flex-col items-center justify-center p-12 text-muted-foreground text-sm">
@@ -1456,6 +1457,7 @@ function TafsirContent() {
                         highlights={highlights}
                         notes={notes}
                         onDeleteNote={(noteId) => setNotes(prev => prev.filter(n => n.id !== noteId))}
+                        onSaveNote={(saved) => setNotes(prev => [...prev, saved])}
                       />
                     );
                   }}
@@ -2305,6 +2307,41 @@ function TafsirContent() {
           window.getSelection()?.removeAllRanges();
         }}
       />
+
+      <AyahNoteModal
+        isOpen={isNoteModalOpen}
+        onClose={() => { setIsNoteModalOpen(false); setNoteSelectedText(""); setNoteInitialText(""); setNoteTargetAyah(null); }}
+        surahNumber={activeSurah}
+        ayahNumber={noteTargetAyah || (currentAyahIndex + 1)}
+        selectedText={noteSelectedText}
+        initialNoteText={noteInitialText}
+        onSave={(saved) => setNotes(prev => [...prev, saved])}
+      />
+
+      {/* Floating Interactive Note Popover when clicking inline note icon */}
+      <NotePopover
+        note={activeNotePopup?.note || null}
+        position={activeNotePopup ? { x: activeNotePopup.x, y: activeNotePopup.y } : null}
+        onClose={() => setActiveNotePopup(null)}
+        onDelete={async (id) => {
+          const ok = await deleteUserNote(id);
+          if (ok) {
+            toast.success("Note deleted.");
+            setNotes(prev => prev.filter(n => n.id !== id));
+            setActiveNotePopup(null);
+          } else {
+            toast.error("Failed to delete note.");
+          }
+        }}
+        onEdit={(note) => {
+          const anchorMatch = note.text.match(/^\[Re:\s*["']?([\s\S]+?)["']?\](?:\r?\n\r?\n|$)([\s\S]*)$/);
+          setNoteSelectedText(anchorMatch ? anchorMatch[1] : "");
+          setNoteInitialText(anchorMatch ? anchorMatch[2] : note.text);
+          setNoteTargetAyah(note.ayahNumber);
+          setIsNoteModalOpen(true);
+          setActiveNotePopup(null);
+        }}
+      />
     </div>
   );
 }
@@ -2330,6 +2367,7 @@ function TafsirCard({
   highlights = [],
   notes = [],
   onDeleteNote,
+  onSaveNote,
 }: {
   entry: any;
   idx: number;
@@ -2342,6 +2380,7 @@ function TafsirCard({
   highlights?: UserHighlight[];
   notes?: UserNote[];
   onDeleteNote?: (id: string) => void;
+  onSaveNote?: (note: UserNote) => void;
 }) {
   const ayahNumber = entry.ayah?.numberInSurah || idx + 1;
   const arabicText = entry.ayah?.text && entry.ayah.text !== "Arabic Text" ? entry.ayah.text : null;
@@ -2408,6 +2447,7 @@ function TafsirCard({
         onClose={() => setIsNoteModalOpen(false)}
         surahNumber={activeSurah}
         ayahNumber={ayahNumber}
+        onSave={(saved) => onSaveNote?.(saved)}
       />
       <div
         id={`ayah-${ayahNumber}`}
@@ -2456,8 +2496,8 @@ function TafsirCard({
               className={cn(
                 "flex items-center rounded-lg transition font-medium whitespace-nowrap gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs cursor-pointer",
                 isSaved 
-                  ? "bg-accent/15 text-accent border border-accent/40 hover:bg-accent/20 shadow-sm" 
-                  : "bg-muted hover:bg-muted text-reading",
+                ? "bg-accent/15 text-accent border border-accent/40 hover:bg-accent/20 shadow-sm" 
+                : "bg-muted hover:bg-muted text-reading",
                 aiChatContext && "lg:gap-1 lg:px-2 lg:text-[10px]"
               )}
               title={isSaved ? "Remove from Saved" : "Save Tafsir to Profile"}
@@ -2481,7 +2521,9 @@ function TafsirCard({
               title="Add Note"
             >
               <Edit3 className={cn("shrink-0 size-3.5", aiChatContext && "lg:size-3")} />
-              <span className={cn("hidden sm:inline", aiChatContext && "lg:hidden")}>Note</span>
+              <span className={cn("hidden sm:inline", aiChatContext && "lg:hidden")}>
+                Note {ayahNotes.length > 0 && `(${ayahNotes.length})`}
+              </span>
             </button>
 
             {/* Hidden button to allow inline raw HTML icons to trigger the notes panel */}
