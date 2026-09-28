@@ -1011,8 +1011,10 @@ function LexiconPageContent() {
                 setHighlights(prev => prev.filter(h => h.id !== match.id));
               }
             }
+            const activeWord = result?.normalizedRoot || activeRoot;
             const matchedEntry = result?.entries?.find(e => Number(e.dictId) === Number(ayahNumber));
-            const authorStr = matchedEntry ? matchedEntry.dictName : (Number(ayahNumber) === 999999 ? "AI Root Summary" : `Lexicon - ${activeRoot}`);
+            const dictTitle = matchedEntry ? matchedEntry.dictName : (Number(ayahNumber) === 999999 ? "AI Root Summary" : "Lexicon");
+            const authorStr = `${dictTitle} (${activeWord})`;
             const res = await saveUserHighlight(surahNumber, ayahNumber, text, type, authorStr, color);
             if (res) {
               toast.success("Highlight saved.");

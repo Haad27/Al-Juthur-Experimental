@@ -246,8 +246,8 @@ const DesktopSurahHeader = ({ surah, translationEdition, aiChatContext, ALL_TRAN
           <Link href="/home" className="hover:text-foreground transition">Home</Link>
           <Link href="/tafsir" className="hover:text-foreground transition">Tafsir</Link>
           <Link href="/lexicon" className="hover:text-foreground transition">Lexicon</Link>
-          <Link href="/ai" className="hover:text-foreground transition">Translator</Link>
           <Link href="/rag" className="hover:text-foreground transition">Juthur AI</Link>
+          <Link href="/saved" className="hover:text-foreground transition">Library</Link>
         </nav>
         <ThemeToggleButton />
       </div>

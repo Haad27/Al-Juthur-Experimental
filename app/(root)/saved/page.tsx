@@ -91,6 +91,44 @@ const getHighlightDot = (color?: string) => {
   }
 };
 
+function getHighlightBadgeInfo(hl: UserHighlight) {
+  if (Number(hl.surahId) === 0) {
+    // Lexicon highlight
+    let word = "";
+    const parenMatch = hl.authorName?.match(/\(([^)]+)\)/);
+    if (parenMatch) {
+      word = parenMatch[1].trim();
+    } else {
+      const bulletMatch = hl.authorName?.match(/[•\-]\s*([^\s]+)/);
+      if (bulletMatch) {
+        word = bulletMatch[1].trim();
+      } else {
+        // Fallback: extract the first Arabic word from hl.text if available
+        const arabicMatch = hl.text?.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+/);
+        if (arabicMatch) {
+          word = arabicMatch[0].trim();
+        }
+      }
+    }
+
+    const dictNameOnly = hl.authorName ? hl.authorName.replace(/\s*\([^)]*\)/g, '').trim() : "Lexicon";
+
+    return {
+      isLexicon: true,
+      label: word ? `Lexicon • ${word}` : (dictNameOnly || "Lexicon"),
+      href: word ? `/lexicon?root=${encodeURIComponent(word)}` : "/lexicon",
+      dictName: dictNameOnly,
+    };
+  }
+
+  return {
+    isLexicon: false,
+    label: `Surah ${hl.surahId} : ${hl.ayahNumber}`,
+    href: `/surah/${hl.surahId}?ayah=${hl.ayahNumber}`,
+    dictName: hl.authorName,
+  };
+}
+
 export default function SavedPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>("highlights");
@@ -289,7 +327,7 @@ export default function SavedPage() {
   };
 
   return (
-    <main className="min-h-screen w-full bg-[#FCFAF6] dark:bg-background text-foreground pb-28">
+    <main className="min-h-screen w-full bg-background text-foreground pb-28">
       <AppHeader />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
@@ -349,22 +387,22 @@ export default function SavedPage() {
 
           {/* Continue Reading Hero (only if valid last read) */}
           {lastRead && (
-            <div className="relative overflow-hidden rounded-3xl bg-accent text-accent-foreground shadow-sm p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-              <div className="absolute top-0 right-0 p-12 opacity-10 pointer-events-none">
+            <div className="relative overflow-hidden rounded-3xl bg-card border border-accent/30 shadow-md p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+              <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none text-accent">
                 <BookOpen className="size-40" />
               </div>
               <div className="relative z-10 space-y-2">
-                <div className="text-xs font-semibold uppercase tracking-wider text-accent-foreground/80 flex items-center gap-2">
+                <div className="text-xs font-semibold uppercase tracking-wider text-accent flex items-center gap-2">
                   <Clock className="size-3.5" /> Continue Reading
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-serif font-bold">{lastRead.surahName}</h2>
-                <p className="text-sm text-accent-foreground/90">
+                <h2 className="text-2xl sm:text-3xl font-serif font-bold text-foreground">{lastRead.surahName}</h2>
+                <p className="text-sm text-muted-foreground">
                   Ayah {lastRead.ayahNumber} • {lastRead.authorName}
                 </p>
               </div>
               <Link
                 href={`/tafsir?author=${lastRead.authorId}&surah=${lastRead.surahId}&ayah=${lastRead.ayahNumber}`}
-                className="relative z-10 shrink-0 inline-flex items-center gap-2 bg-background text-foreground font-semibold px-6 py-3 rounded-full text-sm shadow-md hover:scale-105 transition-transform"
+                className="relative z-10 shrink-0 inline-flex items-center gap-2 bg-accent text-accent-foreground font-semibold px-6 py-3 rounded-full text-sm shadow-sm hover:opacity-90 transition-opacity"
               >
                 Resume Study <ArrowRight className="size-4" />
               </Link>
@@ -388,8 +426,8 @@ export default function SavedPage() {
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all shrink-0 border",
                 activeTab === tab.id 
-                  ? "bg-accent border-accent text-accent-foreground shadow-sm"
-                  : "bg-background border-border text-muted-foreground hover:border-border/80 hover:text-foreground"
+                  ? "bg-accent/15 border-accent/40 text-accent font-semibold shadow-sm"
+                  : "bg-card border-border text-muted-foreground hover:border-border/80 hover:text-foreground"
               )}
             >
               <tab.icon className="size-4" />
@@ -397,7 +435,7 @@ export default function SavedPage() {
               {tab.count > 0 && (
                 <span className={cn(
                   "px-1.5 py-0.5 rounded-full text-[10px] font-bold ml-1",
-                  activeTab === tab.id ? "bg-background/20" : "bg-muted text-muted-foreground"
+                  activeTab === tab.id ? "bg-accent/20 text-accent" : "bg-muted text-muted-foreground"
                 )}>
                   {tab.count}
                 </span>
@@ -458,44 +496,47 @@ export default function SavedPage() {
           {activeTab === "highlights" && (
             filteredHighlights.length > 0 ? (
               <div className={cn("grid gap-4", viewMode === "grid" ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1")}>
-                {filteredHighlights.map((hl) => (
-                  <div key={hl.id} className="group flex flex-col bg-card border border-border/50 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
-                    <div className="flex justify-between items-start mb-3">
-                      <Link href={`/surah/${hl.surahId}?ayah=${hl.ayahNumber}`} className="flex items-center gap-2 bg-accent/10 text-accent px-2.5 py-1 rounded-md text-xs font-medium hover:bg-accent/20 transition">
-                        <Bookmark className="size-3.5 fill-accent/20" />
-                        Surah {hl.surahId} : {hl.ayahNumber}
-                      </Link>
-                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => { copyToClipboard(hl.text, "Copied"); }} className="p-1.5 text-muted-foreground hover:text-foreground">
-                          <Copy className="size-3.5" />
-                        </button>
-                        <button onClick={async () => {
-                          if (await deleteUserHighlight(hl.id)) {
-                            setSavedHighlights(savedHighlights.filter(h => h.id !== hl.id));
-                            toast.info("Highlight deleted");
-                          }
-                        }} className="p-1.5 text-muted-foreground hover:text-red-500">
-                          <Trash2 className="size-3.5" />
-                        </button>
+                {filteredHighlights.map((hl) => {
+                  const badgeInfo = getHighlightBadgeInfo(hl);
+                  return (
+                    <div key={hl.id} className="group flex flex-col bg-card border border-border/50 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
+                      <div className="flex justify-between items-start mb-3">
+                        <Link href={badgeInfo.href} className="flex items-center gap-2 bg-accent/10 text-accent px-2.5 py-1 rounded-md text-xs font-medium hover:bg-accent/20 transition">
+                          {badgeInfo.isLexicon ? <BookOpen className="size-3.5" /> : <Bookmark className="size-3.5 fill-accent/20" />}
+                          <span>{badgeInfo.label}</span>
+                        </Link>
+                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => { copyToClipboard(hl.text, "Copied"); }} className="p-1.5 text-muted-foreground hover:text-foreground">
+                            <Copy className="size-3.5" />
+                          </button>
+                          <button onClick={async () => {
+                            if (await deleteUserHighlight(hl.id)) {
+                              setSavedHighlights(savedHighlights.filter(h => h.id !== hl.id));
+                              toast.info("Highlight deleted");
+                            }
+                          }} className="p-1.5 text-muted-foreground hover:text-red-500">
+                            <Trash2 className="size-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <blockquote className={cn("pl-4 py-1.5 mb-4 text-base border-l-[3px]", getHighlightStyle(hl.color))}>
+                        <span className={cn("leading-relaxed", hl.type === "arabic" ? "font-mushaf-indopak-16 text-xl text-right block" : "text-reading italic")}>
+                          {hl.text}
+                        </span>
+                      </blockquote>
+                      
+                      <div className="mt-auto flex items-center justify-between text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          {badgeInfo.dictName && <span className="font-medium text-foreground/80">{badgeInfo.dictName}</span>}
+                          {badgeInfo.dictName && <span>•</span>}
+                          <span className="uppercase tracking-wider">{badgeInfo.isLexicon ? "Lexicon" : hl.type}</span>
+                        </div>
+                        <span>{timeAgo(hl.createdAt)}</span>
                       </div>
                     </div>
-                    
-                    <blockquote className={cn("pl-4 py-1.5 mb-4 text-base border-l-[3px]", getHighlightStyle(hl.color))}>
-                      <span className={cn("leading-relaxed", hl.type === "arabic" ? "font-mushaf-indopak-16 text-xl text-right block" : "text-reading italic")}>
-                        {hl.text}
-                      </span>
-                    </blockquote>
-                    
-                    <div className="mt-auto flex items-center justify-between text-xs text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        {hl.authorName && <span className="font-medium text-foreground/80">{hl.authorName}</span>}
-                        {hl.authorName && <span>•</span>}
-                        <span className="uppercase tracking-wider">{hl.type}</span>
-                      </div>
-                      <span>{timeAgo(hl.createdAt)}</span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <EmptyState icon={Sparkles} title="No Highlights Yet" subtitle="Select text while reading to highlight it and find it here." link="/surah/1" linkText="Start Reading" />
@@ -524,10 +565,17 @@ export default function SavedPage() {
                     </div>
                     
                     <div className="mt-auto flex items-center justify-between border-t border-border/50 pt-3">
-                      <Link href={`/surah/${note.surahId}?ayah=${note.ayahNumber}`} className="flex items-center gap-2 text-xs font-medium text-accent hover:underline">
-                        <Bookmark className="size-3.5" />
-                        Surah {note.surahId} : {note.ayahNumber}
-                      </Link>
+                      {Number(note.surahId) === 0 ? (
+                        <Link href="/lexicon" className="flex items-center gap-2 text-xs font-medium text-accent hover:underline">
+                          <BookOpen className="size-3.5" />
+                          Lexicon Note
+                        </Link>
+                      ) : (
+                        <Link href={`/surah/${note.surahId}?ayah=${note.ayahNumber}`} className="flex items-center gap-2 text-xs font-medium text-accent hover:underline">
+                          <Bookmark className="size-3.5" />
+                          Surah {note.surahId} : {note.ayahNumber}
+                        </Link>
+                      )}
                       <span className="text-xs text-muted-foreground">{timeAgo(note.createdAt)}</span>
                     </div>
                   </div>

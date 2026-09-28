@@ -152,19 +152,19 @@ const Sidebar = () => {
                     className={cn(
                       "relative z-10 flex-1 flex items-center justify-center gap-2 py-2.5 px-3 text-xs font-bold transition-all duration-200 cursor-pointer select-none group",
                       isActive
-                        ? "text-primary-foreground"
+                        ? "text-foreground"
                         : "text-muted-foreground hover:text-foreground"
                     )}
                   >
                     {isActive && (
                       <motion.div
                         layoutId="sidebar-creative-tab-bg"
-                        className="absolute inset-0 bg-primary rounded-xl z-0"
+                        className="absolute inset-0 bg-card border border-border/80 shadow-sm rounded-xl z-0"
                         transition={{ type: "spring", stiffness: 450, damping: 30 }}
                       />
                     )}
                     <span className="relative z-10 flex items-center gap-2 tracking-wide">
-                      <span className={cn("transition-transform duration-200 group-hover:scale-110", isActive && "text-accent-foreground drop-shadow-[0_0_6px_rgba(255,255,255,0.7)]")}>
+                      <span className={cn("transition-transform duration-200 group-hover:scale-110", isActive && "text-accent")}>
                         {tab.icon}
                       </span>
                       <span>{tab.label}</span>
@@ -276,7 +276,7 @@ const Sidebar = () => {
                   className={cn(
                     "p-3 rounded-2xl border transition-all duration-200 flex items-center justify-between group cursor-pointer",
                     isActive
-                      ? "bg-gradient-to-r from-accent/10 to-card border-accent/40 shadow-lg "
+                      ? "bg-accent/10 border-accent/40 shadow-sm"
                       : "bg-card/50 hover:bg-muted/80 border-border hover:border-accent/30"
                   )}
                 >
@@ -285,7 +285,7 @@ const Sidebar = () => {
                       className={cn(
                         "w-9 h-9 rounded-xl flex items-center justify-center font-mono font-bold text-xs shrink-0 transition-all duration-200 border",
                         isActive
-                          ? "bg-accent text-foreground border-accent shadow-md shadow-sm"
+                          ? "bg-accent/15 text-accent border-accent/30 shadow-sm"
                           : "bg-muted text-muted-foreground group-hover:text-accent group-hover:bg-accent/10 border-border"
                       )}
                     >
