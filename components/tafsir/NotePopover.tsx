@@ -45,9 +45,9 @@ export default function NotePopover({
   if (!note || !position) return null;
 
   // Extract anchor quote if formatted as [Re: "quote"]\n\nbody
-  const anchorMatch = note.text.match(/^\[Re:\s*"([^"]+)"\]\n\n([\s\S]*)$/);
+  const anchorMatch = note.text.match(/^\[Re:\s*["']?([\s\S]+?)["']?\]\s*(?:\r?\n|$)/);
   const anchorText = anchorMatch ? anchorMatch[1] : null;
-  const noteBody = anchorMatch ? anchorMatch[2] : note.text;
+  const noteBody = note.text.replace(/^\[Re:\s*["']?[\s\S]+?["']?\]\s*(?:\r?\n)*/, '');
 
   // Viewport-safe coordinates
   const CARD_WIDTH = 300;

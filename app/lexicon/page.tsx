@@ -989,9 +989,10 @@ function LexiconPageContent() {
             }
           }}
           onEdit={(note) => {
-            const anchorMatch = note.text.match(/^\[Re:\s*"([^"]+)"\]\n\n([\s\S]*)$/);
+            const anchorMatch = note.text.match(/^\[Re:\s*["']?([\s\S]+?)["']?\]\s*(?:\r?\n|$)/);
+            const bodyText = note.text.replace(/^\[Re:\s*["']?[\s\S]+?["']?\]\s*(?:\r?\n)*/, '');
             setNoteSelectedText(anchorMatch ? anchorMatch[1] : "");
-            setNoteInitialText(anchorMatch ? anchorMatch[2] : note.text);
+            setNoteInitialText(bodyText);
             setNoteTargetDictId(note.ayahNumber);
             setIsNoteModalOpen(true);
             setActiveNotePopup(null);

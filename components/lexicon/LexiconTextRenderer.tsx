@@ -14,27 +14,53 @@ export interface LexiconTextRendererProps {
   isEnglish?: boolean;
 }
 
-// Helper to generate resilient regex pattern matching across whitespace, smart quotes, non-breaking spaces, and interleaved HTML tags
+// Unified resilient pattern generator matching across Arabic diacritics, HTML tags, whitespace, smart quotes, entities, etc.
 export function buildResilientPattern(rawStr: string): string | null {
-  const trimmed = rawStr.trim();
+  const trimmed = cleanQuranText(rawStr.trim());
   if (!trimmed) return null;
 
-  // 1. Escape special characters except whitespace
+  const hasArabic = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(trimmed);
+
+  if (hasArabic) {
+    const diacritics = '[\\u064B-\\u065F\\u0670\\u0640]*';
+    let pattern = '';
+    for (let i = 0; i < trimmed.length; i++) {
+      const char = trimmed[i];
+      // Skip if character is a standalone diacritic in the source selection
+      if (/[\u064B-\u065F\u0670\u0640]/.test(char)) continue;
+
+      if (/[اأإآٱ]/.test(char)) {
+        pattern += '[اأإآٱ]' + diacritics;
+      } else if (/[يىئ]/.test(char)) {
+        pattern += '[يىئ]' + diacritics;
+      } else if (/[ةه]/.test(char)) {
+        pattern += '[ةه]' + diacritics;
+      } else if (/[\s\u00A0\u200B-\u200D]/.test(char)) {
+        pattern += '(?:<[^>]+>|[\\s\\u00A0\\u200B-\\u200D])+';
+      } else if (/[''’‘]/.test(char)) {
+        pattern += "(?:'|&#39;|&apos;|’|‘)";
+      } else if (/[""“”]/.test(char)) {
+        pattern += '(?:"|&quot;|&#34;|“|”)';
+      } else if (char === '&') {
+        pattern += '(?:&|&amp;)';
+      } else if (/[-\/\\^$*+?.()|[\]{}]/.test(char)) {
+        pattern += '\\' + char;
+      } else {
+        pattern += char + diacritics;
+      }
+    }
+    return pattern;
+  }
+
+  // Non-Arabic (English / Urdu / Latin languages)
   let escaped = trimmed
-    .replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-
-  // 2. Handle smart quotes, straight quotes, and HTML entities
-  escaped = escaped
+    .replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
     .replace(/[''’‘]/g, "(?:'|&#39;|&apos;|’|‘)")
-    .replace(/[""“”]/g, '(?:"|&quot;|&#34;|“|”)');
-
-  // 3. Handle ampersands and arrows
-  escaped = escaped
+    .replace(/[""“”]/g, '(?:"|&quot;|&#34;|“|”)')
     .replace(/&/g, '(?:&|&amp;)')
-    .replace(/↓/g, '(?:↓|&darr;)');
-
-  // 4. Handle whitespace, non-breaking spaces, and interleaved HTML tags
-  escaped = escaped.replace(/\\\s+|\s+/g, '(?:<[^>]+>|[\\s\\u00A0])+');
+    .replace(/↓/g, '(?:↓|&darr;)')
+    .replace(/[—–-]/g, '(?:—|–|-|&mdash;|&ndash;)')
+    .replace(/\\\s+|\s+/g, '(?:<[^>]+>|[\\s\\u00A0\\u200B-\\u200D])+');
 
   return escaped;
 }
@@ -46,7 +72,6 @@ export function applyHighlightsAndNotesToHtml(
 ): string {
   let html = rawHtml;
 
-  // 1. Apply User Highlights (Fill and Underline modes)
   // 1. Apply User Highlights (Fill and Underline modes) - Vibrant readable palette
   if (highlights && highlights.length > 0) {
     highlights.forEach((h) => {
@@ -83,11 +108,12 @@ export function applyHighlightsAndNotesToHtml(
         targets.forEach((seg) => {
           const pattern = buildResilientPattern(seg);
           if (!pattern) return;
-          const reg = new RegExp(pattern, 'gi');
-          html = html.replace(reg, `<mark style="${markStyle}" class="text-inherit cursor-pointer transition-opacity hover:opacity-85" data-id="${h.id || ''}" data-color="${color}">$&</mark>`);
+          // Match text outside HTML tags and not already inside a <mark>
+          const reg = new RegExp(`(${pattern})(?![^<]*>)(?![^<]*<\\/mark>)`, 'giu');
+          html = html.replace(reg, `<mark style="${markStyle}" class="text-inherit cursor-pointer transition-opacity hover:opacity-85" data-id="${h.id || ''}" data-color="${color}">$1</mark>`);
         });
       } catch (e) {
-        console.error("Failed to highlight lexicon text", e);
+        console.error("Failed to highlight text", e);
       }
     });
   }
@@ -95,17 +121,18 @@ export function applyHighlightsAndNotesToHtml(
   // 2. Apply Inline Note Indicators (only for anchored notes that match this specific text)
   if (notes && notes.length > 0) {
     notes.forEach((note) => {
-      const anchorMatch = note.text.match(/^\[Re:\s*["']?([\s\S]+?)["']?\](?:\r?\n\r?\n|$)/);
+      const anchorMatch = note.text.match(/^\[Re:\s*["']?([\s\S]+?)["']?\]\s*(?:\r?\n|$)/);
       if (anchorMatch) {
         let anchor = anchorMatch[1].trim();
         if (anchor.endsWith('…')) anchor = anchor.slice(0, -1).trim();
         const pattern = buildResilientPattern(anchor);
         if (pattern) {
           try {
-            const regex = new RegExp(`(${pattern})(</mark>)?`, "gi");
-            // Subtle sticky note icon placed right after the complete highlighted word/phrase (outside mark)
+            // Match the anchored phrase outside HTML tags, right after mark or complete word
+            const regex = new RegExp(`(${pattern}(?:<\\/mark>)?)(?![\\p{L}\\p{N}])(?![^<]*>)`, "iu");
+            // Subtle sticky note icon placed right after the complete highlighted word/phrase
             const iconHtml = ` <span role="button" tabindex="0" data-note-id="${note.id}" class="note-indicator-icon inline-flex items-center justify-center shrink-0 size-5 rounded-md bg-amber-400/30 hover:bg-amber-400/50 border border-amber-500/50 text-amber-700 dark:text-amber-300 text-xs mx-1 align-baseline cursor-pointer transition-transform hover:scale-110 select-none shadow-sm" title="Click to view note">📝</span>`;
-            html = html.replace(regex, `$1$2${iconHtml}`);
+            html = html.replace(regex, `$1${iconHtml}`);
           } catch (e) {
             console.error("Failed to add note indicator", e);
           }

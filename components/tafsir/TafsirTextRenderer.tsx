@@ -3,6 +3,9 @@ import { useSubscriptionStore } from "@/lib/stores/subscriptionStore";
 import { useGlobalState } from "@/lib/providers/GlobalStatesProvider";
 import { getEnglishFont, getUrduFont } from "@/lib/fontsConfig";
 import { UserHighlight } from "@/lib/readerStorage";
+import { applyHighlightsAndNotesToHtml, buildResilientPattern } from "@/components/lexicon/LexiconTextRenderer";
+
+export { applyHighlightsAndNotesToHtml, buildResilientPattern };
 
 interface TafsirTextRendererProps {
   text: string;
@@ -173,88 +176,8 @@ export default function TafsirTextRenderer({
     }
     html = html.replace(/<span[^>]*class=["']gray["'][^>]*>/gi, "");
 
-    // Helper to generate resilient regex pattern matching across whitespace, smart quotes, non-breaking spaces, and interleaved HTML tags
-    const buildResilientPattern = (rawStr: string) => {
-      const trimmed = rawStr.trim();
-      if (!trimmed) return null;
-
-      // Escape special characters except whitespace
-      const escaped = trimmed
-        .replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
-        .replace(/[''’‘]/g, "(?:'|&#39;|&apos;|’|‘)")
-        .replace(/[""“”]/g, '(?:"|&quot;|&#34;|“|”)')
-        .replace(/&/g, '(?:&|&amp;)')
-        .replace(/\\\s+|\s+/g, '(?:<[^>]+>|[\\s\\u00A0])+');
-
-      return escaped;
-    };
-
-    // 5. Apply User Highlights (Fill and Underline modes) - Vibrant readable palette
-    if (highlights && highlights.length > 0) {
-      highlights.forEach(h => {
-        if (!h.text || h.text.trim() === '') return;
-        try {
-          const color = (h.color || 'gold').toLowerCase();
-          const isUnderline = color.endsWith('_underline');
-          const baseColor = color.replace('_underline', '');
-
-          let bg = 'rgba(250, 204, 21, 0.45)'; // amber/yellow-400 (vibrant on sepia & dark)
-          let border = '#d97706';
-          if (baseColor === 'pink') {
-            bg = 'rgba(244, 63, 94, 0.40)'; // rose/pink-500
-            border = '#e11d48';
-          } else if (baseColor === 'green') {
-            bg = 'rgba(34, 197, 94, 0.40)'; // emerald/green-500
-            border = '#16a34a';
-          } else if (baseColor === 'blue') {
-            bg = 'rgba(59, 130, 246, 0.40)'; // sky/blue-500
-            border = '#2563eb';
-          } else if (baseColor === 'purple') {
-            bg = 'rgba(168, 85, 247, 0.40)'; // purple/violet-500
-            border = '#9333ea';
-          }
-
-          const markStyle = isUnderline
-            ? `background-color: transparent; border-bottom: 2.5px solid ${border}; padding-bottom: 1.5px; text-decoration: none; display: inline;`
-            : `background-color: ${bg}; border-bottom: 2px solid ${border}; border-radius: 3px; padding: 2px 4px; text-decoration: none; display: inline;`;
-
-          // Handle multi-line selections across paragraphs
-          const segments = h.text.split(/\n+/).map(s => s.trim()).filter(s => s.length >= 2);
-          const targets = segments.length > 0 ? segments : [h.text.trim()];
-
-          targets.forEach(seg => {
-            const pattern = buildResilientPattern(seg);
-            if (!pattern) return;
-            const reg = new RegExp(pattern, 'gi');
-            html = html.replace(reg, `<mark style="${markStyle}" class="text-inherit cursor-pointer transition-opacity hover:opacity-85" data-id="${h.id || ''}" data-color="${color}">$&</mark>`);
-          });
-        } catch (e) {
-          console.error("Failed to highlight", e);
-        }
-      });
-    }
-
-    // 6. Apply Inline Note Indicators (only for anchored notes that match this specific text)
-    if (notes && notes.length > 0) {
-      notes.forEach(note => {
-        const anchorMatch = note.text.match(/^\[Re:\s*["']?([\s\S]+?)["']?\](?:\r?\n\r?\n|$)/);
-        if (anchorMatch) {
-          let anchor = anchorMatch[1].trim();
-          if (anchor.endsWith('…')) anchor = anchor.slice(0, -1).trim();
-          const pattern = buildResilientPattern(anchor);
-          if (pattern) {
-            try {
-              const regex = new RegExp(`(${pattern})(</mark>)?`, "gi");
-              // Subtle sticky note icon placed right after the complete highlighted word/phrase (outside of mark)
-              const iconHtml = ` <span role="button" tabindex="0" data-note-id="${note.id}" class="note-indicator-icon inline-flex items-center justify-center shrink-0 size-5 rounded-md bg-amber-400/30 hover:bg-amber-400/50 border border-amber-500/50 text-amber-700 dark:text-amber-300 text-xs mx-1 align-baseline cursor-pointer transition-transform hover:scale-110 select-none shadow-sm" title="Click to view note">📝</span>`;
-              html = html.replace(regex, `$1$2${iconHtml}`);
-            } catch (e) {
-              console.error("Failed to add note indicator", e);
-            }
-          }
-        }
-      });
-    }
+    // 5. Apply User Highlights and Inline Note Indicators via unified resilient parser
+    html = applyHighlightsAndNotesToHtml(html, highlights, notes);
 
     // 7. Only apply Arabic snippet font wrapper if this is an LTR translation (e.g. English, French)
     if (!isRightToLeft) {

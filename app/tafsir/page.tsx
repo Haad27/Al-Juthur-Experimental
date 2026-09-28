@@ -41,6 +41,7 @@ import { copyToClipboard, cn } from "@/lib/utils";
 import AyahNoteModal from "@/components/quran/AyahNoteModal";
 import HighlightToolbar, { HighlightColor, HighlightSelection } from "@/components/tafsir/HighlightToolbar";
 import NotePopover from "@/components/tafsir/NotePopover";
+import { applyHighlightsAndNotesToHtml } from "@/components/lexicon/LexiconTextRenderer";
 import { getTafsirFameRank, getLanguagePriority, getTafsirDifficulty } from "@/lib/tafsirRanking";
 import { getTafsirWarning } from "@/lib/tafsirWarnings";
 import TopicSearchModal from "@/components/shared/TopicSearchModal";
@@ -1537,9 +1538,10 @@ function TafsirContent() {
             }
           }}
           onEdit={(note) => {
-            const anchorMatch = note.text.match(/^\[Re:\s*"([^"]+)"\]\n\n([\s\S]*)$/);
+            const anchorMatch = note.text.match(/^\[Re:\s*["']?([\s\S]+?)["']?\]\s*(?:\r?\n|$)/);
+            const bodyText = note.text.replace(/^\[Re:\s*["']?[\s\S]+?["']?\]\s*(?:\r?\n)*/, '');
             setNoteSelectedText(anchorMatch ? anchorMatch[1] : "");
-            setNoteInitialText(anchorMatch ? anchorMatch[2] : note.text);
+            setNoteInitialText(bodyText);
             setNoteTargetAyah(note.ayahNumber);
             setIsNoteModalOpen(true);
             setActiveNotePopup(null);
@@ -2334,9 +2336,10 @@ function TafsirContent() {
           }
         }}
         onEdit={(note) => {
-          const anchorMatch = note.text.match(/^\[Re:\s*["']?([\s\S]+?)["']?\](?:\r?\n\r?\n|$)([\s\S]*)$/);
+          const anchorMatch = note.text.match(/^\[Re:\s*["']?([\s\S]+?)["']?\]\s*(?:\r?\n|$)/);
+          const bodyText = note.text.replace(/^\[Re:\s*["']?[\s\S]+?["']?\]\s*(?:\r?\n)*/, '');
           setNoteSelectedText(anchorMatch ? anchorMatch[1] : "");
-          setNoteInitialText(anchorMatch ? anchorMatch[2] : note.text);
+          setNoteInitialText(bodyText);
           setNoteTargetAyah(note.ayahNumber);
           setIsNoteModalOpen(true);
           setActiveNotePopup(null);
@@ -2552,9 +2555,19 @@ function TafsirCard({
         {/* Arabic Verse */}
         {arabicText && (
           <div className="py-2">
-            <p lang="ar" className={`font-mushaf-indopak-16 text-[1.65rem] md:text-4xl text-right leading-loose text-arabic font-normal`} dir="rtl" style={{ lineHeight: '2.4' }}>
-              {arabicText}
-            </p>
+            <p 
+              lang="ar" 
+              className={`font-mushaf-indopak-16 text-[1.65rem] md:text-4xl text-right leading-loose text-arabic font-normal`} 
+              dir="rtl" 
+              style={{ lineHeight: '2.4' }}
+              dangerouslySetInnerHTML={{
+                __html: applyHighlightsAndNotesToHtml(
+                  arabicText,
+                  ayahHighlights.filter(h => h.type === 'arabic'),
+                  ayahNotes
+                )
+              }}
+            />
           </div>
         )}
 
@@ -2620,9 +2633,9 @@ function TafsirCard({
               </button>
             </div>
             {ayahNotes.map(note => {
-              const anchorMatch = note.text.match(/^\[Re:\s*"([^"]+)"\]\n\n([\s\S]*)$/);
+              const anchorMatch = note.text.match(/^\[Re:\s*["']?([\s\S]+?)["']?\]\s*(?:\r?\n|$)/);
               const anchorText = anchorMatch ? anchorMatch[1] : null;
-              const noteBody = anchorMatch ? anchorMatch[2] : note.text;
+              const noteBody = note.text.replace(/^\[Re:\s*["']?[\s\S]+?["']?\]\s*(?:\r?\n)*/, '');
 
               return (
                 <div key={note.id} className="p-3.5 rounded-2xl bg-amber-500/8 border border-amber-500/20 text-sm text-foreground space-y-2">
