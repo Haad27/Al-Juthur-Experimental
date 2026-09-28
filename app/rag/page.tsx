@@ -471,50 +471,45 @@ function RagChatContent() {
     <div className={`flex h-dvh max-h-dvh w-full flex-col overflow-hidden bg-background text-foreground ${inter.className}`}>
       <AppHeader
         className="shrink-0"
-        subtitle={
-          <span className="hidden xl:inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-0.5 text-xs text-muted-foreground">
-            AI Scholar
-          </span>
-        }
         leftSlot={
-          <button
-            onClick={() => setShowDisclaimers(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted text-xs font-medium transition-all cursor-pointer shrink-0"
-            title="View Notes & Disclaimers"
-          >
-            <Info className="size-3.5" />
-            <span className="hidden lg:inline">Notes & Disclaimers</span>
-            <span className="hidden sm:inline lg:hidden">Notes</span>
-            {currentBot.warning && (
-              <span className="size-1.5 rounded-full bg-accent" title="Guardrail active" />
-            )}
-          </button>
-        }
-        rightSlot={
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            {messages.length > 0 && (
-              <button
-                onClick={handleClearChat}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-card border border-border hover:bg-muted text-xs text-muted-foreground hover:text-foreground transition-all cursor-pointer"
-                title="Clear Chat"
-              >
-                <Trash2 className="size-3.5" />
-                <span className="hidden lg:inline">Clear</span>
-              </button>
-            )}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowDisclaimers(true)}
+              className="h-8 inline-flex items-center gap-1.5 px-2.5 sm:px-3 rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted text-xs font-medium transition-all cursor-pointer shrink-0"
+              title="View Notes & Disclaimers"
+            >
+              <Info className="size-3.5" />
+              <span className="hidden lg:inline">Notes & Disclaimers</span>
+              <span className="hidden sm:inline lg:hidden">Notes</span>
+              {currentBot.warning && (
+                <span className="size-1.5 rounded-full bg-accent" title="Guardrail active" />
+              )}
+            </button>
 
-            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-card border border-border text-[11px] text-muted-foreground font-medium">
+            <div className="h-8 inline-flex items-center gap-1.5 px-2.5 sm:px-3 rounded-xl border border-border bg-card text-xs font-medium text-muted-foreground shrink-0">
               <Sparkles className="size-3.5 text-accent shrink-0" />
               {remainingTokens !== null ? (
                 <span>
-                  <strong className="text-foreground">{(tokenLimit - remainingTokens).toLocaleString()}</strong>
-                  <span>/{tokenLimit.toLocaleString()}</span>
+                  <strong className="text-foreground font-semibold">{(tokenLimit - remainingTokens).toLocaleString()}</strong>
+                  <span className="text-muted-foreground">/{tokenLimit.toLocaleString()}</span>
                 </span>
               ) : (
                 <span>Active</span>
               )}
             </div>
           </div>
+        }
+        rightSlot={
+          messages.length > 0 ? (
+            <button
+              onClick={handleClearChat}
+              className="h-8 inline-flex items-center gap-1.5 px-2.5 sm:px-3 rounded-xl bg-card border border-border hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground transition-all cursor-pointer shrink-0"
+              title="Clear Chat"
+            >
+              <Trash2 className="size-3.5" />
+              <span className="hidden lg:inline">Clear</span>
+            </button>
+          ) : undefined
         }
       />
 
