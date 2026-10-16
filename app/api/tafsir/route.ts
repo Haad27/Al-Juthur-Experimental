@@ -298,7 +298,7 @@ const getLocalDownloadedTafsir = unstable_cache(
       return null;
     }
   },
-  ['local-downloaded-tafsir-v14'],
+  ['local-downloaded-tafsir-v15'],
   { revalidate: 2592000 }
 );
 
