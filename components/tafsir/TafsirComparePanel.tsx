@@ -37,7 +37,6 @@ interface TafsirComparePanelProps {
   surahId: number;
   currentAuthorId: number;
   languages: Language[];
-  onNavigateToAyah?: (ayahNum: number) => void;
 }
 
 const COMPARE_STORAGE_KEY = "tafsir-compare-authors";
@@ -67,7 +66,6 @@ export default function TafsirComparePanel({
   surahId,
   currentAuthorId,
   languages,
-  onNavigateToAyah,
 }: TafsirComparePanelProps) {
   const catalog = useMemo<CompareAuthor[]>(() => {
     const list: CompareAuthor[] = [];
@@ -212,7 +210,6 @@ export default function TafsirComparePanel({
                           isUrdu={isUrdu}
                           langName={languageName}
                           authorName={author.name}
-                          onNavigateToAyah={onNavigateToAyah}
                         />
                       </div>
                     )}
