@@ -19,50 +19,50 @@ export function buildResilientPattern(rawStr: string): string | null {
   const trimmed = cleanQuranText(rawStr.trim());
   if (!trimmed) return null;
 
-  const hasArabic = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(trimmed);
+  // Check if string contains genuine Arabic letters (distinct from isolated symbols or ligatures)
+  const hasArabicLetters = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(trimmed);
+  const diacritics = '[\\u064B-\\u065F\\u0670\\u0640]*';
 
-  if (hasArabic) {
-    const diacritics = '[\\u064B-\\u065F\\u0670\\u0640]*';
-    let pattern = '';
-    for (let i = 0; i < trimmed.length; i++) {
-      const char = trimmed[i];
-      // Skip if character is a standalone diacritic in the source selection
-      if (/[\u064B-\u065F\u0670\u0640]/.test(char)) continue;
+  let pattern = '';
+  for (let i = 0; i < trimmed.length; i++) {
+    const char = trimmed[i];
+    // Skip standalone diacritics in the source pattern
+    if (/[\u064B-\u065F\u0670\u0640]/.test(char)) continue;
 
-      if (/[اأإآٱ]/.test(char)) {
-        pattern += '[اأإآٱ]' + diacritics;
-      } else if (/[يىئ]/.test(char)) {
-        pattern += '[يىئ]' + diacritics;
-      } else if (/[ةه]/.test(char)) {
-        pattern += '[ةه]' + diacritics;
-      } else if (/[\s\u00A0\u200B-\u200D]/.test(char)) {
-        pattern += '(?:<[^>]+>|[\\s\\u00A0\\u200B-\\u200D])+';
-      } else if (/[''’‘]/.test(char)) {
-        pattern += "(?:'|&#39;|&apos;|’|‘)";
-      } else if (/[""“”]/.test(char)) {
-        pattern += '(?:"|&quot;|&#34;|“|”)';
-      } else if (char === '&') {
-        pattern += '(?:&|&amp;)';
-      } else if (/[-\/\\^$*+?.()|[\]{}]/.test(char)) {
-        pattern += '\\' + char;
-      } else {
-        pattern += char + diacritics;
-      }
+    if (/[اأإآٱ]/.test(char)) {
+      pattern += '[اأإآٱ]' + diacritics;
+    } else if (/[يىئ]/.test(char)) {
+      pattern += '[يىئ]' + diacritics;
+    } else if (/[ةه]/.test(char)) {
+      pattern += '[ةه]' + diacritics;
+    } else if (/[\s\u00A0\u200B-\u200D]/.test(char)) {
+      pattern += '(?:<[^>]+>|[\\s\\u00A0\\u200B-\\u200D])+';
+    } else if (/[''’‘]/.test(char)) {
+      pattern += "(?:'|&#39;|&apos;|’|‘)";
+    } else if (/[""“”]/.test(char)) {
+      pattern += '(?:"|&quot;|&#34;|“|”)';
+    } else if (char === '&') {
+      pattern += '(?:&|&amp;)';
+    } else if (char === '↓') {
+      pattern += '(?:↓|&darr;)';
+    } else if (/[—–-]/.test(char)) {
+      // NEVER escape hyphen as \\- in Unicode RegExp! Handle dashes and entities
+      pattern += '(?:—|–|-|&mdash;|&ndash;)';
+    } else if (/[\{﴿«]/.test(char)) {
+      pattern += '(?:[\\{﴿«]|&laquo;)';
+    } else if (/[\}﴾»]/.test(char)) {
+      pattern += '(?:[\\}﴾»]|&raquo;)';
+    } else if (char === 'ﷺ') {
+      pattern += '(?:ﷺ|صلى\\s+الله\\s+عليه\\s+وسلم)';
+    } else if (/[\/\\^$*+?.()|[\]{}]/.test(char)) {
+      // Escape regex meta-characters (excluding hyphen which is handled above)
+      pattern += '\\' + char;
+    } else {
+      pattern += char + (hasArabicLetters && /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(char) ? diacritics : '');
     }
-    return pattern;
   }
 
-  // Non-Arabic (English / Urdu / Latin languages)
-  let escaped = trimmed
-    .replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
-    .replace(/[''’‘]/g, "(?:'|&#39;|&apos;|’|‘)")
-    .replace(/[""“”]/g, '(?:"|&quot;|&#34;|“|”)')
-    .replace(/&/g, '(?:&|&amp;)')
-    .replace(/↓/g, '(?:↓|&darr;)')
-    .replace(/[—–-]/g, '(?:—|–|-|&mdash;|&ndash;)')
-    .replace(/\\\s+|\s+/g, '(?:<[^>]+>|[\\s\\u00A0\\u200B-\\u200D])+');
-
-  return escaped;
+  return pattern;
 }
 
 export function applyHighlightsAndNotesToHtml(
@@ -101,16 +101,62 @@ export function applyHighlightsAndNotesToHtml(
           ? `background-color: transparent; border-bottom: 2.5px solid ${border}; padding-bottom: 1.5px; text-decoration: none; display: inline;`
           : `background-color: ${bg}; border-bottom: 2px solid ${border}; border-radius: 3px; padding: 2px 4px; text-decoration: none; display: inline;`;
 
-        // Handle multi-line selections across paragraphs
-        const segments = h.text.split(/\n+/).map((s) => s.trim()).filter((s) => s.length >= 2);
-        const targets = segments.length > 0 ? segments : [h.text.trim()];
+        // Handle multi-line selections across paragraphs, titles, and Arabic snippets
+        // Split on any combination of carriage returns and newlines
+        const rawSegments = h.text.split(/[\r\n]+/).map((s) => s.trim()).filter((s) => s.length >= 2);
+        const targets = new Set<string>(rawSegments.length > 0 ? rawSegments : [h.text.trim()]);
+
+        // If the highlight spans across blocks or contains plain text that overlaps this block:
+        const cleanHtmlText = html.replace(/<[^>]+>/g, '').trim();
+        if (cleanHtmlText.length >= 2) {
+          const normH = h.text.replace(/\s+/g, ' ').trim();
+          const normBlock = cleanHtmlText.replace(/\s+/g, ' ').trim();
+          // If the entire block text is contained within the highlight selection:
+          if (normH.includes(normBlock)) {
+            targets.add(cleanHtmlText);
+          } else {
+            // Check for prefix/suffix overlap when selection spans from one block to another without \n
+            for (let len = Math.min(cleanHtmlText.length, normH.length); len >= 4; len--) {
+              const prefix = cleanHtmlText.slice(0, len);
+              if (normH.endsWith(prefix.replace(/\s+/g, ' ').trim())) {
+                targets.add(prefix);
+                break;
+              }
+            }
+            for (let len = Math.min(cleanHtmlText.length, normH.length); len >= 4; len--) {
+              const suffix = cleanHtmlText.slice(cleanHtmlText.length - len);
+              if (normH.startsWith(suffix.replace(/\s+/g, ' ').trim())) {
+                targets.add(suffix);
+                break;
+              }
+            }
+          }
+        }
 
         targets.forEach((seg) => {
+          if (!seg || seg.length < 2) return;
           const pattern = buildResilientPattern(seg);
           if (!pattern) return;
-          // Match text outside HTML tags and not already inside a <mark>
-          const reg = new RegExp(`(${pattern})(?![^<]*>)(?![^<]*<\\/mark>)`, 'giu');
-          html = html.replace(reg, `<mark style="${markStyle}" class="text-inherit cursor-pointer transition-opacity hover:opacity-85" data-id="${h.id || ''}" data-color="${color}">$1</mark>`);
+          try {
+            // Match text outside HTML tags and not already inside a <mark>
+            const reg = new RegExp(`(${pattern})(?![^<]*>)(?![^<]*<\\/mark>)`, 'giu');
+            html = html.replace(reg, `<mark style="${markStyle}" class="text-inherit cursor-pointer transition-opacity hover:opacity-85" data-id="${h.id || ''}" data-color="${color}">$1</mark>`);
+          } catch (regErr) {
+            console.error("Regex error for segment:", seg, regErr);
+          }
+        });
+
+        // Ensure proper HTML tag nesting if a <mark> crosses a <span> boundary
+        html = html.replace(/(<mark[^>]*>)([\s\S]*?)<\/mark>/gi, (fullMark, markOpen, markContent) => {
+          const openSpans = (markContent.match(/<span[^>]*>/gi) || []);
+          const closeSpans = (markContent.match(/<\/span>/gi) || []);
+          if (openSpans.length > closeSpans.length) {
+            return `${markOpen}${markContent.replace(/(<span[^>]*>)/gi, `</mark>$1${markOpen}`)}</mark>`;
+          }
+          if (closeSpans.length > openSpans.length) {
+            return `${markOpen}${markContent.replace(/(<\/span>)/gi, `</mark>$1${markOpen}`)}</mark>`;
+          }
+          return fullMark;
         });
       } catch (e) {
         console.error("Failed to highlight text", e);

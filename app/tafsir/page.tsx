@@ -442,26 +442,25 @@ function TafsirContent() {
 
       if (!startEl) return;
 
+      const commonEl = range.commonAncestorContainer
+        ? (range.commonAncestorContainer.nodeType === Node.TEXT_NODE
+          ? range.commonAncestorContainer.parentElement
+          : range.commonAncestorContainer as HTMLElement)
+        : null;
+
       // Determine type from the closest matching ancestor
       let type: "arabic" | "translation" | null = null;
-      if (startEl.closest(".tafsir-content")) {
+      if (startEl.closest(".tafsir-content") || commonEl?.closest(".tafsir-content")) {
         type = "translation";
-      } else if (startEl.closest("[lang='ar']") || startEl.closest("[id^='atext-']")) {
+      } else if (startEl.closest("[lang='ar']") || commonEl?.closest("[lang='ar']") || startEl.closest("[id^='atext-']")) {
         type = "arabic";
       } else {
-        const card = startEl.closest("[data-ayah-num]");
+        const card = startEl.closest("[data-ayah-num]") || commonEl?.closest("[data-ayah-num]");
         if (card) type = "translation";
       }
 
       // Find card element
-      let card = startEl.closest("[data-ayah-num]");
-      if (!card && range.commonAncestorContainer) {
-        const commonEl = range.commonAncestorContainer.nodeType === Node.TEXT_NODE
-          ? range.commonAncestorContainer.parentElement
-          : (range.commonAncestorContainer as HTMLElement);
-        card = commonEl?.closest("[data-ayah-num]") || null;
-      }
-
+      let card = startEl.closest("[data-ayah-num]") || commonEl?.closest("[data-ayah-num]");
       let targetAyahNum: number | null = null;
       let targetSurahNum: number | null = null;
       if (card) {
@@ -2654,6 +2653,7 @@ function TafsirCard({
             surahId={activeSurah}
             currentAuthorId={authorId}
             languages={languages}
+            onNavigateToAyah={(num) => scrollToAyah(num)}
           />
         )}
 
