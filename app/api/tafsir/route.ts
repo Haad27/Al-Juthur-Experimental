@@ -298,7 +298,7 @@ const getLocalDownloadedTafsir = unstable_cache(
       return null;
     }
   },
-  ['local-downloaded-tafsir-v14'],
+  ['local-downloaded-tafsir-v15'],
   { revalidate: 2592000 }
 );
 
@@ -359,7 +359,7 @@ const getSurahDbTafsir = unstable_cache(
       return [];
     }
   },
-  ['surah-db-tafsir-v15'],
+  ['surah-db-tafsir-v16'],
   { revalidate: 2592000 } // 30 days
 );
 
@@ -515,6 +515,22 @@ export async function GET(request: Request) {
       // FALLBACK: Database query
       if (tafsirs.length === 0) {
         tafsirs = await getSurahDbTafsir(parsedAuthorId, parsedSurahId);
+      }
+
+      // Safeguard: Ensure As-Sa'di English has no repeated consecutive text in any environment
+      if (parsedAuthorId === 265 && tafsirs.length > 0) {
+        let leaderAyah = tafsirs[0].ayah?.numberInSurah || tafsirs[0].ayahId || 1;
+        let leaderText = tafsirs[0].text;
+        for (let i = 1; i < tafsirs.length; i++) {
+          const t = tafsirs[i];
+          const aNum = t.ayah?.numberInSurah || t.ayahId || (i + 1);
+          if (t.text && t.text === leaderText && !/^\d+:\d+$/.test(leaderText.trim())) {
+            t.text = `${parsedSurahId}:${leaderAyah}`;
+          } else {
+            leaderAyah = aNum;
+            leaderText = t.text;
+          }
+        }
       }
 
       if (countNum > 0) {
