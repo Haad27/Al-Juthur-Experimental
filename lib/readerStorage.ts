@@ -329,18 +329,30 @@ export interface UserHighlight {
   createdAt: string;
 }
 
+export function getStoredUserNotes(): UserNote[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem("aljuthur-cached-notes");
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return [];
+}
+
+export function getStoredUserHighlights(): UserHighlight[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem("aljuthur-cached-highlights");
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return [];
+}
+
 export async function fetchUserNotes(): Promise<UserNote[]> {
   const id = getUserIdentifier();
   const deviceId = getDeviceId();
   
   // Fast offline/local fallback
-  let cached: UserNote[] = [];
-  if (typeof window !== "undefined") {
-    try {
-      const raw = localStorage.getItem("aljuthur-cached-notes");
-      if (raw) cached = JSON.parse(raw);
-    } catch {}
-  }
+  const cached: UserNote[] = getStoredUserNotes();
 
   try {
     const res = await fetch(`/api/notes?identifier=${encodeURIComponent(id)}&deviceId=${encodeURIComponent(deviceId)}`);
@@ -357,44 +369,63 @@ export async function fetchUserNotes(): Promise<UserNote[]> {
 
 export async function saveUserNote(surahId: number, ayahNumber: number, text: string): Promise<UserNote | null> {
   const id = getUserIdentifier();
+  const tempId = "note_" + (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2) + Date.now().toString(36));
+  const localNote: UserNote = {
+    id: tempId,
+    surahId,
+    ayahNumber,
+    text,
+    createdAt: new Date().toISOString()
+  };
+
+  // Immediate optimistic local save
+  if (typeof window !== "undefined") {
+    try {
+      const existing = getStoredUserNotes();
+      const filtered = existing.filter(n => !(n.surahId === surahId && n.ayahNumber === ayahNumber && n.text === text));
+      localStorage.setItem("aljuthur-cached-notes", JSON.stringify([localNote, ...filtered]));
+    } catch {}
+  }
+
   try {
     const res = await fetch('/api/notes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ identifier: id, surahId, ayahNumber, text })
     });
-    if (!res.ok) return null;
-    const note: UserNote = await res.json();
+    if (!res.ok) return localNote;
+    const serverNote: UserNote = await res.json();
     if (typeof window !== "undefined") {
       try {
-        const raw = localStorage.getItem("aljuthur-cached-notes");
-        const existing: UserNote[] = raw ? JSON.parse(raw) : [];
-        localStorage.setItem("aljuthur-cached-notes", JSON.stringify([note, ...existing]));
+        const existing = getStoredUserNotes();
+        const updated = existing.map(n => n.id === tempId ? serverNote : n);
+        localStorage.setItem("aljuthur-cached-notes", JSON.stringify(updated));
       } catch {}
     }
-    return note;
+    return serverNote;
   } catch {
-    return null;
+    return localNote;
   }
 }
 
 export async function deleteUserNote(noteId: string): Promise<boolean> {
   const id = getUserIdentifier();
   const deviceId = getDeviceId();
+
+  // Immediate optimistic local removal
+  if (typeof window !== "undefined") {
+    try {
+      const existing = getStoredUserNotes();
+      const filtered = existing.filter((n: UserNote) => n.id !== noteId);
+      localStorage.setItem("aljuthur-cached-notes", JSON.stringify(filtered));
+    } catch {}
+  }
+
   try {
     const res = await fetch(`/api/notes?identifier=${encodeURIComponent(id)}&deviceId=${encodeURIComponent(deviceId)}&id=${encodeURIComponent(noteId)}`, { method: 'DELETE' });
-    if (res.ok && typeof window !== "undefined") {
-      try {
-        const raw = localStorage.getItem("aljuthur-cached-notes");
-        if (raw) {
-          const filtered = JSON.parse(raw).filter((n: UserNote) => n.id !== noteId);
-          localStorage.setItem("aljuthur-cached-notes", JSON.stringify(filtered));
-        }
-      } catch {}
-    }
     return res.ok;
   } catch {
-    return false;
+    return true;
   }
 }
 
@@ -403,13 +434,7 @@ export async function fetchUserHighlights(): Promise<UserHighlight[]> {
   const deviceId = getDeviceId();
 
   // Fast offline/local fallback
-  let cached: UserHighlight[] = [];
-  if (typeof window !== "undefined") {
-    try {
-      const raw = localStorage.getItem("aljuthur-cached-highlights");
-      if (raw) cached = JSON.parse(raw);
-    } catch {}
-  }
+  const cached: UserHighlight[] = getStoredUserHighlights();
 
   try {
     const res = await fetch(`/api/highlights?identifier=${encodeURIComponent(id)}&deviceId=${encodeURIComponent(deviceId)}`);
@@ -426,44 +451,66 @@ export async function fetchUserHighlights(): Promise<UserHighlight[]> {
 
 export async function saveUserHighlight(surahId: number, ayahNumber: number, text: string, type: 'arabic'|'translation', authorName?: string, color?: string): Promise<UserHighlight | null> {
   const id = getUserIdentifier();
+  const tempId = "hl_" + (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2) + Date.now().toString(36));
+  const localHighlight: UserHighlight = {
+    id: tempId,
+    surahId,
+    ayahNumber,
+    text,
+    type,
+    authorName,
+    color: color || "gold",
+    createdAt: new Date().toISOString()
+  };
+
+  // Immediate optimistic local save
+  if (typeof window !== "undefined") {
+    try {
+      const existing = getStoredUserHighlights();
+      const filtered = existing.filter(h => !(h.surahId === surahId && h.ayahNumber === ayahNumber && h.text === text));
+      localStorage.setItem("aljuthur-cached-highlights", JSON.stringify([localHighlight, ...filtered]));
+    } catch {}
+  }
+
   try {
     const res = await fetch('/api/highlights', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ identifier: id, surahId, ayahNumber, text, type, authorName, color })
+      body: JSON.stringify({ identifier: id, surahId, ayahNumber, text, type, authorName, color: color || "gold" })
     });
-    if (!res.ok) return null;
-    const highlight: UserHighlight = await res.json();
+    if (!res.ok) return localHighlight;
+    const serverHighlight: UserHighlight = await res.json();
     if (typeof window !== "undefined") {
       try {
-        const raw = localStorage.getItem("aljuthur-cached-highlights");
-        const existing: UserHighlight[] = raw ? JSON.parse(raw) : [];
-        localStorage.setItem("aljuthur-cached-highlights", JSON.stringify([highlight, ...existing]));
+        const existing = getStoredUserHighlights();
+        const updated = existing.map(h => h.id === tempId ? serverHighlight : h);
+        localStorage.setItem("aljuthur-cached-highlights", JSON.stringify(updated));
       } catch {}
     }
-    return highlight;
+    return serverHighlight;
   } catch {
-    return null;
+    return localHighlight;
   }
 }
 
 export async function deleteUserHighlight(highlightId: string): Promise<boolean> {
   const id = getUserIdentifier();
   const deviceId = getDeviceId();
+
+  // Immediate optimistic local removal
+  if (typeof window !== "undefined") {
+    try {
+      const existing = getStoredUserHighlights();
+      const filtered = existing.filter((h: UserHighlight) => h.id !== highlightId);
+      localStorage.setItem("aljuthur-cached-highlights", JSON.stringify(filtered));
+    } catch {}
+  }
+
   try {
     const res = await fetch(`/api/highlights?identifier=${encodeURIComponent(id)}&deviceId=${encodeURIComponent(deviceId)}&id=${encodeURIComponent(highlightId)}`, { method: 'DELETE' });
-    if (res.ok && typeof window !== "undefined") {
-      try {
-        const raw = localStorage.getItem("aljuthur-cached-highlights");
-        if (raw) {
-          const filtered = JSON.parse(raw).filter((h: UserHighlight) => h.id !== highlightId);
-          localStorage.setItem("aljuthur-cached-highlights", JSON.stringify(filtered));
-        }
-      } catch {}
-    }
     return res.ok;
   } catch {
-    return false;
+    return true;
   }
 }
 

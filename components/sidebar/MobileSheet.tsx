@@ -227,6 +227,7 @@ const MobileSheet = ({
       ) : null}
       <SheetContent
         side="right"
+        onOpenAutoFocus={(e) => e.preventDefault()}
         className="z-[99999] bg-card bg-background text-foreground text-foreground px-3 sm:px-4 border-l border-border border-border sm:min-w-[25%] min-w-[90%] w-full max-w-[92vw] sm:max-w-md overflow-x-hidden overflow-y-auto touch-pan-y"
       >
         <VisuallyHidden>

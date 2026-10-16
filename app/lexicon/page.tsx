@@ -42,7 +42,9 @@ import {
   UserHighlight, 
   fetchUserNotes, 
   deleteUserNote, 
-  UserNote 
+  UserNote,
+  getStoredUserHighlights,
+  getStoredUserNotes,
 } from '@/lib/readerStorage';
 
 interface DictionaryInfo {
@@ -139,8 +141,13 @@ function LexiconPageContent() {
   const [selectedDictId, setSelectedDictId] = useState<number | 'all'>('all');
   const [isAiSummaryExpanded, setIsAiSummaryExpanded] = useState(false);
 
-  const [highlights, setHighlights] = useState<UserHighlight[]>([]);
-  const [notes, setNotes] = useState<UserNote[]>([]);
+  const [highlights, setHighlights] = useState<UserHighlight[]>(() => getStoredUserHighlights());
+  const [notes, setNotes] = useState<UserNote[]>(() => getStoredUserNotes());
+  const highlightsRef = useRef<UserHighlight[]>(highlights);
+  highlightsRef.current = highlights;
+  const notesRef = useRef<UserNote[]>(notes);
+  notesRef.current = notes;
+
   const [highlightSelection, setHighlightSelection] = useState<HighlightSelection | null>(null);
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const [noteSelectedText, setNoteSelectedText] = useState<string>('');
@@ -150,8 +157,12 @@ function LexiconPageContent() {
 
   useEffect(() => {
     const loadUserData = () => {
-      fetchUserHighlights().then(setHighlights).catch(console.error);
-      fetchUserNotes().then(setNotes).catch(console.error);
+      fetchUserHighlights().then((res) => {
+        if (res && res.length > 0) setHighlights(res);
+      }).catch(console.error);
+      fetchUserNotes().then((res) => {
+        if (res && res.length > 0) setNotes(res);
+      }).catch(console.error);
     };
 
     loadUserData();
@@ -230,7 +241,7 @@ function LexiconPageContent() {
         e.preventDefault();
         e.stopPropagation();
         const noteId = target.getAttribute('data-note-id');
-        const found = notes.find((n) => n.id === noteId);
+        const found = notesRef.current.find((n) => n.id === noteId);
         if (found) {
           const rect = target.getBoundingClientRect();
           setActiveNotePopup({
@@ -254,22 +265,33 @@ function LexiconPageContent() {
       setTimeout(handleSelection, 80);
     };
 
+    let selectionDebounceTimer: any = null;
+    const handleSelectionChange = () => {
+      clearTimeout(selectionDebounceTimer);
+      selectionDebounceTimer = setTimeout(() => {
+        handleSelection();
+      }, 150);
+    };
+
     document.addEventListener('mouseup', handleSelection);
     document.addEventListener('touchend', handleTouchEnd);
+    document.addEventListener('selectionchange', handleSelectionChange);
     document.addEventListener('click', handleMarkClick);
     document.addEventListener('click', handleNoteClick);
     document.addEventListener('mousedown', handleGlobalClick);
     document.addEventListener('touchstart', handleGlobalClick);
 
     return () => {
+      clearTimeout(selectionDebounceTimer);
       document.removeEventListener('mouseup', handleSelection);
       document.removeEventListener('touchend', handleTouchEnd);
+      document.removeEventListener('selectionchange', handleSelectionChange);
       document.removeEventListener('click', handleMarkClick);
       document.removeEventListener('click', handleNoteClick);
       document.removeEventListener('mousedown', handleGlobalClick);
       document.removeEventListener('touchstart', handleGlobalClick);
     };
-  }, [activeRoot, notes]);
+  }, [activeRoot]);
 
   // Scroll navigation state
   const [readingProgress, setReadingProgress] = useState(0);
@@ -1005,39 +1027,42 @@ function LexiconPageContent() {
           onHighlight={async (color: HighlightColor) => {
             if (!highlightSelection) return;
             const { text, surahNumber, ayahNumber, type, id } = highlightSelection;
-            if (id || highlightSelection.isExisting) {
-              const match = highlights.find(h => (id && h.id === id) || (h.text === text && Number(h.surahId) === Number(surahNumber) && Number(h.ayahNumber) === Number(ayahNumber)));
-              if (match) {
-                await deleteUserHighlight(match.id);
-                setHighlights(prev => prev.filter(h => h.id !== match.id));
-              }
-            }
             const activeWord = result?.normalizedRoot || activeRoot;
             const matchedEntry = result?.entries?.find(e => Number(e.dictId) === Number(ayahNumber));
             const dictTitle = matchedEntry ? matchedEntry.dictName : (Number(ayahNumber) === 999999 ? "AI Root Summary" : "Lexicon");
             const authorStr = `${dictTitle} (${activeWord})`;
-            const res = await saveUserHighlight(surahNumber, ayahNumber, text, type, authorStr, color);
-            if (res) {
-              toast.success("Highlight saved.");
-              setHighlights(prev => [...prev, res]);
-            } else {
-              toast.error("Failed to save highlight.");
-            }
+            const tempId = id || ("hl_" + (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2) + Date.now().toString(36)));
+
+            const optimisticHl: UserHighlight = {
+              id: tempId,
+              surahId: surahNumber,
+              ayahNumber,
+              text,
+              type,
+              authorName: authorStr,
+              color,
+              createdAt: new Date().toISOString()
+            };
+
+            setHighlights(prev => [...prev.filter(h => h.id !== tempId && !(h.text === text && Number(h.surahId) === Number(surahNumber) && Number(h.ayahNumber) === Number(ayahNumber))), optimisticHl]);
+            toast.success("Highlight saved.");
             setHighlightSelection(null);
             window.getSelection()?.removeAllRanges();
+
+            saveUserHighlight(surahNumber, ayahNumber, text, type, authorStr, color).then((res) => {
+              if (res && res.id !== tempId) {
+                setHighlights(prev => prev.map(h => h.id === tempId ? res : h));
+              }
+            });
           }}
           onDelete={async () => {
             if (!highlightSelection) return;
             const { text, surahNumber, ayahNumber, id } = highlightSelection;
-            const match = highlights.find(h => (id && h.id === id) || (h.text === text && Number(h.surahId) === Number(surahNumber) && Number(h.ayahNumber) === Number(ayahNumber)));
+            const match = highlightsRef.current.find(h => (id && h.id === id) || (h.text === text && Number(h.surahId) === Number(surahNumber) && Number(h.ayahNumber) === Number(ayahNumber)));
             if (match) {
-              const success = await deleteUserHighlight(match.id);
-              if (success) {
-                toast.success("Highlight removed.");
-                setHighlights(prev => prev.filter(h => h.id !== match.id));
-              } else {
-                toast.error("Failed to remove highlight.");
-              }
+              setHighlights(prev => prev.filter(h => h.id !== match.id));
+              toast.success("Highlight removed.");
+              deleteUserHighlight(match.id);
             }
             setHighlightSelection(null);
             window.getSelection()?.removeAllRanges();

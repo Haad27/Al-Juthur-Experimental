@@ -150,55 +150,65 @@ export default function TranslationSelector() {
 
   return (
     <div className="relative w-full">
-      {/* Mobile Native Translation Selector Overlay */}
-      <select
-        value={translationEdition}
-        onChange={(e) => handleSelect(e.target.value)}
-        className="absolute inset-0 w-full h-full opacity-0 sm:hidden cursor-pointer z-20 bg-card text-foreground"
-        aria-label="Select Translation"
-      >
-        {Object.entries(allGroupedByLanguage).map(([lang, options]) => (
-          <optgroup key={lang} label={lang} className="bg-card text-accent font-bold">
-            {options.map((opt) => (
-              <option key={opt.identifier} value={opt.identifier} className="bg-card text-foreground py-1">
-                {opt.languageLabel} — {opt.englishName} ({opt.name})
-              </option>
-            ))}
-          </optgroup>
-        ))}
-      </select>
-
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl border border-border dark:border-border bg-muted/80 dark:bg-muted hover:bg-muted dark:hover:bg-muted transition-all duration-200 text-left group shadow-xs cursor-pointer"
+      {/* Mobile Native Translation Selector (Always active, 100% reliable tap anywhere on mobile) */}
+      <div className="sm:hidden relative w-full">
+        <div className="relative flex items-center w-full">
+          <div className="absolute left-3 p-1.5 rounded-lg bg-accent/10 text-accent pointer-events-none z-10">
+            <Languages className="w-4 h-4" />
+          </div>
+          <select
+            value={translationEdition}
+            onChange={(e) => handleSelect(e.target.value)}
+            className="w-full min-h-[48px] pl-11 pr-9 py-2.5 rounded-xl border border-border bg-muted/80 hover:bg-muted text-xs font-semibold text-foreground appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
+            aria-label="Select Translation"
           >
-            <div className="flex items-center gap-2 overflow-hidden min-w-0">
-              <div className="p-1.5 rounded-lg bg-accent/10 text-accent dark:text-accent group-hover:scale-105 transition-transform duration-200 shrink-0">
-                <Languages className="w-4 h-4" />
-              </div>
-              <div className="flex flex-col overflow-hidden min-w-0">
-                <span className="text-xs font-semibold text-foreground dark:text-foreground truncate">
-                  {currentOption.languageLabel} — {currentOption.englishName}
-                </span>
-                <span className="text-[11px] text-muted-foreground dark:text-muted-foreground truncate">
-                  {currentOption.name} ({currentOption.identifier})
-                </span>
-              </div>
-            </div>
-            <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform duration-200 shrink-0 ml-1", open && "rotate-180")} />
-          </button>
-        </PopoverTrigger>
+            {Object.entries(allGroupedByLanguage).map(([lang, options]) => (
+              <optgroup key={lang} label={lang} className="bg-card text-accent font-bold">
+                {options.map((opt) => (
+                  <option key={opt.identifier} value={opt.identifier} className="bg-card text-foreground py-1 text-xs">
+                    {opt.languageLabel} — {opt.englishName} ({opt.name})
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+          <ChevronDown className="w-4 h-4 text-muted-foreground absolute right-3 pointer-events-none z-10" />
+        </div>
+      </div>
 
-        <PopoverContent
-          align="start"
-          side="bottom"
-          sideOffset={6}
-          collisionPadding={16}
-          className="w-[var(--radix-popover-trigger-width)] min-w-[280px] max-w-[340px] max-h-[min(360px,var(--radix-popover-content-available-height))] p-3 bg-popover dark:bg-card backdrop-blur-2xl border border-border dark:border-border shadow-2xl rounded-2xl z-[9999999] text-foreground dark:text-foreground flex flex-col overflow-hidden hidden sm:flex"
-        >
-        <div className="flex flex-col space-y-2.5 min-h-0 flex-1 overflow-hidden">
+      {/* Desktop Searchable Popover with Filter Pills */}
+      <div className="hidden sm:block w-full">
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl border border-border dark:border-border bg-muted/80 dark:bg-muted hover:bg-muted dark:hover:bg-muted transition-all duration-200 text-left group shadow-xs cursor-pointer"
+            >
+              <div className="flex items-center gap-2 overflow-hidden min-w-0">
+                <div className="p-1.5 rounded-lg bg-accent/10 text-accent dark:text-accent group-hover:scale-105 transition-transform duration-200 shrink-0">
+                  <Languages className="w-4 h-4" />
+                </div>
+                <div className="flex flex-col overflow-hidden min-w-0">
+                  <span className="text-xs font-semibold text-foreground dark:text-foreground truncate">
+                    {currentOption.languageLabel} — {currentOption.englishName}
+                  </span>
+                  <span className="text-[11px] text-muted-foreground dark:text-muted-foreground truncate">
+                    {currentOption.name} ({currentOption.identifier})
+                  </span>
+                </div>
+              </div>
+              <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform duration-200 shrink-0 ml-1", open && "rotate-180")} />
+            </button>
+          </PopoverTrigger>
+
+          <PopoverContent
+            align="start"
+            side="bottom"
+            sideOffset={6}
+            collisionPadding={16}
+            className="w-[var(--radix-popover-trigger-width)] min-w-[280px] max-w-[340px] max-h-[min(360px,var(--radix-popover-content-available-height))] p-3 bg-popover dark:bg-card backdrop-blur-2xl border border-border dark:border-border shadow-2xl rounded-2xl z-[9999999] text-foreground dark:text-foreground flex flex-col overflow-hidden"
+          >
+          <div className="flex flex-col space-y-2.5 min-h-0 flex-1 overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between px-0.5 shrink-0">
             <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-accent">
@@ -289,6 +299,7 @@ export default function TranslationSelector() {
         </div>
       </PopoverContent>
       </Popover>
+      </div>
     </div>
   );
 }

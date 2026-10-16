@@ -48,7 +48,21 @@ import { getTranslationFontStyle } from "@/lib/fontsConfig";
 import ThemeToggleButton from "@/components/ThemeToggleButton";
 import AlJuthurLoadingProgress from "@/components/shared/AlJuthurLoadingProgress";
 import AyahSkeleton from "@/components/quran/AyahSkeleton";
-import { setRecentQuranReading } from "@/lib/readerStorage";
+import {
+  setRecentQuranReading,
+  getStoredUserHighlights,
+  getStoredUserNotes,
+  fetchUserHighlights,
+  fetchUserNotes,
+  saveUserHighlight,
+  deleteUserHighlight,
+  deleteUserNote,
+  UserHighlight,
+  UserNote,
+} from "@/lib/readerStorage";
+import { applyHighlightsAndNotesToHtml } from "@/components/lexicon/LexiconTextRenderer";
+import HighlightToolbar, { HighlightColor, HighlightSelection } from "@/components/tafsir/HighlightToolbar";
+import NotePopover from "@/components/tafsir/NotePopover";
 
 interface AyahProps {
   number: number;
@@ -118,6 +132,8 @@ interface AyahRowProps {
   isUrduTranslation: boolean;
   translationEdition: string;
   isSidebarOpen?: boolean;
+  highlights?: UserHighlight[];
+  notes?: UserNote[];
 }
 
 function cleanUrduFootnoteText(html: string) {
@@ -271,6 +287,8 @@ const AyahRow = React.memo(({
   isUrduTranslation,
   translationEdition,
   isSidebarOpen,
+  highlights = [],
+  notes = [],
 }: AyahRowProps) => {
   const isCurrentlyPlaying = useAudioStore(s => s.isPlaying && s.currentAyah === ayah.numberInSurah && s.currentSurah === surahNumber);
   const isPlaying = useAudioStore(s => s.isPlaying);
@@ -297,6 +315,29 @@ const AyahRow = React.memo(({
   const { mainText, footnotes } = React.useMemo(() => {
     return processTranslation(ayah.translation);
   }, [ayah.translation]);
+
+  const ayahHighlights = React.useMemo(() => {
+    if (!highlights || highlights.length === 0) return [];
+    return highlights.filter(
+      (h) => Number(h.surahId) === Number(surahNumber) && Number(h.ayahNumber) === Number(ayah.numberInSurah)
+    );
+  }, [highlights, surahNumber, ayah.numberInSurah]);
+
+  const ayahNotes = React.useMemo(() => {
+    if (!notes || notes.length === 0) return [];
+    return notes.filter(
+      (n) => Number(n.surahId) === Number(surahNumber) && Number(n.ayahNumber) === Number(ayah.numberInSurah)
+    );
+  }, [notes, surahNumber, ayah.numberInSurah]);
+
+  const renderedTranslationHtml = React.useMemo(() => {
+    if (!mainText) return "";
+    return applyHighlightsAndNotesToHtml(
+      mainText,
+      ayahHighlights.filter((h) => h.type === "translation"),
+      ayahNotes
+    );
+  }, [mainText, ayahHighlights, ayahNotes]);
 
   const hasFootnotesAvailable = React.useMemo(() => {
     return Boolean(ayah.footnoteIds?.length || footnotes.length > 0 || isTafsirEdition);
@@ -489,6 +530,8 @@ const AyahRow = React.memo(({
         isOtherPlaying ? "opacity-35 blur-[1px] scale-[0.995] pointer-events-none" : "opacity-100 blur-none scale-100"
       )}
       id={`ayah-${ayah.numberInSurah}`}
+      data-ayah-num={ayah.numberInSurah}
+      data-surah-num={surahNumber}
     >
       {isCurrentlyPlaying && (
         <div className="sticky top-0 z-50 flex justify-center w-full mb-4 sm:mb-8 mt-2 sm:mt-0 pointer-events-none">
@@ -562,10 +605,15 @@ const AyahRow = React.memo(({
         </div>
         <div
           onClick={() => onOpenNoteModal(surahNumber, ayah.numberInSurah, ayah.translation ? `[${surahNumber}:${ayah.numberInSurah}] ${ayah.translation}` : undefined)}
-          className="p-2 rounded-full dark:hover:bg-muted hover:bg-[var(--sephia-500)]/45 transition-colors cursor-pointer inline-flex items-center justify-center"
+          className="p-2 rounded-full dark:hover:bg-muted hover:bg-[var(--sephia-500)]/45 transition-colors cursor-pointer inline-flex items-center justify-center relative"
           title="Add Note"
         >
-          <FileText className="text-muted-foreground hover:text-accent" size={18} />
+          <FileText className={cn("text-muted-foreground hover:text-accent", ayahNotes.length > 0 && "text-accent")} size={18} />
+          {ayahNotes.length > 0 && (
+            <span className="absolute -top-1 -right-1 size-4 rounded-full bg-accent text-[9px] font-bold text-accent-foreground flex items-center justify-center">
+              {ayahNotes.length}
+            </span>
+          )}
         </div>
         <div
           onClick={() => {
@@ -646,7 +694,7 @@ const AyahRow = React.memo(({
                   display: "block",
                   width: "100%"
                 }}
-                dangerouslySetInnerHTML={{ __html: mainText }}
+                dangerouslySetInnerHTML={{ __html: renderedTranslationHtml }}
               />
             </div>
 
@@ -771,6 +819,7 @@ export default function SurahReaderClient({
   surahInfo,
 }: SurahReaderClientProps) {
   const { fontSize, showTranslation, showWbw, translationEdition } = useGlobalState();
+  const surahNumber = surah?.number || 1;
   const [showSurahContext, setShowSurahContext] = useState(false);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const router = useRouter();
@@ -795,6 +844,155 @@ export default function SurahReaderClient({
   const [tafsirWheelContext, setTafsirWheelContext] = useState<{ surah: number; ayah: number } | null>(null);
   const [noteModalContext, setNoteModalContext] = useState<{ surah: number; ayah: number; text?: string } | null>(null);
   const [isTopicModalOpen, setIsTopicModalOpen] = useState<boolean>(false);
+
+  const [highlights, setHighlights] = useState<UserHighlight[]>(() => getStoredUserHighlights());
+  const [notes, setNotes] = useState<UserNote[]>(() => getStoredUserNotes());
+  const highlightsRef = useRef<UserHighlight[]>(highlights);
+  highlightsRef.current = highlights;
+  const notesRef = useRef<UserNote[]>(notes);
+  notesRef.current = notes;
+
+  const [highlightSelection, setHighlightSelection] = useState<HighlightSelection | null>(null);
+  const [activeNotePopup, setActiveNotePopup] = useState<{ note: UserNote; x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    const loadUserData = () => {
+      fetchUserHighlights().then((res) => {
+        if (res && res.length > 0) setHighlights(res);
+      }).catch(console.error);
+      fetchUserNotes().then((res) => {
+        if (res && res.length > 0) setNotes(res);
+      }).catch(console.error);
+    };
+
+    loadUserData();
+    window.addEventListener("aljuthur-auth-changed", loadUserData);
+    return () => window.removeEventListener("aljuthur-auth-changed", loadUserData);
+  }, []);
+
+  useEffect(() => {
+    const handleSelection = () => {
+      const selection = window.getSelection();
+      if (!selection || selection.isCollapsed) return;
+
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+      const text = selection.toString().trim();
+      if (!text || text.length < 2) return;
+
+      const startEl = range.startContainer.nodeType === Node.TEXT_NODE
+        ? range.startContainer.parentElement
+        : (range.startContainer as HTMLElement);
+      if (!startEl) return;
+
+      let type: "arabic" | "translation" | null = null;
+      if (startEl.closest("[lang='ar']") || startEl.closest("[id^='atext-']")) {
+        type = "arabic";
+      } else if (startEl.closest(".translation-content") || startEl.closest(".reading-prose") || startEl.closest("[data-ayah-num]")) {
+        type = "translation";
+      }
+
+      const card = startEl.closest("[data-ayah-num]") || (range.commonAncestorContainer.nodeType === Node.TEXT_NODE ? range.commonAncestorContainer.parentElement?.closest("[data-ayah-num]") : (range.commonAncestorContainer as HTMLElement)?.closest("[data-ayah-num]"));
+      let targetAyahNum = card ? parseInt(card.getAttribute("data-ayah-num") || "0", 10) : null;
+      if (!targetAyahNum && visibleAyahRef.current) {
+        targetAyahNum = visibleAyahRef.current;
+      }
+
+      if (type && targetAyahNum) {
+        setHighlightSelection({
+          text,
+          surahNumber,
+          ayahNumber: targetAyahNum,
+          type,
+          x: rect.left + rect.width / 2,
+          y: rect.top,
+          isExisting: false,
+        });
+      }
+    };
+
+    const handleMarkClick = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName.toLowerCase() === 'mark') {
+        const text = target.textContent || "";
+        const ayahNum = parseInt(target.closest('[data-ayah-num]')?.getAttribute('data-ayah-num') || "0", 10);
+        const rect = target.getBoundingClientRect();
+        const id = target.getAttribute('data-id') || undefined;
+        const color = (target.getAttribute('data-color') || 'gold') as HighlightColor;
+
+        if (text && ayahNum) {
+          setHighlightSelection({
+            id,
+            text,
+            surahNumber,
+            ayahNumber: ayahNum,
+            type: "translation",
+            x: rect.left + rect.width / 2,
+            y: rect.top,
+            isExisting: true,
+            color,
+          });
+        }
+      }
+    };
+
+    const handleNoteClick = (e: MouseEvent | TouchEvent) => {
+      const target = (e.target as HTMLElement).closest('.note-indicator-icon, [data-note-id]');
+      if (target) {
+        e.preventDefault();
+        e.stopPropagation();
+        const noteId = target.getAttribute('data-note-id');
+        const found = notesRef.current.find(n => n.id === noteId);
+        if (found) {
+          const rect = target.getBoundingClientRect();
+          setActiveNotePopup({
+            note: found,
+            x: rect.left + rect.width / 2,
+            y: rect.top,
+          });
+        }
+      }
+    };
+
+    const handleGlobalClick = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.highlight-popover') && !target.closest('.note-indicator-icon') && target.tagName.toLowerCase() !== 'mark' && window.getSelection()?.isCollapsed) {
+        setHighlightSelection(null);
+      }
+    };
+
+    const handleTouchEnd = () => {
+      handleSelection();
+      setTimeout(handleSelection, 80);
+    };
+
+    let selectionDebounceTimer: any = null;
+    const handleSelectionChange = () => {
+      clearTimeout(selectionDebounceTimer);
+      selectionDebounceTimer = setTimeout(() => {
+        handleSelection();
+      }, 150);
+    };
+
+    document.addEventListener("mouseup", handleSelection);
+    document.addEventListener("touchend", handleTouchEnd);
+    document.addEventListener("selectionchange", handleSelectionChange);
+    document.addEventListener("click", handleMarkClick);
+    document.addEventListener("click", handleNoteClick);
+    document.addEventListener("mousedown", handleGlobalClick);
+    document.addEventListener("touchstart", handleGlobalClick);
+
+    return () => {
+      clearTimeout(selectionDebounceTimer);
+      document.removeEventListener("mouseup", handleSelection);
+      document.removeEventListener("touchend", handleTouchEnd);
+      document.removeEventListener("selectionchange", handleSelectionChange);
+      document.removeEventListener("click", handleMarkClick);
+      document.removeEventListener("click", handleNoteClick);
+      document.removeEventListener("mousedown", handleGlobalClick);
+      document.removeEventListener("touchstart", handleGlobalClick);
+    };
+  }, [surahNumber]);
 
   const currentTranslationOption = useMemo(() => {
     return ALL_TRANSLATION_OPTIONS.find(t => t.identifier === translationEdition);
@@ -842,8 +1040,6 @@ export default function SurahReaderClient({
   // Which page numbers are already loaded / currently in-flight (avoid duplicate fetches)
   const loadedPagesRef = useRef<Set<number>>(new Set(initialLoadedPages));
   const loadingPagesRef = useRef<Set<number>>(new Set());
-
-  const surahNumber = surah?.number || 1;
 
   const fetchPage = useCallback(async (page: number, edition: string) => {
     if (loadedPagesRef.current.has(page) || loadingPagesRef.current.has(page)) return;
@@ -1460,6 +1656,8 @@ export default function SurahReaderClient({
                     isUrduTranslation={isUrduTranslation}
                     translationEdition={translationEdition}
                     isSidebarOpen={!!aiChatContext}
+                    highlights={highlights}
+                    notes={notes}
                   />
                 </div>
               );
@@ -1513,6 +1711,101 @@ export default function SurahReaderClient({
         surahNumber={noteModalContext?.surah || surahNumber}
         ayahNumber={noteModalContext?.ayah || 1}
         selectedText={noteModalContext?.text}
+        onSave={(saved) => {
+          setNotes(prev => [...prev.filter(n => n.id !== saved.id), saved]);
+        }}
+      />
+
+      {/* Floating Highlight Toolbar */}
+      <HighlightToolbar
+        selection={highlightSelection}
+        onHighlight={async (color: HighlightColor) => {
+          if (!highlightSelection) return;
+          const { text, surahNumber: sNum, ayahNumber: aNum, type, id } = highlightSelection;
+          const tempId = id || ("hl_" + (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2) + Date.now().toString(36)));
+          
+          const optimisticHl: UserHighlight = {
+            id: tempId,
+            surahId: sNum,
+            ayahNumber: aNum,
+            text,
+            type,
+            authorName: translationEdition,
+            color,
+            createdAt: new Date().toISOString()
+          };
+
+          setHighlights(prev => [...prev.filter(h => h.id !== tempId && !(h.surahId === sNum && h.ayahNumber === aNum && h.text === text)), optimisticHl]);
+          toast.success("Highlight saved.");
+          setHighlightSelection(null);
+          window.getSelection()?.removeAllRanges();
+
+          saveUserHighlight(sNum, aNum, text, type, translationEdition, color).then((res) => {
+            if (res && res.id !== tempId) {
+              setHighlights(prev => prev.map(h => h.id === tempId ? res : h));
+            }
+          });
+        }}
+        onDelete={async () => {
+          if (!highlightSelection) return;
+          const { text, surahNumber: sNum, ayahNumber: aNum, id } = highlightSelection;
+          const match = highlightsRef.current.find(h => h.id === id || (h.text === text && h.surahId === sNum && h.ayahNumber === aNum));
+          if (match) {
+            setHighlights(prev => prev.filter(h => h.id !== match.id));
+            toast.success("Highlight removed.");
+            deleteUserHighlight(match.id);
+          }
+          setHighlightSelection(null);
+          window.getSelection()?.removeAllRanges();
+        }}
+        onNote={() => {
+          if (!highlightSelection) return;
+          handleOpenNoteModal(highlightSelection.surahNumber, highlightSelection.ayahNumber, highlightSelection.text);
+          setHighlightSelection(null);
+          window.getSelection()?.removeAllRanges();
+        }}
+        onCopy={() => {
+          if (!highlightSelection) return;
+          copyToClipboard(highlightSelection.text, "Copied to clipboard!");
+          setHighlightSelection(null);
+          window.getSelection()?.removeAllRanges();
+        }}
+        onShare={() => {
+          if (!highlightSelection) return;
+          if (navigator.share) {
+            navigator.share({ title: `Surah ${surah?.englishName || surahNumber}:${highlightSelection.ayahNumber}`, text: highlightSelection.text }).catch(console.error);
+          } else {
+            copyToClipboard(highlightSelection.text, "Copied to clipboard!");
+          }
+          setHighlightSelection(null);
+          window.getSelection()?.removeAllRanges();
+        }}
+        onClose={() => {
+          setHighlightSelection(null);
+          window.getSelection()?.removeAllRanges();
+        }}
+      />
+
+      {/* Floating Interactive Note Popover when clicking inline note icon */}
+      <NotePopover
+        note={activeNotePopup?.note || null}
+        position={activeNotePopup ? { x: activeNotePopup.x, y: activeNotePopup.y } : null}
+        onClose={() => setActiveNotePopup(null)}
+        onDelete={async (id) => {
+          const ok = await deleteUserNote(id);
+          if (ok) {
+            toast.success("Note deleted.");
+            setNotes(prev => prev.filter(n => n.id !== id));
+            setActiveNotePopup(null);
+          } else {
+            toast.error("Failed to delete note.");
+          }
+        }}
+        onEdit={(note) => {
+          const anchorMatch = note.text.match(/^\[Re:\s*["']?([\s\S]+?)["']?\]\s*(?:\r?\n|$)/);
+          handleOpenNoteModal(note.surahId, note.ayahNumber, anchorMatch ? anchorMatch[1] : undefined);
+          setActiveNotePopup(null);
+        }}
       />
 
     </div>

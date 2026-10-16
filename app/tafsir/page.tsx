@@ -31,6 +31,8 @@ import {
   fetchUserNotes,
   deleteUserNote,
   UserNote,
+  getStoredUserHighlights,
+  getStoredUserNotes,
 } from "@/lib/readerStorage";
 
 import { useRouter, useSearchParams } from "next/navigation";
@@ -252,14 +254,22 @@ function TafsirContent() {
   
   const [highlightSelection, setHighlightSelection] = useState<HighlightSelection | null>(null);
 
-  const [highlights, setHighlights] = useState<UserHighlight[]>([]);
-  const [notes, setNotes] = useState<UserNote[]>([]);
+  const [highlights, setHighlights] = useState<UserHighlight[]>(() => getStoredUserHighlights());
+  const [notes, setNotes] = useState<UserNote[]>(() => getStoredUserNotes());
+  const highlightsRef = useRef<UserHighlight[]>(highlights);
+  highlightsRef.current = highlights;
+  const notesRef = useRef<UserNote[]>(notes);
+  notesRef.current = notes;
   const [showHighlightOnboarding, setShowHighlightOnboarding] = useState(false);
 
   useEffect(() => {
     const loadUserData = () => {
-      fetchUserHighlights().then(setHighlights).catch(console.error);
-      fetchUserNotes().then(setNotes).catch(console.error);
+      fetchUserHighlights().then((res) => {
+        if (res && res.length > 0) setHighlights(res);
+      }).catch(console.error);
+      fetchUserNotes().then((res) => {
+        if (res && res.length > 0) setNotes(res);
+      }).catch(console.error);
     };
 
     loadUserData();
@@ -409,6 +419,7 @@ function TafsirContent() {
   });
   const [activeLangName, setActiveLangName] = useState<string>("");
   const [activeSurah, setActiveSurah] = useState<number>(parsedUrlSurahId);
+  const [currentAyahIndex, setCurrentAyahIndex] = useState<number>(0);
 
   useEffect(() => {
     const handleSelection = async () => {
@@ -438,25 +449,28 @@ function TafsirContent() {
       } else if (startEl.closest("[lang='ar']") || startEl.closest("[id^='atext-']")) {
         type = "arabic";
       } else {
-        // fallback: anything inside a TafsirCard counts as translation
         const card = startEl.closest("[data-ayah-num]");
         if (card) type = "translation";
       }
 
-      // Walk up to find ayah/surah numbers
+      // Find card element
+      let card = startEl.closest("[data-ayah-num]");
+      if (!card && range.commonAncestorContainer) {
+        const commonEl = range.commonAncestorContainer.nodeType === Node.TEXT_NODE
+          ? range.commonAncestorContainer.parentElement
+          : (range.commonAncestorContainer as HTMLElement);
+        card = commonEl?.closest("[data-ayah-num]") || null;
+      }
+
       let targetAyahNum: number | null = null;
       let targetSurahNum: number | null = null;
-      let node: Node | null = startEl;
-      while (node && node !== document.body) {
-        if (node.nodeType === Node.ELEMENT_NODE) {
-          const el = node as HTMLElement;
-          if (!targetAyahNum && el.getAttribute("data-ayah-num")) {
-            targetAyahNum = parseInt(el.getAttribute("data-ayah-num") || "0", 10);
-            targetSurahNum = parseInt(el.getAttribute("data-surah-num") || "0", 10);
-            break;
-          }
-        }
-        node = node.parentNode;
+      if (card) {
+        targetAyahNum = parseInt(card.getAttribute("data-ayah-num") || "0", 10);
+        targetSurahNum = parseInt(card.getAttribute("data-surah-num") || "0", 10);
+      }
+      if (!targetAyahNum && typeof currentAyahIndex === "number") {
+        targetAyahNum = currentAyahIndex + 1;
+        targetSurahNum = activeSurah;
       }
 
       if (type && targetAyahNum) {
@@ -504,7 +518,7 @@ function TafsirContent() {
         e.preventDefault();
         e.stopPropagation();
         const noteId = target.getAttribute('data-note-id');
-        const found = notes.find(n => n.id === noteId);
+        const found = notesRef.current.find(n => n.id === noteId);
         if (found) {
           const rect = target.getBoundingClientRect();
           setActiveNotePopup({
@@ -528,22 +542,33 @@ function TafsirContent() {
       setTimeout(handleSelection, 80);
     };
 
+    let selectionDebounceTimer: any = null;
+    const handleSelectionChange = () => {
+      clearTimeout(selectionDebounceTimer);
+      selectionDebounceTimer = setTimeout(() => {
+        handleSelection();
+      }, 150);
+    };
+
     document.addEventListener("mouseup", handleSelection);
     document.addEventListener("touchend", handleTouchEnd);
+    document.addEventListener("selectionchange", handleSelectionChange);
     document.addEventListener("click", handleMarkClick);
     document.addEventListener("click", handleNoteClick);
     document.addEventListener("mousedown", handleGlobalClick);
     document.addEventListener("touchstart", handleGlobalClick);
 
     return () => {
+      clearTimeout(selectionDebounceTimer);
       document.removeEventListener("mouseup", handleSelection);
       document.removeEventListener("touchend", handleTouchEnd);
+      document.removeEventListener("selectionchange", handleSelectionChange);
       document.removeEventListener("click", handleMarkClick);
       document.removeEventListener("click", handleNoteClick);
       document.removeEventListener("mousedown", handleGlobalClick);
       document.removeEventListener("touchstart", handleGlobalClick);
     };
-  }, [activeSurah, notes]);
+  }, [activeSurah, currentAyahIndex]);
   const [loadedTafsir, setLoadedTafsir] = useState<Record<number, TafsirEntry>>({});
   const [loadingEntries, setLoadingEntries] = useState<boolean>(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -552,7 +577,6 @@ function TafsirContent() {
 
   const [topNavVisible, setTopNavVisible] = useState<boolean>(true);
   const [readingMode, setReadingMode] = useState<"vertical" | "horizontal">("vertical");
-  const [currentAyahIndex, setCurrentAyahIndex] = useState<number>(0);
   const ayahRefs = useRef<(HTMLDivElement | null)[]>([]);
   const lastScrollYRef = useRef<number>(0);
 
@@ -1644,28 +1668,40 @@ function TafsirContent() {
           onHighlight={async (color: HighlightColor) => {
             if (!highlightSelection) return;
             const { text, surahNumber, ayahNumber, type, id } = highlightSelection;
-            if (id || highlightSelection.isExisting) {
-              const match = highlights.find(h => h.id === id || (h.text === text && h.surahId === surahNumber && h.ayahNumber === ayahNumber));
-              if (match) {
-                await deleteUserHighlight(match.id);
-                setHighlights(prev => prev.filter(h => h.id !== match.id));
-              }
-            }
-            const authorStr = type === 'translation' ? ((activeAuthor as any)?.name || (activeAuthor as any)?.authorName || undefined) : undefined;
-            const res = await saveUserHighlight(surahNumber, ayahNumber, text, type, authorStr, color);
-            if (res) { toast.success("Highlight saved."); setHighlights(prev => [...prev, res]); }
-            else toast.error("Failed to save highlight.");
+            const effectiveAuthorName = loadedTafsir[ayahNumber - 1]?.author?.name || activeAuthor?.name || "";
+            const authorStr = type === 'translation' ? (effectiveAuthorName.startsWith("Tafsir #") ? undefined : effectiveAuthorName) : undefined;
+            const tempId = id || ("hl_" + (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2) + Date.now().toString(36)));
+            
+            const optimisticHl: UserHighlight = {
+              id: tempId,
+              surahId: surahNumber,
+              ayahNumber,
+              text,
+              type,
+              authorName: authorStr,
+              color,
+              createdAt: new Date().toISOString()
+            };
+
+            setHighlights(prev => [...prev.filter(h => h.id !== tempId && !(h.surahId === surahNumber && h.ayahNumber === ayahNumber && h.text === text)), optimisticHl]);
+            toast.success("Highlight saved.");
             setHighlightSelection(null);
             window.getSelection()?.removeAllRanges();
+
+            saveUserHighlight(surahNumber, ayahNumber, text, type, authorStr, color).then((res) => {
+              if (res && res.id !== tempId) {
+                setHighlights(prev => prev.map(h => h.id === tempId ? res : h));
+              }
+            });
           }}
           onDelete={async () => {
             if (!highlightSelection) return;
             const { text, surahNumber, ayahNumber, id } = highlightSelection;
-            const match = highlights.find(h => h.id === id || (h.text === text && h.surahId === surahNumber && h.ayahNumber === ayahNumber));
+            const match = highlightsRef.current.find(h => h.id === id || (h.text === text && h.surahId === surahNumber && h.ayahNumber === ayahNumber));
             if (match) {
-              const success = await deleteUserHighlight(match.id);
-              if (success) { toast.success("Highlight removed."); setHighlights(prev => prev.filter(h => h.id !== match.id)); }
-              else toast.error("Failed to remove highlight.");
+              setHighlights(prev => prev.filter(h => h.id !== match.id));
+              toast.success("Highlight removed.");
+              deleteUserHighlight(match.id);
             }
             setHighlightSelection(null);
             window.getSelection()?.removeAllRanges();
@@ -2245,37 +2281,40 @@ function TafsirContent() {
         onHighlight={async (color: HighlightColor) => {
           if (!highlightSelection) return;
           const { text, surahNumber, ayahNumber, type, id } = highlightSelection;
-          // If re-highlighting an existing one, remove it first
-          if (id || highlightSelection.isExisting) {
-            const match = highlights.find(h => h.id === id || (h.text === text && h.surahId === surahNumber && h.ayahNumber === ayahNumber));
-            if (match) {
-              await deleteUserHighlight(match.id);
-              setHighlights(prev => prev.filter(h => h.id !== match.id));
-            }
-          }
-          const authorStr = type === 'translation' ? ((activeAuthor as any)?.name || (activeAuthor as any)?.authorName || undefined) : undefined;
-          const res = await saveUserHighlight(surahNumber, ayahNumber, text, type, authorStr, color);
-          if (res) {
-            toast.success("Highlight saved.");
-            setHighlights(prev => [...prev, res]);
-          } else {
-            toast.error("Failed to save highlight.");
-          }
+          const effectiveAuthorName = loadedTafsir[ayahNumber - 1]?.author?.name || (activeAuthor as any)?.name || "";
+          const authorStr = type === 'translation' ? (effectiveAuthorName.startsWith("Tafsir #") ? undefined : effectiveAuthorName) : undefined;
+          const tempId = id || ("hl_" + (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2) + Date.now().toString(36)));
+          
+          const optimisticHl: UserHighlight = {
+            id: tempId,
+            surahId: surahNumber,
+            ayahNumber,
+            text,
+            type,
+            authorName: authorStr,
+            color,
+            createdAt: new Date().toISOString()
+          };
+
+          setHighlights(prev => [...prev.filter(h => h.id !== tempId && !(h.surahId === surahNumber && h.ayahNumber === ayahNumber && h.text === text)), optimisticHl]);
+          toast.success("Highlight saved.");
           setHighlightSelection(null);
           window.getSelection()?.removeAllRanges();
+
+          saveUserHighlight(surahNumber, ayahNumber, text, type, authorStr, color).then((res) => {
+            if (res && res.id !== tempId) {
+              setHighlights(prev => prev.map(h => h.id === tempId ? res : h));
+            }
+          });
         }}
         onDelete={async () => {
           if (!highlightSelection) return;
           const { text, surahNumber, ayahNumber, id } = highlightSelection;
-          const match = highlights.find(h => h.id === id || (h.text === text && h.surahId === surahNumber && h.ayahNumber === ayahNumber));
+          const match = highlightsRef.current.find(h => h.id === id || (h.text === text && h.surahId === surahNumber && h.ayahNumber === ayahNumber));
           if (match) {
-            const success = await deleteUserHighlight(match.id);
-            if (success) {
-              toast.success("Highlight removed.");
-              setHighlights(prev => prev.filter(h => h.id !== match.id));
-            } else {
-              toast.error("Failed to remove highlight.");
-            }
+            setHighlights(prev => prev.filter(h => h.id !== match.id));
+            toast.success("Highlight removed.");
+            deleteUserHighlight(match.id);
           }
           setHighlightSelection(null);
           window.getSelection()?.removeAllRanges();
@@ -2404,8 +2443,9 @@ function TafsirCard({
     if (Number(h.surahId) !== Number(activeSurah) || Number(h.ayahNumber) !== Number(ayahNumber)) return false;
     if (h.type === 'arabic') return true;
     if (h.authorName && authorName) {
-      const hName = h.authorName.toLowerCase();
-      const aName = authorName.toLowerCase();
+      if (h.authorName.startsWith("Tafsir #") || authorName.startsWith("Tafsir #")) return true;
+      const hName = h.authorName.toLowerCase().replace(/^(tafsir|tafseer)\s+/i, '').trim();
+      const aName = authorName.toLowerCase().replace(/^(tafsir|tafseer)\s+/i, '').trim();
       return hName === aName || hName.includes(aName) || aName.includes(hName);
     }
     return true;
