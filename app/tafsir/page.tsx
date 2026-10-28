@@ -50,6 +50,7 @@ import TopicSearchModal from "@/components/shared/TopicSearchModal";
 import InlineTranslation from "@/components/shared/InlineTranslation";
 import AlJuthurLoadingProgress from "@/components/shared/AlJuthurLoadingProgress";
 import { isTafsirMatch, filterTafsirs } from "@/lib/searchUtils";
+import TafsirAudioPlayer from "@/components/tafsir/TafsirAudioPlayer";
 
 interface Author {
   id: number;
@@ -87,7 +88,7 @@ interface TafsirEntry {
   footnotes?: Record<string, string>;
 }
 
-export function isFreeTafsirAuthor(name?: string, authorName?: string): boolean {
+function isFreeTafsirAuthor(name?: string, authorName?: string): boolean {
   const n = (name || "").toLowerCase();
   const a = (authorName || "").toLowerCase();
   if (n.includes("kathir") || a.includes("kathir")) return true;
@@ -2625,6 +2626,15 @@ function TafsirCard({
             notes={ayahNotes}
           />
         </div>
+
+        {/* Audio Player - only shown when tafsir is not locked */}
+        {!isLocked && (
+          <TafsirAudioPlayer
+            tafsirText={entry.text}
+            langName={activeLangName}
+            ayahKey={`${activeSurah}:${ayahNumber}:${authorId}`}
+          />
+        )}
 
         {/* Inline Translation (Exclusively for Arabic Tafsirs) */}
         {isArabic && !isLocked && (

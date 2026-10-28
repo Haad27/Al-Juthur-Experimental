@@ -917,3 +917,9 @@ html[data-scroll-locked] {
     transform: translateX(200%);
   }
 }
+
+/* Tafsir Audio Player — animated equaliser bars */
+@keyframes audioBar {
+  0%, 100% { height: 4px; }
+  50%       { height: 14px; }
+}
