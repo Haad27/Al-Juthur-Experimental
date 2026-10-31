@@ -11,7 +11,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 # Rules
 
 ## 1. Production Workflow
-- **Push to Test by Default**: When a major feature, bugfix, or milestone is completed, stage, commit, and push to the `test` branch (`git add .`, `git commit -m "..."`, and `git push origin test`). Only push or merge to `main` when explicitly requested by the user.
+- **Push to Test by Default**: When a major feature, bugfix, or milestone is completed, stage, commit, and push to the `test` branch (`git add .`, `git commit -m "..."`, and `git push origin test`).
+- **Selective Push to Main (No Blanket Merges)**: Only push to `main` when explicitly requested by the user for the specific feature of the current chat. **NEVER do a full `git merge test` into `main`**, as multiple chats may have other features under test on the `test` branch. Instead, isolate and cherry-pick ONLY the specific commit(s) produced for the current feature (`git checkout main`, `git pull origin main`, `git cherry-pick <commit-hash>`, `git push origin main`, then switch back to `test`). Each chat is responsible only for deploying its own verified work.
 
 ## 2. UI/UX Design System
 - **Distraction-Free & Minimalist**: Reverent aesthetic for Qur'an research. Avoid heavy animations, bouncing effects, or radar pings. Use clean fades and subtle progress bars.
