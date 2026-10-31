@@ -11,7 +11,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 # Rules
 
 ## 1. Production Workflow
-- **Push to Test Only (Never Directly to Main)**: When a major feature, bugfix, or milestone is completed, stage, commit, and push to the `test` branch (`git add .`, `git commit -m "..."`, and `git push origin test`). NEVER push directly to `main`.
+- **Push to Test by Default**: When a major feature, bugfix, or milestone is completed, stage, commit, and push to the `test` branch (`git add .`, `git commit -m "..."`, and `git push origin test`). Only push or merge to `main` when explicitly requested by the user.
 
 ## 2. UI/UX Design System
 - **Distraction-Free & Minimalist**: Reverent aesthetic for Qur'an research. Avoid heavy animations, bouncing effects, or radar pings. Use clean fades and subtle progress bars.
