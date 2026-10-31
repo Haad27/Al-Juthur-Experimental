@@ -123,3 +123,33 @@ export const SURAHS_DATA: SurahMeta[] = [
   { number: 113, name: "سُورَةُ ٱلْفَلَقِ", englishName: "Al-Falaq", englishNameTranslation: "The Daybreak", numberOfAyahs: 5, revelationType: "Meccan" },
   { number: 114, name: "سُورَةُ ٱلنَّاسِ", englishName: "An-Nas", englishNameTranslation: "Mankind", numberOfAyahs: 6, revelationType: "Meccan" }
 ];
+
+/**
+ * Calculates the global ayah index across the Quran (1 to 6236)
+ */
+export function getGlobalAyahNumber(surahNumber: number, ayahNumberInSurah: number): number {
+  let count = 0;
+  for (let i = 0; i < surahNumber - 1 && i < SURAHS_DATA.length; i++) {
+    count += SURAHS_DATA[i].numberOfAyahs;
+  }
+  return count + ayahNumberInSurah;
+}
+
+/**
+ * Generates direct high-speed CDN audio URLs for Arabic, English, or Urdu translations
+ */
+export function getAyahAudioUrl(
+  surahNumber: number,
+  ayahNumberInSurah: number,
+  edition: "ar.alafasy" | "en.walk" | "ur.khan" | string = "ar.alafasy"
+): string {
+  const globalAyah = getGlobalAyahNumber(surahNumber, ayahNumberInSurah);
+  if (edition === "en.walk") {
+    return `https://cdn.islamic.network/quran/audio/192/en.walk/${globalAyah}.mp3`;
+  }
+  if (edition === "ur.khan") {
+    return `https://cdn.islamic.network/quran/audio/64/ur.khan/${globalAyah}.mp3`;
+  }
+  return `https://cdn.islamic.network/quran/audio/128/${edition}/${globalAyah}.mp3`;
+}
+

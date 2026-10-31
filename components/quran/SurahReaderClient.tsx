@@ -295,6 +295,9 @@ const AyahRow = React.memo(({
   const isOtherPlaying = isPlaying && !isCurrentlyPlaying;
   const playAyah = useAudioStore(s => s.playAyah);
   const pause = useAudioStore(s => s.pause);
+  const audioMode = useAudioStore(s => s.audioMode);
+  const activePhase = useAudioStore(s => s.activePhase);
+  const translationAudioLang = useAudioStore(s => s.translationAudioLang);
   const [showFootnoteIds, setShowFootnoteIds] = useState(false);
   const [fetchedFootnotes, setFetchedFootnotes] = useState<Record<string, string>>({});
   const [loadingFootnotes, setLoadingFootnotes] = useState(false);
@@ -542,7 +545,9 @@ const AyahRow = React.memo(({
               <span className="w-[2px] h-2/3 bg-accent animate-pulse" style={{ animationDelay: '0.2s' }}></span>
               <span className="w-[2px] h-full bg-accent animate-pulse" style={{ animationDelay: '0.3s' }}></span>
             </div>
-            <span className="text-[9px] font-bold text-accent tracking-[0.15em] uppercase hidden sm:inline">Now Playing</span>
+            <span className="text-[9px] font-bold text-accent tracking-[0.15em] uppercase hidden sm:inline">
+              Now Playing {audioMode === "both" ? (activePhase === "translation" ? `• Translation (${translationAudioLang === "ur" ? "Urdu" : "English"})` : "• Arabic") : audioMode === "translation" ? `• Translation (${translationAudioLang === "ur" ? "Urdu" : "English"})` : "• Arabic"}
+            </span>
           </div>
 
           <div className="flex items-center gap-1.5">
@@ -684,7 +689,10 @@ const AyahRow = React.memo(({
           )}>
             <div>
               <span
-                className="text-reading md:leading-[1.7] leading-[1.7] translation-content reading-prose"
+                className={cn(
+                  "text-reading md:leading-[1.7] leading-[1.7] translation-content reading-prose transition-all duration-300",
+                  isCurrentlyPlaying && activePhase === "translation" && "text-accent drop-shadow-sm font-medium"
+                )}
                 style={{ 
                   fontSize: getTranslationFontSize(fontSize, isUrduTranslation),
                   fontFamily: activeFontStyle.fontFamily,

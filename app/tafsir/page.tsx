@@ -51,6 +51,8 @@ import InlineTranslation from "@/components/shared/InlineTranslation";
 import AlJuthurLoadingProgress from "@/components/shared/AlJuthurLoadingProgress";
 import { isTafsirMatch, filterTafsirs } from "@/lib/searchUtils";
 import TafsirAudioPlayer from "@/components/tafsir/TafsirAudioPlayer";
+import DrIsrarMediaCard from "@/components/tafsir/DrIsrarMediaCard";
+import { isDrIsrarAuthor } from "@/lib/bayanUlQuranMedia";
 
 interface Author {
   id: number;
@@ -1342,6 +1344,15 @@ function TafsirContent() {
               </div>
             )}
 
+            {/* Dr. Israr Ahmed Original Bayan-ul-Quran Audio & Video Media Card */}
+            {activeAuthor && isDrIsrarAuthor(activeAuthor.id, activeAuthor.authorName, activeAuthor.name) && (
+              <DrIsrarMediaCard
+                surahNumber={activeSurah}
+                surahName={currentSurahMeta.englishName}
+                arabicName={currentSurahMeta.name}
+              />
+            )}
+
             {/* Context & Theme Popover / Drawer Content */}
             {showSurahContext && surahInfo && (
               <div className={cn(
@@ -2629,7 +2640,7 @@ function TafsirCard({
         </div>
 
         {/* Audio Player - only shown when tafsir is not locked */}
-        {!isLocked && (
+        {!isLocked && !isDrIsrarAuthor(authorId, authorName) && (
           <TafsirAudioPlayer
             tafsirText={entry.text}
             langName={activeLangName}

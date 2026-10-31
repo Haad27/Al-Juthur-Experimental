@@ -1,5 +1,9 @@
 import { create } from 'zustand';
 
+export type AudioMode = "arabic" | "translation" | "both";
+export type TranslationAudioLang = "en" | "ur";
+export type AudioPhase = "arabic" | "translation" | null;
+
 interface AudioState {
   currentSurah: number | null;
   currentAyah: number | null;
@@ -7,6 +11,10 @@ interface AudioState {
   isPlaying: boolean;
   playbackRate: number;
   audioElement: HTMLAudioElement | null;
+  audioMode: AudioMode;
+  translationAudioLang: TranslationAudioLang;
+  activePhase: AudioPhase;
+  hasChosenAudioMode: boolean;
   
   // Actions
   playAyah: (surahNumber: number, ayahNumber: number, audioUrl: string) => void;
@@ -17,8 +25,39 @@ interface AudioState {
   setCurrentWord: (word: number | null) => void;
   setIsPlaying: (isPlaying: boolean) => void;
   setPlaybackRate: (rate: number) => void;
+  setAudioMode: (mode: AudioMode) => void;
+  setTranslationAudioLang: (lang: TranslationAudioLang) => void;
+  setActivePhase: (phase: AudioPhase) => void;
+  setHasChosenAudioMode: (chosen: boolean) => void;
   clearAudio: () => void;
 }
+
+const getInitialAudioMode = (): AudioMode => {
+  if (typeof window !== "undefined") {
+    const saved = localStorage.getItem("quran_audio_mode");
+    if (saved === "arabic" || saved === "translation" || saved === "both") {
+      return saved;
+    }
+  }
+  return "both";
+};
+
+const getInitialTranslationLang = (): TranslationAudioLang => {
+  if (typeof window !== "undefined") {
+    const saved = localStorage.getItem("quran_translation_audio_lang");
+    if (saved === "en" || saved === "ur") {
+      return saved;
+    }
+  }
+  return "en";
+};
+
+const getInitialHasChosen = (): boolean => {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("quran_audio_mode_chosen") === "true";
+  }
+  return false;
+};
 
 export const useAudioStore = create<AudioState>((set, get) => ({
   currentSurah: null,
@@ -27,6 +66,10 @@ export const useAudioStore = create<AudioState>((set, get) => ({
   isPlaying: false,
   playbackRate: 1,
   audioElement: null,
+  audioMode: getInitialAudioMode(),
+  translationAudioLang: getInitialTranslationLang(),
+  activePhase: null,
+  hasChosenAudioMode: getInitialHasChosen(),
 
   playAyah: (surahNumber, ayahNumber, audioUrl) => {
     const state = get();
@@ -62,7 +105,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
     });
 
     audio.addEventListener('ended', () => {
-      set({ currentAyah: null, isPlaying: false });
+      set({ currentAyah: null, isPlaying: false, activePhase: null });
     });
 
     audio.addEventListener('pause', () => {
@@ -89,6 +132,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
     if (audioElement) {
       audioElement.pause();
     }
+    set({ isPlaying: false });
   },
 
   setAudioElement: (element) => set({ audioElement: element }),
@@ -97,6 +141,30 @@ export const useAudioStore = create<AudioState>((set, get) => ({
   setCurrentWord: (word) => set({ currentWord: word }),
   setIsPlaying: (isPlaying) => set({ isPlaying }),
   
+  setAudioMode: (mode: AudioMode) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("quran_audio_mode", mode);
+      localStorage.setItem("quran_audio_mode_chosen", "true");
+    }
+    set({ audioMode: mode, hasChosenAudioMode: true });
+  },
+
+  setTranslationAudioLang: (lang: TranslationAudioLang) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("quran_translation_audio_lang", lang);
+    }
+    set({ translationAudioLang: lang });
+  },
+
+  setActivePhase: (phase: AudioPhase) => set({ activePhase: phase }),
+
+  setHasChosenAudioMode: (chosen: boolean) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("quran_audio_mode_chosen", chosen ? "true" : "false");
+    }
+    set({ hasChosenAudioMode: chosen });
+  },
+
   setPlaybackRate: (rate: number) => {
     const { audioElement } = get();
     if (audioElement) {
@@ -116,6 +184,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
       audioElement.pause();
       audioElement.currentTime = 0;
     }
-    set({ currentSurah: null, currentAyah: null, currentWord: null, isPlaying: false, audioElement: null });
+    set({ currentSurah: null, currentAyah: null, currentWord: null, isPlaying: false, audioElement: null, activePhase: null });
   }
 }));
+

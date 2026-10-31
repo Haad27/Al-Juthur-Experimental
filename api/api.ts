@@ -44,11 +44,11 @@ export const searchQuran = async (query: string) => {
 export const fetchAyahAudio = async (
   surahId: number,
   ayahId: number,
-  type?: unknown
+  edition: string = "ar.alafasy"
 ) => {
   try {
     const response = await fetch(
-      `https://api.alquran.cloud/v1/ayah/${surahId}:${ayahId}/ar.alafasy`
+      `https://api.alquran.cloud/v1/ayah/${surahId}:${ayahId}/${edition}`
     );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -60,10 +60,10 @@ export const fetchAyahAudio = async (
   }
 };
 
-export const fetchSurahAudio = async (surahId: number) => {
+export const fetchSurahAudio = async (surahId: number, edition: string = "ar.alafasy") => {
   try {
     const response = await fetch(
-      `https://api.alquran.cloud/v1/surah/${surahId}/ar.alafasy`
+      `https://api.alquran.cloud/v1/surah/${surahId}/${edition}`
     );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
