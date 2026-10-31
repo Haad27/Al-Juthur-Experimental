@@ -31,8 +31,10 @@ export function cleanPunctuation(str: string): string {
     .replace(/ة/g, "ه")
     .replace(/[ىئ]/g, "ي")
     .replace(/ؤ/g, "و")
-    // Replace punctuation with spaces
-    .replace(/[''`'"\-–—:;,.()\[\]\/{}\\_#?!\*&]/g, " ")
+    // Remove quotes, apostrophes, backticks so words like Sa'di, Qur'an, Ma'arif, Ash'ari remain intact
+    .replace(/[''`’‘"“”]/g, "")
+    // Replace remaining punctuation with spaces
+    .replace(/[\-–—:;,.()\[\]\/{}\\_#?!\*&]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -49,8 +51,8 @@ export function phoneticReduce(str: string): string {
   s = s.replace(/\b(surah|surat|sura|soorah|tafsir|tafseer|sheikh|shaykh|imam|hafiz|mufti|maulana|allamah|allama|dr|doctor|ustadh)\b/gi, " ");
 
   // Strip definite articles at word boundaries: al-, an-, as-, at-, ar-, az-, ad-, ash-, adh-, aal-, el-, etc.
-  s = s.replace(/\b(al|an|as|at|ar|az|ad|ash|adh|aal|el|en|es|et|er|ez|ed|esh|edh)\s+/gi, " ");
-  s = s.replace(/\b(al|an|as|at|ar|az|ad|ash|adh|aal|el|en|es|et|er|ez|ed|esh|edh)(?=[a-z]{3,})/gi, "");
+  s = s.replace(/\b(al|an|as|at|ar|az|ad|ash|adh|azh|aal|el)\s+/gi, " ");
+  s = s.replace(/\b(al|an|as|at|ar|az|ad|ash|adh|azh|aal|el)(?=[a-z]{3,})/gi, "");
 
   // Common typo fixes
   s = s.replace(/\bibhn\b/gi, "ibn");
@@ -154,6 +156,21 @@ export function levenshteinDistance(a: string, b: string): number {
  */
 export function getMatchScore(query: string, target: string): number {
   if (!query || !target) return 0;
+  
+  // If target contains parenthesized subtitle (e.g. "Tafsir as-Sa'di (تيسير الكريم الرحمن)"),
+  // also score the primary name without parentheses
+  const withoutParens = target.replace(/\s*\([^)]*\)/g, "").trim();
+  if (withoutParens && withoutParens !== target) {
+    const scoreWithoutParens = getMatchScoreInternal(query, withoutParens);
+    const scoreBase = getMatchScoreInternal(query, target);
+    return Math.max(scoreBase, scoreWithoutParens);
+  }
+
+  return getMatchScoreInternal(query, target);
+}
+
+function getMatchScoreInternal(query: string, target: string): number {
+  if (!query || !target) return 0;
   const qTrim = query.trim().toLowerCase();
   const tTrim = target.trim().toLowerCase();
   if (!qTrim || !tTrim) return 0;
@@ -185,6 +202,16 @@ export function getMatchScore(query: string, target: string): number {
   const tTokens = tPhone.split(" ").filter(Boolean);
 
   if (qTokens.length === 1 && tTokens.includes(qTokens[0])) {
+    return 90;
+  }
+
+  // All query tokens are found in target tokens (e.g. "sadi english" or "ibn kathir")
+  if (qTokens.length > 1 && qTokens.every((qTok) => tTokens.includes(qTok))) {
+    return 90;
+  }
+
+  // Multi-token prefix match on all tokens (e.g. "sadi eng" matches "sadi ... english")
+  if (qTokens.length > 0 && qTokens.every((qTok) => tTokens.some((tTok) => tTok === qTok || tTok.startsWith(qTok)))) {
     return 90;
   }
 
@@ -487,9 +514,13 @@ export function filterTafsirs<
   if (matching.length === 0) return [];
 
   const maxScore = Math.max(...matching.map((m) => m.score));
-  // If top-tier (>= 90 exact or canonical matches) exist, return ONLY those to keep results clean and relevant
+  // If top-tier (>= 90 exact or canonical matches) exist, return ONLY those to keep results clean and relevant,
+  // sorted descending by score so exact matches appear first
   if (maxScore >= 90) {
-    return matching.filter((m) => m.score >= 90).map((m) => m.item);
+    return matching
+      .filter((m) => m.score >= 90)
+      .sort((a, b) => b.score - a.score)
+      .map((m) => m.item);
   }
 
   return matching.sort((a, b) => b.score - a.score).map((m) => m.item);

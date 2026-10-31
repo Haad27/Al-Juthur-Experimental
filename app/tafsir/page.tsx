@@ -114,7 +114,8 @@ const normalizeText = (text: string): string => {
   if (!text) return "";
   return text
     .toLowerCase()
-    .replace(/[''`'"\-–—:;,.()\[\]\/]/g, " ")
+    .replace(/[''`’‘"“”]/g, "")
+    .replace(/[\-–—:;,.()\[\]\/]/g, " ")
     .replace(/\b(tafseer|tafsir)\b/g, "tafsir")
     .replace(/\b(kaseer|kahtir|katheer)\b/g, "kathir")
     .replace(/\b(saddi|saadi|sadi)\b/g, "saadi")

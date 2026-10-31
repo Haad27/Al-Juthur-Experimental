@@ -19,7 +19,7 @@ export function getTafsirFameRank(name: string, authorName?: string | null): num
   if (text.includes("qurtubi") || text.includes("قرطبي") || text.includes("قرطبی")) return 4;
 
   // 5. Tafsir as-Sa'di (Most famous modern clear classical Tafsir)
-  if (text.includes("sa'di") || text.includes("sadi") || text.includes("سعدي") || text.includes("سعدی")) return 5;
+  if (text.includes("sa'di") || text.includes("sadi") || text.includes("saadi") || text.includes("saddi") || text.includes("سعدي") || text.includes("سعدی")) return 5;
 
   // 6. Tafheem-ul-Quran (Sayyid Abul A'la Maududi)
   if (text.includes("tafheem") || text.includes("maududi") || text.includes("تفہیم") || text.includes("مودودي") || text.includes("مودودی")) return 6;
