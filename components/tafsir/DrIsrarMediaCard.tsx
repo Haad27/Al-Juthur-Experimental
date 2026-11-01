@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import {
   Play,
@@ -8,22 +8,17 @@ import {
   Volume2,
   VolumeX,
   Youtube,
-  Tv,
   X,
   ExternalLink,
   FastForward,
   Rewind,
   Sparkles,
-  Move,
   Minimize2,
-  Maximize2,
-  PanelTop,
   Layers,
-  ChevronDown,
   RefreshCw,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { getDrIsrarMedia, DrIsrarAudioPart } from "@/lib/bayanUlQuranMedia";
+import { getDrIsrarMedia } from "@/lib/bayanUlQuranMedia";
+import { useDrIsrarPlayer } from "@/lib/providers/DrIsrarPlayerContext";
 
 interface DrIsrarMediaCardProps {
   surahNumber: number;
@@ -31,14 +26,13 @@ interface DrIsrarMediaCardProps {
   arabicName?: string;
 }
 
-type VideoViewMode = "docked" | "floating";
-
 export default function DrIsrarMediaCard({
   surahNumber,
   surahName,
   arabicName,
 }: DrIsrarMediaCardProps) {
   const media = getDrIsrarMedia(surahNumber, surahName);
+  const player = useDrIsrarPlayer();
 
   // Audio state
   const [selectedPartIndex, setSelectedPartIndex] = useState(0);
@@ -50,21 +44,6 @@ export default function DrIsrarMediaCard({
   const [audioError, setAudioError] = useState(false);
   const [isRetryingAudio, setIsRetryingAudio] = useState(false);
 
-  // Video state (Split Screen Docked vs Floating PiP)
-  const [isVideoOpen, setIsVideoOpen] = useState(false);
-  const [videoMode, setVideoMode] = useState<VideoViewMode>("docked");
-  const [isVideoMinimized, setIsVideoMinimized] = useState(false);
-
-  // Floating PiP Drag state
-  const [pipPos, setPipPos] = useState<{ x: number; y: number }>({ x: 24, y: 80 });
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStartRef = useRef<{ startX: number; startY: number; posX: number; posY: number }>({
-    startX: 0,
-    startY: 0,
-    posX: 24,
-    posY: 80,
-  });
-
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Active audio URL based on selected part
@@ -72,11 +51,6 @@ export default function DrIsrarMediaCard({
     media.audioParts.length > 0 && media.audioParts[selectedPartIndex]
       ? media.audioParts[selectedPartIndex].url
       : media.audioUrl;
-
-  const currentPartLabel =
-    media.audioParts.length > 0 && media.audioParts[selectedPartIndex]
-      ? media.audioParts[selectedPartIndex].label
-      : "Full Lecture";
 
   // Reset state when surah changes
   useEffect(() => {
@@ -102,6 +76,14 @@ export default function DrIsrarMediaCard({
     }
   }, [selectedPartIndex]);
 
+  // If global video player is opened, stop audio playback
+  useEffect(() => {
+    if (player.isOpen && isPlaying && audioRef.current) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
+  }, [player.isOpen]);
+
   // Audio Controls
   const togglePlay = () => {
     if (!audioRef.current) return;
@@ -110,8 +92,8 @@ export default function DrIsrarMediaCard({
       setIsPlaying(false);
     } else {
       // Pause video if user switches to audio
-      if (isVideoOpen) {
-        setIsVideoOpen(false);
+      if (player.isOpen) {
+        player.closePlayer();
       }
       setAudioError(false);
       audioRef.current
@@ -202,61 +184,16 @@ export default function DrIsrarMediaCard({
     return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
-  // Video toggles
-  const openVideo = (mode: VideoViewMode = "docked") => {
-    // Pause audio when video opens
+  const handleOpenVideo = (mode: "docked" | "floating") => {
     if (isPlaying && audioRef.current) {
       audioRef.current.pause();
       setIsPlaying(false);
     }
-    setVideoMode(mode);
-    setIsVideoMinimized(false);
-    setIsVideoOpen(true);
+    player.openPlayer(surahNumber, surahName, arabicName, mode);
   };
 
-  const closeVideo = () => {
-    setIsVideoOpen(false);
-    setIsVideoMinimized(false);
-  };
-
-  // Draggable PiP Handlers
-  const handlePointerDown = (e: React.PointerEvent) => {
-    // Only drag from header handle
-    setIsDragging(true);
-    dragStartRef.current = {
-      startX: e.clientX,
-      startY: e.clientY,
-      posX: pipPos.x,
-      posY: pipPos.y,
-    };
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  };
-
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDragging) return;
-    const dx = e.clientX - dragStartRef.current.startX;
-    const dy = e.clientY - dragStartRef.current.startY;
-
-    // Bounds check
-    const maxX = Math.max(20, window.innerWidth - 380);
-    const maxY = Math.max(20, window.innerHeight - 250);
-
-    const nextX = Math.min(Math.max(10, dragStartRef.current.posX + dx), maxX);
-    const nextY = Math.min(Math.max(10, dragStartRef.current.posY + dy), maxY);
-
-    setPipPos({ x: nextX, y: nextY });
-  };
-
-  const handlePointerUp = (e: React.PointerEvent) => {
-    if (isDragging) {
-      setIsDragging(false);
-      try {
-        (e.target as HTMLElement).releasePointerCapture(e.pointerId);
-      } catch {
-        // ignore
-      }
-    }
-  };
+  // Check if docked player is currently active in tafsir reader
+  const isDockedActive = player.isOpen && player.viewMode === "docked" && !player.isMinimized;
 
   return (
     <>
@@ -273,30 +210,31 @@ export default function DrIsrarMediaCard({
 
       {/* =========================================================================
           MODE 1: TOP DOCKED SPLIT-SCREEN PLAYER (Apple Split-Screen Style)
-          Takes the top area, pinned cleanly, and text flows completely beneath it!
+          Sticky at top with a fixed 16:9 proportion as the user scrolls down,
+          with tafsir commentary text flowing completely beneath it!
           ========================================================================= */}
-      {isVideoOpen && videoMode === "docked" && (
-        <div className="w-full my-4 rounded-2xl border-2 border-accent/40 bg-card shadow-2xl overflow-hidden transition-all animate-in fade-in slide-in-from-top-4 duration-300">
+      {isDockedActive && (
+        <div className="sticky top-14 sm:top-16 z-30 w-full my-4 rounded-2xl border-2 border-accent/40 bg-card shadow-2xl overflow-hidden transition-all animate-in fade-in slide-in-from-top-4 duration-300">
           {/* Docked Player Header Toolbar */}
-          <div className="flex items-center justify-between px-3.5 sm:px-4 py-2.5 bg-card border-b border-border text-foreground">
+          <div className="flex items-center justify-between px-3.5 sm:px-4 py-2 bg-card border-b border-border text-foreground">
             <div className="flex items-center gap-2 min-w-0">
               <span className="flex h-2.5 w-2.5 relative">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
               </span>
               <span className="text-xs sm:text-sm font-bold truncate">
-                Dr. Israr Ahmed • Bayan-ul-Quran (Surah {surahName})
+                Dr. Israr Ahmed • Surah {player.surahName}
               </span>
               <span className="hidden md:inline-flex px-2 py-0.5 rounded-md bg-accent/10 text-accent text-[11px] font-semibold">
-                Split Screen (Top Area)
+                Split Screen (Top Fixed)
               </span>
             </div>
 
-            {/* Apple-style window action buttons */}
+            {/* Header controls */}
             <div className="flex items-center gap-1.5 shrink-0">
-              {/* Switch to Floating PiP mode */}
+              {/* Float Window (pop out) */}
               <button
-                onClick={() => setVideoMode("floating")}
+                onClick={() => player.setVideoMode("floating")}
                 className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground text-xs font-medium transition-colors cursor-pointer"
                 title="Pop out into floating movable window (PiP)"
               >
@@ -306,14 +244,14 @@ export default function DrIsrarMediaCard({
 
               {/* Minimize to compact pill */}
               <button
-                onClick={() => setIsVideoMinimized(true)}
+                onClick={() => player.setIsMinimized(true)}
                 className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                 title="Minimize player"
               >
                 <Minimize2 size={14} />
               </button>
 
-              {/* Open in YouTube */}
+              {/* External link */}
               <a
                 href={media.youtubeWatchUrl}
                 target="_blank"
@@ -324,9 +262,9 @@ export default function DrIsrarMediaCard({
                 <ExternalLink size={14} />
               </a>
 
-              {/* Close Video */}
+              {/* Close */}
               <button
-                onClick={closeVideo}
+                onClick={player.closePlayer}
                 className="p-1.5 rounded-lg hover:bg-red-500/15 text-muted-foreground hover:text-red-500 transition-colors cursor-pointer"
                 title="Close Split Screen"
               >
@@ -336,7 +274,7 @@ export default function DrIsrarMediaCard({
           </div>
 
           {/* 16:9 Responsive Video Viewport */}
-          <div className="relative w-full aspect-video max-h-[380px] sm:max-h-[460px] bg-black">
+          <div className="relative w-full aspect-video max-h-[360px] sm:max-h-[420px] bg-black">
             <iframe
               src={media.youtubeEmbedUrl}
               title={`Dr. Israr Ahmed Bayan-ul-Quran Surah ${surahName}`}
@@ -347,14 +285,13 @@ export default function DrIsrarMediaCard({
             />
           </div>
 
-          {/* Sub-bar with quick hint */}
-          <div className="px-4 py-2 bg-muted/40 border-t border-border flex items-center justify-between text-[11px] text-muted-foreground">
-            <span>
-              💡 Split screen active: Scroll down freely to read the Tafsir commentary text below
-              without interruption.
+          {/* Bottom helper info */}
+          <div className="px-4 py-1.5 bg-muted/40 border-t border-border flex items-center justify-between text-[11px] text-muted-foreground">
+            <span className="truncate">
+              Scroll down freely to read the Tafsir text below • You can also open the Quran and keep watching!
             </span>
             <button
-              onClick={() => setVideoMode("floating")}
+              onClick={() => player.setVideoMode("floating")}
               className="text-accent hover:underline font-semibold cursor-pointer shrink-0 ml-2"
             >
               Make Floating →
@@ -364,124 +301,8 @@ export default function DrIsrarMediaCard({
       )}
 
       {/* =========================================================================
-          MODE 2: MOVABLE FLOATING PICTURE-IN-PICTURE (Apple PiP Style)
-          Hovering on top, always on top (z-70), solid background so text below
-          never bleeds through, and fully draggable across the screen!
-          ========================================================================= */}
-      {isVideoOpen && videoMode === "floating" && !isVideoMinimized && (
-        <div
-          style={{
-            position: "fixed",
-            left: `${pipPos.x}px`,
-            top: `${pipPos.y}px`,
-            zIndex: 70,
-          }}
-          className={cn(
-            "w-[90vw] sm:w-[440px] md:w-[480px] rounded-2xl border-2 border-accent/50 bg-card shadow-2xl overflow-hidden transition-shadow select-none",
-            isDragging ? "shadow-accent/20 cursor-grabbing ring-2 ring-accent" : "shadow-2xl"
-          )}
-        >
-          {/* Floating Drag Handle Header */}
-          <div
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            className="flex items-center justify-between px-3 py-2 bg-muted/80 border-b border-border cursor-grab active:cursor-grabbing text-foreground"
-            title="Drag to move video window"
-          >
-            <div className="flex items-center gap-2 min-w-0 pointer-events-none">
-              <Move size={14} className="text-accent shrink-0" />
-              <span className="text-xs font-bold truncate">
-                Dr. Israr • Surah {surahName}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-1 shrink-0">
-              {/* Dock back to Top Split Screen */}
-              <button
-                onClick={() => setVideoMode("docked")}
-                className="p-1 rounded-md hover:bg-card text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                title="Dock to top split-screen"
-              >
-                <PanelTop size={14} />
-              </button>
-
-              {/* Minimize to Pill */}
-              <button
-                onClick={() => setIsVideoMinimized(true)}
-                className="p-1 rounded-md hover:bg-card text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                title="Minimize"
-              >
-                <Minimize2 size={14} />
-              </button>
-
-              {/* Close */}
-              <button
-                onClick={closeVideo}
-                className="p-1 rounded-md hover:bg-red-500/20 text-muted-foreground hover:text-red-500 transition-colors cursor-pointer"
-                title="Close"
-              >
-                <X size={14} />
-              </button>
-            </div>
-          </div>
-
-          {/* Video Container (16:9, Solid Black Base, High z-index) */}
-          <div className="relative w-full aspect-video bg-black">
-            <iframe
-              src={media.youtubeEmbedUrl}
-              title={`Dr. Israr Ahmed Bayan-ul-Quran Surah ${surahName}`}
-              className="absolute inset-0 size-full border-0 pointer-events-auto"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-            />
-          </div>
-
-          {/* Floating Footer with controls */}
-          <div className="px-3 py-1.5 bg-card flex items-center justify-between text-[11px] text-muted-foreground">
-            <span className="truncate">Drag header to reposition</span>
-            <button
-              onClick={() => setVideoMode("docked")}
-              className="text-accent hover:underline font-semibold cursor-pointer shrink-0"
-            >
-              Dock to Top ↑
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* =========================================================================
-          MODE 3: MINIMIZED FLOATING PILL
-          When the user minimizes either docked or floating video to view full text
-          ========================================================================= */}
-      {isVideoOpen && isVideoMinimized && (
-        <div className="fixed bottom-6 right-6 z-[70] flex items-center gap-2.5 px-3.5 py-2 rounded-full bg-card border border-accent/40 shadow-2xl text-foreground animate-in zoom-in-95 duration-200">
-          <span className="flex h-2.5 w-2.5 relative">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-accent"></span>
-          </span>
-          <span className="text-xs font-bold">Dr. Israr Bayan ({surahName})</span>
-          <button
-            onClick={() => setIsVideoMinimized(false)}
-            className="p-1 rounded-full hover:bg-muted text-accent hover:text-accent-foreground transition-colors cursor-pointer"
-            title="Expand Video"
-          >
-            <Maximize2 size={13} />
-          </button>
-          <button
-            onClick={closeVideo}
-            className="p-1 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-            title="Close Video"
-          >
-            <X size={13} />
-          </button>
-        </div>
-      )}
-
-      {/* =========================================================================
           MAIN INLINE MEDIA CARD: ORIGINAL AUDIO TAFSIR + VIDEO LAUNCHER
-          Always visible in the reader header, with Dr. Israr's verified MP3 stream!
+          Always visible in the reader header, with Dr. Israr's portrait and MP3!
           ========================================================================= */}
       <div className="w-full my-4 rounded-2xl border border-border bg-card/95 shadow-sm backdrop-blur p-4 sm:p-5 transition-all">
         {/* Scholar Portrait + Lecture Details */}
@@ -495,6 +316,7 @@ export default function DrIsrarMediaCard({
               className="object-cover rounded-xl"
               sizes="(max-width: 640px) 64px, 80px"
               priority
+              unoptimized
             />
             {isPlaying && (
               <div className="absolute inset-0 bg-background/50 backdrop-blur-[1px] flex items-center justify-center">
@@ -616,7 +438,7 @@ export default function DrIsrarMediaCard({
                 {/* Video Split Screen / PiP Launch Buttons */}
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => openVideo("docked")}
+                    onClick={() => handleOpenVideo("docked")}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-600/15 border border-red-500/30 text-red-500 dark:text-red-400 hover:bg-red-600/25 text-xs font-semibold transition-all cursor-pointer shadow-sm"
                     title="Watch Split Screen Video (Apple Style)"
                   >
@@ -625,7 +447,7 @@ export default function DrIsrarMediaCard({
                   </button>
 
                   <button
-                    onClick={() => openVideo("floating")}
+                    onClick={() => handleOpenVideo("floating")}
                     className="p-1.5 rounded-lg border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-colors inline-flex items-center cursor-pointer"
                     title="Open Floating Picture-in-Picture window"
                   >
@@ -637,7 +459,7 @@ export default function DrIsrarMediaCard({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-1.5 rounded-lg border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-colors inline-flex items-center"
-                    title="Open in YouTube"
+                    title="Open Complete YouTube Playlist"
                   >
                     <ExternalLink size={13} />
                   </a>

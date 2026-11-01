@@ -90,6 +90,8 @@ export const viewport = {
 };
 
 import GlobalModals from "@/components/popups/GlobalModals";
+import { DrIsrarPlayerProvider } from "@/lib/providers/DrIsrarPlayerContext";
+import DrIsrarGlobalPlayer from "@/components/tafsir/DrIsrarGlobalPlayer";
 
 const THEME_BOOTSTRAP = `(function(){try{var t=localStorage.getItem('theme');if(t==='light'){document.documentElement.classList.remove('dark');}else{document.documentElement.classList.add('dark');}}catch(e){}})();`;
 
@@ -107,6 +109,7 @@ export default function RootLayout({
         <AppThemeProvider>
           <AuthProvider>
             <GlobalStateProvider>
+              <DrIsrarPlayerProvider>
               <NextTopLoader
                 color="#8B6914"
                 showSpinner={false}
@@ -117,7 +120,9 @@ export default function RootLayout({
               <BottomNav />
               <GlobalTopicSearchProvider />
               <GlobalModals />
+              <DrIsrarGlobalPlayer />
               <Toaster />
+              </DrIsrarPlayerProvider>
             </GlobalStateProvider>
           </AuthProvider>
         </AppThemeProvider>

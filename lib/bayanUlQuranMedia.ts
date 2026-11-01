@@ -2,10 +2,12 @@
  * lib/bayanUlQuranMedia.ts
  *
  * Media mapping (Audio lectures from Tanzeem-e-Islami Bayan-ul-Quran archive
- * and YouTube video embeds) for Dr. Israr Ahmed's complete Bayan-ul-Quran.
+ * and complete 114 Surah-by-Surah YouTube playlist video embeds) for
+ * Dr. Israr Ahmed's complete Bayan-ul-Quran.
  */
 
 import israrAudioMapRaw from "./israrAudioMap.json";
+import israrVideoMapRaw from "./israrVideoMap.json";
 
 export interface DrIsrarAudioPart {
   filename: string;
@@ -25,31 +27,10 @@ export interface DrIsrarMedia {
 }
 
 const israrAudioMap = israrAudioMapRaw as Record<string, string[]>;
+const israrVideoMap = israrVideoMapRaw as Record<string, string>;
 
+export const BAYAN_UL_QURAN_PLAYLIST_ID = "PLcWR-ibc7-PJzjJrSjXu7zTe7kWFPmDd5";
 const ARCHIVE_BASE_URL = "https://archive.org/download/BayanUlQuranByDr.IsrarAhmed";
-
-// Verified YouTube video IDs for Dr. Israr Ahmed Bayan-ul-Quran lectures
-export const DR_ISRAR_YOUTUBE_MAP: Record<number, string> = {
-  1: "vNrTPrkVQmw", // Surah Al-Fatihah
-  2: "o_RHhqjl9Nc", // Surah Al-Baqarah (Ruku 1-4)
-  3: "eK_g22_c9U0", // Surah Ali 'Imran
-  4: "q6rD-VjU3Xk", // Surah An-Nisa
-  5: "Yw1Y3e-y6Gk", // Surah Al-Ma'idah
-  6: "Q9j0rXfH7eM", // Surah Al-An'am
-  7: "F2Bf5xK4y-4", // Surah Al-A'raf
-  8: "iE2vY-7O0U8", // Surah Al-Anfal
-  9: "u1_4A5gM0Lg", // Surah At-Tawbah
-  10: "p3X6b_XJ0rI", // Surah Yunus
-  11: "s3_kL_2P0yA", // Surah Hud
-  12: "h6_b0G9Xk1I", // Surah Yusuf
-  18: "AUZIYQEddtt", // Surah Al-Kahf
-  36: "AUZIYQG7dyd", // Surah Ya-Sin
-  55: "AUZIYQFRFKd", // Surah Ar-Rahman
-  67: "AUZIYQH87ms", // Surah Al-Mulk
-  112: "AUZIYQG1FU8", // Surah Al-Ikhlas
-  113: "AUZIYQFrkKQ", // Surah Al-Falaq
-  114: "AUZIYQGVwh7", // Surah An-Nas
-};
 
 function formatPartLabel(filename: string, index: number, totalParts: number): string {
   if (totalParts === 1) return "Full Lecture";
@@ -64,7 +45,7 @@ function formatPartLabel(filename: string, index: number, totalParts: number): s
 }
 
 /**
- * Returns audio streaming URLs and YouTube embed/search parameters for Dr. Israr Ahmed
+ * Returns audio streaming URLs and complete YouTube playlist video embed parameters for Dr. Israr Ahmed
  */
 export function getDrIsrarMedia(surahNumber: number, surahName: string): DrIsrarMedia {
   const numStr = String(surahNumber);
@@ -82,17 +63,17 @@ export function getDrIsrarMedia(surahNumber: number, surahName: string): DrIsrar
     ? audioParts[0].url 
     : `${ARCHIVE_BASE_URL}/${encodeURIComponent(defaultFilename)}`;
 
-  // Specific mapped YouTube video or search embed
-  const youtubeVideoId = DR_ISRAR_YOUTUBE_MAP[surahNumber];
+  // Video ID mapped from the complete 114 Surah-by-Surah YouTube playlist
+  const youtubeVideoId = israrVideoMap[numStr];
   const youtubeSearchQuery = `Dr Israr Ahmed Bayan ul Quran Surah ${surahName}`;
 
   const youtubeWatchUrl = youtubeVideoId
-    ? `https://www.youtube.com/watch?v=${youtubeVideoId}`
-    : `https://www.youtube.com/results?search_query=${encodeURIComponent(youtubeSearchQuery)}`;
+    ? `https://www.youtube.com/watch?v=${youtubeVideoId}&list=${BAYAN_UL_QURAN_PLAYLIST_ID}`
+    : `https://www.youtube.com/playlist?list=${BAYAN_UL_QURAN_PLAYLIST_ID}`;
 
   const youtubeEmbedUrl = youtubeVideoId
     ? `https://www.youtube-nocookie.com/embed/${youtubeVideoId}?autoplay=1&rel=0`
-    : `https://www.youtube-nocookie.com/embed?listType=search&list=${encodeURIComponent(youtubeSearchQuery)}&autoplay=1`;
+    : `https://www.youtube-nocookie.com/embed/videoseries?list=${BAYAN_UL_QURAN_PLAYLIST_ID}&autoplay=1`;
 
   return {
     surahNumber,
