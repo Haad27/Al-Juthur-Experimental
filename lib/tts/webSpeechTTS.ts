@@ -46,27 +46,93 @@ function ensureVoicesLoaded(cb: () => void) {
   );
 }
 
-/** Return all voices available in the user's browser */
-export function getAvailableVoices(): SpeechSynthesisVoice[] {
-  const synth = getSynth();
-  if (!synth) return [];
-  return synth.getVoices();
+/**
+ * Preferred quality keywords for neural/natural/high-definition smooth voices.
+ */
+const SMOOTH_VOICE_KEYWORDS = [
+  "natural",
+  "neural",
+  "online",
+  "google",
+  "siri",
+  "premium",
+  "enhanced",
+  "deep",
+  "studio",
+  "calm",
+];
+
+function scoreVoiceQuality(v: SpeechSynthesisVoice): number {
+  const name = v.name.toLowerCase();
+  let score = 0;
+
+  // 1. Natural / Neural cloud voices sound dramatically more human and smooth
+  if (name.includes("natural") || name.includes("neural")) score += 100;
+  if (name.includes("online")) score += 50;
+  if (name.includes("google")) score += 40;
+  if (name.includes("premium") || name.includes("enhanced")) score += 30;
+
+  // 2. Specific smooth voices for English
+  if (
+    name.includes("guy") ||
+    name.includes("aria") ||
+    name.includes("jenny") ||
+    name.includes("ryan") ||
+    name.includes("sonia") ||
+    name.includes("george") ||
+    name.includes("hazel") ||
+    name.includes("susan")
+  ) {
+    score += 25;
+  }
+
+  // 3. Specific smooth voices for Arabic & Urdu
+  if (
+    name.includes("shakir") ||
+    name.includes("salma") ||
+    name.includes("hamed") ||
+    name.includes("naayf") ||
+    name.includes("tariq") ||
+    name.includes("asad") ||
+    name.includes("uzma") ||
+    name.includes("gul")
+  ) {
+    score += 25;
+  }
+
+  // 4. Deprioritize old robotic legacy synthesizer desktop voices if natural ones exist
+  if (name.includes("desktop") && !name.includes("natural")) {
+    score -= 10;
+  }
+
+  return score;
 }
 
 /**
- * Return voices filtered by BCP-47 language prefix.
+ * Return all voices available in the user's browser, sorted by naturalness and quality.
+ */
+export function getAvailableVoices(): SpeechSynthesisVoice[] {
+  const synth = getSynth();
+  if (!synth) return [];
+  const voices = synth.getVoices();
+  return [...voices].sort((a, b) => scoreVoiceQuality(b) - scoreVoiceQuality(a));
+}
+
+/**
+ * Return voices filtered by BCP-47 language prefix, sorted so smooth/natural voices come first.
  * e.g. getLangVoices("ur") → all voices whose lang starts with "ur"
  */
 export function getLangVoices(lang: TtsLang): SpeechSynthesisVoice[] {
   const prefix = LANG_BCP47[lang].toLowerCase();
-  return getAvailableVoices().filter((v) =>
+  const voices = getAvailableVoices().filter((v) =>
     v.lang.toLowerCase().startsWith(prefix)
   );
+  return voices.sort((a, b) => scoreVoiceQuality(b) - scoreVoiceQuality(a));
 }
 
 /**
  * Pick the best voice for a given language from the available browser voices.
- * Prefers local voices over remote/online ones.
+ * Prioritizes natural/neural/smooth high-fidelity voices over robotic legacy synthesizers.
  */
 export function pickBestVoice(
   lang: TtsLang,
@@ -81,10 +147,7 @@ export function pickBestVoice(
     if (match) return match;
   }
 
-  // 2. Prefer local (not online) voices
-  const local = voices.filter((v) => v.localService);
-  if (local.length > 0) return local[0];
-
+  // 2. Voices are already sorted by natural/neural quality score
   return voices[0];
 }
 
@@ -220,7 +283,12 @@ function _speakSegments(options: TtsPlaybackOptions) {
       utt.lang = LANG_BCP47[seg.lang];
     }
 
-    utt.rate = rate;
+    // Rate tuning: default to slightly calmer, more measured pacing (0.92x of standard rate)
+    // which prevents rushed unnatural cadence when reading sacred Quranic tafsir text
+    utt.rate = rate * 0.95;
+
+    // Pitch: slightly warmer/calmer tone
+    utt.pitch = 0.98;
 
     utt.onstart = () => {
       _currentSegmentIndex = idx;

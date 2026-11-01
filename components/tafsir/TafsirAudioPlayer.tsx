@@ -296,11 +296,14 @@ export default function TafsirAudioPlayer({
                       onChange={(e) => setVoicePref(baseLang, e.target.value)}
                       className="w-full bg-background border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                     >
-                      {primaryVoices.map((v) => (
-                        <option key={v.name} value={v.name}>
-                          {v.name} ({v.lang})
-                        </option>
-                      ))}
+                      {primaryVoices.map((v) => {
+                        const isNatural = /natural|neural|online|google|premium|enhanced/i.test(v.name);
+                        return (
+                          <option key={v.name} value={v.name}>
+                            {isNatural ? "✨ " : ""}{v.name} ({v.lang})
+                          </option>
+                        );
+                      })}
                     </select>
                   </div>
                 )}
@@ -319,11 +322,14 @@ export default function TafsirAudioPlayer({
                       onChange={(e) => setVoicePref("ar", e.target.value)}
                       className="w-full bg-background border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                     >
-                      {arabicVoices.map((v) => (
-                        <option key={v.name} value={v.name}>
-                          {v.name} ({v.lang})
-                        </option>
-                      ))}
+                      {arabicVoices.map((v) => {
+                        const isNatural = /natural|neural|online|google|premium|enhanced/i.test(v.name);
+                        return (
+                          <option key={v.name} value={v.name}>
+                            {isNatural ? "✨ " : ""}{v.name} ({v.lang})
+                          </option>
+                        );
+                      })}
                     </select>
                   </div>
                 )}
