@@ -169,6 +169,11 @@ export default function SurahPlayer({
       if (audioStore.translationAudioLang === "ur") {
         return `https://cdn.islamic.network/quran/audio/64/ur.khan/${globalAyahNum}.mp3`;
       }
+      if (audioStore.englishAudioVoice === "walk_studio") {
+        const s = String(surahNumber).padStart(3, "0");
+        const a = String(ayahNum).padStart(3, "0");
+        return `https://everyayah.com/data/English/Sahih_Intnl_Ibrahim_Walk_192kbps/${s}${a}.mp3`;
+      }
       return `https://cdn.islamic.network/quran/audio/192/en.walk/${globalAyahNum}.mp3`;
     }
 
@@ -302,6 +307,7 @@ export default function SurahPlayer({
     phase,
     audioStore.audioMode,
     audioStore.translationAudioLang,
+    audioStore.englishAudioVoice,
     surahNumber,
     lastAyahNumber,
     audioQueue,
@@ -666,38 +672,76 @@ export default function SurahPlayer({
                 </button>
               </div>
 
-              {/* Translation Voice Language Selector */}
+              {/* Translation Voice Language & Options Selector */}
               {(audioStore.audioMode === "translation" || audioStore.audioMode === "both") && (
-                <div className="pt-2 border-t border-border">
-                  <label className="text-[11px] font-medium text-muted-foreground block mb-1.5">
-                    Translation Audio Voice:
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => audioStore.setTranslationAudioLang("en")}
-                      className={cn(
-                        "py-1.5 px-2 rounded-lg text-xs font-medium border text-center transition cursor-pointer",
-                        audioStore.translationAudioLang === "en"
-                          ? "bg-accent text-foreground font-semibold border-accent shadow-sm"
-                          : "bg-muted/60 text-muted-foreground border-border hover:text-foreground"
-                      )}
-                    >
-                      English (Ibrahim Walk)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => audioStore.setTranslationAudioLang("ur")}
-                      className={cn(
-                        "py-1.5 px-2 rounded-lg text-xs font-medium border text-center transition cursor-pointer font-urdu",
-                        audioStore.translationAudioLang === "ur"
-                          ? "bg-accent text-foreground font-semibold border-accent shadow-sm"
-                          : "bg-muted/60 text-muted-foreground border-border hover:text-foreground"
-                      )}
-                    >
-                      اردو (شمشاد علی خان)
-                    </button>
+                <div className="pt-2 border-t border-border space-y-2">
+                  <div>
+                    <label className="text-[11px] font-medium text-muted-foreground block mb-1.5">
+                      Translation Language:
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => audioStore.setTranslationAudioLang("en")}
+                        className={cn(
+                          "py-1.5 px-2 rounded-lg text-xs font-medium border text-center transition cursor-pointer",
+                          audioStore.translationAudioLang === "en"
+                            ? "bg-accent text-foreground font-semibold border-accent shadow-sm"
+                            : "bg-muted/60 text-muted-foreground border-border hover:text-foreground"
+                        )}
+                      >
+                        English
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => audioStore.setTranslationAudioLang("ur")}
+                        className={cn(
+                          "py-1.5 px-2 rounded-lg text-xs font-medium border text-center transition cursor-pointer font-urdu",
+                          audioStore.translationAudioLang === "ur"
+                            ? "bg-accent text-foreground font-semibold border-accent shadow-sm"
+                            : "bg-muted/60 text-muted-foreground border-border hover:text-foreground"
+                        )}
+                      >
+                        اردو (شمشاد علی خان)
+                      </button>
+                    </div>
                   </div>
+
+                  {audioStore.translationAudioLang === "en" && (
+                    <div className="bg-card/40 border border-border/60 rounded-xl p-2.5">
+                      <label className="text-[11px] font-medium text-muted-foreground block mb-1.5">
+                        English Voice Quality:
+                      </label>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => audioStore.setEnglishAudioVoice("walk_studio")}
+                          className={cn(
+                            "py-1.5 px-2 rounded-lg text-[11px] font-medium border text-left transition cursor-pointer flex flex-col",
+                            audioStore.englishAudioVoice === "walk_studio"
+                              ? "bg-accent/20 text-accent font-semibold border-accent/40 shadow-xs"
+                              : "bg-muted/40 text-muted-foreground border-border hover:text-foreground"
+                          )}
+                        >
+                          <span className="font-semibold text-foreground">Studio Master</span>
+                          <span className="text-[10px] text-muted-foreground">Warmer & Natural</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => audioStore.setEnglishAudioVoice("walk_classic")}
+                          className={cn(
+                            "py-1.5 px-2 rounded-lg text-[11px] font-medium border text-left transition cursor-pointer flex flex-col",
+                            audioStore.englishAudioVoice === "walk_classic"
+                              ? "bg-accent/20 text-accent font-semibold border-accent/40 shadow-xs"
+                              : "bg-muted/40 text-muted-foreground border-border hover:text-foreground"
+                          )}
+                        >
+                          <span className="font-semibold text-foreground">Standard</span>
+                          <span className="text-[10px] text-muted-foreground">Original Stream</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -788,34 +832,70 @@ export default function SurahPlayer({
 
               {/* Inline Language Selector (if Both or Translation) */}
               {(audioStore.audioMode === "translation" || audioStore.audioMode === "both") && (
-                <div className="flex items-center justify-between px-1 text-[11px]">
-                  <span className="text-muted-foreground">Voice:</span>
-                  <div className="flex gap-1">
-                    <button
-                      type="button"
-                      onClick={() => audioStore.setTranslationAudioLang("en")}
-                      className={cn(
-                        "px-2 py-0.5 rounded text-[10px] font-medium transition cursor-pointer border",
-                        audioStore.translationAudioLang === "en"
-                          ? "bg-accent/20 border-accent/40 text-accent font-semibold"
-                          : "border-transparent text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      English (Walk)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => audioStore.setTranslationAudioLang("ur")}
-                      className={cn(
-                        "px-2 py-0.5 rounded text-[10px] font-medium transition cursor-pointer border font-urdu",
-                        audioStore.translationAudioLang === "ur"
-                          ? "bg-accent/20 border-accent/40 text-accent font-semibold"
-                          : "border-transparent text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      اردو (خان)
-                    </button>
+                <div className="space-y-1.5 pt-0.5">
+                  <div className="flex items-center justify-between px-1 text-[11px]">
+                    <span className="text-muted-foreground">Language:</span>
+                    <div className="flex gap-1">
+                      <button
+                        type="button"
+                        onClick={() => audioStore.setTranslationAudioLang("en")}
+                        className={cn(
+                          "px-2 py-0.5 rounded text-[10px] font-medium transition cursor-pointer border",
+                          audioStore.translationAudioLang === "en"
+                            ? "bg-accent/20 border-accent/40 text-accent font-semibold"
+                            : "border-transparent text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        English
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => audioStore.setTranslationAudioLang("ur")}
+                        className={cn(
+                          "px-2 py-0.5 rounded text-[10px] font-medium transition cursor-pointer border font-urdu",
+                          audioStore.translationAudioLang === "ur"
+                            ? "bg-accent/20 border-accent/40 text-accent font-semibold"
+                            : "border-transparent text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        اردو (خان)
+                      </button>
+                    </div>
                   </div>
+
+                  {audioStore.translationAudioLang === "en" && (
+                    <div className="flex items-center justify-between px-1 text-[11px]">
+                      <span className="text-muted-foreground">Voice Audio:</span>
+                      <div className="flex gap-1">
+                        <button
+                          type="button"
+                          onClick={() => audioStore.setEnglishAudioVoice("walk_studio")}
+                          className={cn(
+                            "px-2 py-0.5 rounded text-[10px] font-medium transition cursor-pointer border",
+                            audioStore.englishAudioVoice === "walk_studio"
+                              ? "bg-accent/20 border-accent/40 text-accent font-semibold"
+                              : "border-transparent text-muted-foreground hover:text-foreground"
+                          )}
+                          title="High-bitrate studio master with natural sound"
+                        >
+                          Studio Master
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => audioStore.setEnglishAudioVoice("walk_classic")}
+                          className={cn(
+                            "px-2 py-0.5 rounded text-[10px] font-medium transition cursor-pointer border",
+                            audioStore.englishAudioVoice === "walk_classic"
+                              ? "bg-accent/20 border-accent/40 text-accent font-semibold"
+                              : "border-transparent text-muted-foreground hover:text-foreground"
+                          )}
+                          title="Standard original audio stream"
+                        >
+                          Standard
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

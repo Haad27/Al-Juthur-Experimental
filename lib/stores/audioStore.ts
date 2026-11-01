@@ -2,6 +2,7 @@ import { create } from 'zustand';
 
 export type AudioMode = "arabic" | "translation" | "both";
 export type TranslationAudioLang = "en" | "ur";
+export type EnglishAudioVoice = "walk_studio" | "walk_classic";
 export type AudioPhase = "arabic" | "translation" | null;
 
 interface AudioState {
@@ -13,6 +14,7 @@ interface AudioState {
   audioElement: HTMLAudioElement | null;
   audioMode: AudioMode;
   translationAudioLang: TranslationAudioLang;
+  englishAudioVoice: EnglishAudioVoice;
   activePhase: AudioPhase;
   hasChosenAudioMode: boolean;
   
@@ -27,6 +29,7 @@ interface AudioState {
   setPlaybackRate: (rate: number) => void;
   setAudioMode: (mode: AudioMode) => void;
   setTranslationAudioLang: (lang: TranslationAudioLang) => void;
+  setEnglishAudioVoice: (voice: EnglishAudioVoice) => void;
   setActivePhase: (phase: AudioPhase) => void;
   setHasChosenAudioMode: (chosen: boolean) => void;
   clearAudio: () => void;
@@ -52,6 +55,16 @@ const getInitialTranslationLang = (): TranslationAudioLang => {
   return "en";
 };
 
+const getInitialEnglishVoice = (): EnglishAudioVoice => {
+  if (typeof window !== "undefined") {
+    const saved = localStorage.getItem("quran_english_audio_voice");
+    if (saved === "walk_studio" || saved === "walk_classic") {
+      return saved;
+    }
+  }
+  return "walk_studio";
+};
+
 const getInitialHasChosen = (): boolean => {
   if (typeof window !== "undefined") {
     return localStorage.getItem("quran_audio_mode_chosen") === "true";
@@ -68,6 +81,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
   audioElement: null,
   audioMode: getInitialAudioMode(),
   translationAudioLang: getInitialTranslationLang(),
+  englishAudioVoice: getInitialEnglishVoice(),
   activePhase: null,
   hasChosenAudioMode: getInitialHasChosen(),
 
@@ -154,6 +168,13 @@ export const useAudioStore = create<AudioState>((set, get) => ({
       localStorage.setItem("quran_translation_audio_lang", lang);
     }
     set({ translationAudioLang: lang });
+  },
+
+  setEnglishAudioVoice: (voice: EnglishAudioVoice) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("quran_english_audio_voice", voice);
+    }
+    set({ englishAudioVoice: voice });
   },
 
   setActivePhase: (phase: AudioPhase) => set({ activePhase: phase }),
