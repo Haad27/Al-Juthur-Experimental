@@ -16,6 +16,7 @@ import {
   Minimize2,
   Layers,
   RefreshCw,
+  Loader2,
 } from "lucide-react";
 import { getDrIsrarMedia } from "@/lib/bayanUlQuranMedia";
 import { useDrIsrarPlayer } from "@/lib/providers/DrIsrarPlayerContext";
@@ -37,6 +38,7 @@ export default function DrIsrarMediaCard({
   // Audio state
   const [selectedPartIndex, setSelectedPartIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [playbackRate, setPlaybackRate] = useState<number>(1);
@@ -55,6 +57,7 @@ export default function DrIsrarMediaCard({
   // Reset state when surah changes
   useEffect(() => {
     setIsPlaying(false);
+    setIsLoadingAudio(false);
     setCurrentTime(0);
     setAudioError(false);
     setSelectedPartIndex(0);
@@ -71,7 +74,11 @@ export default function DrIsrarMediaCard({
       const wasPlaying = isPlaying;
       audioRef.current.load();
       if (wasPlaying) {
-        audioRef.current.play().catch(() => setAudioError(true));
+        setIsLoadingAudio(true);
+        audioRef.current.play().catch(() => {
+          setIsLoadingAudio(false);
+          setAudioError(true);
+        });
       }
     }
   }, [selectedPartIndex]);
@@ -81,6 +88,7 @@ export default function DrIsrarMediaCard({
     if (player.isOpen && isPlaying && audioRef.current) {
       audioRef.current.pause();
       setIsPlaying(false);
+      setIsLoadingAudio(false);
     }
   }, [player.isOpen]);
 
@@ -90,20 +98,24 @@ export default function DrIsrarMediaCard({
     if (isPlaying) {
       audioRef.current.pause();
       setIsPlaying(false);
+      setIsLoadingAudio(false);
     } else {
       // Pause video if user switches to audio
       if (player.isOpen) {
         player.closePlayer();
       }
       setAudioError(false);
+      setIsLoadingAudio(true);
       audioRef.current
         .play()
         .then(() => {
           setIsPlaying(true);
+          setIsLoadingAudio(false);
           setAudioError(false);
         })
         .catch((e) => {
           console.warn("Audio playback issue:", e);
+          setIsLoadingAudio(false);
           setAudioError(true);
         });
     }
@@ -111,6 +123,7 @@ export default function DrIsrarMediaCard({
 
   const retryAudio = () => {
     setIsRetryingAudio(true);
+    setIsLoadingAudio(true);
     setAudioError(false);
     if (audioRef.current) {
       audioRef.current.load();
@@ -118,10 +131,12 @@ export default function DrIsrarMediaCard({
         .play()
         .then(() => {
           setIsPlaying(true);
+          setIsLoadingAudio(false);
           setIsRetryingAudio(false);
         })
         .catch(() => {
           setAudioError(true);
+          setIsLoadingAudio(false);
           setIsRetryingAudio(false);
         });
     }
@@ -185,9 +200,10 @@ export default function DrIsrarMediaCard({
   };
 
   const handleOpenVideo = (mode: "docked" | "floating") => {
-    if (isPlaying && audioRef.current) {
+    if (audioRef.current) {
       audioRef.current.pause();
       setIsPlaying(false);
+      setIsLoadingAudio(false);
     }
     player.openPlayer(surahNumber, surahName, arabicName, mode);
   };
@@ -204,8 +220,24 @@ export default function DrIsrarMediaCard({
         preload="metadata"
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
-        onEnded={() => setIsPlaying(false)}
-        onError={() => setAudioError(true)}
+        onWaiting={() => setIsLoadingAudio(true)}
+        onPlaying={() => {
+          setIsLoadingAudio(false);
+          setIsPlaying(true);
+          setAudioError(false);
+        }}
+        onPause={() => {
+          setIsLoadingAudio(false);
+          setIsPlaying(false);
+        }}
+        onEnded={() => {
+          setIsLoadingAudio(false);
+          setIsPlaying(false);
+        }}
+        onError={() => {
+          setIsLoadingAudio(false);
+          setAudioError(true);
+        }}
       />
 
       {/* =========================================================================
@@ -318,7 +350,12 @@ export default function DrIsrarMediaCard({
               priority
               unoptimized
             />
-            {isPlaying && (
+            {isLoadingAudio && (
+              <div className="absolute inset-0 bg-background/60 backdrop-blur-[1px] flex items-center justify-center">
+                <Loader2 size={22} className="animate-spin text-accent" />
+              </div>
+            )}
+            {!isLoadingAudio && isPlaying && (
               <div className="absolute inset-0 bg-background/50 backdrop-blur-[1px] flex items-center justify-center">
                 <span className="flex h-3.5 w-3.5 relative">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
@@ -403,11 +440,30 @@ export default function DrIsrarMediaCard({
 
                   <button
                     onClick={togglePlay}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-accent text-accent-foreground font-bold text-xs shadow-md hover:bg-accent/90 transition-all cursor-pointer"
-                    title={isPlaying ? "Pause Original Audio" : "Play Original Audio"}
+                    disabled={isLoadingAudio}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-accent text-accent-foreground font-bold text-xs shadow-md hover:bg-accent/90 transition-all cursor-pointer disabled:opacity-85"
+                    title={
+                      isLoadingAudio
+                        ? "Loading audio lecture stream..."
+                        : isPlaying
+                        ? "Pause Original Audio"
+                        : "Play Original Audio"
+                    }
                   >
-                    {isPlaying ? <Pause size={14} /> : <Play size={14} className="fill-current" />}
-                    <span>{isPlaying ? "Pause" : "Play Lecture"}</span>
+                    {isLoadingAudio ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : isPlaying ? (
+                      <Pause size={14} />
+                    ) : (
+                      <Play size={14} className="fill-current" />
+                    )}
+                    <span>
+                      {isLoadingAudio
+                        ? "Loading..."
+                        : isPlaying
+                        ? "Pause"
+                        : "Play Lecture"}
+                    </span>
                   </button>
 
                   <button
