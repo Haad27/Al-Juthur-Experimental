@@ -141,14 +141,9 @@ export function getGlobalAyahNumber(surahNumber: number, ayahNumberInSurah: numb
 export function getAyahAudioUrl(
   surahNumber: number,
   ayahNumberInSurah: number,
-  edition: "ar.alafasy" | "en.walk" | "en.walk_studio" | "ur.khan" | string = "ar.alafasy"
+  edition: "ar.alafasy" | "en.walk" | "ur.khan" | string = "ar.alafasy"
 ): string {
   const globalAyah = getGlobalAyahNumber(surahNumber, ayahNumberInSurah);
-  if (edition === "en.walk_studio") {
-    const s = String(surahNumber).padStart(3, "0");
-    const a = String(ayahNumberInSurah).padStart(3, "0");
-    return `https://everyayah.com/data/English/Sahih_Intnl_Ibrahim_Walk_192kbps/${s}${a}.mp3`;
-  }
   if (edition === "en.walk") {
     return `https://cdn.islamic.network/quran/audio/192/en.walk/${globalAyah}.mp3`;
   }
