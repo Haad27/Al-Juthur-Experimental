@@ -16,7 +16,7 @@ const getAyahsForSurah = unstable_cache(
       orderBy: { numberInSurah: "asc" },
     });
   },
-  ["ayahs-for-surah"],
+  ["ayahs-for-surah", String(surahNumber)],
   { revalidate: 2592000 } // 30 days — the Quran text does not change
 );
 
@@ -52,7 +52,7 @@ const getTranslationMaps = unstable_cache(
 
     return { translationMap, footnoteMap };
   },
-  ["translation-maps"],
+  ["translation-maps", String(surahNumber), String(edition)],
   { revalidate: 86400 } // 24 hours — translation files are static
 );
 

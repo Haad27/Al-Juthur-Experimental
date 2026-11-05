@@ -411,7 +411,25 @@ export default function SurahPlayer({
   }, [lastAyahNumber, audioStore.hasChosenAudioMode, audioStore.audioMode]);
 
   // Audio Controls
+  const syncTranslationToAudio = () => {
+    if (!setTranslationEdition) return;
+    if (audioStore.audioMode === "both" || audioStore.audioMode === "translation") {
+      if (audioStore.translationAudioLang === "ur") {
+        if (translationEdition !== "234") {
+          setTranslationEdition("234");
+        }
+      } else {
+        if (translationEdition !== "20") {
+          setTranslationEdition("20");
+        }
+      }
+    }
+  };
+
   const handlePlayPause = () => {
+    if (!playing) {
+      syncTranslationToAudio();
+    }
     setPlaying(!playing);
   };
 
