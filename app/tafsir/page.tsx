@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo, useRef, useCallback, Suspense } fr
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
-import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, ChevronLeft, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check, Bookmark, BookmarkCheck, Lock, Columns2, AlertCircle, RotateCcw, Edit3, Highlighter, PenTool, Wrench, StickyNote, Trash2 } from "lucide-react";
+import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, ChevronLeft, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check, Bookmark, BookmarkCheck, Lock, Columns2, AlertCircle, RotateCcw, Edit3, Highlighter, PenTool, Wrench, StickyNote, Trash2, WifiOff } from "lucide-react";
 import dynamic from "next/dynamic";
 import TafsirHorizontalReader from "@/components/tafsir/TafsirHorizontalReader";
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
@@ -575,6 +575,8 @@ function TafsirContent() {
   const [loadedTafsir, setLoadedTafsir] = useState<Record<number, TafsirEntry>>({});
   const [loadingEntries, setLoadingEntries] = useState<boolean>(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [tafsirLoadingProgress, setTafsirLoadingProgress] = useState<number>(12);
+  const [isOffline, setIsOffline] = useState<boolean>(false);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const tafsirCacheRef = useRef<Map<string, TafsirEntry[]>>(new Map());
 
@@ -616,8 +618,8 @@ function TafsirContent() {
     }
   }, [activeAuthor?.id, activeSurah]);
 
-  // Fetch all languages & authors on mount
-  useEffect(() => {
+  // Fetch all languages & authors
+  const fetchCatalog = useCallback(() => {
     setLoadingCatalog(true);
     fetch("/api/tafsir")
       .then((res) => res.json())
@@ -664,32 +666,74 @@ function TafsirContent() {
           }
         }
       })
-      .catch((err) => console.error("Failed to fetch languages:", err))
+      .catch((err) => {
+        console.error("Failed to fetch languages:", err);
+        if (typeof navigator !== "undefined" && !navigator.onLine) {
+          setIsOffline(true);
+        }
+      })
       .finally(() => {
         setLoadingCatalog(false);
       });
   }, [urlAuthor]);
 
+  useEffect(() => {
+    fetchCatalog();
+  }, [fetchCatalog]);
+
   // Load full Surah Tafsir in ONE single fast request and cache in memory
   const loadSurahTafsir = useCallback(async (authorId: number, surahId: number) => {
     const cacheKey = `${authorId}:${surahId}`;
     setLoadError(null);
+
+    // Immediate offline check
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      setIsOffline(true);
+      setLoadError("You are offline. Please check your internet connection.");
+      setLoadingEntries(false);
+      return;
+    }
+
     if (tafsirCacheRef.current.has(cacheKey)) {
       const cached = tafsirCacheRef.current.get(cacheKey)!;
       const map: Record<number, TafsirEntry> = {};
       cached.forEach((item, idx) => { map[idx] = item; });
       setLoadedTafsir(map);
       setLoadingEntries(false);
+      setTafsirLoadingProgress(100);
+      setIsOffline(false);
       return;
     }
 
     setLoadedTafsir({}); // Clear old tafsir immediately so previous language doesn't linger!
     setLoadingEntries(true);
+    setTafsirLoadingProgress(15);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 14000);
+
+    // Accurate progress timer: reaches 50% at 1.5s, scaling smoothly
+    const progressInterval = setInterval(() => {
+      setTafsirLoadingProgress((prev) => {
+        if (prev < 48) return prev + 5;
+        if (prev < 68) return prev + 2;
+        if (prev < 88) return prev + 1;
+        return prev;
+      });
+    }, 180);
 
     try {
-      const res = await fetch(`/api/tafsir?authorId=${authorId}&surahId=${surahId}`);
+      const res = await fetch(`/api/tafsir?authorId=${authorId}&surahId=${surahId}`, {
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      clearInterval(progressInterval);
+      setTafsirLoadingProgress(75);
+
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
+      setTafsirLoadingProgress(92);
+
       if (data.success && Array.isArray(data.data)) {
         if (data.data.length === 0) {
           setLoadError("No commentary entries found for this Surah in the selected edition.");
@@ -698,19 +742,60 @@ function TafsirContent() {
           data.data.forEach((entry: TafsirEntry, i: number) => {
             map[i] = entry;
           });
+          setTafsirLoadingProgress(100);
           setLoadedTafsir(map);
           tafsirCacheRef.current.set(cacheKey, data.data);
+          setIsOffline(false);
         }
       } else {
         setLoadError(data.error || "Failed to retrieve commentary for this Surah.");
       }
     } catch (e: any) {
+      clearTimeout(timeoutId);
+      clearInterval(progressInterval);
       console.error(`[TafsirReader] Failed to load tafsir for author ${authorId}, surah ${surahId}:`, e);
-      setLoadError("Unable to load commentary. Please check your connection or retry.");
+      const isNetDown = (typeof navigator !== "undefined" && !navigator.onLine) || e.name === "AbortError" || e.message?.toLowerCase().includes("fetch");
+      setIsOffline(isNetDown);
+      if (isNetDown) {
+        setLoadError("You are offline or your connection timed out. Please check your internet and tap Retry.");
+      } else {
+        setLoadError("Unable to load commentary. Please check your connection or retry.");
+      }
     } finally {
+      clearTimeout(timeoutId);
+      clearInterval(progressInterval);
       setLoadingEntries(false);
     }
   }, []);
+
+  // Listen for online/offline transitions and auto-retry
+  useEffect(() => {
+    if (typeof navigator !== "undefined") {
+      setIsOffline(!navigator.onLine);
+    }
+
+    const handleOnline = () => {
+      setIsOffline(false);
+      if (languages.length === 0) {
+        fetchCatalog();
+      }
+      if (loadError && activeAuthor) {
+        setLoadError(null);
+        loadSurahTafsir(activeAuthor.id, activeSurah);
+      }
+    };
+    const handleOffline = () => {
+      setIsOffline(true);
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, [loadError, activeAuthor, activeSurah, loadSurahTafsir, languages.length, fetchCatalog]);
 
   // Fetch initial Tafsir when author or surah changes (with instant client cache)
   useEffect(() => {
@@ -1391,15 +1476,24 @@ function TafsirContent() {
 
             <div className={cn("flex-1 w-full min-h-0", readingMode === "horizontal" && "flex flex-col overflow-hidden")}>
               {loadError ? (
-                <div className="flex flex-col items-center justify-center p-8 sm:p-12 text-center my-12 border border-border/40 rounded-2xl bg-card/40 backdrop-blur max-w-lg mx-auto">
-                  <div className="w-12 h-12 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center mb-4">
-                    <AlertCircle className="w-6 h-6" />
+                <div className="flex flex-col items-center justify-center p-8 sm:p-12 text-center my-12 border border-border/40 rounded-2xl bg-card/60 backdrop-blur max-w-lg mx-auto shadow-sm animate-in fade-in duration-300">
+                  <div className={cn(
+                    "w-12 h-12 rounded-full flex items-center justify-center mb-4",
+                    isOffline ? "bg-amber-500/15 text-amber-500 border border-amber-500/30" : "bg-amber-500/10 text-amber-500 border border-amber-500/20"
+                  )}>
+                    {isOffline ? <WifiOff className="w-6 h-6 animate-pulse" /> : <AlertCircle className="w-6 h-6" />}
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">Commentary Unavailable</h3>
-                  <p className="text-sm text-muted-foreground mb-6 leading-relaxed">{loadError}</p>
+                  <h3 className="text-lg font-bold text-foreground mb-2">
+                    {isOffline ? "You Are Currently Offline" : "Commentary Unavailable"}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-6 leading-relaxed max-w-md">
+                    {isOffline
+                      ? "Your network connection is unavailable. When your connection is restored, tap Retry to load the commentary."
+                      : loadError}
+                  </p>
                   <button
                     onClick={() => activeAuthor && loadSurahTafsir(activeAuthor.id, activeSurah)}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-accent/10 border border-accent/40 text-accent hover:bg-accent/20 transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-accent text-accent-foreground hover:bg-accent/90 shadow transition-all cursor-pointer"
                   >
                     <RotateCcw className="w-4 h-4" />
                     Retry Loading
@@ -1414,7 +1508,9 @@ function TafsirContent() {
                     "Cross-referencing scholarly commentary & notes...",
                     "Preparing typography & structured annotations..."
                   ]}
-                  minDurationMs={400}
+                  value={tafsirLoadingProgress}
+                  isOffline={isOffline}
+                  onRetry={() => activeAuthor && loadSurahTafsir(activeAuthor.id, activeSurah)}
                 />
               ) : readingMode === "horizontal" ? (
                 <TafsirHorizontalReader
@@ -2202,7 +2298,24 @@ function TafsirContent() {
           </div>
         ) : filteredAuthors.length === 0 ? (
           <div className="text-center py-20 bg-card/40 border border-border rounded-xl">
-            <p className="text-muted-foreground text-sm">No Tafsir books found matching your filter selections.</p>
+            {isOffline && languages.length === 0 ? (
+              <div className="flex flex-col items-center gap-3">
+                <WifiOff className="w-8 h-8 text-amber-500 animate-pulse" />
+                <h4 className="text-base font-bold text-foreground">You Are Offline</h4>
+                <p className="text-muted-foreground text-sm max-w-sm">
+                  Please connect to the internet to load the classical Tafsir library.
+                </p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-accent text-accent-foreground hover:bg-accent/90 shadow transition-all cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  Retry Connection
+                </button>
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-sm">No Tafsir books found matching your filter selections.</p>
+            )}
           </div>
         ) : (
           <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
