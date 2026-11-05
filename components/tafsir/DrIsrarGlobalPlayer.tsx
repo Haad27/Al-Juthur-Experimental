@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDrIsrarPlayer } from "@/lib/providers/DrIsrarPlayerContext";
-import { getDrIsrarMedia } from "@/lib/bayanUlQuranMedia";
+import { getScholarMedia } from "@/lib/scholarMedia";
 
 export default function DrIsrarGlobalPlayer() {
   const pathname = usePathname();
@@ -20,6 +20,7 @@ export default function DrIsrarGlobalPlayer() {
     isOpen,
     viewMode,
     isMinimized,
+    scholarId,
     surahNumber,
     surahName,
     pipPos,
@@ -29,7 +30,7 @@ export default function DrIsrarGlobalPlayer() {
     setIsMinimized,
   } = useDrIsrarPlayer();
 
-  const media = getDrIsrarMedia(surahNumber, surahName);
+  const media = getScholarMedia(scholarId, surahNumber, surahName);
 
   // Dragging state
   const [isDragging, setIsDragging] = useState(false);
@@ -86,7 +87,7 @@ export default function DrIsrarGlobalPlayer() {
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
           <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-accent"></span>
         </span>
-        <span className="text-xs font-bold">Dr. Israr Bayan ({surahName})</span>
+        <span className="text-xs font-bold">{media.scholarName} ({surahName})</span>
         <button
           onClick={() => setIsMinimized(false)}
           className="p-1 rounded-full hover:bg-muted text-accent hover:text-accent-foreground transition-colors cursor-pointer"
@@ -133,7 +134,7 @@ export default function DrIsrarGlobalPlayer() {
           <div className="flex items-center gap-2 min-w-0 pointer-events-none">
             <Move size={14} className="text-accent shrink-0" />
             <span className="text-xs font-bold truncate">
-              Dr. Israr • Surah {surahName}
+              {media.scholarName} • Surah {surahName}
             </span>
           </div>
 
@@ -184,7 +185,7 @@ export default function DrIsrarGlobalPlayer() {
         <div className="relative w-full aspect-video bg-black">
           <iframe
             src={media.youtubeEmbedUrl}
-            title={`Dr. Israr Ahmed Bayan-ul-Quran Surah ${surahName}`}
+            title={`${media.scholarName} ${media.seriesTitle} Surah ${surahName}`}
             className="absolute inset-0 size-full border-0 pointer-events-auto"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             referrerPolicy="strict-origin-when-cross-origin"

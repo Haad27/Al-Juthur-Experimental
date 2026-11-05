@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo, useRef, useCallback, Suspense } fr
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
-import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, ChevronLeft, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check, Bookmark, BookmarkCheck, Lock, Columns2, AlertCircle, RotateCcw, Edit3, Highlighter, PenTool, Wrench, StickyNote, Trash2, WifiOff } from "lucide-react";
+import { ArrowLeft, BookOpen, Search, Sparkles, ChevronRight, ChevronLeft, Copy, Languages, User, BookOpenText, ChevronUp, ChevronDown, X, Bot, Compass, Filter, Library, Check, Bookmark, BookmarkCheck, Lock, Columns2, AlertCircle, RotateCcw, Edit3, Highlighter, PenTool, Wrench, StickyNote, Trash2, WifiOff, Headphones } from "lucide-react";
 import dynamic from "next/dynamic";
 import TafsirHorizontalReader from "@/components/tafsir/TafsirHorizontalReader";
 import { SURAHS_DATA, SurahMeta } from "@/lib/surahsData";
@@ -52,7 +52,8 @@ import AlJuthurLoadingProgress from "@/components/shared/AlJuthurLoadingProgress
 import { isTafsirMatch, filterTafsirs } from "@/lib/searchUtils";
 import TafsirAudioPlayer from "@/components/tafsir/TafsirAudioPlayer";
 import DrIsrarMediaCard from "@/components/tafsir/DrIsrarMediaCard";
-import { isDrIsrarAuthor } from "@/lib/bayanUlQuranMedia";
+import ScholarSpotlightBanner from "@/components/tafsir/ScholarSpotlightBanner";
+import { isDrIsrarAuthor, isDrFarhatAuthor, isLectureAuthor, getScholarType } from "@/lib/scholarMedia";
 
 interface Author {
   id: number;
@@ -579,6 +580,9 @@ function TafsirContent() {
   const [isOffline, setIsOffline] = useState<boolean>(false);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const tafsirCacheRef = useRef<Map<string, TafsirEntry[]>>(new Map());
+  const inFlightRequestRef = useRef<string | null>(null);
+  const activeAbortRef = useRef<AbortController | null>(null);
+  const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const [topNavVisible, setTopNavVisible] = useState<boolean>(true);
   const [readingMode, setReadingMode] = useState<"vertical" | "horizontal">("vertical");
@@ -705,54 +709,103 @@ function TafsirContent() {
       return;
     }
 
-    setLoadedTafsir({}); // Clear old tafsir immediately so previous language doesn't linger!
-    setLoadingEntries(true);
-    setTafsirLoadingProgress(15);
+    // Cancel any previous in-flight request and timer
+    if (activeAbortRef.current) {
+      activeAbortRef.current.abort();
+    }
+    if (progressTimerRef.current) {
+      clearInterval(progressTimerRef.current);
+      progressTimerRef.current = null;
+    }
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 14000);
+    activeAbortRef.current = controller;
+    inFlightRequestRef.current = cacheKey;
 
-    // Accurate progress timer: reaches 50% at 1.5s, scaling smoothly
-    const progressInterval = setInterval(() => {
+    setLoadedTafsir({}); // Clear old tafsir immediately so previous language doesn't linger!
+    setLoadingEntries(true);
+    setTafsirLoadingProgress(14);
+
+    const startTime = Date.now();
+    progressTimerRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTime;
       setTafsirLoadingProgress((prev) => {
-        if (prev < 48) return prev + 5;
-        if (prev < 68) return prev + 2;
-        if (prev < 88) return prev + 1;
-        return prev;
+        // Monotonic progression: ~50% at 1.4s, ~78% at 3.2s, ~90% at 5.5s, then continuous gentle creep
+        let target = prev;
+        if (elapsed < 1400) {
+          target = 14 + (elapsed / 1400) * 36;
+        } else if (elapsed < 3200) {
+          target = 50 + ((elapsed - 1400) / 1800) * 28;
+        } else if (elapsed < 5500) {
+          target = 78 + ((elapsed - 3200) / 2300) * 12;
+        } else {
+          target = Math.min(96, 90 + (elapsed - 5500) / 1000);
+        }
+        return Math.max(prev, Math.floor(target));
       });
-    }, 180);
+    }, 60);
+
+    const timeoutId = setTimeout(() => {
+      if (inFlightRequestRef.current === cacheKey) {
+        controller.abort();
+      }
+    }, 18000);
 
     try {
       const res = await fetch(`/api/tafsir?authorId=${authorId}&surahId=${surahId}`, {
         signal: controller.signal,
       });
       clearTimeout(timeoutId);
-      clearInterval(progressInterval);
-      setTafsirLoadingProgress(75);
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      // Response received: bump target monotonically to at least 84%
+      setTafsirLoadingProgress((prev) => Math.max(prev, 84));
+
       const data = await res.json();
-      setTafsirLoadingProgress(92);
+      // JSON parsed: bump target monotonically to at least 95%
+      setTafsirLoadingProgress((prev) => Math.max(prev, 95));
+
+      // Discard stale response if a different request was initiated
+      if (inFlightRequestRef.current !== cacheKey) {
+        return;
+      }
 
       if (data.success && Array.isArray(data.data)) {
         if (data.data.length === 0) {
+          if (progressTimerRef.current) clearInterval(progressTimerRef.current);
           setLoadError("No commentary entries found for this Surah in the selected edition.");
+          setLoadingEntries(false);
         } else {
           const map: Record<number, TafsirEntry> = {};
           data.data.forEach((entry: TafsirEntry, i: number) => {
             map[i] = entry;
           });
-          setTafsirLoadingProgress(100);
-          setLoadedTafsir(map);
           tafsirCacheRef.current.set(cacheKey, data.data);
+          if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+
+          // Complete smoothly to 100%
+          setTafsirLoadingProgress(100);
           setIsOffline(false);
+
+          // 200ms grace period so user sees the progress bar reach 100% smoothly
+          setTimeout(() => {
+            if (inFlightRequestRef.current === cacheKey) {
+              setLoadedTafsir(map);
+              setLoadingEntries(false);
+            }
+          }, 200);
         }
       } else {
+        if (progressTimerRef.current) clearInterval(progressTimerRef.current);
         setLoadError(data.error || "Failed to retrieve commentary for this Surah.");
+        setLoadingEntries(false);
       }
     } catch (e: any) {
       clearTimeout(timeoutId);
-      clearInterval(progressInterval);
+      if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+      if (controller.signal.aborted && inFlightRequestRef.current !== cacheKey) {
+        return; // Superseded by a newer request, silent discard
+      }
       console.error(`[TafsirReader] Failed to load tafsir for author ${authorId}, surah ${surahId}:`, e);
       const isNetDown = (typeof navigator !== "undefined" && !navigator.onLine) || e.name === "AbortError" || e.message?.toLowerCase().includes("fetch");
       setIsOffline(isNetDown);
@@ -761,9 +814,6 @@ function TafsirContent() {
       } else {
         setLoadError("Unable to load commentary. Please check your connection or retry.");
       }
-    } finally {
-      clearTimeout(timeoutId);
-      clearInterval(progressInterval);
       setLoadingEntries(false);
     }
   }, []);
@@ -1429,12 +1479,13 @@ function TafsirContent() {
               </div>
             )}
 
-            {/* Dr. Israr Ahmed Original Bayan-ul-Quran Audio & Video Media Card */}
-            {activeAuthor && isDrIsrarAuthor(activeAuthor.id, activeAuthor.authorName, activeAuthor.name) && (
+            {/* Authentic Scholar Multimedia Audio & Video Card (Dr. Israr Ahmed & Dr. Farhat Hashmi) */}
+            {activeAuthor && isLectureAuthor(activeAuthor.id, activeAuthor.authorName, activeAuthor.name) && (
               <DrIsrarMediaCard
                 surahNumber={activeSurah}
                 surahName={currentSurahMeta.englishName}
                 arabicName={currentSurahMeta.name}
+                scholarId={getScholarType(activeAuthor.id, activeAuthor.authorName, activeAuthor.name) || "israr"}
               />
             )}
 
@@ -1501,6 +1552,8 @@ function TafsirContent() {
                 </div>
               ) : loadingEntries || Object.keys(loadedTafsir).length === 0 || (loadedTafsir[0] && loadedTafsir[0].authorId !== activeAuthor.id) ? (
                 <AlJuthurLoadingProgress
+                  key={`tafsir-loader-${activeAuthor?.id ?? "none"}-${activeSurah}`}
+                  resetKey={`${activeAuthor?.id}-${activeSurah}`}
                   title={`Loading ${activeAuthor?.name?.replace(/\s*\([^)]*\)\s*$/, '').trim() || "Tafsir"}`}
                   subtitle={`Surah ${currentSurahMeta.englishName} (${activeLangName || "Scholarly Exegesis"})`}
                   statusMessages={[
@@ -2276,6 +2329,29 @@ function TafsirContent() {
         />
       </div>
 
+      {/* Scholar Lecture Series Spotlight Banner (Dr. Israr Ahmed & Dr. Farhat Hashmi) */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8">
+        <ScholarSpotlightBanner
+          onSelectScholar={(authorId, langName) => {
+            const match = allAuthorsWithLang.find((a) => a.author.id === authorId);
+            if (match) {
+              setActiveAuthor(match.author);
+              setActiveLangName(match.language.name);
+            } else {
+              const fallbackAuthor: Author = {
+                id: authorId,
+                name: authorId === 160 ? "Taleem-ul-Quran (تعلیم القرآن)" : "Bayan-ul-Quran (بیان القرآن)",
+                authorName: authorId === 160 ? "Dr. Farhat Hashmi" : "Dr. Israr Ahmad",
+                languageId: 10,
+              };
+              setActiveAuthor(fallbackAuthor);
+              setActiveLangName(langName);
+            }
+            if (activeSurah <= 0) setActiveSurah(1);
+          }}
+        />
+      </div>
+
       {/* Grid of Tafsir Containers (1 col -> 2 -> 3 -> 4 cols on laptop view) */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
         {loadingCatalog ? (
@@ -2367,6 +2443,12 @@ function TafsirContent() {
                   {difficultyLevel && (
                     <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold border truncate max-w-[140px] bg-accent/10 text-accent border-accent/25">
                       {difficultyLevel}
+                    </span>
+                  )}
+                  {isLectureAuthor(author.id, author.authorName, author.name) && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold bg-red-500/15 text-red-500 dark:text-red-400 border border-red-500/30 shrink-0 uppercase tracking-wider">
+                      <Headphones className="size-2.5" />
+                      <span>Audio & Video</span>
                     </span>
                   )}
                   {/* {!isFreeTafsirAuthor(author.name, author.authorName) && (
@@ -2753,7 +2835,7 @@ function TafsirCard({
         </div>
 
         {/* Audio Player - only shown when tafsir is not locked */}
-        {!isLocked && !isDrIsrarAuthor(authorId, authorName) && (
+        {!isLocked && !isLectureAuthor(authorId, authorName) && (
           <TafsirAudioPlayer
             tafsirText={entry.text}
             langName={activeLangName}

@@ -42,6 +42,8 @@ const LOCAL_TAFSIR_MAP: Record<number, { folder: string; isUrdu?: boolean; isPas
   140: { folder: "en-tafsir-fe-zalul-quran-syed-qatab", authorName: "Sayyid Qutb", name: "Fi Zilal al-Quran" },
   158: { folder: "ur-tafsir-bayan-ul-quran", isUrdu: true, authorName: "Dr. Israr Ahmad", name: "Bayan-ul-Quran (بیان القرآن)" },
   100158: { folder: "ur-tafsir-bayan-ul-quran", isUrdu: true, authorName: "Dr. Israr Ahmad", name: "Bayan-ul-Quran (بیان القرآن)" },
+  160: { folder: "ur-tafsir-farhat-hashmi", isUrdu: true, authorName: "Dr. Farhat Hashmi", name: "Taleem-ul-Quran (تعلیم القرآن)" },
+  100160: { folder: "ur-tafsir-farhat-hashmi", isUrdu: true, authorName: "Dr. Farhat Hashmi", name: "Taleem-ul-Quran (تعلیم القرآن)" },
   // Quranpedia Classical & Contemporary Tafsirs
   201: { folder: "ar-tafsir-al-manar", authorName: "Muhammad Rashid Rida", name: "Tafsir al-Manar (تفسير المنار)" },
   202: { folder: "ar-tafsir-al-shaarawi", authorName: "Shaykh Muhammad Metwalli al-Sha'rawi", name: "Tafsir al-Sha'rawi (تفسير الشعراوي)" },
@@ -188,7 +190,7 @@ const getTafsirLibrary = unstable_cache(
     });
     
     authors.forEach(a => {
-      if ([138, 139, 105, 158].includes(a.id)) {
+      if ([138, 139, 105, 158, 160, 100160].includes(a.id)) {
         if (!a.tags.find((t: any) => t.id === 999)) {
           a.tags.push(virtualTag as any);
         }

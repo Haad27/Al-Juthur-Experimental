@@ -13,6 +13,7 @@ export function getTafsirDifficulty(name: string, authorName?: string | null): T
     text.includes("sa'di") || text.includes("sadi") || text.includes("سعدي") || text.includes("سعدی") ||
     text.includes("tafheem") || text.includes("maududi") || text.includes("تفہیم") || text.includes("مودودي") || text.includes("مودودی") ||
     text.includes("israr") || text.includes("bayan-ul-quran") || text.includes("بيان القرآن") || text.includes("بیان القرآن") ||
+    text.includes("farhat") || text.includes("hashmi") || text.includes("فرحت") || text.includes("ہاشمی") || text.includes("taleem-ul-quran") || text.includes("تعلیم القرآن") ||
     text.includes("taqi usmani") || text.includes("عثماني") || text.includes("عثمانی") ||
     text.includes("mukhtasar") || text.includes("مختصر") ||
     text.includes("shaarawi") || text.includes("sha'rawi") || text.includes("شعراوي") ||

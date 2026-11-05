@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { X, Search, Sparkles, BookOpen } from "lucide-react";
+import { X, Search, Sparkles, BookOpen, Headphones } from "lucide-react";
 import { filterTafsirs } from "@/lib/searchUtils";
 import { getTafsirFameRank, getLanguagePriority } from "@/lib/tafsirRanking";
+import { isLectureAuthor } from "@/lib/scholarMedia";
 
 interface Author {
   id: number;
@@ -362,6 +363,12 @@ export default function TafsirWheelPickerModal({
                     <span className="text-xs sm:text-sm truncate leading-tight group-data-[selected=true]:font-bold group-data-[selected=false]:font-medium">
                       {item.author.name}
                     </span>
+                    {isLectureAuthor(item.author.id, item.author.authorName, item.author.name) && (
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded bg-red-500/15 border border-red-500/30 text-red-500 dark:text-red-400 text-[8px] font-bold uppercase tracking-wider shrink-0 mt-0.5">
+                        <Headphones className="size-2.5" />
+                        <span>Lecture</span>
+                      </span>
+                    )}
                     <span className="text-[8px] sm:text-[9px] text-muted-foreground font-mono font-semibold uppercase tracking-widest">
                       {item.langName} {item.author.authorName ? `• ${item.author.authorName}` : ''}
                     </span>

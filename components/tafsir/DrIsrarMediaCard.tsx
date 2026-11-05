@@ -17,22 +17,25 @@ import {
   Layers,
   RefreshCw,
   Loader2,
+  Info,
 } from "lucide-react";
-import { getDrIsrarMedia } from "@/lib/bayanUlQuranMedia";
+import { getScholarMedia, getScholarType, ScholarId } from "@/lib/scholarMedia";
 import { useDrIsrarPlayer } from "@/lib/providers/DrIsrarPlayerContext";
 
 interface DrIsrarMediaCardProps {
   surahNumber: number;
   surahName: string;
   arabicName?: string;
+  scholarId?: ScholarId;
 }
 
 export default function DrIsrarMediaCard({
   surahNumber,
   surahName,
   arabicName,
+  scholarId = "israr",
 }: DrIsrarMediaCardProps) {
-  const media = getDrIsrarMedia(surahNumber, surahName);
+  const media = getScholarMedia(scholarId, surahNumber, surahName, arabicName);
   const player = useDrIsrarPlayer();
 
   // Audio state
@@ -54,7 +57,7 @@ export default function DrIsrarMediaCard({
       ? media.audioParts[selectedPartIndex].url
       : media.audioUrl;
 
-  // Reset state when surah changes
+  // Reset state when surah or scholar changes
   useEffect(() => {
     setIsPlaying(false);
     setIsLoadingAudio(false);
@@ -66,7 +69,7 @@ export default function DrIsrarMediaCard({
       audioRef.current.currentTime = 0;
       audioRef.current.load();
     }
-  }, [surahNumber]);
+  }, [surahNumber, scholarId]);
 
   // If audio part changes, reload audio
   useEffect(() => {
@@ -121,40 +124,6 @@ export default function DrIsrarMediaCard({
     }
   };
 
-  const retryAudio = () => {
-    setIsRetryingAudio(true);
-    setIsLoadingAudio(true);
-    setAudioError(false);
-    if (audioRef.current) {
-      audioRef.current.load();
-      audioRef.current
-        .play()
-        .then(() => {
-          setIsPlaying(true);
-          setIsLoadingAudio(false);
-          setIsRetryingAudio(false);
-        })
-        .catch(() => {
-          setAudioError(true);
-          setIsLoadingAudio(false);
-          setIsRetryingAudio(false);
-        });
-    }
-  };
-
-  const handleTimeUpdate = () => {
-    if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime);
-    }
-  };
-
-  const handleLoadedMetadata = () => {
-    if (audioRef.current) {
-      setDuration(audioRef.current.duration || 0);
-      setAudioError(false);
-    }
-  };
-
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const time = Number(e.target.value);
     setCurrentTime(time);
@@ -163,122 +132,149 @@ export default function DrIsrarMediaCard({
     }
   };
 
-  const skipSeconds = (sec: number) => {
-    if (audioRef.current) {
-      const nextTime = Math.max(0, Math.min(duration, audioRef.current.currentTime + sec));
-      audioRef.current.currentTime = nextTime;
-      setCurrentTime(nextTime);
-    }
+  const skipSeconds = (seconds: number) => {
+    if (!audioRef.current) return;
+    const newTime = Math.min(Math.max(0, audioRef.current.currentTime + seconds), duration || 9999);
+    audioRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
   };
 
   const cycleSpeed = () => {
-    const speeds = [1, 1.25, 1.5, 1.75, 2];
-    const nextIdx = (speeds.indexOf(playbackRate) + 1) % speeds.length;
-    const nextRate = speeds[nextIdx];
-    setPlaybackRate(nextRate);
+    const rates = [1, 1.25, 1.5, 1.75, 2];
+    const next = rates[(rates.indexOf(playbackRate) + 1) % rates.length];
+    setPlaybackRate(next);
     if (audioRef.current) {
-      audioRef.current.playbackRate = nextRate;
+      audioRef.current.playbackRate = next;
     }
   };
 
   const toggleMute = () => {
-    if (audioRef.current) {
-      audioRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
+    if (!audioRef.current) return;
+    audioRef.current.muted = !isMuted;
+    setIsMuted(!isMuted);
   };
 
-  const formatTime = (seconds: number) => {
-    if (isNaN(seconds) || seconds <= 0) return "00:00";
-    const hrs = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    const secs = Math.floor(seconds % 60);
-    if (hrs > 0) {
-      return `${hrs}:${mins < 10 ? "0" : ""}${mins}:${secs < 10 ? "0" : ""}${secs}`;
-    }
-    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+  const retryAudioStream = () => {
+    if (!audioRef.current) return;
+    setIsRetryingAudio(true);
+    setAudioError(false);
+    setIsLoadingAudio(true);
+    audioRef.current.load();
+    audioRef.current
+      .play()
+      .then(() => {
+        setIsPlaying(true);
+        setIsLoadingAudio(false);
+        setIsRetryingAudio(false);
+      })
+      .catch(() => {
+        setIsLoadingAudio(false);
+        setIsRetryingAudio(false);
+        setAudioError(true);
+      });
   };
 
-  const handleOpenVideo = (mode: "docked" | "floating") => {
-    if (audioRef.current) {
+  const formatTime = (secs: number) => {
+    if (isNaN(secs) || secs < 0) return "0:00";
+    const hours = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = Math.floor(secs % 60);
+    if (hours > 0) {
+      return `${hours}:${m < 10 ? "0" : ""}${m}:${s < 10 ? "0" : ""}${s}`;
+    }
+    return `${m}:${s < 10 ? "0" : ""}${s}`;
+  };
+
+  // Video Launcher
+  const launchVideo = (mode: "docked" | "floating") => {
+    // Pause audio if video starts
+    if (audioRef.current && isPlaying) {
       audioRef.current.pause();
       setIsPlaying(false);
       setIsLoadingAudio(false);
     }
-    player.openPlayer(surahNumber, surahName, arabicName, mode);
+    player.openPlayer(surahNumber, surahName, arabicName, mode, scholarId);
   };
 
   // Check if docked player is currently active in tafsir reader
-  const isDockedActive = player.isOpen && player.viewMode === "docked" && !player.isMinimized;
+  const isDockedActive = player.isOpen && player.viewMode === "docked" && player.scholarId === scholarId;
 
   return (
-    <>
-      {/* Hidden HTML5 Audio Element streaming from Archive.org high-quality MP3 */}
+    <div className="w-full">
+      {/* Hidden HTML5 Audio Element for Ultra-crisp archive.org streaming */}
       <audio
         ref={audioRef}
         src={currentAudioUrl}
         preload="metadata"
-        onTimeUpdate={handleTimeUpdate}
-        onLoadedMetadata={handleLoadedMetadata}
+        onTimeUpdate={() => {
+          if (audioRef.current) {
+            setCurrentTime(audioRef.current.currentTime);
+          }
+        }}
+        onLoadedMetadata={() => {
+          if (audioRef.current) {
+            setDuration(audioRef.current.duration);
+            setIsLoadingAudio(false);
+            setAudioError(false);
+          }
+        }}
         onWaiting={() => setIsLoadingAudio(true)}
         onPlaying={() => {
           setIsLoadingAudio(false);
           setIsPlaying(true);
           setAudioError(false);
         }}
-        onPause={() => {
-          setIsLoadingAudio(false);
-          setIsPlaying(false);
-        }}
         onEnded={() => {
-          setIsLoadingAudio(false);
           setIsPlaying(false);
+          setCurrentTime(0);
+          // Auto advance to next part if available
+          if (selectedPartIndex + 1 < media.audioParts.length) {
+            setSelectedPartIndex((prev) => prev + 1);
+          }
         }}
         onError={() => {
           setIsLoadingAudio(false);
+          setIsPlaying(false);
           setAudioError(true);
         }}
       />
 
       {/* =========================================================================
-          MODE 1: TOP DOCKED SPLIT-SCREEN PLAYER (Apple Split-Screen Style)
-          Sticky at top with a fixed 16:9 proportion as the user scrolls down,
-          with tafsir commentary text flowing completely beneath it!
+          DOCKED VIDEO VIEWPORT (Split-screen Apple-style header dock)
           ========================================================================= */}
       {isDockedActive && (
-        <div className="sticky top-14 sm:top-16 z-30 w-full my-4 rounded-2xl border-2 border-accent/40 bg-card shadow-2xl overflow-hidden transition-all animate-in fade-in slide-in-from-top-4 duration-300">
-          {/* Docked Player Header Toolbar */}
-          <div className="flex items-center justify-between px-3.5 sm:px-4 py-2 bg-card border-b border-border text-foreground">
+        <div className="w-full mb-4 rounded-2xl border-2 border-accent/40 bg-card overflow-hidden shadow-2xl animate-in fade-in slide-in-from-top-4 duration-300">
+          {/* Docked Video Top Bar */}
+          <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 bg-muted/80 border-b border-border">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="flex h-2.5 w-2.5 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+              <span className="flex h-2.5 w-2.5 relative shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-accent"></span>
               </span>
-              <span className="text-xs sm:text-sm font-bold truncate">
-                Dr. Israr Ahmed • Surah {player.surahName}
-              </span>
-              <span className="hidden md:inline-flex px-2 py-0.5 rounded-md bg-accent/10 text-accent text-[11px] font-semibold">
-                Split Screen (Top Fixed)
+              <p className="text-xs sm:text-sm font-bold text-foreground truncate">
+                {media.scholarName} • {media.seriesTitle}
+              </p>
+              <span className="hidden sm:inline-flex text-[11px] px-2 py-0.5 rounded-md bg-accent/10 border border-accent/20 text-accent font-medium">
+                Surah {surahName}
               </span>
             </div>
 
-            {/* Header controls */}
-            <div className="flex items-center gap-1.5 shrink-0">
-              {/* Float Window (pop out) */}
+            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+              {/* Float to PiP */}
               <button
                 onClick={() => player.setVideoMode("floating")}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground text-xs font-medium transition-colors cursor-pointer"
-                title="Pop out into floating movable window (PiP)"
+                className="p-1.5 rounded-lg hover:bg-card text-muted-foreground hover:text-foreground transition-colors cursor-pointer flex items-center gap-1 text-xs"
+                title="Pop out to floating picture-in-picture"
               >
-                <Layers size={13} />
-                <span className="hidden sm:inline">Float Window</span>
+                <Layers size={14} className="text-accent" />
+                <span className="hidden md:inline">Float Window</span>
               </button>
 
-              {/* Minimize to compact pill */}
+              {/* Minimize to pill */}
               <button
                 onClick={() => player.setIsMinimized(true)}
-                className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                title="Minimize player"
+                className="p-1.5 rounded-lg hover:bg-card text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                title="Minimize video"
               >
                 <Minimize2 size={14} />
               </button>
@@ -297,19 +293,19 @@ export default function DrIsrarMediaCard({
               {/* Close */}
               <button
                 onClick={player.closePlayer}
-                className="p-1.5 rounded-lg hover:bg-red-500/15 text-muted-foreground hover:text-red-500 transition-colors cursor-pointer"
-                title="Close Split Screen"
+                className="p-1.5 rounded-lg hover:bg-red-500/20 text-muted-foreground hover:text-red-500 transition-colors cursor-pointer"
+                title="Close Video"
               >
                 <X size={15} />
               </button>
             </div>
           </div>
 
-          {/* 16:9 Responsive Video Viewport */}
+          {/* Video Iframe Viewport */}
           <div className="relative w-full aspect-video max-h-[360px] sm:max-h-[420px] bg-black">
             <iframe
               src={media.youtubeEmbedUrl}
-              title={`Dr. Israr Ahmed Bayan-ul-Quran Surah ${surahName}`}
+              title={`${media.scholarName} ${media.seriesTitle} Surah ${surahName}`}
               className="absolute inset-0 size-full border-0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
@@ -317,16 +313,16 @@ export default function DrIsrarMediaCard({
             />
           </div>
 
-          {/* Bottom helper info */}
-          <div className="px-4 py-1.5 bg-muted/40 border-t border-border flex items-center justify-between text-[11px] text-muted-foreground">
+          {/* Docked Video Footer Info */}
+          <div className="px-3 sm:px-4 py-2 bg-card/60 flex items-center justify-between text-xs text-muted-foreground border-t border-border">
             <span className="truncate">
-              Scroll down freely to read the Tafsir text below • You can also open the Quran and keep watching!
+              Watching lecture alongside Quran Ayah commentary
             </span>
             <button
               onClick={() => player.setVideoMode("floating")}
               className="text-accent hover:underline font-semibold cursor-pointer shrink-0 ml-2"
             >
-              Make Floating →
+              Pop out PiP ↗
             </button>
           </div>
         </div>
@@ -334,7 +330,6 @@ export default function DrIsrarMediaCard({
 
       {/* =========================================================================
           MAIN INLINE MEDIA CARD: ORIGINAL AUDIO TAFSIR + VIDEO LAUNCHER
-          Always visible in the reader header, with Dr. Israr's portrait and MP3!
           ========================================================================= */}
       <div className="w-full my-4 rounded-2xl border border-border bg-card/95 shadow-sm backdrop-blur p-4 sm:p-5 transition-all">
         {/* Scholar Portrait + Lecture Details */}
@@ -342,8 +337,8 @@ export default function DrIsrarMediaCard({
           {/* Portrait with Accent Halo */}
           <div className="relative size-16 sm:size-20 shrink-0 rounded-2xl overflow-hidden border border-accent/30 bg-accent/5 p-1 shadow-inner flex items-center justify-center">
             <Image
-              src="/images/dr-israr-ahmed.jpg"
-              alt="Dr. Israr Ahmed"
+              src={media.portraitUrl}
+              alt={media.scholarName}
               fill
               className="object-cover rounded-xl"
               sizes="(max-width: 640px) 64px, 80px"
@@ -371,20 +366,20 @@ export default function DrIsrarMediaCard({
               <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap mb-1">
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent/10 border border-accent/25 text-accent font-semibold text-[11px] uppercase tracking-wider">
                   <Sparkles size={11} className="text-accent" />
-                  Original Audio Tafseer
+                  Original Audio & Video Series
                 </span>
-                <span className="text-[11px] text-muted-foreground">
-                  Urdu Bayan-ul-Quran (بیان القرآن)
+                <span className="text-[11px] text-muted-foreground font-medium">
+                  {media.seriesTitle}
                 </span>
               </div>
 
               <h3 className="text-base sm:text-lg font-bold text-foreground truncate">
-                Dr. Israr Ahmed • Surah {surahName} {arabicName && `(${arabicName})`}
+                {media.scholarName} • Surah {surahName} {arabicName && `(${arabicName})`}
               </h3>
 
               <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap mt-0.5">
                 <p className="text-xs text-muted-foreground">
-                  Complete original Urdu lecture from Tanzeem-e-Islami archive.
+                  {media.scholarTitle} Authentic Archive • {media.audioParts.length} Lecture Part{media.audioParts.length > 1 ? "s" : ""} Available
                 </p>
 
                 {/* Multiple parts selector dropdown if Surah has multiple audio files */}
@@ -459,10 +454,10 @@ export default function DrIsrarMediaCard({
                     )}
                     <span>
                       {isLoadingAudio
-                        ? "Loading..."
+                        ? "Buffering..."
                         : isPlaying
-                        ? "Pause"
-                        : "Play Lecture"}
+                        ? "Pause Audio"
+                        : "Play Audio"}
                     </span>
                   </button>
 
@@ -474,14 +469,16 @@ export default function DrIsrarMediaCard({
                     <FastForward size={15} />
                   </button>
 
+                  {/* Playback speed */}
                   <button
                     onClick={cycleSpeed}
-                    className="px-2 py-1 rounded-lg border border-border text-[10px] font-mono font-bold text-muted-foreground hover:text-foreground hover:border-accent/40 transition-colors cursor-pointer"
-                    title="Playback Speed"
+                    className="px-2 py-1 rounded-lg hover:bg-muted text-[11px] font-mono font-semibold text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                    title="Playback speed"
                   >
-                    {playbackRate}×
+                    {playbackRate}x
                   </button>
 
+                  {/* Mute */}
                   <button
                     onClick={toggleMute}
                     className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
@@ -491,23 +488,23 @@ export default function DrIsrarMediaCard({
                   </button>
                 </div>
 
-                {/* Video Split Screen / PiP Launch Buttons */}
-                <div className="flex items-center gap-2">
+                {/* Video controls */}
+                <div className="flex items-center gap-1 sm:gap-2">
                   <button
-                    onClick={() => handleOpenVideo("docked")}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-600/15 border border-red-500/30 text-red-500 dark:text-red-400 hover:bg-red-600/25 text-xs font-semibold transition-all cursor-pointer shadow-sm"
-                    title="Watch Split Screen Video (Apple Style)"
+                    onClick={() => launchVideo("docked")}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-500 dark:text-red-400 font-semibold text-xs transition-colors cursor-pointer"
+                    title="Watch Split Screen Video"
                   >
                     <Youtube size={14} className="text-red-500 fill-current" />
                     <span>Watch Video</span>
                   </button>
 
                   <button
-                    onClick={() => handleOpenVideo("floating")}
-                    className="p-1.5 rounded-lg border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-colors inline-flex items-center cursor-pointer"
-                    title="Open Floating Picture-in-Picture window"
+                    onClick={() => launchVideo("floating")}
+                    className="p-1.5 rounded-lg border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                    title="Pop out Floating PiP Video"
                   >
-                    <Layers size={13} />
+                    <Layers size={14} className="text-accent" />
                   </button>
 
                   <a
@@ -515,7 +512,7 @@ export default function DrIsrarMediaCard({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-1.5 rounded-lg border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-colors inline-flex items-center"
-                    title="Open Complete YouTube Playlist"
+                    title="Open on YouTube"
                   >
                     <ExternalLink size={13} />
                   </a>
@@ -524,12 +521,12 @@ export default function DrIsrarMediaCard({
 
               {/* Audio error banner with retry */}
               {audioError && (
-                <div className="flex items-center justify-between gap-2 p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-500 mt-2">
-                  <span>Audio connection was interrupted or delayed by archive server.</span>
+                <div className="mt-2 p-2.5 rounded-xl bg-destructive/10 border border-destructive/30 text-destructive text-xs flex items-center justify-between gap-2 animate-in fade-in">
+                  <span>Network stream interrupted. Click to retry connection.</span>
                   <button
-                    onClick={retryAudio}
+                    onClick={retryAudioStream}
                     disabled={isRetryingAudio}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/20 hover:bg-amber-500/30 font-semibold cursor-pointer shrink-0"
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-destructive text-destructive-foreground font-semibold text-[11px] hover:opacity-90 transition cursor-pointer"
                   >
                     <RefreshCw size={11} className={isRetryingAudio ? "animate-spin" : ""} />
                     <span>Retry</span>
@@ -539,7 +536,15 @@ export default function DrIsrarMediaCard({
             </div>
           </div>
         </div>
+
+        {/* Informative Note for User */}
+        <div className="mt-4 pt-3 border-t border-border/60 flex items-center gap-2 text-[11px] text-muted-foreground">
+          <Info size={13} className="text-accent shrink-0" />
+          <span>
+            <strong>Audio & Video First:</strong> The primary rich scholarly exposition for {media.scholarName} is presented in the original lectures above. The text below serves as reference.
+          </span>
+        </div>
       </div>
-    </>
+    </div>
   );
 }

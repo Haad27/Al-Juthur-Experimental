@@ -24,8 +24,8 @@ export function getTafsirFameRank(name: string, authorName?: string | null): num
   // 6. Tafheem-ul-Quran (Sayyid Abul A'la Maududi)
   if (text.includes("tafheem") || text.includes("maududi") || text.includes("تفہیم") || text.includes("مودودي") || text.includes("مودودی")) return 6;
 
-  // 7. Bayan-ul-Quran (Dr. Israr Ahmad / Ashraf Ali Thanwi)
-  if (text.includes("israr") || text.includes("bayan-ul-quran") || text.includes("بيان القرآن") || text.includes("بیان القرآن") || text.includes("thanwi") || text.includes("تھانوی")) return 7;
+  // 7. Bayan-ul-Quran (Dr. Israr Ahmad / Ashraf Ali Thanwi) & Dr. Farhat Hashmi
+  if (text.includes("israr") || text.includes("bayan-ul-quran") || text.includes("بيان القرآن") || text.includes("بیان القرآن") || text.includes("thanwi") || text.includes("تھانوی") || text.includes("farhat") || text.includes("hashmi") || text.includes("فرحت") || text.includes("ہاشمی") || text.includes("taleem-ul-quran") || text.includes("تعلیم القرآن")) return 7;
 
   // 8. Ma'arif-ul-Quran / Mufti Shafi / Taqi Usmani
   if (text.includes("ma'arif") || text.includes("maarif") || text.includes("معارف") || text.includes("shafi") || text.includes("taqi usmani") || text.includes("عثماني") || text.includes("عثمانی")) return 8;

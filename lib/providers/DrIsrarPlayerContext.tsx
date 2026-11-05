@@ -3,12 +3,17 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 
-export type DrIsrarPlayerMode = "docked" | "floating";
+export type ScholarPlayerMode = "docked" | "floating";
+export type ScholarId = "israr" | "farhat";
 
-interface DrIsrarPlayerContextType {
+// Backwards-compatible type alias
+export type DrIsrarPlayerMode = ScholarPlayerMode;
+
+interface ScholarPlayerContextType {
   isOpen: boolean;
-  viewMode: DrIsrarPlayerMode;
+  viewMode: ScholarPlayerMode;
   isMinimized: boolean;
+  scholarId: ScholarId;
   surahNumber: number;
   surahName: string;
   arabicName?: string;
@@ -18,21 +23,24 @@ interface DrIsrarPlayerContextType {
     surahNumber: number,
     surahName: string,
     arabicName?: string,
-    mode?: DrIsrarPlayerMode
+    mode?: ScholarPlayerMode,
+    scholar?: ScholarId
   ) => void;
   closePlayer: () => void;
   toggleMode: () => void;
-  setVideoMode: (mode: DrIsrarPlayerMode) => void;
+  setVideoMode: (mode: ScholarPlayerMode) => void;
   setIsMinimized: (minimized: boolean) => void;
+  setScholar: (scholar: ScholarId) => void;
 }
 
-const DrIsrarPlayerContext = createContext<DrIsrarPlayerContextType | undefined>(undefined);
+const ScholarPlayerContext = createContext<ScholarPlayerContextType | undefined>(undefined);
 
 export function DrIsrarPlayerProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<DrIsrarPlayerMode>("docked");
+  const [viewMode, setViewMode] = useState<ScholarPlayerMode>("docked");
   const [isMinimized, setIsMinimized] = useState(false);
+  const [scholarId, setScholarId] = useState<ScholarId>("israr");
   const [surahNumber, setSurahNumber] = useState(1);
   const [surahName, setSurahName] = useState("Al-Fatihah");
   const [arabicName, setArabicName] = useState<string | undefined>("الفاتحة");
@@ -50,11 +58,13 @@ export function DrIsrarPlayerProvider({ children }: { children: React.ReactNode 
     num: number,
     name: string,
     arName?: string,
-    mode: DrIsrarPlayerMode = "docked"
+    mode: ScholarPlayerMode = "docked",
+    scholar: ScholarId = "israr"
   ) => {
     setSurahNumber(num);
     setSurahName(name);
     setArabicName(arName);
+    setScholarId(scholar);
     // If not on /tafsir, always open as floating PiP
     if (pathname !== "/tafsir") {
       setViewMode("floating");
@@ -74,16 +84,21 @@ export function DrIsrarPlayerProvider({ children }: { children: React.ReactNode 
     setViewMode((prev) => (prev === "docked" ? "floating" : "docked"));
   };
 
-  const setVideoMode = (mode: DrIsrarPlayerMode) => {
+  const setVideoMode = (mode: ScholarPlayerMode) => {
     setViewMode(mode);
   };
 
+  const setScholar = (scholar: ScholarId) => {
+    setScholarId(scholar);
+  };
+
   return (
-    <DrIsrarPlayerContext.Provider
+    <ScholarPlayerContext.Provider
       value={{
         isOpen,
         viewMode,
         isMinimized,
+        scholarId,
         surahNumber,
         surahName,
         arabicName,
@@ -94,17 +109,21 @@ export function DrIsrarPlayerProvider({ children }: { children: React.ReactNode 
         toggleMode,
         setVideoMode,
         setIsMinimized,
+        setScholar,
       }}
     >
       {children}
-    </DrIsrarPlayerContext.Provider>
+    </ScholarPlayerContext.Provider>
   );
 }
 
 export function useDrIsrarPlayer() {
-  const context = useContext(DrIsrarPlayerContext);
+  const context = useContext(ScholarPlayerContext);
   if (!context) {
     throw new Error("useDrIsrarPlayer must be used within a DrIsrarPlayerProvider");
   }
   return context;
 }
+
+// Re-export alias
+export const useScholarPlayer = useDrIsrarPlayer;

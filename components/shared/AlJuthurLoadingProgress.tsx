@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { WifiOff, RotateCcw, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +14,7 @@ export interface AlJuthurLoadingProgressProps {
   value?: number;
   isOffline?: boolean;
   onRetry?: () => void;
+  resetKey?: string | number;
 }
 
 export default function AlJuthurLoadingProgress({
@@ -26,10 +27,29 @@ export default function AlJuthurLoadingProgress({
   value,
   isOffline: propIsOffline,
   onRetry,
+  resetKey,
 }: AlJuthurLoadingProgressProps) {
-  const [internalProgress, setInternalProgress] = useState(12);
+  const [smoothProgress, setSmoothProgress] = useState<number>(() => {
+    return value !== undefined ? Math.max(12, Math.min(100, value)) : 12;
+  });
   const [messageIndex, setMessageIndex] = useState(0);
   const [localOffline, setLocalOffline] = useState(false);
+
+  // Keep a ref to the latest target value to prevent stale closures
+  const targetValueRef = useRef<number>(value ?? 12);
+  useEffect(() => {
+    if (value !== undefined) {
+      targetValueRef.current = value;
+    }
+  }, [value]);
+
+  // Reset progress when resetKey changes
+  useEffect(() => {
+    if (resetKey !== undefined) {
+      setSmoothProgress(12);
+      targetValueRef.current = value ?? 12;
+    }
+  }, [resetKey]);
 
   // Detect offline status
   useEffect(() => {
@@ -51,33 +71,54 @@ export default function AlJuthurLoadingProgress({
 
   const isOffline = propIsOffline ?? localOffline;
 
-  // Realistic human-paced progress animation when not controlled externally
+  // Ultra-smooth, non-reversing, continuous progress animation engine
   useEffect(() => {
-    if (value !== undefined) return;
     if (isOffline) return;
 
     const startTime = Date.now();
     const interval = setInterval(() => {
-      const elapsedSec = (Date.now() - startTime) / 1000;
+      setSmoothProgress((current) => {
+        let target = targetValueRef.current;
 
-      // Natural, realistic progress curve:
-      // - 0s to 1.8s: 12% -> 50% (50% is genuinely in the middle of typical response)
-      // - 1.8s to 4.0s: 50% -> 75%
-      // - 4.0s to 8.0s: 75% -> 88%
-      // - >8s: asymptotic slow crawl up to max 91%
-      if (elapsedSec <= 1.8) {
-        setInternalProgress(Math.floor(12 + (38 * elapsedSec) / 1.8));
-      } else if (elapsedSec <= 4.0) {
-        setInternalProgress(Math.floor(50 + (25 * (elapsedSec - 1.8)) / 2.2));
-      } else if (elapsedSec <= 8.0) {
-        setInternalProgress(Math.floor(75 + (13 * (elapsedSec - 4.0)) / 4.0));
-      } else {
-        setInternalProgress(Math.min(91, Math.floor(88 + Math.log(elapsedSec - 7))));
-      }
-    }, 60);
+        // If no external value provided, use natural time-based target curve
+        if (value === undefined) {
+          const elapsedSec = (Date.now() - startTime) / 1000;
+          if (elapsedSec <= 1.5) {
+            target = 12 + (38 * elapsedSec) / 1.5; // reaches 50% at 1.5s
+          } else if (elapsedSec <= 3.5) {
+            target = 50 + (28 * (elapsedSec - 1.5)) / 2.0; // 50% -> 78%
+          } else if (elapsedSec <= 7.0) {
+            target = 78 + (14 * (elapsedSec - 3.5)) / 3.5; // 78% -> 92%
+          } else {
+            target = Math.min(97, 92 + Math.log(elapsedSec - 6));
+          }
+        }
+
+        // Completion phase
+        if (target >= 100) {
+          if (current >= 100) return 100;
+          const step = Math.max(2, (100 - current) * 0.35);
+          return Math.min(100, current + step);
+        }
+
+        // Catching up to target
+        if (current < target) {
+          const step = Math.max(0.4, (target - current) * 0.14);
+          return Math.min(target, current + step);
+        }
+
+        // NEVER FREEZE: If current caught up to target, gently micro-creep forward
+        // so the user sees continuous activity rather than getting stuck at any number
+        if (current < 98) {
+          return current + 0.12;
+        }
+
+        return current;
+      });
+    }, 45);
 
     return () => clearInterval(interval);
-  }, [value, isOffline]);
+  }, [value, isOffline, resetKey]);
 
   // Status message rotation
   useEffect(() => {
@@ -89,7 +130,7 @@ export default function AlJuthurLoadingProgress({
     return () => clearInterval(msgInterval);
   }, [statusMessages]);
 
-  const activeProgress = value !== undefined ? Math.min(100, Math.max(5, value)) : internalProgress;
+  const displayPercent = Math.min(100, Math.floor(smoothProgress));
 
   const activeSubtitle = isOffline
     ? "Internet connection is currently unavailable."
@@ -122,7 +163,7 @@ export default function AlJuthurLoadingProgress({
           )}
         </div>
       ) : (
-        // Normal Accurate Progress View
+        // Normal Ultra-Smooth Progress View
         <div className="flex flex-col items-center gap-2 w-full mt-2">
           <div className="text-center text-[10px] font-bold text-accent uppercase tracking-[0.25em] mb-0.5">
             {title}
@@ -131,19 +172,19 @@ export default function AlJuthurLoadingProgress({
             {activeSubtitle}
           </div>
 
-          {/* Clean Accurate Progress Bar */}
+          {/* Clean Accurate Continuous Progress Bar */}
           <div className="flex flex-col gap-1.5 w-60 mt-1">
             <div className="flex items-center justify-between w-full text-[10px] font-bold uppercase tracking-[0.2em]">
               <span className="text-accent flex items-center gap-1.5">
                 <Loader2 size={11} className="animate-spin text-accent" />
                 <span>Loading</span>
               </span>
-              <span className="text-accent font-mono font-bold">{activeProgress}%</span>
+              <span className="text-accent font-mono font-bold">{displayPercent}%</span>
             </div>
             <div className="w-full h-[3px] bg-accent/15 rounded-full relative overflow-hidden">
               <div
-                className="absolute top-0 left-0 h-full bg-gradient-to-r from-accent via-accent to-primary rounded-full transition-all duration-300 ease-out"
-                style={{ width: `${activeProgress}%` }}
+                className="absolute top-0 left-0 h-full bg-gradient-to-r from-accent via-accent to-primary rounded-full transition-all duration-150 ease-out"
+                style={{ width: `${displayPercent}%` }}
               />
             </div>
           </div>
