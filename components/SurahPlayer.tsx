@@ -45,7 +45,14 @@ export default function SurahPlayer({
   router,
   aiChatContext,
 }: SurahPlayerProps) {
-  const { mistakeDetection, selectedReciter, setSelectedReciter, isWordDialogVisible, setTranslationEdition } = useGlobalState();
+  const {
+    mistakeDetection,
+    selectedReciter,
+    setSelectedReciter,
+    isWordDialogVisible,
+    translationEdition,
+    setTranslationEdition,
+  } = useGlobalState();
   const audioStore = useAudioStore();
 
   const [reciters, setReciters] = useState<any[]>([]);
@@ -112,6 +119,27 @@ export default function SurahPlayer({
       audioStore.setActivePhase("arabic");
     }
   }, [audioStore.audioMode]);
+
+  // Proactive auto-synchronization: Ensure on-screen text matches the chosen audio translation
+  // Whenever audioMode includes translation ("both" or "translation"), keep the text translation aligned
+  useEffect(() => {
+    if (audioStore.audioMode !== "translation" && audioStore.audioMode !== "both") {
+      return;
+    }
+    if (!setTranslationEdition) return;
+
+    if (audioStore.translationAudioLang === "ur") {
+      // Shamshad Ali Khan recites Fateh Muhammad Jalandhari (id: 234)
+      if (translationEdition !== "234") {
+        setTranslationEdition("234");
+      }
+    } else {
+      // Ibrahim Walk recites Saheeh International (id: 20)
+      if (translationEdition !== "20") {
+        setTranslationEdition("20");
+      }
+    }
+  }, [audioStore.audioMode, audioStore.translationAudioLang, translationEdition, setTranslationEdition]);
 
   const [recording, setRecording] = useState(false);
   const [showReciteGuide, setShowReciteGuide] = useState(false);
