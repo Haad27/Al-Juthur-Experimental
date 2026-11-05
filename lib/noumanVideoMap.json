@@ -1,0 +1,124 @@
+{
+  "divine_speech": {
+    "title": "Divine Speech Prologue & Literary Seminars",
+    "description": "Exploration of the literary miracle, coherence, and linguistic beauty of the Quran.",
+    "episodes": [
+      {
+        "title": "Divine Speech Prologue (Part 1)",
+        "videoId": "YR4B-3puOSw"
+      },
+      {
+        "title": "Divine Speech Prologue (Part 2)",
+        "videoId": "5qnTS5jz8Fc"
+      }
+    ]
+  },
+  "juz_amma_playlist": "PLFiWRBiEv9Di5Bd4tbjdOreuYAMRbmv1K",
+  "surahs": {
+    "1": {
+      "title": "Surah Al-Fatihah",
+      "videoId": "wgWO26eifsg",
+      "hasCoverage": true
+    },
+    "2": {
+      "title": "Surah Al-Baqarah",
+      "videoId": "UnJzIXE63jI",
+      "hasCoverage": true
+    },
+    "12": {
+      "title": "Surah Yusuf",
+      "videoId": "r3ak4q52Cmg",
+      "hasCoverage": true
+    },
+    "18": {
+      "title": "Surah Al-Kahf",
+      "videoId": "71cC5woCSl0",
+      "hasCoverage": true
+    },
+    "19": {
+      "title": "Surah Maryam",
+      "videoId": "MjQv_dshQYI",
+      "hasCoverage": true
+    },
+    "20": {
+      "title": "Surah Ta-Ha",
+      "videoId": "yLWFFJxg9pA",
+      "hasCoverage": true
+    },
+    "24": {
+      "title": "Surah An-Nur",
+      "videoId": "hU4zZQtfGRo",
+      "hasCoverage": true
+    },
+    "25": {
+      "title": "Surah Al-Furqan",
+      "videoId": "pUdQx5pCGwA",
+      "hasCoverage": true
+    },
+    "31": {
+      "title": "Surah Luqman",
+      "videoId": "yLWFFJxg9pA",
+      "hasCoverage": true
+    },
+    "36": {
+      "title": "Surah Yaseen",
+      "videoId": "LxCzKhtWRuY",
+      "hasCoverage": true
+    },
+    "49": {
+      "title": "Surah Al-Hujurat",
+      "videoId": "hU4zZQtfGRo",
+      "hasCoverage": true
+    },
+    "55": {
+      "title": "Surah Ar-Rahman",
+      "videoId": "pdsPOqKjcr4",
+      "hasCoverage": true
+    },
+    "56": {
+      "title": "Surah Al-Waqi'ah",
+      "videoId": "_BQIfJKv8F0",
+      "hasCoverage": true
+    },
+    "57": {
+      "title": "Surah Al-Hadid",
+      "videoId": "XDlIUC9BnUA",
+      "hasCoverage": true
+    },
+    "67": {
+      "title": "Surah Al-Mulk",
+      "videoId": "LIbGykosIbw",
+      "hasCoverage": true
+    },
+    "68": {
+      "title": "Surah Al-Qalam",
+      "videoId": "2yBazx7TPMg",
+      "hasCoverage": true
+    },
+    "78": {
+      "title": "Surah An-Naba",
+      "videoId": "WNVU0JpHSzw",
+      "hasCoverage": true
+    },
+    "97": {
+      "title": "Surah Al-Qadr",
+      "videoId": "5sWAyGRQ0-k",
+      "hasCoverage": true
+    },
+    "98": {
+      "title": "Surah Al-Bayyinah",
+      "videoId": "n0YN7mczYE8",
+      "hasCoverage": true
+    },
+    "103": {
+      "title": "Surah Al-Asr",
+      "videoId": "tFtk9OxlWlc",
+      "hasCoverage": true
+    },
+    "112": {
+      "title": "Surah Al-Ikhlas",
+      "videoId": "cV2Vf5SesgU",
+      "hasCoverage": true
+    }
+  }
+}

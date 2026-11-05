@@ -2340,9 +2340,19 @@ function TafsirContent() {
             } else {
               const fallbackAuthor: Author = {
                 id: authorId,
-                name: authorId === 160 ? "Taleem-ul-Quran (تعلیم القرآن)" : "Bayan-ul-Quran (بیان القرآن)",
-                authorName: authorId === 160 ? "Dr. Farhat Hashmi" : "Dr. Israr Ahmad",
-                languageId: 10,
+                name:
+                  authorId === 170
+                    ? "Quran Series & Divine Speech"
+                    : authorId === 160
+                    ? "Taleem-ul-Quran (تعلیم القرآن)"
+                    : "Bayan-ul-Quran (بیان القرآن)",
+                authorName:
+                  authorId === 170
+                    ? "Ustadh Nouman Ali Khan"
+                    : authorId === 160
+                    ? "Dr. Farhat Hashmi"
+                    : "Dr. Israr Ahmad",
+                languageId: authorId === 170 ? 1 : 10,
               };
               setActiveAuthor(fallbackAuthor);
               setActiveLangName(langName);

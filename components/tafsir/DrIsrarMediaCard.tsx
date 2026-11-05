@@ -18,8 +18,9 @@ import {
   RefreshCw,
   Loader2,
   Info,
+  BookOpen,
 } from "lucide-react";
-import { getScholarMedia, getScholarType, ScholarId } from "@/lib/scholarMedia";
+import { getScholarMedia, ScholarId } from "@/lib/scholarMedia";
 import { useDrIsrarPlayer } from "@/lib/providers/DrIsrarPlayerContext";
 
 interface DrIsrarMediaCardProps {
@@ -37,6 +38,9 @@ export default function DrIsrarMediaCard({
 }: DrIsrarMediaCardProps) {
   const media = getScholarMedia(scholarId, surahNumber, surahName, arabicName);
   const player = useDrIsrarPlayer();
+
+  // Mode for Nouman Ali Khan (Surah vs Divine Speech)
+  const [noumanSeriesMode, setNoumanSeriesMode] = useState<"surah" | "divine_speech">("surah");
 
   // Audio state
   const [selectedPartIndex, setSelectedPartIndex] = useState(0);
@@ -57,6 +61,17 @@ export default function DrIsrarMediaCard({
       ? media.audioParts[selectedPartIndex].url
       : media.audioUrl;
 
+  // Active video embed based on series toggle
+  const activeVideoEmbedUrl =
+    scholarId === "nouman" && noumanSeriesMode === "divine_speech"
+      ? "https://www.youtube-nocookie.com/embed/YR4B-3puOSw?autoplay=1&rel=0"
+      : media.youtubeEmbedUrl;
+
+  const activeVideoWatchUrl =
+    scholarId === "nouman" && noumanSeriesMode === "divine_speech"
+      ? "https://www.youtube.com/watch?v=YR4B-3puOSw"
+      : media.youtubeWatchUrl;
+
   // Reset state when surah or scholar changes
   useEffect(() => {
     setIsPlaying(false);
@@ -67,13 +82,15 @@ export default function DrIsrarMediaCard({
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
-      audioRef.current.load();
+      if (currentAudioUrl) {
+        audioRef.current.load();
+      }
     }
   }, [surahNumber, scholarId]);
 
   // If audio part changes, reload audio
   useEffect(() => {
-    if (audioRef.current) {
+    if (audioRef.current && currentAudioUrl) {
       const wasPlaying = isPlaying;
       audioRef.current.load();
       if (wasPlaying) {
@@ -97,13 +114,12 @@ export default function DrIsrarMediaCard({
 
   // Audio Controls
   const togglePlay = () => {
-    if (!audioRef.current) return;
+    if (!audioRef.current || !currentAudioUrl) return;
     if (isPlaying) {
       audioRef.current.pause();
       setIsPlaying(false);
       setIsLoadingAudio(false);
     } else {
-      // Pause video if user switches to audio
       if (player.isOpen) {
         player.closePlayer();
       }
@@ -139,19 +155,19 @@ export default function DrIsrarMediaCard({
     setCurrentTime(newTime);
   };
 
-  const cycleSpeed = () => {
-    const rates = [1, 1.25, 1.5, 1.75, 2];
-    const next = rates[(rates.indexOf(playbackRate) + 1) % rates.length];
-    setPlaybackRate(next);
-    if (audioRef.current) {
-      audioRef.current.playbackRate = next;
-    }
-  };
-
   const toggleMute = () => {
     if (!audioRef.current) return;
     audioRef.current.muted = !isMuted;
     setIsMuted(!isMuted);
+  };
+
+  const cycleSpeed = () => {
+    if (!audioRef.current) return;
+    const speeds = [1, 1.25, 1.5, 1.75, 2];
+    const nextIdx = (speeds.indexOf(playbackRate) + 1) % speeds.length;
+    const nextSpeed = speeds[nextIdx];
+    audioRef.current.playbackRate = nextSpeed;
+    setPlaybackRate(nextSpeed);
   };
 
   const retryAudioStream = () => {
@@ -168,6 +184,7 @@ export default function DrIsrarMediaCard({
         setIsRetryingAudio(false);
       })
       .catch(() => {
+        setIsPlaying(false);
         setIsLoadingAudio(false);
         setIsRetryingAudio(false);
         setAudioError(true);
@@ -175,19 +192,18 @@ export default function DrIsrarMediaCard({
   };
 
   const formatTime = (secs: number) => {
-    if (isNaN(secs) || secs < 0) return "0:00";
-    const hours = Math.floor(secs / 3600);
+    if (isNaN(secs) || secs < 0) return "00:00";
+    const h = Math.floor(secs / 3600);
     const m = Math.floor((secs % 3600) / 60);
     const s = Math.floor(secs % 60);
-    if (hours > 0) {
-      return `${hours}:${m < 10 ? "0" : ""}${m}:${s < 10 ? "0" : ""}${s}`;
+    if (h > 0) {
+      return `${h}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
     }
-    return `${m}:${s < 10 ? "0" : ""}${s}`;
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
-  // Video Launcher
+  // Launch Video
   const launchVideo = (mode: "docked" | "floating") => {
-    // Pause audio if video starts
     if (audioRef.current && isPlaying) {
       audioRef.current.pause();
       setIsPlaying(false);
@@ -196,104 +212,87 @@ export default function DrIsrarMediaCard({
     player.openPlayer(surahNumber, surahName, arabicName, mode, scholarId);
   };
 
-  // Check if docked player is currently active in tafsir reader
   const isDockedActive = player.isOpen && player.viewMode === "docked" && player.scholarId === scholarId;
 
   return (
     <div className="w-full">
-      {/* Hidden HTML5 Audio Element for Ultra-crisp archive.org streaming */}
-      <audio
-        ref={audioRef}
-        src={currentAudioUrl}
-        preload="metadata"
-        onTimeUpdate={() => {
-          if (audioRef.current) {
-            setCurrentTime(audioRef.current.currentTime);
-          }
-        }}
-        onLoadedMetadata={() => {
-          if (audioRef.current) {
-            setDuration(audioRef.current.duration);
+      {/* HTML5 Audio Element when audio is available */}
+      {currentAudioUrl && (
+        <audio
+          ref={audioRef}
+          src={currentAudioUrl}
+          preload="metadata"
+          onTimeUpdate={() => {
+            if (audioRef.current) {
+              setCurrentTime(audioRef.current.currentTime);
+            }
+          }}
+          onLoadedMetadata={() => {
+            if (audioRef.current) {
+              setDuration(audioRef.current.duration);
+              setIsLoadingAudio(false);
+              setAudioError(false);
+            }
+          }}
+          onWaiting={() => setIsLoadingAudio(true)}
+          onPlaying={() => {
             setIsLoadingAudio(false);
+            setIsPlaying(true);
             setAudioError(false);
-          }
-        }}
-        onWaiting={() => setIsLoadingAudio(true)}
-        onPlaying={() => {
-          setIsLoadingAudio(false);
-          setIsPlaying(true);
-          setAudioError(false);
-        }}
-        onEnded={() => {
-          setIsPlaying(false);
-          setCurrentTime(0);
-          // Auto advance to next part if available
-          if (selectedPartIndex + 1 < media.audioParts.length) {
-            setSelectedPartIndex((prev) => prev + 1);
-          }
-        }}
-        onError={() => {
-          setIsLoadingAudio(false);
-          setIsPlaying(false);
-          setAudioError(true);
-        }}
-      />
+          }}
+          onEnded={() => {
+            setIsPlaying(false);
+            setCurrentTime(0);
+            if (selectedPartIndex + 1 < media.audioParts.length) {
+              setSelectedPartIndex((prev) => prev + 1);
+            }
+          }}
+          onError={() => {
+            setIsLoadingAudio(false);
+            setIsPlaying(false);
+            setAudioError(true);
+          }}
+        />
+      )}
 
       {/* =========================================================================
           DOCKED VIDEO VIEWPORT (Split-screen Apple-style header dock)
           ========================================================================= */}
       {isDockedActive && (
         <div className="w-full mb-4 rounded-2xl border-2 border-accent/40 bg-card overflow-hidden shadow-2xl animate-in fade-in slide-in-from-top-4 duration-300">
-          {/* Docked Video Top Bar */}
           <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 bg-muted/80 border-b border-border">
             <div className="flex items-center gap-2 min-w-0">
               <span className="flex h-2.5 w-2.5 relative shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-accent"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
               </span>
-              <p className="text-xs sm:text-sm font-bold text-foreground truncate">
-                {media.scholarName} • {media.seriesTitle}
-              </p>
-              <span className="hidden sm:inline-flex text-[11px] px-2 py-0.5 rounded-md bg-accent/10 border border-accent/20 text-accent font-medium">
-                Surah {surahName}
+              <Youtube size={15} className="text-red-500 fill-current shrink-0" />
+              <span className="text-xs sm:text-sm font-bold text-foreground truncate">
+                {media.scholarName} • {noumanSeriesMode === "divine_speech" && scholarId === "nouman" ? "Divine Speech Seminar" : `Surah ${surahName}`}
               </span>
             </div>
 
-            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-              {/* Float to PiP */}
+            <div className="flex items-center gap-1.5 shrink-0">
               <button
                 onClick={() => player.setVideoMode("floating")}
-                className="p-1.5 rounded-lg hover:bg-card text-muted-foreground hover:text-foreground transition-colors cursor-pointer flex items-center gap-1 text-xs"
-                title="Pop out to floating picture-in-picture"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-accent/10 hover:bg-accent/20 text-accent transition-colors cursor-pointer"
+                title="Pop out Floating Picture-in-Picture Video"
               >
-                <Layers size={14} className="text-accent" />
-                <span className="hidden md:inline">Float Window</span>
+                <Layers size={13} />
+                <span className="hidden sm:inline">Floating PiP</span>
               </button>
 
-              {/* Minimize to pill */}
               <button
                 onClick={() => player.setIsMinimized(true)}
-                className="p-1.5 rounded-lg hover:bg-card text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                title="Minimize video"
+                className="p-1 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                title="Minimize Video"
               >
                 <Minimize2 size={14} />
               </button>
 
-              {/* External link */}
-              <a
-                href={media.youtubeWatchUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                title="Open in YouTube"
-              >
-                <ExternalLink size={14} />
-              </a>
-
-              {/* Close */}
               <button
                 onClick={player.closePlayer}
-                className="p-1.5 rounded-lg hover:bg-red-500/20 text-muted-foreground hover:text-red-500 transition-colors cursor-pointer"
+                className="p-1 rounded-lg hover:bg-muted text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
                 title="Close Video"
               >
                 <X size={15} />
@@ -304,7 +303,7 @@ export default function DrIsrarMediaCard({
           {/* Video Iframe Viewport */}
           <div className="relative w-full aspect-video max-h-[360px] sm:max-h-[420px] bg-black">
             <iframe
-              src={media.youtubeEmbedUrl}
+              src={activeVideoEmbedUrl}
               title={`${media.scholarName} ${media.seriesTitle} Surah ${surahName}`}
               className="absolute inset-0 size-full border-0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -313,7 +312,6 @@ export default function DrIsrarMediaCard({
             />
           </div>
 
-          {/* Docked Video Footer Info */}
           <div className="px-3 sm:px-4 py-2 bg-card/60 flex items-center justify-between text-xs text-muted-foreground border-t border-border">
             <span className="truncate">
               Watching lecture alongside Quran Ayah commentary
@@ -329,12 +327,11 @@ export default function DrIsrarMediaCard({
       )}
 
       {/* =========================================================================
-          MAIN INLINE MEDIA CARD: ORIGINAL AUDIO TAFSIR + VIDEO LAUNCHER
+          MAIN INLINE MEDIA CARD
           ========================================================================= */}
       <div className="w-full my-4 rounded-2xl border border-border bg-card/95 shadow-sm backdrop-blur p-4 sm:p-5 transition-all">
-        {/* Scholar Portrait + Lecture Details */}
         <div className="flex flex-col sm:flex-row items-center sm:items-stretch gap-4 sm:gap-5">
-          {/* Portrait with Accent Halo */}
+          {/* Portrait */}
           <div className="relative size-16 sm:size-20 shrink-0 rounded-2xl overflow-hidden border border-accent/30 bg-accent/5 p-1 shadow-inner flex items-center justify-center">
             <Image
               src={media.portraitUrl}
@@ -366,20 +363,55 @@ export default function DrIsrarMediaCard({
               <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap mb-1">
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent/10 border border-accent/25 text-accent font-semibold text-[11px] uppercase tracking-wider">
                   <Sparkles size={11} className="text-accent" />
-                  Original Audio & Video Series
+                  Authentic Lecture Series
                 </span>
                 <span className="text-[11px] text-muted-foreground font-medium">
                   {media.seriesTitle}
                 </span>
+
+                {/* Ustadh Nouman Ali Khan Toggle: Surah vs Divine Speech */}
+                {scholarId === "nouman" && (
+                  <div className="inline-flex rounded-lg border border-border/80 bg-muted/60 p-0.5 ml-auto">
+                    <button
+                      onClick={() => setNoumanSeriesMode("surah")}
+                      className={`px-2 py-0.5 text-[10px] font-semibold rounded-md transition-colors cursor-pointer ${
+                        noumanSeriesMode === "surah"
+                          ? "bg-accent text-accent-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      Surah Lecture
+                    </button>
+                    <button
+                      onClick={() => setNoumanSeriesMode("divine_speech")}
+                      className={`flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded-md transition-colors cursor-pointer ${
+                        noumanSeriesMode === "divine_speech"
+                          ? "bg-accent text-accent-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <BookOpen size={10} />
+                      Divine Speech
+                    </button>
+                  </div>
+                )}
               </div>
 
               <h3 className="text-base sm:text-lg font-bold text-foreground truncate">
-                {media.scholarName} • Surah {surahName} {arabicName && `(${arabicName})`}
+                {scholarId === "nouman" && noumanSeriesMode === "divine_speech"
+                  ? `${media.scholarName} • Divine Speech: Exploring Quran as Literature`
+                  : `${media.scholarName} • Surah ${surahName} ${arabicName ? `(${arabicName})` : ""}`}
               </h3>
 
               <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap mt-0.5">
                 <p className="text-xs text-muted-foreground">
-                  {media.scholarTitle} Authentic Archive • {media.audioParts.length} Lecture Part{media.audioParts.length > 1 ? "s" : ""} Available
+                  {scholarId === "nouman"
+                    ? media.hasSpecificCoverage
+                      ? "High-definition video lecture series available on YouTube"
+                      : "General reflections & Divine Speech available on YouTube"
+                    : `${media.scholarTitle} Authentic Archive • ${media.audioParts.length} Lecture Part${
+                        media.audioParts.length > 1 ? "s" : ""
+                      } Available`}
                 </p>
 
                 {/* Multiple parts selector dropdown if Surah has multiple audio files */}
@@ -401,29 +433,33 @@ export default function DrIsrarMediaCard({
               </div>
             </div>
 
-            {/* Timeline Scrubber */}
-            <div className="mt-3 flex flex-col gap-1.5 w-full">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono text-muted-foreground w-10 text-right shrink-0">
-                  {formatTime(currentTime)}
-                </span>
-                <input
-                  type="range"
-                  min={0}
-                  max={duration || 100}
-                  value={currentTime}
-                  onChange={handleSeek}
-                  className="flex-1 h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-accent"
-                  aria-label="Audio progress"
-                />
-                <span className="text-[10px] font-mono text-muted-foreground w-10 text-left shrink-0">
-                  {duration ? formatTime(duration) : "--:--"}
-                </span>
+            {/* Audio Timeline Scrubber (only shown if scholar has direct audio parts) */}
+            {media.audioParts.length > 0 && (
+              <div className="mt-3 flex flex-col gap-1.5 w-full">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono text-muted-foreground w-10 text-right shrink-0">
+                    {formatTime(currentTime)}
+                  </span>
+                  <input
+                    type="range"
+                    min={0}
+                    max={duration || 100}
+                    value={currentTime}
+                    onChange={handleSeek}
+                    className="flex-1 h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-accent"
+                    aria-label="Audio progress"
+                  />
+                  <span className="text-[10px] font-mono text-muted-foreground w-10 text-left shrink-0">
+                    {duration ? formatTime(duration) : "--:--"}
+                  </span>
+                </div>
               </div>
+            )}
 
-              {/* Action Buttons Toolbar */}
-              <div className="flex items-center justify-between gap-2 flex-wrap pt-1">
-                {/* Audio controls */}
+            {/* Action Buttons Toolbar */}
+            <div className="flex items-center justify-between gap-2 flex-wrap pt-2 mt-1 border-t border-border/40">
+              {/* Audio controls (for Dr Israr & Dr Farhat) */}
+              {media.audioParts.length > 0 ? (
                 <div className="flex items-center gap-1 sm:gap-2">
                   <button
                     onClick={() => skipSeconds(-15)}
@@ -437,13 +473,6 @@ export default function DrIsrarMediaCard({
                     onClick={togglePlay}
                     disabled={isLoadingAudio}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-accent text-accent-foreground font-bold text-xs shadow-md hover:bg-accent/90 transition-all cursor-pointer disabled:opacity-85"
-                    title={
-                      isLoadingAudio
-                        ? "Loading audio lecture stream..."
-                        : isPlaying
-                        ? "Pause Original Audio"
-                        : "Play Original Audio"
-                    }
                   >
                     {isLoadingAudio ? (
                       <Loader2 size={14} className="animate-spin" />
@@ -469,7 +498,6 @@ export default function DrIsrarMediaCard({
                     <FastForward size={15} />
                   </button>
 
-                  {/* Playback speed */}
                   <button
                     onClick={cycleSpeed}
                     className="px-2 py-1 rounded-lg hover:bg-muted text-[11px] font-mono font-semibold text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
@@ -478,7 +506,6 @@ export default function DrIsrarMediaCard({
                     {playbackRate}x
                   </button>
 
-                  {/* Mute */}
                   <button
                     onClick={toggleMute}
                     className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
@@ -487,53 +514,60 @@ export default function DrIsrarMediaCard({
                     {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
                   </button>
                 </div>
-
-                {/* Video controls */}
-                <div className="flex items-center gap-1 sm:gap-2">
-                  <button
-                    onClick={() => launchVideo("docked")}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-500 dark:text-red-400 font-semibold text-xs transition-colors cursor-pointer"
-                    title="Watch Split Screen Video"
-                  >
-                    <Youtube size={14} className="text-red-500 fill-current" />
-                    <span>Watch Video</span>
-                  </button>
-
-                  <button
-                    onClick={() => launchVideo("floating")}
-                    className="p-1.5 rounded-lg border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                    title="Pop out Floating PiP Video"
-                  >
-                    <Layers size={14} className="text-accent" />
-                  </button>
-
-                  <a
-                    href={media.youtubeWatchUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-1.5 rounded-lg border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-colors inline-flex items-center"
-                    title="Open on YouTube"
-                  >
-                    <ExternalLink size={13} />
-                  </a>
-                </div>
-              </div>
-
-              {/* Audio error banner with retry */}
-              {audioError && (
-                <div className="mt-2 p-2.5 rounded-xl bg-destructive/10 border border-destructive/30 text-destructive text-xs flex items-center justify-between gap-2 animate-in fade-in">
-                  <span>Network stream interrupted. Click to retry connection.</span>
-                  <button
-                    onClick={retryAudioStream}
-                    disabled={isRetryingAudio}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-destructive text-destructive-foreground font-semibold text-[11px] hover:opacity-90 transition cursor-pointer"
-                  >
-                    <RefreshCw size={11} className={isRetryingAudio ? "animate-spin" : ""} />
-                    <span>Retry</span>
-                  </button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
+                    <Youtube size={15} className="text-red-500 fill-current" />
+                    Full Video Tafsir via YouTube
+                  </span>
                 </div>
               )}
+
+              {/* Video controls */}
+              <div className="flex items-center gap-1 sm:gap-2">
+                <button
+                  onClick={() => launchVideo("docked")}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-500 dark:text-red-400 font-semibold text-xs transition-colors cursor-pointer"
+                  title="Watch Split Screen Video"
+                >
+                  <Youtube size={14} className="text-red-500 fill-current" />
+                  <span>Watch Video</span>
+                </button>
+
+                <button
+                  onClick={() => launchVideo("floating")}
+                  className="p-1.5 rounded-lg border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                  title="Pop out Floating PiP Video"
+                >
+                  <Layers size={14} className="text-accent" />
+                </button>
+
+                <a
+                  href={activeVideoWatchUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-1.5 rounded-lg border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-colors inline-flex items-center"
+                  title="Open on YouTube"
+                >
+                  <ExternalLink size={13} />
+                </a>
+              </div>
             </div>
+
+            {/* Audio error banner with retry */}
+            {audioError && (
+              <div className="mt-2 p-2.5 rounded-xl bg-destructive/10 border border-destructive/30 text-destructive text-xs flex items-center justify-between gap-2 animate-in fade-in">
+                <span>Network stream interrupted. Click to retry connection.</span>
+                <button
+                  onClick={retryAudioStream}
+                  disabled={isRetryingAudio}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-destructive text-destructive-foreground font-semibold text-[11px] hover:opacity-90 transition cursor-pointer"
+                >
+                  <RefreshCw size={11} className={isRetryingAudio ? "animate-spin" : ""} />
+                  <span>Retry</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -541,7 +575,7 @@ export default function DrIsrarMediaCard({
         <div className="mt-4 pt-3 border-t border-border/60 flex items-center gap-2 text-[11px] text-muted-foreground">
           <Info size={13} className="text-accent shrink-0" />
           <span>
-            <strong>Audio & Video First:</strong> The primary rich scholarly exposition for {media.scholarName} is presented in the original lectures above. The text below serves as reference.
+            <strong>Authentic Lecture Series:</strong> You can watch {media.scholarName}&apos;s verified lectures docked side-by-side with the Qur&apos;an or in a movable floating window.
           </span>
         </div>
       </div>

@@ -5,11 +5,13 @@
  * Supports:
  *  1. Dr. Israr Ahmed (Bayan-ul-Quran)
  *  2. Dr. Farhat Hashmi (Taleem-ul-Quran / Al-Huda)
+ *  3. Ustadh Nouman Ali Khan (Bayyinah - Quran Series & Divine Speech)
  */
 
 import israrAudioMapRaw from "./israrAudioMap.json";
 import israrVideoMapRaw from "./israrVideoMap.json";
 import farhatAudioMapRaw from "./farhatAudioMap.json";
+import noumanVideoMapRaw from "./noumanVideoMap.json";
 
 export interface ScholarAudioPart {
   filename: string;
@@ -17,7 +19,7 @@ export interface ScholarAudioPart {
   label: string;
 }
 
-export type ScholarId = "israr" | "farhat";
+export type ScholarId = "israr" | "farhat" | "nouman";
 
 export interface ScholarMedia {
   scholarId: ScholarId;
@@ -36,11 +38,21 @@ export interface ScholarMedia {
   youtubeWatchUrl: string;
   youtubeSearchQuery: string;
   archiveBaseUrl: string;
+  hasSpecificCoverage?: boolean;
 }
 
 const israrAudioMap = israrAudioMapRaw as Record<string, string[]>;
 const israrVideoMap = israrVideoMapRaw as Record<string, string>;
 const farhatAudioMap = farhatAudioMapRaw as Record<string, string[]>;
+const noumanVideoMap = noumanVideoMapRaw as {
+  divine_speech: {
+    title: string;
+    description: string;
+    episodes: { title: string; videoId: string }[];
+  };
+  juz_amma_playlist: string;
+  surahs: Record<string, { title: string; videoId: string; hasCoverage: boolean }>;
+};
 
 export const BAYAN_UL_QURAN_PLAYLIST_ID = "PLcWR-ibc7-PJzjJrSjXu7zTe7kWFPmDd5";
 export const ISRAR_ARCHIVE_BASE = "https://archive.org/download/BayanUlQuranByDr.IsrarAhmed";
@@ -85,18 +97,28 @@ export function isDrFarhatAuthor(authorId?: number, authorName?: string, name?: 
 }
 
 /**
+ * Check if author matches Ustadh Nouman Ali Khan
+ */
+export function isNoumanAuthor(authorId?: number, authorName?: string, name?: string): boolean {
+  if (authorId === 170 || authorId === 100170) return true;
+  const combined = `${authorName || ""} ${name || ""}`.toLowerCase();
+  return combined.includes("nouman") || combined.includes("bayyinah") || combined.includes("divine speech");
+}
+
+/**
  * Check if author has an authentic multimedia audio & video lecture series
  */
 export function isLectureAuthor(authorId?: number, authorName?: string, name?: string): boolean {
-  return isDrIsrarAuthor(authorId, authorName, name) || isDrFarhatAuthor(authorId, authorName, name);
+  return isDrIsrarAuthor(authorId, authorName, name) || isDrFarhatAuthor(authorId, authorName, name) || isNoumanAuthor(authorId, authorName, name);
 }
 
 /**
  * Get scholar identifier
  */
-export function getScholarType(authorId?: number, authorName?: string, name?: string): "israr" | "farhat" | null {
+export function getScholarType(authorId?: number, authorName?: string, name?: string): ScholarId | null {
   if (isDrIsrarAuthor(authorId, authorName, name)) return "israr";
   if (isDrFarhatAuthor(authorId, authorName, name)) return "farhat";
+  if (isNoumanAuthor(authorId, authorName, name)) return "nouman";
   return null;
 }
 
@@ -104,12 +126,52 @@ export function getScholarType(authorId?: number, authorName?: string, name?: st
  * Get scholar media for a specific scholar and Surah
  */
 export function getScholarMedia(
-  scholarType: "israr" | "farhat",
+  scholarType: ScholarId,
   surahNumber: number,
   surahName: string,
   arabicName?: string
 ): ScholarMedia {
   const numStr = String(surahNumber);
+
+  if (scholarType === "nouman") {
+    const surahData = noumanVideoMap.surahs[numStr];
+    const isJuzAmma = surahNumber >= 78 && surahNumber <= 114;
+    const hasSpecificCoverage = !!surahData?.hasCoverage;
+
+    const youtubeVideoId = surahData?.videoId || undefined;
+    const youtubeSearchQuery = `Nouman Ali Khan Surah ${surahName} Tafseer Bayyinah`;
+    const youtubeWatchUrl = youtubeVideoId
+      ? `https://www.youtube.com/watch?v=${youtubeVideoId}`
+      : isJuzAmma
+      ? `https://www.youtube.com/playlist?list=${noumanVideoMap.juz_amma_playlist}`
+      : `https://www.youtube.com/results?search_query=${encodeURIComponent(youtubeSearchQuery)}`;
+
+    const youtubeEmbedUrl = youtubeVideoId
+      ? `https://www.youtube-nocookie.com/embed/${youtubeVideoId}?autoplay=1&rel=0`
+      : isJuzAmma
+      ? `https://www.youtube-nocookie.com/embed/videoseries?list=${noumanVideoMap.juz_amma_playlist}&autoplay=1`
+      : `https://www.youtube-nocookie.com/embed/YR4B-3puOSw?autoplay=1&rel=0`;
+
+    return {
+      scholarId: "nouman",
+      scholarName: "Ustadh Nouman Ali Khan",
+      scholarTitle: "Bayyinah Institute",
+      seriesTitle: "Quran Reflections & Divine Speech",
+      seriesSubtitle: "Linguistic Miracles, Rhetoric & Thematic Coherence",
+      portraitUrl: "/images/nouman-ali-khan.jpg",
+      surahNumber,
+      surahName,
+      arabicName,
+      audioUrl: "",
+      audioParts: [],
+      youtubeVideoId,
+      youtubeEmbedUrl,
+      youtubeWatchUrl,
+      youtubeSearchQuery,
+      archiveBaseUrl: "",
+      hasSpecificCoverage: hasSpecificCoverage || isJuzAmma,
+    };
+  }
 
   if (scholarType === "farhat") {
     const fileList = farhatAudioMap[numStr] || [];
@@ -145,6 +207,7 @@ export function getScholarMedia(
       youtubeWatchUrl,
       youtubeSearchQuery,
       archiveBaseUrl: FARHAT_ARCHIVE_BASE,
+      hasSpecificCoverage: true,
     };
   }
 
@@ -189,6 +252,7 @@ export function getScholarMedia(
     youtubeWatchUrl,
     youtubeSearchQuery,
     archiveBaseUrl: ISRAR_ARCHIVE_BASE,
+    hasSpecificCoverage: true,
   };
 }
 

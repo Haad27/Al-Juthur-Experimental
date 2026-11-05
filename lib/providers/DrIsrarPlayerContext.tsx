@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 
 export type ScholarPlayerMode = "docked" | "floating";
-export type ScholarId = "israr" | "farhat";
+export type ScholarId = "israr" | "farhat" | "nouman";
 
 // Backwards-compatible type alias
 export type DrIsrarPlayerMode = ScholarPlayerMode;
