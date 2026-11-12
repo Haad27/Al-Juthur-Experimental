@@ -882,7 +882,9 @@ function TafsirContent() {
     const base = allAuthorsWithLang.filter(({ author, language }) => {
       const matchesLang =
         selectedLanguage === "All" ||
-        language.name.toLowerCase() === selectedLanguage.toLowerCase();
+        (selectedLanguage === "Lectures"
+          ? isLectureAuthor(author.id, author.authorName, author.name)
+          : language.name.toLowerCase() === selectedLanguage.toLowerCase());
       const matchesEra =
         selectedEra === "All Eras" ||
         author.era === selectedEra;
@@ -2273,6 +2275,17 @@ function TafsirContent() {
               >
                 All ({allAuthorsWithLang.length})
               </button>
+              <button
+                onClick={() => setSelectedLanguage("Lectures")}
+                className={`px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 flex items-center gap-1.5 ${
+                  selectedLanguage === "Lectures"
+                    ? "bg-accent text-accent-foreground shadow-md shadow-sm"
+                    : "bg-card/70 border border-border text-muted-foreground hover:text-foreground hover:border-border"
+                }`}
+              >
+                <Headphones className="size-3 text-accent" />
+                <span>Lectures ({allAuthorsWithLang.filter(({ author }) => isLectureAuthor(author.id, author.authorName, author.name)).length})</span>
+              </button>
               {languages.map((lang) => (
                 <button
                   key={lang.id}
@@ -2329,38 +2342,7 @@ function TafsirContent() {
         />
       </div>
 
-      {/* Scholar Lecture Series Spotlight Banner (Dr. Israr Ahmed & Dr. Farhat Hashmi) */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <ScholarSpotlightBanner
-          onSelectScholar={(authorId, langName) => {
-            const match = allAuthorsWithLang.find((a) => a.author.id === authorId);
-            if (match) {
-              setActiveAuthor(match.author);
-              setActiveLangName(match.language.name);
-            } else {
-              const fallbackAuthor: Author = {
-                id: authorId,
-                name:
-                  authorId === 170
-                    ? "Quran Series & Divine Speech"
-                    : authorId === 160
-                    ? "Taleem-ul-Quran (تعلیم القرآن)"
-                    : "Bayan-ul-Quran (بیان القرآن)",
-                authorName:
-                  authorId === 170
-                    ? "Ustadh Nouman Ali Khan"
-                    : authorId === 160
-                    ? "Dr. Farhat Hashmi"
-                    : "Dr. Israr Ahmad",
-                languageId: authorId === 170 ? 1 : 10,
-              };
-              setActiveAuthor(fallbackAuthor);
-              setActiveLangName(langName);
-            }
-            if (activeSurah <= 0) setActiveSurah(1);
-          }}
-        />
-      </div>
+
 
       {/* Grid of Tafsir Containers (1 col -> 2 -> 3 -> 4 cols on laptop view) */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
@@ -2473,6 +2455,40 @@ function TafsirContent() {
           })}
           </div>
         )}
+      </div>
+
+      {/* Scholar Lecture Series (placed after Tafsir catalog books) */}
+{/* Scholar Lecture Series Spotlight Banner (Dr. Israr Ahmed & Dr. Farhat Hashmi) */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8">
+        <ScholarSpotlightBanner
+          onSelectScholar={(authorId, langName) => {
+            const match = allAuthorsWithLang.find((a) => a.author.id === authorId);
+            if (match) {
+              setActiveAuthor(match.author);
+              setActiveLangName(match.language.name);
+            } else {
+              const fallbackAuthor: Author = {
+                id: authorId,
+                name:
+                  authorId === 170
+                    ? "Quran Series & Divine Speech"
+                    : authorId === 160
+                    ? "Taleem-ul-Quran (تعلیم القرآن)"
+                    : "Bayan-ul-Quran (بیان القرآن)",
+                authorName:
+                  authorId === 170
+                    ? "Ustadh Nouman Ali Khan"
+                    : authorId === 160
+                    ? "Dr. Farhat Hashmi"
+                    : "Dr. Israr Ahmad",
+                languageId: authorId === 170 ? 1 : 10,
+              };
+              setActiveAuthor(fallbackAuthor);
+              setActiveLangName(langName);
+            }
+            if (activeSurah <= 0) setActiveSurah(1);
+          }}
+        />
       </div>
 
       <AyahWheelPickerModal
