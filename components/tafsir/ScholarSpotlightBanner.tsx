@@ -1,23 +1,44 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { Headphones, Youtube, ChevronRight, Play } from "lucide-react";
+import { Headphones, ChevronRight, Play, ChevronUp, ChevronDown } from "lucide-react";
 
 interface ScholarSpotlightProps {
   onSelectScholar: (authorId: number, langName: string) => void;
 }
 
 export default function ScholarSpotlightBanner({ onSelectScholar }: ScholarSpotlightProps) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("scholar_spotlight_collapsed");
+      if (saved === "true") setIsCollapsed(true);
+    } catch {
+      // LocalStorage access fails in private/restricted modes
+    }
+  }, []);
+
+  const toggleCollapse = () => {
+    setIsCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("scholar_spotlight_collapsed", String(next));
+      } catch {
+        // Ignore
+      }
+      return next;
+    });
+  };
+
   const scholars = [
     {
       id: 104, // Dr. Israr Ahmed
       name: "Dr. Israr Ahmed",
       subName: "ڈاکٹر اسرار احمد",
       series: "Bayan-ul-Quran (بیان القرآن)",
-      desc: "Complete 114 Surahs authentic audio & video lectures recorded by Tanzeem-e-Islami.",
       image: "/images/dr-israr-ahmed.jpg",
-      badge: "Full Bayan-ul-Quran Series",
       langName: "Urdu",
     },
     {
@@ -25,107 +46,118 @@ export default function ScholarSpotlightBanner({ onSelectScholar }: ScholarSpotl
       name: "Dr. Farhat Hashmi",
       subName: "ڈاکٹر فرحت ہاشمی",
       series: "Taleem-ul-Quran (تعلیم القرآن)",
-      desc: "Word-by-word Urdu translation, deep contextual insights, and video lecture series.",
       image: "/images/dr-farhat-hashmi.jpg",
-      badge: "Word-by-Word & Tafseer",
       langName: "Urdu",
     },
     {
       id: 170, // Ustadh Nouman Ali Khan
-      name: "Ustadh Nouman Ali Khan",
+      name: "Nouman Ali Khan",
       subName: "نعمان علی خان",
       series: "Quran Series & Divine Speech",
-      desc: "Linguistic miracle, rhetorical coherence, Juz 'Amma series & Divine Speech seminars.",
       image: "/images/nouman-ali-khan.jpg",
-      badge: "Linguistic & Divine Speech",
       langName: "English",
     },
   ];
 
-  return (
-    <div className="w-full my-6 rounded-2xl sm:rounded-3xl border border-accent/30 bg-gradient-to-br from-card via-card to-accent/5 p-4 sm:p-6 shadow-md relative overflow-hidden">
-      {/* Decorative background glows */}
-      <div className="absolute -top-12 -right-12 size-48 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-12 -left-12 size-48 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
-
-      {/* Header */}
-      <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-border/80">
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-accent/15 border border-accent/30 text-accent">
-            <Headphones className="size-4 sm:size-5" />
+  if (isCollapsed) {
+    return (
+      <div className="w-full my-2.5 rounded-xl border border-border bg-card/60 px-3.5 py-2 flex items-center justify-between transition-colors hover:border-accent/40">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="size-6 rounded-md bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0">
+            <Headphones className="size-3.5" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider text-accent bg-accent/10 px-2 py-0.5 rounded-full border border-accent/20">
-                Special Collection
-              </span>
-              <span className="flex items-center gap-1 text-[11px] text-muted-foreground font-medium">
-                <Youtube className="size-3 text-red-500 fill-current" /> Video & Audio Lectures
-              </span>
-            </div>
-            <h2 className="text-base sm:text-lg font-bold text-foreground mt-0.5">
-              Original Scholar Lecture Series (آڈیو و ویڈیو دروس)
-            </h2>
+          <span className="text-xs font-medium text-foreground truncate">
+            Scholar Lecture Series
+          </span>
+          <span className="text-[11px] text-muted-foreground hidden sm:inline truncate">
+            — Dr. Israr Ahmed, Dr. Farhat Hashmi, Nouman Ali Khan
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={toggleCollapse}
+          className="text-xs text-accent hover:text-accent/80 font-medium inline-flex items-center gap-1 shrink-0 ml-2 cursor-pointer transition-colors"
+        >
+          <span>Show</span>
+          <ChevronDown className="size-3.5" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full my-3 rounded-xl border border-border bg-card/50 transition-colors">
+      {/* Header bar */}
+      <div className="px-3.5 py-2 border-b border-border/50 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="size-6 rounded-md bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0">
+            <Headphones className="size-3.5" />
+          </div>
+          <div className="flex items-baseline gap-2 truncate">
+            <h3 className="text-xs font-semibold text-foreground tracking-wide">
+              Scholar Lecture Series
+            </h3>
+            <span className="text-[11px] text-muted-foreground hidden sm:inline">
+              Original audio & video commentaries
+            </span>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground max-w-sm">
-          Listen to genuine scholarly recordings with synchronized ayah commentaries and video lectures.
-        </p>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={toggleCollapse}
+            className="text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-muted/50 transition-colors cursor-pointer"
+            title="Minimize section"
+            aria-label="Minimize scholar lectures section"
+          >
+            <span className="hidden sm:inline">Hide</span>
+            <ChevronUp className="size-3.5" />
+          </button>
+        </div>
       </div>
 
-      {/* Cards Grid */}
-      <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+      {/* 3 Compact Scholar Cards */}
+      <div className="p-2 sm:p-2.5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
         {scholars.map((s) => (
-          <div
+          <button
             key={s.id}
+            type="button"
             onClick={() => onSelectScholar(s.id, s.langName)}
-            className="group relative flex flex-col items-start gap-3 p-4 rounded-2xl border border-border/80 hover:border-accent/50 bg-background/70 hover:bg-muted/40 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md"
+            className="group relative flex items-center gap-2.5 p-2 rounded-lg border border-border/60 hover:border-accent/40 bg-background/50 hover:bg-accent/5 transition-all text-left w-full cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
-            <div className="flex items-center gap-3 w-full">
-              {/* Scholar Portrait */}
-              <div className="relative size-14 sm:size-16 shrink-0 rounded-2xl overflow-hidden border border-accent/30 bg-accent/5 p-1 shadow-inner flex items-center justify-center">
-                <Image
-                  src={s.image}
-                  alt={s.name}
-                  fill
-                  className="object-cover rounded-xl group-hover:scale-105 transition-transform duration-300"
-                  sizes="64px"
-                  unoptimized
-                />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
-                <div className="absolute bottom-1 right-1 p-1 rounded-full bg-accent text-accent-foreground shadow">
-                  <Play className="size-2.5 fill-current" />
-                </div>
+            {/* Scholar Portrait */}
+            <div className="relative size-10 shrink-0 rounded-lg overflow-hidden border border-border/70 bg-muted/30">
+              <Image
+                src={s.image}
+                alt={s.name}
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-200"
+                sizes="40px"
+                unoptimized
+              />
+              <div className="absolute inset-0 bg-black/15 group-hover:bg-black/35 transition-colors flex items-center justify-center">
+                <Play className="size-3 text-white fill-current opacity-85 group-hover:opacity-100 transition-opacity" />
               </div>
+            </div>
 
-              {/* Badges & Titles */}
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
-                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-accent/10 border border-accent/25 text-accent uppercase tracking-wider">
-                    {s.badge}
-                  </span>
-                  <span className="text-[10px] text-muted-foreground font-arabic">
-                    {s.subName}
-                  </span>
-                </div>
-                <h3 className="text-sm font-bold text-foreground group-hover:text-accent transition-colors truncate">
+            {/* Scholar Info */}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between gap-1.5">
+                <span className="text-xs font-semibold text-foreground group-hover:text-accent transition-colors truncate">
                   {s.name}
-                </h3>
-                <p className="text-[11px] text-accent/90 font-medium truncate">
-                  {s.series}
-                </p>
+                </span>
+                <span className="text-[9px] font-medium px-1.5 py-0.2 rounded bg-muted/60 text-muted-foreground shrink-0">
+                  {s.langName}
+                </span>
+              </div>
+              <div className="text-[11px] text-muted-foreground group-hover:text-foreground/80 transition-colors truncate mt-0.5">
+                {s.series}
               </div>
             </div>
 
-            <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-              {s.desc}
-            </p>
-
-            <div className="mt-auto pt-1 flex items-center gap-1.5 text-xs font-semibold text-accent group-hover:translate-x-0.5 transition-transform">
-              <span>Open Lecture Series</span>
-              <ChevronRight className="size-3.5" />
-            </div>
-          </div>
+            <ChevronRight className="size-3.5 text-muted-foreground/40 group-hover:text-accent group-hover:translate-x-0.5 transition-all shrink-0" />
+          </button>
         ))}
       </div>
     </div>
