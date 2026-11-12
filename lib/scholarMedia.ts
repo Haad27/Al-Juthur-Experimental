@@ -11,6 +11,7 @@
 import israrAudioMapRaw from "./israrAudioMap.json";
 import israrVideoMapRaw from "./israrVideoMap.json";
 import farhatAudioMapRaw from "./farhatAudioMap.json";
+import farhatVideoMapRaw from "./farhatVideoMap.json";
 import noumanVideoMapRaw from "./noumanVideoMap.json";
 
 export interface ScholarAudioPart {
@@ -44,6 +45,15 @@ export interface ScholarMedia {
 const israrAudioMap = israrAudioMapRaw as Record<string, string[]>;
 const israrVideoMap = israrVideoMapRaw as Record<string, string>;
 const farhatAudioMap = farhatAudioMapRaw as Record<string, string[]>;
+const farhatVideoMap = farhatVideoMapRaw as Record<
+  string,
+  {
+    title: string;
+    videoId?: string | null;
+    playlistId?: string | null;
+    hasSpecificCoverage?: boolean;
+  }
+>;
 const noumanVideoMap = noumanVideoMapRaw as {
   divine_speech: {
     title: string;
@@ -55,6 +65,8 @@ const noumanVideoMap = noumanVideoMapRaw as {
 };
 
 export const BAYAN_UL_QURAN_PLAYLIST_ID = "PLcWR-ibc7-PJzjJrSjXu7zTe7kWFPmDd5";
+export const FARHAT_DEFAULT_PLAYLIST_ID = "PLgWtzr2mgrK2bPNdGq_90qfVFIfZPJTa9";
+export const FARHAT_FALLBACK_VIDEO_ID = "wnI-BKTp_gM";
 export const ISRAR_ARCHIVE_BASE = "https://archive.org/download/BayanUlQuranByDr.IsrarAhmed";
 export const FARHAT_ARCHIVE_BASE = "https://archive.org/download/Quran-Urdu-Word-by-Word-Lafzi-Audio-by-Dr-Farhat-Hashmi";
 
@@ -186,10 +198,28 @@ export function getScholarMedia(
       ? audioParts[0].url
       : `${FARHAT_ARCHIVE_BASE}/${encodeURIComponent(defaultFilename)}`;
 
+    const surahVideoData = farhatVideoMap[numStr];
+    // Surah 3 (Aal-e-Imran) default to verified official lecture wnI-BKTp_gM (Ep: 78 / Lesson 1: 1-32)
+    const youtubeVideoId = surahVideoData?.videoId || (numStr === "3" ? "wnI-BKTp_gM" : undefined);
+    const playlistId = surahVideoData?.playlistId || (numStr === "3" ? "PLxP7htsLk9TZqB4h37Q3huqHcCkLRFijS" : undefined);
+    const hasSpecificCoverage = !!(surahVideoData?.hasSpecificCoverage || youtubeVideoId || playlistId);
+
     const youtubeSearchQuery = `Dr Farhat Hashmi Surah ${surahName} Tafseer Taleem ul Quran`;
-    const youtubeWatchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(youtubeSearchQuery)}`;
-    // Clean embed search series query
-    const youtubeEmbedUrl = `https://www.youtube-nocookie.com/embed?listType=search&list=${encodeURIComponent(youtubeSearchQuery)}&autoplay=1`;
+
+    const youtubeWatchUrl = youtubeVideoId && playlistId
+      ? `https://www.youtube.com/watch?v=${youtubeVideoId}&list=${playlistId}`
+      : youtubeVideoId
+      ? `https://www.youtube.com/watch?v=${youtubeVideoId}`
+      : playlistId
+      ? `https://www.youtube.com/playlist?list=${playlistId}`
+      : `https://www.youtube.com/results?search_query=${encodeURIComponent(youtubeSearchQuery)}`;
+
+    // Clean, direct YouTube embed (never use listType=search as it triggers "video unavailable")
+    const youtubeEmbedUrl = youtubeVideoId
+      ? `https://www.youtube-nocookie.com/embed/${youtubeVideoId}?autoplay=1&rel=0`
+      : playlistId
+      ? `https://www.youtube-nocookie.com/embed/videoseries?list=${playlistId}&autoplay=1`
+      : `https://www.youtube-nocookie.com/embed/${FARHAT_FALLBACK_VIDEO_ID}?autoplay=1&rel=0`;
 
     return {
       scholarId: "farhat",
@@ -203,11 +233,12 @@ export function getScholarMedia(
       arabicName,
       audioUrl,
       audioParts,
+      youtubeVideoId,
       youtubeEmbedUrl,
       youtubeWatchUrl,
       youtubeSearchQuery,
       archiveBaseUrl: FARHAT_ARCHIVE_BASE,
-      hasSpecificCoverage: true,
+      hasSpecificCoverage,
     };
   }
 
