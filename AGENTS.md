@@ -11,8 +11,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 # Rules
 
 ## 1. Production Workflow
-- **Push to Test by Default**: When a major feature, bugfix, or milestone is completed, stage, commit, and push to the `test` branch (`git add .`, `git commit -m "..."`, and `git push origin test`).
-- **Selective Push to Main (No Blanket Merges)**: Only push to `main` when explicitly requested by the user for the specific feature of the current chat. **NEVER do a full `git merge test` into `main`**, as multiple chats may have other features under test on the `test` branch. Instead, isolate and cherry-pick ONLY the specific commit(s) produced for the current feature (`git checkout main`, `git pull origin main`, `git cherry-pick <commit-hash>`, `git push origin main`, then switch back to `test`). Each chat is responsible only for deploying its own verified work.
+- **Push to Experimental Main by Default (Live Vercel Preview)**: When a feature, bugfix, or milestone is completed, stage, commit, and push directly to the experimental remote (`experimental main`) so it immediately triggers the live Vercel test website deployment for user review (`git add .`, `git commit -m "..."`, and `git push experimental test:main --force`). Also keep `origin test` synced (`git push origin test`).
+- **Selective Push to Production Main (Only Upon User Approval)**: Only push to production `main` on `origin` (`git push origin main`) when explicitly approved and requested by the user for the verified feature of the current chat. **NEVER do a full `git merge` of untested work into `main`**. Isolate and cherry-pick ONLY the specific commit(s) produced for the current feature (`git checkout main`, `git pull origin main`, `git cherry-pick <commit-hash>`, `git push origin main`, then switch back to `test`). Each chat is responsible only for deploying its own verified work.
 
 ## 2. UI/UX Design System
 - **Distraction-Free & Minimalist**: Reverent aesthetic for Qur'an research. Avoid heavy animations, bouncing effects, or radar pings. Use clean fades and subtle progress bars.
