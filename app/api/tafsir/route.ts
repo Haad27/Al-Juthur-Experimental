@@ -44,6 +44,8 @@ const LOCAL_TAFSIR_MAP: Record<number, { folder: string; isUrdu?: boolean; isPas
   100158: { folder: "ur-tafsir-bayan-ul-quran", isUrdu: true, authorName: "Dr. Israr Ahmad", name: "Bayan-ul-Quran (بیان القرآن)" },
   160: { folder: "ur-tafsir-farhat-hashmi", isUrdu: true, authorName: "Dr. Farhat Hashmi", name: "Taleem-ul-Quran (تعلیم القرآن)" },
   100160: { folder: "ur-tafsir-farhat-hashmi", isUrdu: true, authorName: "Dr. Farhat Hashmi", name: "Taleem-ul-Quran (تعلیم القرآن)" },
+  170: { folder: "en-tafsir-nouman-ali-khan", authorName: "Ustadh Nouman Ali Khan", name: "Quran Reflections & Divine Speech" },
+  100170: { folder: "en-tafsir-nouman-ali-khan", authorName: "Ustadh Nouman Ali Khan", name: "Quran Reflections & Divine Speech" },
   // Quranpedia Classical & Contemporary Tafsirs
   201: { folder: "ar-tafsir-al-manar", authorName: "Muhammad Rashid Rida", name: "Tafsir al-Manar (تفسير المنار)" },
   202: { folder: "ar-tafsir-al-shaarawi", authorName: "Shaykh Muhammad Metwalli al-Sha'rawi", name: "Tafsir al-Sha'rawi (تفسير الشعراوي)" },
@@ -172,6 +174,7 @@ const getTafsirLibrary = unstable_cache(
       { id: 100203, name: "The Noble Quran (Interpretation & Notes)", authorName: "Muhammad Taqi-ud-Din al-Hilali & Muhammad Muhsin Khan", languageId: 3, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
       { id: 100149, name: "Bridges’ Translation (Linguistic & Qira'at Notes)", authorName: "Fadel Soliman", languageId: 3, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
       { id: 100085, name: "The Quran (Oxford World's Classics)", authorName: "M.A.S. Abdel Haleem", languageId: 3, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
+      { id: 170, name: "Quran Reflections & Divine Speech", authorName: "Ustadh Nouman Ali Khan", languageId: 3, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
       
       // Urdu (languageId: 10)
       { id: 100097, name: "Tafheem-ul-Quran (تفہیم القرآن)", authorName: "Syed Abul A'la Maududi", languageId: 10, era: "Modern & Contemporary (19th-21st CE)", tags: [] },
@@ -214,7 +217,7 @@ const getTafsirLibrary = unstable_cache(
       authors: authorsByLang[l.id] || []
     }));
   },
-  ['tafsir-library-v16'],
+  ['tafsir-library-v17'],
   { revalidate: 2592000 } // 30 days
 );
 

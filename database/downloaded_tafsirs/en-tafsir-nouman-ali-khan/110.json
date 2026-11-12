@@ -1,0 +1,14 @@
+[
+  {
+    "ayah": 1,
+    "text": "<div class='p-4 rounded-xl bg-accent/10 border border-accent/20 text-foreground text-sm my-2'><strong>Ustadh Nouman Ali Khan Lecture Series:</strong> Full video and structural commentary for Surah 110 is active in the media card above. Watch in split-screen or floating Picture-in-Picture mode.</div>"
+  },
+  {
+    "ayah": 2,
+    "text": "<p class='text-muted-foreground text-sm italic'>Refer to the video lecture series in the media player above for Ustadh Nouman Ali Khan's verse-by-verse linguistic analysis.</p>"
+  },
+  {
+    "ayah": 3,
+    "text": "<p class='text-muted-foreground text-sm italic'>Refer to the video lecture series in the media player above for Ustadh Nouman Ali Khan's verse-by-verse linguistic analysis.</p>"
+  }
+]
