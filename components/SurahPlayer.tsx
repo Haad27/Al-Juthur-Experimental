@@ -45,14 +45,7 @@ export default function SurahPlayer({
   router,
   aiChatContext,
 }: SurahPlayerProps) {
-  const {
-    mistakeDetection,
-    selectedReciter,
-    setSelectedReciter,
-    isWordDialogVisible,
-    translationEdition,
-    setTranslationEdition,
-  } = useGlobalState();
+  const { mistakeDetection, selectedReciter, setSelectedReciter, isWordDialogVisible } = useGlobalState();
   const audioStore = useAudioStore();
 
   const [reciters, setReciters] = useState<any[]>([]);
@@ -120,27 +113,6 @@ export default function SurahPlayer({
     }
   }, [audioStore.audioMode]);
 
-  // Proactive auto-synchronization: Ensure on-screen text matches the chosen audio translation
-  // Whenever audioMode includes translation ("both" or "translation"), keep the text translation aligned
-  useEffect(() => {
-    if (audioStore.audioMode !== "translation" && audioStore.audioMode !== "both") {
-      return;
-    }
-    if (!setTranslationEdition) return;
-
-    if (audioStore.translationAudioLang === "ur") {
-      // Shamshad Ali Khan recites Fateh Muhammad Jalandhari (id: 234)
-      if (translationEdition !== "234") {
-        setTranslationEdition("234");
-      }
-    } else {
-      // Ibrahim Walk recites Saheeh International (id: 20)
-      if (translationEdition !== "20") {
-        setTranslationEdition("20");
-      }
-    }
-  }, [audioStore.audioMode, audioStore.translationAudioLang, translationEdition, setTranslationEdition]);
-
   const [recording, setRecording] = useState(false);
   const [showReciteGuide, setShowReciteGuide] = useState(false);
 
@@ -188,21 +160,7 @@ export default function SurahPlayer({
     });
   }, [surahNumber, selectedReciter]);
 
-  // Helper to sync on-screen text edition to match spoken audio translation
-  const handleSelectTranslationLang = (lang: TranslationAudioLang) => {
-    audioStore.setTranslationAudioLang(lang);
-    if (setTranslationEdition) {
-      if (lang === "ur") {
-        // Shamshad Ali Khan reads Fateh Muhammad Jalandhari (234)
-        setTranslationEdition("234");
-        toast.info("Switched text to Fatah Muhammad Jalandhari to match Urdu recitation", { duration: 2500 });
-      } else {
-        // Ibrahim Walk reads Saheeh International (20)
-        setTranslationEdition("20");
-        toast.info("Switched text to Saheeh International to match English recitation", { duration: 2500 });
-      }
-    }
-  };
+  // URL generator for the active ayah & phase
   const getResolvedAudioUrl = (ayahIdx: number, currentPhase: "arabic" | "translation") => {
     const ayahNum = ayahIdx + 1;
     const globalAyahNum = getGlobalAyahNumber(surahNumber, ayahNum);
@@ -411,25 +369,7 @@ export default function SurahPlayer({
   }, [lastAyahNumber, audioStore.hasChosenAudioMode, audioStore.audioMode]);
 
   // Audio Controls
-  const syncTranslationToAudio = () => {
-    if (!setTranslationEdition) return;
-    if (audioStore.audioMode === "both" || audioStore.audioMode === "translation") {
-      if (audioStore.translationAudioLang === "ur") {
-        if (translationEdition !== "234") {
-          setTranslationEdition("234");
-        }
-      } else {
-        if (translationEdition !== "20") {
-          setTranslationEdition("20");
-        }
-      }
-    }
-  };
-
   const handlePlayPause = () => {
-    if (!playing) {
-      syncTranslationToAudio();
-    }
     setPlaying(!playing);
   };
 
@@ -735,34 +675,29 @@ export default function SurahPlayer({
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
-                      onClick={() => handleSelectTranslationLang("en")}
+                      onClick={() => audioStore.setTranslationAudioLang("en")}
                       className={cn(
-                        "py-2 px-2.5 rounded-lg text-xs font-medium border text-center transition cursor-pointer flex flex-col items-center justify-center gap-0.5",
+                        "py-1.5 px-2 rounded-lg text-xs font-medium border text-center transition cursor-pointer",
                         audioStore.translationAudioLang === "en"
                           ? "bg-accent text-foreground font-semibold border-accent shadow-sm"
                           : "bg-muted/60 text-muted-foreground border-border hover:text-foreground"
                       )}
                     >
-                      <span className="font-semibold">English</span>
-                      <span className="text-[10px] opacity-80">(Saheeh International)</span>
+                      English (Ibrahim Walk)
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleSelectTranslationLang("ur")}
+                      onClick={() => audioStore.setTranslationAudioLang("ur")}
                       className={cn(
-                        "py-2 px-2.5 rounded-lg text-xs font-medium border text-center transition cursor-pointer flex flex-col items-center justify-center gap-0.5",
+                        "py-1.5 px-2 rounded-lg text-xs font-medium border text-center transition cursor-pointer font-urdu",
                         audioStore.translationAudioLang === "ur"
                           ? "bg-accent text-foreground font-semibold border-accent shadow-sm"
                           : "bg-muted/60 text-muted-foreground border-border hover:text-foreground"
                       )}
                     >
-                      <span className="font-urdu text-sm font-semibold">اردو</span>
-                      <span className="text-[10px] opacity-80 font-urdu">(فتح محمد جالندھری)</span>
+                      اردو (شمشاد علی خان)
                     </button>
                   </div>
-                  <p className="text-[10px] text-muted-foreground/80 mt-1.5 px-0.5">
-                    Switches the on-screen text to match the recitation word-for-word.
-                  </p>
                 </div>
               )}
 
@@ -858,27 +793,25 @@ export default function SurahPlayer({
                   <div className="flex gap-1">
                     <button
                       type="button"
-                      onClick={() => handleSelectTranslationLang("en")}
+                      onClick={() => audioStore.setTranslationAudioLang("en")}
                       className={cn(
                         "px-2 py-0.5 rounded text-[10px] font-medium transition cursor-pointer border",
                         audioStore.translationAudioLang === "en"
                           ? "bg-accent/20 border-accent/40 text-accent font-semibold"
                           : "border-transparent text-muted-foreground hover:text-foreground"
                       )}
-                      title="English (Saheeh International)"
                     >
                       English (Walk)
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleSelectTranslationLang("ur")}
+                      onClick={() => audioStore.setTranslationAudioLang("ur")}
                       className={cn(
                         "px-2 py-0.5 rounded text-[10px] font-medium transition cursor-pointer border font-urdu",
                         audioStore.translationAudioLang === "ur"
                           ? "bg-accent/20 border-accent/40 text-accent font-semibold"
                           : "border-transparent text-muted-foreground hover:text-foreground"
                       )}
-                      title="Urdu (Fateh Muhammad Jalandhari)"
                     >
                       اردو (خان)
                     </button>
